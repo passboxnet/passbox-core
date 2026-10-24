@@ -223,5 +223,16 @@
   "generator.numbers": "Numbers",
   "generator.symbols": "Symbols",
   "generator.avoidAmbiguous": "Avoid ambiguous characters",
-  "generator.avoidAmbiguousText": "Leaves out l, I, 1, O, o and 0."
+  "generator.avoidAmbiguousText": "Leaves out l, I, 1, O, o and 0.",
+  "vault.filter": "Vault",
+  "vault.allVaults": "All vaults",
+  "vault.viewOnlyOption": "{vault} (view only)",
+  "vault.shared": "Shared with your family or team",
+  "vault.sharingWarning.title": "Sharing needs your attention",
+  "vault.sharingWarning.text": "Passbox found {count, plural, one {# problem} other {# problems}} while checking shared vaults, for example a changed security code. The web app shows what to do.",
+  "vault.sharingWarning.open": "Open in the web app",
+  "item.sharedVault": "{vault} · {org}",
+  "item.viewOnly": "View only: you can copy and fill this entry, but not change it.",
+  "item.error.readOnly": "You can only view this entry. Whoever manages the shared vault can give you edit rights.",
+  "save.sharedVault": "{vault} · {org}"
 }

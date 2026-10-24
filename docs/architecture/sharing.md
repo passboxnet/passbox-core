@@ -28,7 +28,7 @@ What it **can** still do (known limits, honest list):
 - **Metadata.** It sees who is in which organization, group and vault, roles, emails of members (to members), sizes, times and access patterns.
 - **Server-side authorization.** Roles are enforced by the server (403), *and* signed. A server that ignored its own role checks could let a view-only member overwrite ciphertext; other clients would still decrypt only what was encrypted with the vault key (which that member has), so this is a denial-of-integrity limited to members who hold the key. View-only is a convenience boundary against honest servers, not a cryptographic one: anyone who can read a vault key can produce valid item ciphertexts.
 - **Suspension** is server-side only. Removal is the cryptographic operation.
-- **What a removed member saw**, they may have kept. Rotation protects new and changed data only; the clients should suggest changing those passwords (UI, later).
+- **What a removed member saw**, they may have kept. Rotation protects new and changed data only; the web app says so when removing someone and suggests changing those passwords.
 - **A compromised admin** (or owner) can attest a key of their choice and share vaults they manage. The design narrows trust to the owner and admins instead of the server; it does not remove it.
 
 ## Account key pairs (A1)

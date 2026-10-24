@@ -75,6 +75,16 @@ The dialog headlines the verified RP ID ("Save a passkey for **example.com**?") 
 - Auto-lock offers the web vault's choices (1, 5, 15, 30, 60 minutes); the vault also locks when the screen locks and when the browser closes.
 - Items that fail to decrypt are listed in a banner with details; nothing is deleted. Trashed items are purged after 30 days, best effort after each unlock.
 
+## Shared vaults
+
+The extension shows what families and teams share but does not manage them (that is the web vault's "Family & team"):
+
+- The popup has a vault filter under the search when there is more than one vault: personal vaults, then shared vaults grouped by organization (`<optgroup>`), view-only ones marked. Items in shared vaults carry a people icon; suggestions for the current site are never filtered.
+- `snapshot.sharingWarnings` (changed keys, unverifiable shared data) show a warning notice with a link to `#/sharing` in the web vault, where they are explained and resolved.
+- View-only items (`ItemDetail.readOnly`) can be copied and filled; trash and password restore are hidden, and the service worker refuses those writes with `item.error.readOnly` (`Vault.writable`).
+- The save banner lists only vaults the user may write to, shared ones as "Family vault · The Millers", and never offers to update a login from a view-only vault (a changed password there is for its managers). New logins default to the personal vault.
+- The exported session is refreshed when a shared vault's key epoch changes, so a restarted service worker keeps the rotated key.
+
 ## Languages
 
 All popup, frame and error strings come from `@passbox/i18n` (`common` plus the `extension` namespace, English and German). The language follows the browser and can be changed in Settings (stored as `locale` in `chrome.storage.local`). The manifest name and description, the shortcut description and the few labels the content script creates use `_locales/{en,de}/messages.json`.
@@ -86,7 +96,7 @@ All popup, frame and error strings come from `@passbox/i18n` (`common` plus the 
 ## Tests
 
 - `pnpm --filter @passbox/extension test`: unit tests for domain matching, field detection and visibility (jsdom fixtures), trusted submits, save and update decisions with undo, fill payloads, passkey user verification, server checks, error mapping and translation completeness.
-- `pnpm e2e` (`e2e/tests/extension.spec.ts`) loads the built extension in Chromium and covers the first-run server step, sign-in, the inline menu, update with Undo, scripted submits, hidden fields, frames of other sites, clipboard clearing on lock, passkeys with and without user verification, and the sign-out confirmation.
+- `pnpm e2e` (`e2e/tests/extension.spec.ts`) loads the built extension in Chromium and covers the first-run server step, sign-in, the inline menu, update with Undo, scripted submits, hidden fields, frames of other sites, clipboard clearing on lock, passkeys with and without user verification, shared family vaults in the popup filter, and the sign-out confirmation.
 
 ## Known limitations
 
