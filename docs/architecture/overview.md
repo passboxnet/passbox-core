@@ -37,6 +37,7 @@
 | Core | Rust, RustCrypto crates | `#![forbid(unsafe_code)]` workspace-wide |
 | Web client | React 19, Vite, Tailwind CSS 4 | Loads the core as WebAssembly |
 | Extension | Manifest V3, React | Keys only in `chrome.storage.session`; server URL can be preset through enterprise policy (`managed_schema.json`) |
+| Desktop | Tauri 2 | Wraps the built web client; tray, global shortcut, lock on sleep. See [desktop.md](../desktop.md) |
 | Website | Next.js, static export | Shares the design tokens of `packages/ui` |
 | CLI | Rust, clap | Binary name `pbx` |
 

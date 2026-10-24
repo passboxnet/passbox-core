@@ -7,11 +7,12 @@
     "node": ">=22"
   },
   "scripts": {
-    "build": "pnpm -r --filter=!passbox build",
+    "build": "pnpm -r --filter=!passbox --filter=!@passbox/desktop build",
     "build:wasm": "pnpm --filter @passbox/core-wasm build",
     "dev:web": "pnpm --filter @passbox/web dev",
     "dev:website": "pnpm --filter @passbox/website dev",
     "dev:extension": "pnpm --filter @passbox/extension dev",
+    "dev:desktop": "pnpm --filter @passbox/desktop dev",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
     "lint": "biome check .",
