@@ -9,6 +9,7 @@
 
 pub mod aead;
 pub mod audit;
+pub mod breach;
 pub mod canon;
 pub mod device_link;
 pub mod directory;

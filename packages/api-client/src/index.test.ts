@@ -96,6 +96,24 @@ describe("createClient", () => {
     ]);
   });
 
+  it("loads website icons as bytes and treats 404 as no icon", async () => {
+    const png = new Uint8Array([0x89, 0x50, 0x4e, 0x47]);
+    const fetch = vi.fn(async (input: RequestInfo | URL, _init?: RequestInit) =>
+      String(input).includes("github.com")
+        ? new Response(png, { status: 200, headers: { "content-type": "image/png" } })
+        : new Response(JSON.stringify({ error: "not_found" }), { status: 404 }),
+    );
+    const client = createClient({ fetch, getToken: () => "tok" });
+
+    const icon = await client.icon(" GitHub.com ");
+    expect(icon?.contentType).toBe("image/png");
+    expect([...(icon?.bytes ?? [])]).toEqual([...png]);
+    expect(await client.icon("missing.example")).toBeNull();
+    const [url, init] = fetch.mock.calls[0] ?? [];
+    expect(url).toBe("/api/v1/icons/github.com");
+    expect((init?.headers as Record<string, string> | undefined)?.authorization).toBe("Bearer tok");
+  });
+
   it("exposes the registration error codes", async () => {
     const client = createClient({
       fetch: fakeFetch(403, { error: "registration_closed", message: "registration requires an invitation" }),

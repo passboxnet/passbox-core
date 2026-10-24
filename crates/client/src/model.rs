@@ -229,6 +229,8 @@ pub struct Item {
     pub vault_id: String,
     pub revision: u64,
     pub updated_at: i64,
+    /// When the item was created (Unix ms); 0 if the server did not say.
+    pub created_at: i64,
     /// The vault key epoch the item is encrypted with.
     pub key_epoch: u32,
     pub data: ItemData,

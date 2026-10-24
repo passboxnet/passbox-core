@@ -13,6 +13,10 @@ pub mod security;
 pub mod store;
 
 pub use api::{AccountEvent, SecurityKeyInfo, SessionInfo, TotpSetup, TwoFactorStatus};
+pub use client::item_tools::{
+    BreachRange, BreachedItem, BulkFailure, HibpRange, ItemHealth, ItemProblem, ItemUsage,
+    ItemVersion, UsageKind,
+};
 pub use client::recovery::{
     CodeRecoveryStart, DeviceLinkStart, DeviceLinkState, EmergencyContact, EmergencyContacts,
     EmergencyVaults, LinkedAccount, OrgRecovery, PendingOrgRecovery, RecoveryRequest,

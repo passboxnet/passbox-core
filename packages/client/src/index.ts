@@ -18,6 +18,8 @@ export {
   securityAggregate,
 } from "./admin";
 export {
+  type BreachedItem,
+  type BulkFailure,
   type ClientAuditAction,
   type ClientSnapshot,
   type ClientStatus,
@@ -30,12 +32,17 @@ export {
   InvalidCredentialsError,
   InvalidTwoFactorCodeError,
   type Item,
+  type ItemHealth,
+  type ItemProblem,
+  type ItemUsage,
+  type ItemVersion,
   PassboxClient,
   type PassboxClientOptions,
   ReauthenticationRequiredError,
   type SessionState,
   TwoFactorExpiredError,
   TwoFactorRequiredError,
+  type UsageKind,
   type Vault,
 } from "./client";
 export {

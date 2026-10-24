@@ -64,6 +64,10 @@ pub(crate) fn item_aad(vault_id: &str, item_id: &str, revision: u64, epoch: u32)
     }
 }
 
+fn local_aad(account_id: &str, purpose: &str) -> Vec<u8> {
+    format!("passbox/v1/local|{account_id}|{purpose}").into_bytes()
+}
+
 fn session_aad(account_id: &str) -> Vec<u8> {
     format!("passbox/v1/session|{account_id}").into_bytes()
 }
@@ -251,6 +255,28 @@ impl Keyring {
             &account_key_aad(&self.account_id),
         )?;
         Ok(encoding::encode(&encrypted))
+    }
+
+    // --- Device-local data --------------------------------------------------------
+
+    /// Encrypts device-local data (JSON) that never leaves the device, such as
+    /// item usage statistics, with the account key. `purpose` names the data
+    /// (for example `item-usage`) and is bound as associated data.
+    pub fn encrypt_local(&self, purpose: &str, json: &str) -> Result<String> {
+        ensure_json(json.as_bytes())?;
+        let envelope = self
+            .account_key
+            .encrypt(json.as_bytes(), &local_aad(&self.account_id, purpose))?;
+        Ok(encoding::encode(&envelope))
+    }
+
+    /// Decrypts data from [`Keyring::encrypt_local`] with the same `purpose`.
+    pub fn decrypt_local(&self, purpose: &str, encrypted: &str) -> Result<String> {
+        let plaintext = self.account_key.decrypt(
+            &encoding::decode(encrypted)?,
+            &local_aad(&self.account_id, purpose),
+        )?;
+        into_json_string(plaintext)
     }
 
     // --- Account key pairs ------------------------------------------------------
@@ -768,6 +794,28 @@ mod tests {
         let auk = SymmetricKey::generate().unwrap();
         let (keyring, encrypted) = Keyring::create(&auk, "acc").unwrap();
         (auk, keyring, encrypted)
+    }
+
+    #[test]
+    fn local_data_is_bound_to_account_and_purpose() {
+        let (auk, keyring, encrypted) = setup();
+        let sealed = keyring.encrypt_local("item-usage", r#"{"a":1}"#).unwrap();
+        let again = Keyring::unlock(&auk, "acc", &encrypted).unwrap();
+        assert_eq!(
+            again.decrypt_local("item-usage", &sealed).unwrap(),
+            r#"{"a":1}"#
+        );
+        assert!(again.decrypt_local("other", &sealed).is_err());
+        assert!(keyring.encrypt_local("item-usage", "not json").is_err());
+    }
+
+    #[test]
+    fn old_revisions_decrypt_with_their_own_revision_only() {
+        let (_, mut keyring, _) = setup();
+        let vault = keyring.create_vault("{}").unwrap();
+        let v1 = keyring.encrypt_item(&vault.id, "item", 1, "{}").unwrap();
+        assert!(keyring.decrypt_item(&vault.id, "item", 1, &v1).is_ok());
+        assert!(keyring.decrypt_item(&vault.id, "item", 2, &v1).is_err());
     }
 
     #[test]
