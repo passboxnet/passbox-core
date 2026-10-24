@@ -39,6 +39,8 @@ pub struct TrustStore {
     pub org_roots: BTreeMap<String, String>,
     /// Latest verified manifest version and hash per vault.
     pub manifests: BTreeMap<String, ManifestPin>,
+    /// Newest verified policy per organization (D2).
+    pub policies: BTreeMap<String, crate::policy::PolicyPin>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -54,8 +56,10 @@ pub struct ManifestPin {
 pub struct Warning {
     /// `key_changed`, `org_root_changed`, `org_unverified`,
     /// `member_unverified`, `manifest_invalid`, `grant_invalid`,
-    /// `role_mismatch`, `membership_mismatch`, `group_unverified` or
-    /// `own_key_changed`.
+    /// `role_mismatch`, `membership_mismatch`, `group_unverified`,
+    /// `own_key_changed`, or for policies `policy_invalid`,
+    /// `policy_rollback`, `policy_conflict`, `policy_missing` and
+    /// `policy_needs_resign`.
     pub kind: String,
     /// The account, organization, group or vault concerned.
     pub subject_id: String,
@@ -156,6 +160,12 @@ pub struct SharingView {
     pub orgs: Vec<OrgView>,
     pub vaults: Vec<SharedVaultView>,
     pub warnings: Vec<Warning>,
+    /// Policies in force per organization (D2).
+    #[serde(default)]
+    pub policies: Vec<crate::policy::OrgPolicyView>,
+    /// The combination of the policies this account is bound by.
+    #[serde(default)]
+    pub effective_policy: crate::policy::EffectivePolicy,
 }
 
 /// An own copy of a vault key to store on the server
@@ -929,6 +939,8 @@ impl Keyring {
         }
 
         let state = &mut self.sharing;
+        let (policies, effective_policy) =
+            crate::policy::evaluate(&mut state.trust, &rosters, &data, &mut warnings);
         state.rosters = rosters;
         state.groups = groups;
         state.chains = chains;
@@ -937,6 +949,8 @@ impl Keyring {
             orgs: org_views,
             vaults: vault_views,
             warnings,
+            policies,
+            effective_policy,
         };
         SharingReport {
             view: state.view.clone(),

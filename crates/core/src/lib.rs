@@ -8,6 +8,7 @@
 //! **The scheme is a draft and has not been reviewed or audited yet.**
 
 pub mod aead;
+pub mod audit;
 pub mod canon;
 pub mod device_link;
 pub mod directory;
@@ -22,6 +23,7 @@ pub mod kdf;
 pub mod keyring;
 pub mod opaque;
 pub mod passkey;
+pub mod policy;
 pub mod random;
 pub mod recovery;
 pub mod secret_key;
