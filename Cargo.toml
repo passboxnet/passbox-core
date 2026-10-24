@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["crates/core", "crates/core-wasm", "crates/server", "crates/cli"]
+members = ["crates/core", "crates/core-wasm", "crates/server", "crates/cli", "crates/client"]
 
 [workspace.package]
 version = "0.1.0"
@@ -11,6 +11,8 @@ rust-version = "1.87"
 
 [workspace.dependencies]
 passbox-core = { path = "crates/core" }
+passbox-client = { path = "crates/client" }
+passbox-server = { path = "crates/server" }
 
 anyhow = "1"
 argon2 = { version = "0.6", default-features = false, features = ["alloc"] }
@@ -33,6 +35,7 @@ sha2 = "0.11"
 thiserror = "2"
 tokio = { version = "1", features = ["macros", "rt-multi-thread", "net", "signal"] }
 tower = "0.5"
+ureq = { version = "3.5", features = ["platform-verifier"] }
 tower-http = { version = "0.7", features = ["fs", "trace", "cors"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
@@ -49,3 +52,11 @@ all = { level = "warn", priority = -1 }
 lto = true
 codegen-units = 1
 strip = true
+
+# Key derivation is deliberately expensive; optimize it even in debug builds
+# so tests and development builds stay fast.
+[profile.dev.package.argon2]
+opt-level = 3
+
+[profile.dev.package.blake2]
+opt-level = 3

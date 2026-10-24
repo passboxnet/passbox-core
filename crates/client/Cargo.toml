@@ -1,0 +1,25 @@
+[package]
+name = "passbox-client"
+description = "Passbox client: accounts, unlock (online and offline), sync and items. Used by native apps and the CLI."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+passbox-core.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+ureq.workspace = true
+zeroize.workspace = true
+
+[dev-dependencies]
+axum.workspace = true
+passbox-server.workspace = true
+tokio.workspace = true
+tempfile = "3"
+
+[lints]
+workspace = true
