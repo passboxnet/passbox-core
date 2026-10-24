@@ -115,6 +115,67 @@ pub struct LoginFinishResponse {
     /// server is too old to issue one.
     #[serde(default)]
     pub device_token: String,
+    /// Unused recovery codes left, after signing in with one.
+    #[serde(default)]
+    pub recovery_codes_remaining: Option<i64>,
+}
+
+/// Returned by `login/finish` instead of a session when the account needs a
+/// second factor on this device.
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TwoFactorChallenge {
+    pub two_factor_required: bool,
+    pub challenge_token: String,
+    pub expires_at: i64,
+    /// `totp`, `webauthn` and/or `recovery`.
+    pub methods: Vec<String>,
+}
+
+/// The answer to `login/finish`.
+#[derive(Debug, Deserialize)]
+#[serde(untagged)]
+pub enum LoginFinish {
+    TwoFactor(TwoFactorChallenge),
+    Session(LoginFinishResponse),
+}
+
+/// A registered security key (see `GET /api/v1/account/two-factor`).
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SecurityKeyInfo {
+    pub id: String,
+    pub name: String,
+    pub created_at: i64,
+    /// 0 if never used.
+    pub last_used_at: i64,
+}
+
+/// Two-factor authentication status of the account.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TwoFactorStatus {
+    /// Whether sign-ins need a second factor.
+    pub enabled: bool,
+    pub totp: bool,
+    pub security_keys: Vec<SecurityKeyInfo>,
+    pub recovery_codes_remaining: i64,
+}
+
+/// A new TOTP secret for an authenticator app.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+pub struct TotpSetup {
+    /// Base32, for typing it in.
+    pub secret: String,
+    /// `otpauth://` URI, for a QR code.
+    pub uri: String,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct RecoveryCodes {
+    #[serde(default)]
+    recovery_codes: Option<Vec<String>>,
 }
 
 /// A signed-in device (see `GET /api/v1/sessions`).
@@ -252,6 +313,8 @@ impl Api {
                 .unwrap_or_else(|| (String::new(), String::from_utf8_lossy(&bytes).into_owned()));
             return Err(match code.as_str() {
                 "invalid_credentials" => Error::InvalidCredentials,
+                "invalid_two_factor_code" => Error::InvalidTwoFactorCode,
+                "two_factor_expired" => Error::TwoFactorExpired,
                 "conflict"
                     if path.starts_with("/api/v1/items") || path.starts_with("/api/v1/vaults/") =>
                 {
@@ -321,7 +384,7 @@ impl Api {
         finalization: &str,
         device_name: &str,
         client_kind: &str,
-    ) -> Result<LoginFinishResponse> {
+    ) -> Result<LoginFinish> {
         self.call(
             "POST",
             "/api/v1/auth/login/finish",
@@ -333,6 +396,94 @@ impl Api {
                 "clientKind": client_kind,
             })),
         )
+    }
+
+    /// Completes a login with its second factor: `method` is `totp` or
+    /// `recovery`. `remember_device` skips the second step on this device
+    /// for 30 days.
+    pub fn login_two_factor(
+        &self,
+        challenge_token: &str,
+        method: &str,
+        code: &str,
+        remember_device: bool,
+    ) -> Result<LoginFinishResponse> {
+        self.call(
+            "POST",
+            "/api/v1/auth/login/two-factor",
+            None,
+            Some(serde_json::json!({
+                "challengeToken": challenge_token,
+                "method": method,
+                "code": code,
+                "rememberDevice": remember_device,
+            })),
+        )
+    }
+
+    pub fn two_factor_status(&self, token: &str) -> Result<TwoFactorStatus> {
+        self.call("GET", "/api/v1/account/two-factor", Some(token), None)
+    }
+
+    pub fn totp_start(&self, token: &str) -> Result<TotpSetup> {
+        self.call(
+            "POST",
+            "/api/v1/account/two-factor/totp/start",
+            Some(token),
+            Some(serde_json::json!({})),
+        )
+    }
+
+    /// Returns new recovery codes when the account had none.
+    pub fn totp_confirm(&self, token: &str, code: &str) -> Result<Option<Vec<String>>> {
+        let response: RecoveryCodes = self.call(
+            "POST",
+            "/api/v1/account/two-factor/totp/confirm",
+            Some(token),
+            Some(serde_json::json!({ "code": code })),
+        )?;
+        Ok(response.recovery_codes)
+    }
+
+    pub fn totp_remove(&self, token: &str) -> Result<()> {
+        let _: Value = self.call(
+            "DELETE",
+            "/api/v1/account/two-factor/totp",
+            Some(token),
+            None,
+        )?;
+        Ok(())
+    }
+
+    pub fn webauthn_remove(&self, token: &str, id: &str) -> Result<()> {
+        let _: Value = self.call(
+            "DELETE",
+            &format!("/api/v1/account/two-factor/webauthn/{id}"),
+            Some(token),
+            None,
+        )?;
+        Ok(())
+    }
+
+    pub fn regenerate_recovery_codes(&self, token: &str) -> Result<Vec<String>> {
+        let response: RecoveryCodes = self.call(
+            "POST",
+            "/api/v1/account/two-factor/recovery-codes",
+            Some(token),
+            Some(serde_json::json!({})),
+        )?;
+        Ok(response.recovery_codes.unwrap_or_default())
+    }
+
+    /// Turns two-factor authentication off with a code (`totp` or `recovery`).
+    pub fn disable_two_factor(&self, token: &str, method: &str, code: &str) -> Result<()> {
+        let _: Value = self.call(
+            "POST",
+            "/api/v1/account/two-factor/disable",
+            Some(token),
+            Some(serde_json::json!({ "method": method, "code": code })),
+        )?;
+        Ok(())
     }
 
     pub fn account_events(&self, token: &str, limit: u32) -> Result<Vec<AccountEvent>> {
@@ -467,6 +618,25 @@ impl Api {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn login_finish_is_a_session_or_a_challenge() {
+        let session: LoginFinish = serde_json::from_str(
+            r#"{"token":"t","accountId":"a","sessionId":"s","expiresAt":1,"deviceToken":"d"}"#,
+        )
+        .unwrap();
+        assert!(
+            matches!(session, LoginFinish::Session(s) if s.token == "t" && s.device_token == "d")
+        );
+        let challenge: LoginFinish = serde_json::from_str(
+            r#"{"twoFactorRequired":true,"challengeToken":"c","expiresAt":1,"methods":["totp","recovery"],
+                "webauthn":{"challenge":"AA","rpId":"x","allowCredentials":[],"timeout":1,"userVerification":"discouraged"}}"#,
+        )
+        .unwrap();
+        assert!(
+            matches!(challenge, LoginFinish::TwoFactor(c) if c.challenge_token == "c" && c.methods == ["totp", "recovery"])
+        );
+    }
 
     #[test]
     fn rate_limited_message_keeps_the_wait_time() {

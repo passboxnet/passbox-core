@@ -5,6 +5,17 @@ use thiserror::Error;
 pub enum Error {
     #[error("the email, master password or Secret Key is incorrect")]
     InvalidCredentials,
+    /// The password was right; the account needs a second factor on this
+    /// device. Finish with `Client::complete_two_factor`.
+    #[error("a second factor is needed to sign in")]
+    TwoFactorRequired {
+        /// `totp`, `webauthn` and/or `recovery`.
+        methods: Vec<String>,
+    },
+    #[error("the two-factor code is incorrect")]
+    InvalidTwoFactorCode,
+    #[error("the sign-in expired; start again")]
+    TwoFactorExpired,
     #[error("there is no account on this device")]
     NoAccount,
     #[error("the vault is locked")]

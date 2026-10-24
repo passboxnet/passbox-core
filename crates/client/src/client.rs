@@ -16,8 +16,8 @@ use serde::{Deserialize, Serialize};
 use zeroize::Zeroizing;
 
 use crate::api::{
-    AccountEvent, Api, HttpTransport, NewVault, SessionInfo, SyncItem, SyncResponse, SyncVault,
-    Transport,
+    AccountEvent, Api, HttpTransport, LoginFinish, NewVault, SessionInfo, SyncItem, SyncResponse,
+    SyncVault, TotpSetup, Transport, TwoFactorChallenge, TwoFactorStatus,
 };
 use crate::model::{
     DeviceAccount, Item, ItemData, PASSWORD_HISTORY_LEN, PasswordHistoryEntry, TRASH_RETENTION_MS,
@@ -66,10 +66,48 @@ struct Session {
     /// session token expires.
     auth_secret: Zeroizing<[u8; 32]>,
     token: Option<String>,
+    /// When `token` was issued by a full login (Unix ms), for the server's
+    /// recent-login requirement.
+    token_at: i64,
     cache: Cache,
     vaults: BTreeMap<String, Vault>,
     items: BTreeMap<String, Item>,
     errors: Vec<String>,
+}
+
+/// A session token from a login counts as recent for this long (the server
+/// accepts sensitive changes for 10 minutes).
+const RECENT_LOGIN_MS: i64 = 9 * 60 * 1000;
+
+/// What a completed second step continues with.
+enum Then {
+    /// `sign_in` on a new device.
+    SignIn {
+        account: Box<DeviceAccount>,
+        keys: MasterKeys,
+    },
+    /// `unlock` without an offline cache.
+    Unlock { keys: MasterKeys },
+    /// `unlock` with the offline cache: the session is ready but not
+    /// installed until the server login is complete.
+    Resume(Box<Session>),
+    /// A new session token for the unlocked session (reconnecting, or
+    /// proving the password again for a sensitive change).
+    Reconnect,
+}
+
+/// A login waiting for its second factor.
+struct PendingLogin {
+    challenge_token: String,
+    methods: Vec<String>,
+    then: Then,
+}
+
+fn copy_keys(keys: &MasterKeys) -> MasterKeys {
+    MasterKeys {
+        auk: keys.auk.clone(),
+        auth_secret: Zeroizing::new(*keys.auth_secret),
+    }
 }
 
 /// Passbox client for one server and one device account.
@@ -77,6 +115,7 @@ pub struct Client {
     api: Api,
     store: Arc<dyn Store>,
     session: Mutex<Option<Session>>,
+    pending: Mutex<Option<PendingLogin>>,
     /// Device name and client kind shown in the account's device list.
     device: Mutex<(String, String)>,
 }
@@ -100,6 +139,7 @@ impl Client {
             api: Api::new(server_url, transport),
             store,
             session: Mutex::new(None),
+            pending: Mutex::new(None),
             device: Mutex::new((String::new(), String::new())),
         }
     }
@@ -117,6 +157,12 @@ impl Client {
 
     fn lock_session(&self) -> MutexGuard<'_, Option<Session>> {
         self.session
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+    }
+
+    fn lock_pending(&self) -> MutexGuard<'_, Option<PendingLogin>> {
+        self.pending
             .lock()
             .unwrap_or_else(std::sync::PoisonError::into_inner)
     }
@@ -247,7 +293,13 @@ impl Client {
         }))?;
         drop(keyring);
 
-        self.login(&account, &keys)?;
+        self.login(
+            &keys,
+            Then::SignIn {
+                account: Box::new(account.clone()),
+                keys: copy_keys(&keys),
+            },
+        )?;
         self.store
             .put(ACCOUNT_KEY, &serde_json::to_vec(&account)?)?;
         self.sync()?;
@@ -255,6 +307,8 @@ impl Client {
     }
 
     /// Signs in on a new device with email, master password and Secret Key.
+    /// Fails with [`Error::TwoFactorRequired`] when the account needs a
+    /// second factor; finish with [`Client::complete_two_factor`].
     pub fn sign_in(&self, email: &str, password: &str, secret_key: &str) -> Result<()> {
         let secret_key = SecretKey::parse(secret_key).map_err(|_| Error::InvalidCredentials)?;
         let email = email.trim().to_lowercase();
@@ -268,16 +322,27 @@ impl Client {
             kdf_params: prelogin.kdf_params,
         };
         let keys = derive(&account, password)?;
-        self.login(&account, &keys)?;
+        self.login(
+            &keys,
+            Then::SignIn {
+                account: Box::new(account.clone()),
+                keys: copy_keys(&keys),
+            },
+        )?;
+        self.finish_sign_in(&account)
+    }
+
+    fn finish_sign_in(&self, account: &DeviceAccount) -> Result<()> {
         // A different account may have used this device before.
         self.store.delete(CACHE_KEY)?;
-        self.store
-            .put(ACCOUNT_KEY, &serde_json::to_vec(&account)?)?;
+        self.store.put(ACCOUNT_KEY, &serde_json::to_vec(account)?)?;
         self.sync()
     }
 
     /// Unlocks the account remembered on this device. Works offline if the
-    /// vault was synced before.
+    /// vault was synced before. Fails with [`Error::TwoFactorRequired`] when
+    /// the server needs a second factor and this device is not remembered;
+    /// finish with [`Client::complete_two_factor`].
     pub fn unlock(&self, password: &str) -> Result<Connectivity> {
         let account = self.device_account()?.ok_or(Error::NoAccount)?;
         let keys = derive(&account, password)?;
@@ -332,7 +397,12 @@ impl Client {
             .filter(|cache: &Cache| cache.account_id == account.account_id);
 
         let Some(cache) = cache else {
-            self.login(account, keys)?;
+            self.login(
+                keys,
+                Then::Unlock {
+                    keys: copy_keys(keys),
+                },
+            )?;
             self.sync()?;
             return Ok(Connectivity::Online);
         };
@@ -345,20 +415,29 @@ impl Client {
             auk: keys.auk.clone(),
             auth_secret: Zeroizing::new(*keys.auth_secret),
             token: None,
+            token_at: 0,
             cache: Cache::default(),
             vaults: BTreeMap::new(),
             items: BTreeMap::new(),
             errors: Vec::new(),
         };
         apply_cache(&mut session, cache);
-        *self.lock_session() = Some(session);
 
-        match self.reconnect() {
-            Ok(()) => {
+        match self.authenticate(&account.email, &keys.auth_secret) {
+            Ok(LoginFinish::Session(response)) => {
+                session.token = Some(response.token);
+                session.token_at = now_ms();
+                *self.lock_session() = Some(session);
                 self.sync()?;
                 Ok(Connectivity::Online)
             }
-            Err(e) if is_network(&e) => Ok(Connectivity::Offline),
+            Ok(LoginFinish::TwoFactor(challenge)) => {
+                Err(self.pending_login(challenge, Then::Resume(Box::new(session))))
+            }
+            Err(e) if is_network(&e) => {
+                *self.lock_session() = Some(session);
+                Ok(Connectivity::Offline)
+            }
             Err(e) => {
                 *self.lock_session() = None;
                 Err(e)
@@ -366,9 +445,192 @@ impl Client {
         }
     }
 
+    // --- Two-factor sign-in --------------------------------------------------------
+
+    /// Keeps a login for its second step and returns the error that tells
+    /// the app to ask for it.
+    fn pending_login(&self, challenge: TwoFactorChallenge, then: Then) -> Error {
+        let methods = challenge.methods.clone();
+        *self.lock_pending() = Some(PendingLogin {
+            challenge_token: challenge.challenge_token,
+            methods: challenge.methods,
+            then,
+        });
+        Error::TwoFactorRequired { methods }
+    }
+
+    /// The methods of the login waiting for a second factor (`totp`,
+    /// `webauthn`, `recovery`), if any.
+    pub fn pending_two_factor(&self) -> Option<Vec<String>> {
+        self.lock_pending().as_ref().map(|p| p.methods.clone())
+    }
+
+    /// Drops the login waiting for a second factor.
+    pub fn cancel_two_factor(&self) {
+        self.lock_pending().take();
+    }
+
+    /// Completes the pending login (from `sign_in`, `unlock`, a reconnect or
+    /// [`Client::reauthenticate`]) with a code: `method` is `totp` (a
+    /// 6-digit code from the authenticator app) or `recovery` (a recovery
+    /// code). Security keys work in browsers only; on other devices use a
+    /// code or a recovery code. `remember_device` skips the second step on
+    /// this device for 30 days.
+    ///
+    /// A wrong code fails with [`Error::InvalidTwoFactorCode`] and the login
+    /// stays pending; [`Error::TwoFactorExpired`] means it has to start
+    /// over. Returns the number of recovery codes left after using one.
+    pub fn complete_two_factor(
+        &self,
+        method: &str,
+        code: &str,
+        remember_device: bool,
+    ) -> Result<Option<i64>> {
+        let pending = self.lock_pending().take().ok_or(Error::TwoFactorExpired)?;
+        let response = match self.api.login_two_factor(
+            &pending.challenge_token,
+            method,
+            code.trim(),
+            remember_device,
+        ) {
+            Ok(response) => response,
+            Err(Error::TwoFactorExpired) => return Err(Error::TwoFactorExpired),
+            Err(e) => {
+                // Wrong code, rate limit or network: the user can try again.
+                *self.lock_pending() = Some(pending);
+                return Err(e);
+            }
+        };
+        if !response.device_token.is_empty() {
+            self.store
+                .put(DEVICE_TOKEN_KEY, response.device_token.as_bytes())?;
+        }
+        let token = response.token;
+        match pending.then {
+            Then::SignIn { account, keys } => {
+                self.install_login(&keys, token)?;
+                self.finish_sign_in(&account)?;
+            }
+            Then::Unlock { keys } => {
+                self.install_login(&keys, token)?;
+                self.sync()?;
+            }
+            Then::Resume(mut session) => {
+                session.token = Some(token);
+                session.token_at = now_ms();
+                *self.lock_session() = Some(*session);
+                self.sync()?;
+            }
+            Then::Reconnect => {
+                let mut guard = self.lock_session();
+                let session = guard.as_mut().ok_or(Error::Locked)?;
+                session.token = Some(token);
+                session.token_at = now_ms();
+            }
+        }
+        Ok(response.recovery_codes_remaining)
+    }
+
+    /// Proves the master password again with a fresh login, for changes the
+    /// server accepts only from a recent login (adding a second factor, new
+    /// recovery codes). The vault stays unlocked; a wrong password fails
+    /// with [`Error::InvalidCredentials`]. May fail with
+    /// [`Error::TwoFactorRequired`]; then [`Client::complete_two_factor`]
+    /// finishes it.
+    pub fn reauthenticate(&self, password: &str) -> Result<()> {
+        let account = self.device_account()?.ok_or(Error::NoAccount)?;
+        let keys = self.checked_keys(&account, password)?;
+        self.fresh_token(&account, &keys).map(drop)
+    }
+
+    /// Derives the master keys and checks them against the unlocked
+    /// session's account key, on the device.
+    fn checked_keys(&self, account: &DeviceAccount, password: &str) -> Result<MasterKeys> {
+        let encrypted_account_key = {
+            let guard = self.lock_session();
+            guard
+                .as_ref()
+                .ok_or(Error::Locked)?
+                .cache
+                .encrypted_account_key
+                .clone()
+        };
+        let keys = derive(account, password)?;
+        Keyring::unlock(&keys.auk, &account.account_id, &encrypted_account_key)
+            .map_err(|_| Error::InvalidCredentials)?;
+        Ok(keys)
+    }
+
+    /// Logs in again and gives the unlocked session the new token.
+    fn fresh_token(&self, account: &DeviceAccount, keys: &MasterKeys) -> Result<String> {
+        match self.authenticate(&account.email, &keys.auth_secret)? {
+            LoginFinish::Session(response) => {
+                let mut guard = self.lock_session();
+                let session = guard.as_mut().ok_or(Error::Locked)?;
+                session.token = Some(response.token.clone());
+                session.token_at = now_ms();
+                Ok(response.token)
+            }
+            LoginFinish::TwoFactor(challenge) => {
+                Err(self.pending_login(challenge, Then::Reconnect))
+            }
+        }
+    }
+
+    /// The session token, if it comes from a login recent enough for
+    /// sensitive changes.
+    fn recent_token(&self) -> Option<String> {
+        self.lock_session()
+            .as_ref()
+            .filter(|s| now_ms() - s.token_at < RECENT_LOGIN_MS)
+            .and_then(|s| s.token.clone())
+    }
+
+    /// Two-factor sign-in status of the account.
+    pub fn two_factor_status(&self) -> Result<TwoFactorStatus> {
+        self.with_token(|token| self.api.two_factor_status(token))
+    }
+
+    /// Starts setting up an authenticator app: show `uri` as a QR code or
+    /// `secret` for typing, then call [`Client::confirm_totp_setup`]. Needs
+    /// a recent login ([`Client::reauthenticate`]).
+    pub fn start_totp_setup(&self) -> Result<TotpSetup> {
+        self.with_token(|token| self.api.totp_start(token))
+    }
+
+    /// Turns the authenticator app on with a first code. Returns new
+    /// recovery codes (show them once) when the account had none.
+    pub fn confirm_totp_setup(&self, code: &str) -> Result<Option<Vec<String>>> {
+        let code: String = code.chars().filter(|c| !c.is_whitespace()).collect();
+        self.with_token(|token| self.api.totp_confirm(token, &code))
+    }
+
+    /// Removes the authenticator app while a security key remains.
+    pub fn remove_totp(&self) -> Result<()> {
+        self.with_token(|token| self.api.totp_remove(token))
+    }
+
+    /// Removes a security key while another second factor remains.
+    /// Security keys are added in the web app.
+    pub fn remove_security_key(&self, id: &str) -> Result<()> {
+        self.with_token(|token| self.api.webauthn_remove(token, id))
+    }
+
+    /// Replaces the recovery codes with 10 new ones (show them once).
+    pub fn regenerate_recovery_codes(&self) -> Result<Vec<String>> {
+        self.with_token(|token| self.api.regenerate_recovery_codes(token))
+    }
+
+    /// Turns two-factor sign-in off with a current code (`totp`) or a
+    /// recovery code (`recovery`).
+    pub fn disable_two_factor(&self, method: &str, code: &str) -> Result<()> {
+        self.with_token(|token| self.api.disable_two_factor(token, method, code.trim()))
+    }
+
     /// Forgets all keys and decrypted data. The account and the encrypted
     /// offline cache stay on this device.
     pub fn lock(&self) {
+        self.cancel_two_factor();
         let session = self.lock_session().take();
         if let Some(token) = session.and_then(|s| s.token) {
             // Best effort; the session expires anyway.
@@ -403,16 +665,21 @@ impl Client {
     /// vault keys stay the same; only the account key's wrapping and the
     /// server's OPAQUE record change. Other devices are signed out and need
     /// the new password. Fails with [`Error::InvalidCredentials`] if
-    /// `current_password` is wrong.
+    /// `current_password` is wrong. Without a recent login it logs in again
+    /// first, which can fail with [`Error::TwoFactorRequired`]: complete it
+    /// and call this again.
     pub fn change_master_password(&self, current_password: &str, new_password: &str) -> Result<()> {
         let account = self.device_account()?.ok_or(Error::NoAccount)?;
         if self.lock_session().is_none() {
             return Err(Error::Locked);
         }
-        let current = derive(&account, current_password)?;
-        // A fresh login proves the current password and satisfies the
-        // server's recent-login requirement.
-        let token = self.opaque_login(&account.email, &current.auth_secret)?;
+        // The current password is checked on the device; the server needs a
+        // session from a recent login.
+        let current = self.checked_keys(&account, current_password)?;
+        let token = match self.recent_token() {
+            Some(token) => token,
+            None => self.fresh_token(&account, &current)?,
+        };
 
         let next = DeviceAccount {
             kdf_salt: encoding::encode(&kdf::generate_salt()?),
@@ -448,6 +715,7 @@ impl Client {
             session.auk = keys.auk.clone();
             session.auth_secret = Zeroizing::new(*keys.auth_secret);
             session.token = Some(token);
+            session.token_at = now_ms();
             session.cache.encrypted_account_key = encrypted_account_key;
             self.store
                 .put(CACHE_KEY, &serde_json::to_vec(&session.cache)?)?;
@@ -486,9 +754,22 @@ impl Client {
     }
 
     /// Runs the OPAQUE login and replaces the session with a freshly
-    /// unlocked one.
-    fn login(&self, account: &DeviceAccount, keys: &MasterKeys) -> Result<()> {
-        let token = self.opaque_login(&account.email, &keys.auth_secret)?;
+    /// unlocked one. When the account needs a second factor, keeps the
+    /// login pending with `then` and fails with
+    /// [`Error::TwoFactorRequired`].
+    fn login(&self, keys: &MasterKeys, then: Then) -> Result<()> {
+        let account = match &then {
+            Then::SignIn { account, .. } => account.as_ref().clone(),
+            _ => self.device_account()?.ok_or(Error::NoAccount)?,
+        };
+        match self.authenticate(&account.email, &keys.auth_secret)? {
+            LoginFinish::Session(response) => self.install_login(keys, response.token),
+            LoginFinish::TwoFactor(challenge) => Err(self.pending_login(challenge, then)),
+        }
+    }
+
+    /// Unlocks with a session token from a complete login.
+    fn install_login(&self, keys: &MasterKeys, token: String) -> Result<()> {
         let remote = self.api.account(&token)?;
         let keyring = Keyring::unlock(&keys.auk, &remote.account_id, &remote.encrypted_account_key)
             .map_err(|_| Error::InvalidCredentials)?;
@@ -497,6 +778,7 @@ impl Client {
             auk: keys.auk.clone(),
             auth_secret: Zeroizing::new(*keys.auth_secret),
             token: Some(token),
+            token_at: now_ms(),
             cache: Cache {
                 account_id: remote.account_id,
                 encrypted_account_key: remote.encrypted_account_key,
@@ -509,7 +791,9 @@ impl Client {
         Ok(())
     }
 
-    fn opaque_login(&self, email: &str, auth_secret: &[u8; 32]) -> Result<String> {
+    /// Runs the OPAQUE login. Returns a session or the second-factor
+    /// challenge.
+    fn authenticate(&self, email: &str, auth_secret: &[u8; 32]) -> Result<LoginFinish> {
         let (flow, request) = ClientLoginFlow::start(auth_secret)?;
         // The server ignores a token that does not belong to this account.
         let device_token = self
@@ -533,11 +817,13 @@ impl Client {
             &device_name,
             &client_kind,
         )?;
-        if !response.device_token.is_empty() {
+        if let LoginFinish::Session(session) = &response
+            && !session.device_token.is_empty()
+        {
             self.store
-                .put(DEVICE_TOKEN_KEY, response.device_token.as_bytes())?;
+                .put(DEVICE_TOKEN_KEY, session.device_token.as_bytes())?;
         }
-        Ok(response.token)
+        Ok(response)
     }
 
     /// Gets a new session token with the auth secret of the unlocked session.
@@ -547,11 +833,18 @@ impl Client {
             let guard = self.lock_session();
             Zeroizing::new(*guard.as_ref().ok_or(Error::Locked)?.auth_secret)
         };
-        let token = self.opaque_login(&account.email, &auth_secret)?;
-        if let Some(session) = self.lock_session().as_mut() {
-            session.token = Some(token);
+        match self.authenticate(&account.email, &auth_secret)? {
+            LoginFinish::Session(response) => {
+                if let Some(session) = self.lock_session().as_mut() {
+                    session.token = Some(response.token);
+                    session.token_at = now_ms();
+                }
+                Ok(())
+            }
+            LoginFinish::TwoFactor(challenge) => {
+                Err(self.pending_login(challenge, Then::Reconnect))
+            }
         }
-        Ok(())
     }
 
     /// Runs `call` with a session token, connecting first if needed. A

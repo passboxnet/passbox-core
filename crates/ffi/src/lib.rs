@@ -23,6 +23,17 @@ mod android;
 pub enum PassboxError {
     #[error("The email, master password or Secret Key is incorrect.")]
     InvalidCredentials,
+    /// The password was right; the account needs a second factor on this
+    /// device. Ask for a code and call `complete_two_factor`. `methods`
+    /// lists `totp`, `webauthn` (security keys: web only) and `recovery`.
+    #[error("A second factor is needed to sign in.")]
+    TwoFactorRequired { methods: Vec<String> },
+    /// The two-factor or recovery code was wrong; the login stays pending.
+    #[error("The two-factor code is incorrect.")]
+    InvalidTwoFactorCode,
+    /// The pending login expired or was used up; start again.
+    #[error("The sign-in expired. Start again.")]
+    TwoFactorExpired,
     #[error("There is no account on this device.")]
     NoAccount,
     #[error("The vault is locked.")]
@@ -50,6 +61,9 @@ impl From<client::Error> for PassboxError {
         use client::Error as E;
         match err {
             E::InvalidCredentials => Self::InvalidCredentials,
+            E::TwoFactorRequired { methods } => Self::TwoFactorRequired { methods },
+            E::InvalidTwoFactorCode => Self::InvalidTwoFactorCode,
+            E::TwoFactorExpired => Self::TwoFactorExpired,
             E::NoAccount => Self::NoAccount,
             E::Locked => Self::Locked,
             E::Offline => Self::Offline,
@@ -260,6 +274,36 @@ pub struct AccountEvent {
     pub ip: String,
     /// Milliseconds since the Unix epoch.
     pub created_at: i64,
+}
+
+/// A security key registered as a second factor (added in the web app).
+#[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
+pub struct SecurityKey {
+    pub id: String,
+    pub name: String,
+    /// Milliseconds since the Unix epoch.
+    pub created_at: i64,
+    /// 0 if never used.
+    pub last_used_at: i64,
+}
+
+/// Two-factor sign-in status of the account.
+#[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
+pub struct TwoFactorStatus {
+    /// Whether sign-ins need a second factor.
+    pub enabled: bool,
+    pub totp: bool,
+    pub security_keys: Vec<SecurityKey>,
+    pub recovery_codes_remaining: i64,
+}
+
+/// A new secret for an authenticator app.
+#[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
+pub struct TotpSetup {
+    /// Base32, for typing it in.
+    pub secret: String,
+    /// `otpauth://` URI, for a QR code.
+    pub uri: String,
 }
 
 // Conversions between the binding records and the client model.
@@ -622,6 +666,92 @@ impl PassboxClient {
         Ok(self.inner.reveal_secret_key(&password)?)
     }
 
+    // --- Two-factor sign-in -----------------------------------------------------
+    //
+    // `sign_in`, `unlock`, `unlock_with_key` and `change_master_password` fail
+    // with `TwoFactorRequired` when the account needs a second factor on this
+    // device. The client keeps the login pending; finish it with
+    // `complete_two_factor`, then continue (after `change_master_password`,
+    // call it again).
+
+    /// The methods of the login waiting for a second factor, if any.
+    pub fn pending_two_factor(&self) -> Option<Vec<String>> {
+        self.inner.pending_two_factor()
+    }
+
+    /// Completes the pending login with a code: `method` is `totp` (6 digits
+    /// from the authenticator app) or `recovery` (a recovery code; see
+    /// `looks_like_recovery_code`). `remember_device` skips the second step
+    /// on this device for 30 days. Returns the recovery codes left after
+    /// using one. Fails with `InvalidTwoFactorCode` (try again) or
+    /// `TwoFactorExpired` (start over).
+    pub fn complete_two_factor(
+        &self,
+        method: String,
+        code: String,
+        remember_device: bool,
+    ) -> Result<Option<i64>> {
+        Ok(self
+            .inner
+            .complete_two_factor(&method, &code, remember_device)?)
+    }
+
+    /// Drops the pending login.
+    pub fn cancel_two_factor(&self) {
+        self.inner.cancel_two_factor();
+    }
+
+    /// Proves the master password again (for changes that need a recent
+    /// login). May fail with `TwoFactorRequired`.
+    pub fn reauthenticate(&self, password: String) -> Result<()> {
+        Ok(self.inner.reauthenticate(&password)?)
+    }
+
+    pub fn two_factor_status(&self) -> Result<TwoFactorStatus> {
+        let status = self.inner.two_factor_status()?;
+        Ok(TwoFactorStatus {
+            enabled: status.enabled,
+            totp: status.totp,
+            security_keys: status
+                .security_keys
+                .into_iter()
+                .map(|k| SecurityKey {
+                    id: k.id,
+                    name: k.name,
+                    created_at: k.created_at,
+                    last_used_at: k.last_used_at,
+                })
+                .collect(),
+            recovery_codes_remaining: status.recovery_codes_remaining,
+        })
+    }
+
+    /// Starts setting up an authenticator app (needs a recent login).
+    pub fn start_totp_setup(&self) -> Result<TotpSetup> {
+        let setup = self.inner.start_totp_setup()?;
+        Ok(TotpSetup {
+            secret: setup.secret,
+            uri: setup.uri,
+        })
+    }
+
+    /// Turns the authenticator app on with a first code. Returns new
+    /// recovery codes to show once (empty if the account already had some).
+    pub fn confirm_totp_setup(&self, code: String) -> Result<Vec<String>> {
+        Ok(self.inner.confirm_totp_setup(&code)?.unwrap_or_default())
+    }
+
+    /// Replaces the recovery codes with 10 new ones (needs a recent login).
+    pub fn regenerate_recovery_codes(&self) -> Result<Vec<String>> {
+        Ok(self.inner.regenerate_recovery_codes()?)
+    }
+
+    /// Turns two-factor sign-in off with a code (`totp`) or a recovery code
+    /// (`recovery`).
+    pub fn disable_two_factor(&self, method: String, code: String) -> Result<()> {
+        Ok(self.inner.disable_two_factor(&method, &code)?)
+    }
+
     pub fn health(&self) -> Result<VaultHealth> {
         let h = self.inner.health()?;
         Ok(VaultHealth {
@@ -637,6 +767,14 @@ impl PassboxClient {
 }
 
 // --- Utilities ------------------------------------------------------------------
+
+/// Whether a typed second factor looks like a recovery code (16 characters,
+/// with or without dashes) rather than a 6-digit code, so one input field
+/// can take both.
+#[uniffi::export]
+pub fn looks_like_recovery_code(input: String) -> bool {
+    passbox_core::two_factor::looks_like_recovery_code(&input)
+}
 
 /// A new item with the default fields of its category.
 #[uniffi::export]
@@ -756,6 +894,8 @@ mod tests {
         let code = totp_code("JBSWY3DPEHPK3PXP".into(), 59).unwrap();
         assert_eq!(code.code.len(), 6);
         assert_eq!(code.seconds_remaining, 1);
+        assert!(looks_like_recovery_code("abcd-efgh-jkmn-pqrs".into()));
+        assert!(!looks_like_recovery_code("123 456".into()));
         assert_eq!(
             generate_password(24, true, true, false)
                 .unwrap()
