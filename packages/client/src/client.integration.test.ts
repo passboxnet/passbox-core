@@ -78,6 +78,9 @@ describe.skipIf(!serverUrl)("PassboxClient against a server", () => {
       InvalidCredentialsError,
     );
     await laptop.changeMasterPassword("correct horse battery staple", "new horse battery staple");
+    // The offline check follows the change right away.
+    expect(await laptop.verifyMasterPassword("new horse battery staple")).toBe(true);
+    expect(await laptop.verifyMasterPassword("correct horse battery staple")).toBe(false);
     laptop.lock();
     await expect(laptop.unlock("correct horse battery staple")).rejects.toBeInstanceOf(InvalidCredentialsError);
     await laptop.unlock("new horse battery staple");
