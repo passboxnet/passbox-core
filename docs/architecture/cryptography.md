@@ -61,6 +61,25 @@ Plaintexts are JSON. Items use the version-1 schema in [`packages/client/src/ite
 
 Code: [`crates/core/src/keyring.rs`](../../crates/core/src/keyring.rs).
 
+## Extension sessions (implemented)
+
+Manifest V3 service workers are stopped when idle, which would drop the unlocked keyring. `Keyring::export_session` serializes the account key and vault keys and encrypts them with XChaCha20-Poly1305 under a fresh random 256-bit session key, bound to `passbox/v1/session|{account_id}`; `Keyring::import_session` restores them. Every export uses a new session key.
+
+The extension keeps the session key, the encrypted blob and the server session token only in `chrome.storage.session` (memory only, cleared when the browser closes, not readable by content scripts). Locking, auto-lock (after the configured idle time, and when the screen locks) and signing out delete it. Holding both values is equivalent to holding the unlocked keys, so this protects against the keys reaching disk, not against code running inside the extension.
+
+Code: [`crates/core/src/keyring.rs`](../../crates/core/src/keyring.rs), [`apps/extension/src/background/vault.ts`](../../apps/extension/src/background/vault.ts).
+
+## Passkeys (implemented)
+
+Passbox acts as a WebAuthn authenticator for ES256 (ECDSA P-256 with SHA-256, COSE algorithm −7, RustCrypto `p256`):
+
+- **Registration:** a random 16-byte credential ID and a new P-256 key. The authenticator data contains the SHA-256 of the RP ID, the flags UP, UV, BE, BS and AT, a zero signature counter, a Passbox AAGUID, the credential ID and the COSE public key. The attestation object uses the `"none"` format, encoded with a small deterministic CBOR encoder in the core.
+- **Assertion:** an ECDSA signature (DER) over `authenticatorData || SHA-256(clientDataJSON)`. Passkeys are synced, so the counter stays 0, as with other synced passkey providers.
+- **Storage:** the PKCS#8 private key lives in the login item's `passkeys` array and is encrypted like every other item field. Clients never display it.
+- **Origin rules:** the extension takes the calling origin from the browser (never from the page), requires https (http only on `localhost`), and accepts an RP ID only if it equals the origin's host or is a registrable suffix of it (never a public suffix, per the Public Suffix List). It builds `clientDataJSON` itself.
+
+Code: [`crates/core/src/passkey.rs`](../../crates/core/src/passkey.rs), [`apps/extension/src/background/passkeys.ts`](../../apps/extension/src/background/passkeys.ts).
+
 ## Known gaps
 
 - A server can still withhold changes or replay an entire older state of an item (old revision with its matching ciphertext). The signed revision chain below closes this.
