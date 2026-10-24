@@ -122,6 +122,7 @@ mod tests {
             revision: 1,
             key_epoch: 0,
             updated_at: 0,
+            created_at: 0,
             data,
         }
     }

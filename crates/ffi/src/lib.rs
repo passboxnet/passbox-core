@@ -196,6 +196,80 @@ pub struct Item {
     /// Earlier passwords, newest first.
     pub password_history: Vec<PasswordHistoryEntry>,
     pub data: ItemData,
+    /// Unix milliseconds when the item was created (0 if unknown).
+    #[uniffi(default = 0)]
+    pub created_at: i64,
+}
+
+/// An earlier version of an item ("Eintragsverlauf").
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct ItemVersion {
+    pub revision: u64,
+    /// Unix milliseconds when this version was saved.
+    pub updated_at: i64,
+    /// Public ID of the session (device) that saved it, if known; match it
+    /// against `sessions()`.
+    pub updated_by: Option<String>,
+    /// `None` if this device cannot decrypt it (for example a shared vault's
+    /// version from before a key rotation the account was not part of).
+    pub data: Option<ItemData>,
+}
+
+/// How an item was used on this device.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum UsageKind {
+    Copy,
+    Autofill,
+    Open,
+}
+
+/// Device-local usage of an item (never synced).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Record)]
+pub struct ItemUsage {
+    /// Unix milliseconds of the last copy, autofill or open (0 = never).
+    pub last_used_at: i64,
+    /// Unix milliseconds of the last autofill (0 = never).
+    pub last_autofilled_at: i64,
+    pub use_count: u64,
+}
+
+/// A problem shown in an item's "Sicherheits-Check" card.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum ItemProblem {
+    Weak,
+    Reused,
+    /// The website starts with `http://`.
+    InsecureUrl,
+    /// A login without a one-time password (2FA).
+    MissingTotp,
+    /// Found in a data breach (only after `breached_items` or
+    /// `breach_check` ran in this session).
+    Breached,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
+pub struct ItemHealth {
+    pub problems: Vec<ItemProblem>,
+    /// Strength score 0–4 of the password, if it has one.
+    pub strength: Option<u8>,
+    /// Other items with the same password.
+    pub reused_with: Vec<String>,
+    /// Breach count from this session's checks; `None` if not checked.
+    pub breach_count: Option<u64>,
+}
+
+/// A login whose password appears in known data breaches.
+#[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
+pub struct BreachedItem {
+    pub item_id: String,
+    pub count: u64,
+}
+
+/// An item a bulk change could not apply to.
+#[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
+pub struct BulkFailure {
+    pub item_id: String,
+    pub error: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
@@ -430,8 +504,27 @@ fn item_to_ffi(item: client::Item) -> Item {
                 replaced_at: e.replaced_at,
             })
             .collect(),
+        created_at: item.created_at,
         data: data_to_ffi(item.data),
     }
+}
+
+fn usage_to_ffi(usage: client::ItemUsage) -> ItemUsage {
+    ItemUsage {
+        last_used_at: usage.last_used_at,
+        last_autofilled_at: usage.last_autofilled_at,
+        use_count: usage.use_count,
+    }
+}
+
+fn failures_to_ffi(failures: Vec<client::BulkFailure>) -> Vec<BulkFailure> {
+    failures
+        .into_iter()
+        .map(|f| BulkFailure {
+            item_id: f.item_id,
+            error: f.error,
+        })
+        .collect()
 }
 
 // --- Client ---------------------------------------------------------------------
@@ -778,6 +871,120 @@ impl PassboxClient {
         Ok(self.inner.disable_two_factor(&method, &code)?)
     }
 
+    // --- Item extras -------------------------------------------------------------
+    //
+    // All blocking; call them from a background task. `item_history`,
+    // `icon`, `breach_check` and `breached_items` use the network.
+
+    /// Earlier versions of an item (up to 20, newest first). To restore one,
+    /// call `update_item(id, version.data)`: that saves it as a new version
+    /// and keeps the password history.
+    pub fn item_history(&self, id: String) -> Result<Vec<ItemVersion>> {
+        Ok(self
+            .inner
+            .item_history(&id)?
+            .into_iter()
+            .map(|v| ItemVersion {
+                revision: v.revision,
+                updated_at: v.updated_at,
+                updated_by: v.updated_by,
+                data: v.data.map(data_to_ffi),
+            })
+            .collect())
+    }
+
+    /// The website icon of `domain` (`github.com`; PNG, ICO, JPEG, GIF or
+    /// WebP bytes), loaded through the user's server and cached on the
+    /// device for 7 days. `None` when there is none or the server has icons
+    /// turned off. Respect the user's "Website-Icons anzeigen" setting.
+    pub fn icon(&self, domain: String) -> Result<Option<Vec<u8>>> {
+        Ok(self.inner.icon(&domain)?)
+    }
+
+    /// How often a password appears in known data breaches (Have I Been
+    /// Pwned, k-anonymity: only 5 characters of its SHA-1 hash are sent).
+    /// Fails with `Network` when offline. Opt-in only.
+    pub fn breach_check(&self, password: String) -> Result<u64> {
+        Ok(self.inner.breach_check(&password)?)
+    }
+
+    /// Checks all logins outside the trash against Have I Been Pwned and
+    /// returns the breached ones, most breached first. Slow for large vaults:
+    /// run it in the background. Results stay in memory until the vault
+    /// locks. Fails with `Network` when offline. Opt-in only.
+    pub fn breached_items(&self) -> Result<Vec<BreachedItem>> {
+        Ok(self
+            .inner
+            .check_breached_items()?
+            .into_iter()
+            .map(|b| BreachedItem {
+                item_id: b.item_id,
+                count: b.count,
+            })
+            .collect())
+    }
+
+    /// Records a use of an item on this device (copy, autofill, open) for
+    /// "Zuletzt verwendet" and "Letztes Auto-Ausfüllen". Stored encrypted
+    /// under the store key `cache_usage`, never synced.
+    pub fn record_item_use(&self, id: String, kind: UsageKind) -> Result<ItemUsage> {
+        let kind = match kind {
+            UsageKind::Copy => client::UsageKind::Copy,
+            UsageKind::Autofill => client::UsageKind::Autofill,
+            UsageKind::Open => client::UsageKind::Open,
+        };
+        Ok(usage_to_ffi(self.inner.record_item_use(&id, kind)?))
+    }
+
+    /// This device's usage of an item; `None` if never used here.
+    pub fn item_usage(&self, id: String) -> Result<Option<ItemUsage>> {
+        Ok(self.inner.item_usage(&id)?.map(usage_to_ffi))
+    }
+
+    /// This device's usage of all items by item ID, for sorting by
+    /// "Zuletzt verwendet".
+    pub fn item_usages(&self) -> Result<std::collections::HashMap<String, ItemUsage>> {
+        Ok(self
+            .inner
+            .item_usages()?
+            .into_iter()
+            .map(|(id, usage)| (id, usage_to_ffi(usage)))
+            .collect())
+    }
+
+    /// The problems of one item for its "Sicherheits-Check" card.
+    pub fn item_health(&self, id: String) -> Result<ItemHealth> {
+        let health = self.inner.item_health(&id)?;
+        Ok(ItemHealth {
+            problems: health
+                .problems
+                .into_iter()
+                .map(|p| match p {
+                    client::ItemProblem::Weak => ItemProblem::Weak,
+                    client::ItemProblem::Reused => ItemProblem::Reused,
+                    client::ItemProblem::InsecureUrl => ItemProblem::InsecureUrl,
+                    client::ItemProblem::MissingTotp => ItemProblem::MissingTotp,
+                    client::ItemProblem::Breached => ItemProblem::Breached,
+                })
+                .collect(),
+            strength: health.strength,
+            reused_with: health.reused_with,
+            breach_count: health.breach_count,
+        })
+    }
+
+    /// Moves several items to the trash with one sync. Returns the items
+    /// that failed; the others are trashed.
+    pub fn trash_items(&self, ids: Vec<String>) -> Result<Vec<BulkFailure>> {
+        Ok(failures_to_ffi(self.inner.trash_items(&ids)?))
+    }
+
+    /// Marks several items as favorites (or not) with one sync. Returns the
+    /// items that failed.
+    pub fn set_favorite(&self, ids: Vec<String>, favorite: bool) -> Result<Vec<BulkFailure>> {
+        Ok(failures_to_ffi(self.inner.set_favorite(&ids, favorite)?))
+    }
+
     pub fn health(&self) -> Result<VaultHealth> {
         let h = self.inner.health()?;
         Ok(VaultHealth {
@@ -963,6 +1170,18 @@ mod tests {
         assert!(matches!(
             client.reveal_secret_key("password".into()),
             Err(PassboxError::NoAccount)
+        ));
+        assert!(matches!(
+            client.item_history("x".into()),
+            Err(PassboxError::Locked)
+        ));
+        assert!(matches!(
+            client.record_item_use("x".into(), UsageKind::Copy),
+            Err(PassboxError::Locked)
+        ));
+        assert!(matches!(
+            client.trash_items(vec!["x".into()]),
+            Err(PassboxError::Locked)
         ));
     }
 }
