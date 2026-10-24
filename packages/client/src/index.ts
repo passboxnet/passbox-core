@@ -17,6 +17,7 @@ export {
   type SecurityAggregate,
   securityAggregate,
 } from "./admin";
+export type { MoveAudienceMember, MovePreview } from "./client";
 export {
   type BreachedItem,
   type BulkFailure,
@@ -56,8 +57,13 @@ export {
   serviceAccountState,
 } from "./developer";
 export {
+  type Attachment,
+  CATEGORIES,
+  categoryName,
   environmentVariables,
   FIELD,
+  FIELD_FORMATS,
+  type FieldFormat,
   type FieldType,
   fieldValue,
   type ItemCategory,
@@ -70,9 +76,11 @@ export {
   type PasswordHistoryEntry,
   parseItemData,
   parseVaultMeta,
+  serializeItemData,
   TRASH_RETENTION_MS,
   templateFields,
   type VaultMeta,
+  wifiQrPayload,
 } from "./items";
 export {
   type CodeRecoveryStart,
@@ -103,6 +111,17 @@ export {
   type StrengthScore,
   type VaultHealth,
 } from "./security";
+export {
+  openShareLink,
+  type ShareLink,
+  type ShareLinkState,
+  type ShareSnapshot,
+  shareLinkInfo,
+  shareLinkUrl,
+  shareSnapshot,
+  textSnapshot,
+  WrongPassphraseError,
+} from "./shareLinks";
 export {
   type Invitation,
   type KeyLookup,

@@ -1715,3 +1715,163 @@ pub fn parse_agent_request(request: &str) -> Result<String, JsValue> {
     })
     .to_string())
 }
+
+// --- Attachments, share links, SSH keys (G2, B7, G3) ------------------------------
+
+/// A new random file key (Base64url), stored in the item with the
+/// attachment's metadata.
+#[wasm_bindgen(js_name = generateFileKey)]
+pub fn generate_file_key() -> Result<String, JsValue> {
+    passbox_core::file_crypto::generate_key().map_err(js_error)
+}
+
+/// Encrypts a file chunk by chunk (see `passbox_core::file_crypto`). Write
+/// `header()` first, then every chunk of `chunkSize` bytes; the last chunk
+/// may be shorter and must be marked `last`.
+#[wasm_bindgen]
+pub struct FileEncryptor(passbox_core::file_crypto::FileEncryptor);
+
+#[wasm_bindgen]
+impl FileEncryptor {
+    #[wasm_bindgen(constructor)]
+    pub fn new(key: &str, file_id: &str) -> Result<FileEncryptor, JsValue> {
+        let key = passbox_core::file_crypto::parse_key(key).map_err(js_error)?;
+        passbox_core::file_crypto::FileEncryptor::new(&key, file_id)
+            .map(FileEncryptor)
+            .map_err(js_error)
+    }
+
+    pub fn header(&self) -> Vec<u8> {
+        self.0.header().to_vec()
+    }
+
+    #[wasm_bindgen(getter, js_name = chunkSize)]
+    pub fn chunk_size(&self) -> usize {
+        self.0.chunk_size()
+    }
+
+    #[wasm_bindgen(js_name = encryptChunk)]
+    pub fn encrypt_chunk(&mut self, plaintext: &[u8], last: bool) -> Result<Vec<u8>, JsValue> {
+        self.0.encrypt_chunk(plaintext, last).map_err(js_error)
+    }
+}
+
+/// Decrypts a blob chunk by chunk. Pass the first `fileHeaderLength()` bytes to
+/// the constructor, then chunks of `encryptedChunkSize` bytes (the last
+/// one may be shorter and must be marked `last`), then call `finish()`.
+#[wasm_bindgen]
+pub struct FileDecryptor(passbox_core::file_crypto::FileDecryptor);
+
+#[wasm_bindgen]
+impl FileDecryptor {
+    #[wasm_bindgen(constructor)]
+    pub fn new(key: &str, file_id: &str, header: &[u8]) -> Result<FileDecryptor, JsValue> {
+        let key = passbox_core::file_crypto::parse_key(key).map_err(js_error)?;
+        passbox_core::file_crypto::FileDecryptor::new(&key, file_id, header)
+            .map(FileDecryptor)
+            .map_err(js_error)
+    }
+
+    #[wasm_bindgen(getter, js_name = encryptedChunkSize)]
+    pub fn encrypted_chunk_size(&self) -> usize {
+        self.0.encrypted_chunk_size()
+    }
+
+    #[wasm_bindgen(js_name = decryptChunk)]
+    pub fn decrypt_chunk(&mut self, ciphertext: &[u8], last: bool) -> Result<Vec<u8>, JsValue> {
+        self.0.decrypt_chunk(ciphertext, last).map_err(js_error)
+    }
+
+    pub fn finish(&self) -> Result<(), JsValue> {
+        self.0.finish().map_err(js_error)
+    }
+}
+
+/// Length of the header of an encrypted file.
+#[wasm_bindgen(js_name = fileHeaderLength)]
+pub fn file_header_length() -> usize {
+    passbox_core::file_crypto::HEADER_LEN
+}
+
+/// Size of the encrypted blob for a file of `plain_len` bytes.
+#[wasm_bindgen(js_name = encryptedFileLength)]
+pub fn encrypted_file_length(plain_len: f64) -> f64 {
+    passbox_core::file_crypto::encrypted_len(plain_len.max(0.0) as u64) as f64
+}
+
+/// Encrypts a snapshot for a new share link. Returns JSON `{ key, blob,
+/// authHash, salt }`; `key` goes only into the link's fragment.
+#[wasm_bindgen(js_name = shareLinkCreate)]
+pub fn share_link_create(
+    link_id: &str,
+    snapshot: &str,
+    passphrase: Option<String>,
+) -> Result<String, JsValue> {
+    let link = passbox_core::share_link::create(link_id, snapshot, passphrase.as_deref())
+        .map_err(js_error)?;
+    Ok(serde_json::json!({
+        "key": link.key,
+        "blob": link.blob,
+        "authHash": link.auth_hash,
+        "salt": link.salt,
+    })
+    .to_string())
+}
+
+/// The access token that opens a link on the server.
+#[wasm_bindgen(js_name = shareLinkAuthToken)]
+pub fn share_link_auth_token(
+    link_id: &str,
+    key: &str,
+    passphrase: Option<String>,
+    salt: Option<String>,
+) -> Result<String, JsValue> {
+    passbox_core::share_link::auth_token(link_id, key, passphrase.as_deref(), salt.as_deref())
+        .map_err(js_error)
+}
+
+/// Decrypts a link's snapshot.
+#[wasm_bindgen(js_name = shareLinkOpen)]
+pub fn share_link_open(
+    link_id: &str,
+    key: &str,
+    passphrase: Option<String>,
+    salt: Option<String>,
+    blob: &str,
+) -> Result<String, JsValue> {
+    passbox_core::share_link::open(
+        link_id,
+        key,
+        passphrase.as_deref(),
+        salt.as_deref(),
+        blob,
+    )
+    .map_err(js_error)
+}
+
+/// A new Ed25519 SSH key. Returns JSON `{ privateKey, publicKey, fingerprint }`.
+#[wasm_bindgen(js_name = sshGenerateEd25519)]
+pub fn ssh_generate_ed25519(comment: &str) -> Result<String, JsValue> {
+    let pair = passbox_core::ssh::generate_ed25519(comment).map_err(js_error)?;
+    Ok(serde_json::json!({
+        "privateKey": pair.private_key,
+        "publicKey": pair.public_key,
+        "fingerprint": pair.fingerprint,
+    })
+    .to_string())
+}
+
+/// The public key and fingerprint of an OpenSSH Ed25519 private key.
+/// Returns JSON `{ publicKey, fingerprint }`.
+#[wasm_bindgen(js_name = sshPublicKey)]
+pub fn ssh_public_key(private_key: &str) -> Result<String, JsValue> {
+    let (public_key, fingerprint) =
+        passbox_core::ssh::public_key_of(private_key).map_err(js_error)?;
+    Ok(serde_json::json!({ "publicKey": public_key, "fingerprint": fingerprint }).to_string())
+}
+
+/// The `SHA256:` fingerprint of an SSH public key line.
+#[wasm_bindgen(js_name = sshFingerprint)]
+pub fn ssh_fingerprint(public_key: &str) -> Result<String, JsValue> {
+    passbox_core::ssh::fingerprint(public_key).map_err(js_error)
+}

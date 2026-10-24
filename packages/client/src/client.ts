@@ -1,10 +1,12 @@
 import {
+  type AccessRequestRecord,
   type Account,
   type AccountEvent,
   type AccountKeys,
   type AccountPreferences,
   type AdminApi,
   ApiError,
+  type AttachmentUsageResponse,
   type AuditExport,
   type AuditQuery,
   type ChainCheck,
@@ -14,6 +16,7 @@ import {
   type KdfParams,
   type LoginFinishResult,
   type MailLocale,
+  type MoveItemUpload,
   type OrgAdminApi,
   type OrgInvitationInfo,
   type PassboxApi,
@@ -55,13 +58,17 @@ import {
   serviceAccountState,
 } from "./developer";
 import {
+  type Attachment,
+  categoryName,
   FIELD,
   fieldValue,
   type ItemData,
   PASSWORD_HISTORY_LEN,
   parseItemData,
   parseVaultMeta,
+  serializeItemData,
   TRASH_RETENTION_MS,
+  UNKNOWN_CATEGORY,
 } from "./items";
 import {
   type CodeRecoveryStart,
@@ -84,6 +91,7 @@ import {
   RecoveryVerificationError,
 } from "./recovery";
 import { analyzeVault, breachCount, estimateStrength, type Strength, type VaultHealth } from "./security";
+import { type ShareLink, type ShareSnapshot, shareLinkUrl } from "./shareLinks";
 import {
   type Invitation,
   type KeyLookup,
@@ -235,10 +243,12 @@ export interface ClientSnapshot {
   status: ClientStatus;
   email: string | undefined;
   vaults: Vault[];
-  /** Items sorted by title, without those in the trash. */
+  /** Items sorted by title, without those in the trash or the archive. */
   items: Item[];
   /** Items in the trash, most recently trashed first. */
   trash: Item[];
+  /** Archived items (not in the trash), most recently archived first. */
+  archive: Item[];
   /** Items or vaults that could not be decrypted (tampered or unsupported). */
   errors: string[];
   /** Organizations with verified members and groups. */
@@ -373,6 +383,28 @@ const SECURITY_REPORT_INTERVAL_MS = 24 * 60 * 60 * 1000;
 export type ClientAuditAction = "item_viewed" | "secret_revealed" | "item_copied" | "item_filled";
 /** Device-local item usage per account, encrypted with the account key. */
 const USAGE_KEY = "passbox.usage";
+/** Associated-data purpose of share link labels (`Keyring.encryptLocal`). */
+const SHARE_LINK_PURPOSE = "share-link-label";
+
+function roleRank(role: string): number {
+  return role === "manage" ? 3 : role === "edit" ? 2 : role === "view" ? 1 : 0;
+}
+
+/** Someone who can see items in a vault, for `movePreview`. */
+export interface MoveAudienceMember {
+  accountId: string;
+  /** Empty when this device does not know it. */
+  email: string;
+  role: string;
+}
+
+/** Who gains, loses and keeps access when items move (`movePreview`). */
+export interface MovePreview {
+  gain: MoveAudienceMember[];
+  lose: MoveAudienceMember[];
+  keep: MoveAudienceMember[];
+}
+
 /** Associated-data purpose of the usage map (`Keyring.encryptLocal`). */
 const USAGE_PURPOSE = "item-usage";
 /** Content types the server serves for website icons. */
@@ -513,8 +545,11 @@ export class PassboxClient {
       policies: sharing.policies ?? [],
       effectivePolicy: sharing.effectivePolicy ?? NO_POLICY,
       items: [...this.items.values()]
-        .filter((item) => item.data.trashedAt === undefined)
+        .filter((item) => item.data.trashedAt === undefined && item.data.archivedAt === undefined)
         .sort((a, b) => a.data.title.localeCompare(b.data.title)),
+      archive: [...this.items.values()]
+        .filter((item) => item.data.trashedAt === undefined && item.data.archivedAt !== undefined)
+        .sort((a, b) => (b.data.archivedAt ?? 0) - (a.data.archivedAt ?? 0)),
       trash: [...this.items.values()]
         .filter((item) => item.data.trashedAt !== undefined)
         .sort((a, b) => (b.data.trashedAt ?? 0) - (a.data.trashedAt ?? 0)),
@@ -1209,6 +1244,10 @@ export class PassboxClient {
     }
     for (const item of delta.items) {
       if (item.deleted || item.encryptedData === null) {
+        // A tombstone from a vault the item moved out of: keep the item when
+        // this device already has it in its new vault.
+        const known = this.items.get(item.id);
+        if (known && known.vaultId !== item.vaultId) continue;
         this.items.delete(item.id);
         this.errors.delete(item.id);
         continue;
@@ -1298,8 +1337,24 @@ export class PassboxClient {
   }
 
   private nextVersion(item: Item, data: ItemData): ItemData {
-    const { passwordHistory: _ignored, trashedAt: _trashed, ...rest } = data;
+    const {
+      passwordHistory: _ignored,
+      trashedAt: _trashed,
+      archivedAt: _archived,
+      attachments: _attachments,
+      ...rest
+    } = data;
     const next: ItemData = rest;
+    // Archive state and attachments have their own calls; an editor with an
+    // older copy cannot undo them. An unknown category stays when the
+    // editor only knows "other".
+    if (item.data.archivedAt !== undefined) next.archivedAt = item.data.archivedAt;
+    if (item.data.attachments?.length) next.attachments = item.data.attachments;
+    if (next.category === "other" && categoryName(next) === "other" && categoryName(item.data) !== "other") {
+      next.category = item.data.category;
+      const unknown = (item.data as ItemData & { [UNKNOWN_CATEGORY]?: string })[UNKNOWN_CATEGORY];
+      if (unknown) (next as ItemData & { [UNKNOWN_CATEGORY]?: string })[UNKNOWN_CATEGORY] = unknown;
+    }
     const oldPassword = fieldValue(item.data, FIELD.password);
     let history = item.data.passwordHistory ?? [];
     if (oldPassword !== undefined && fieldValue(data, FIELD.password) !== oldPassword) {
@@ -1671,7 +1726,7 @@ export class PassboxClient {
   private async putItem(vaultId: string, id: string, revision: number, data: ItemData) {
     const keyring = this.requireKeyring();
     const keyEpoch = this.vaults.get(vaultId)?.keyEpoch ?? 0;
-    const encryptedData = keyring.encryptItemAt(vaultId, keyEpoch, id, revision, JSON.stringify(data));
+    const encryptedData = keyring.encryptItemAt(vaultId, keyEpoch, id, revision, serializeItemData(data));
     const result = await this.api.putItem(id, {
       vaultId,
       revision,
@@ -2023,7 +2078,7 @@ export class PassboxClient {
             keyEpoch,
             item.id,
             item.revision + 1,
-            JSON.stringify(item.data),
+            serializeItemData(item.data),
           ),
         }));
         await this.api.sharing.reencryptItems(vaultId, batch);
@@ -3372,5 +3427,346 @@ export class PassboxClient {
       throw new ConflictError();
     }
     throw error;
+  }
+
+  // --- Archive, moving, attachments, share links, access requests ----------------
+  //
+  // Waves G14, B5, G2, B7 and B9; see docs/architecture/attachments.md and
+  // docs/architecture/sharing.md.
+
+  /** Archives an item: hidden from lists, search and autofill, kept in its vault. */
+  async archiveItem(id: string): Promise<void> {
+    await this.setArchived(id, Date.now());
+  }
+
+  /** Takes an item out of the archive. */
+  async unarchiveItem(id: string): Promise<void> {
+    await this.setArchived(id, undefined);
+  }
+
+  private async setArchived(id: string, at: number | undefined) {
+    const item = this.items.get(id);
+    if (!item) throw new Error("unknown item");
+    const { archivedAt: _previous, ...data } = item.data;
+    await this.writeItem(item.vaultId, id, item.revision + 1, at === undefined ? data : { ...data, archivedAt: at });
+  }
+
+  /**
+   * Who gains and who loses access when items move into `targetVaultId`:
+   * the people (accounts, through groups too) of the target vault minus
+   * those of the current vaults, and the other way round. Personal vaults
+   * count as "only you".
+   */
+  movePreview(ids: readonly string[], targetVaultId: string): MovePreview {
+    const me = this.deviceAccount?.accountId ?? "";
+    const audience = (vaultId: string): Map<string, MoveAudienceMember> => {
+      const out = new Map<string, MoveAudienceMember>();
+      const vault = this.vaults.get(vaultId);
+      if (!vault?.orgId) {
+        out.set(me, { accountId: me, email: this.deviceAccount?.email ?? "", role: "manage" });
+        return out;
+      }
+      const shared = this.sharingView.vaults.find((v) => v.vaultId === vaultId);
+      const org = this.sharingView.orgs.find((o) => o.id === vault.orgId);
+      for (const member of shared?.members ?? []) {
+        const accounts =
+          member.principalType === "group"
+            ? (org?.groups.find((g) => g.id === member.principalId)?.members ?? [])
+            : [member.principalId];
+        for (const accountId of accounts) {
+          const email = org?.members.find((m) => m.accountId === accountId)?.email ?? "";
+          const known = out.get(accountId);
+          if (!known || roleRank(member.role) > roleRank(known.role)) {
+            out.set(accountId, { accountId, email, role: member.role });
+          }
+        }
+      }
+      return out;
+    };
+    const target = audience(targetVaultId);
+    const sources = new Set(
+      ids.map((id) => this.items.get(id)?.vaultId).filter((v): v is string => !!v && v !== targetVaultId),
+    );
+    const before = new Map<string, MoveAudienceMember>();
+    for (const vaultId of sources) for (const [id, m] of audience(vaultId)) before.set(id, m);
+    return {
+      gain: [...target.values()].filter((m) => !before.has(m.accountId)),
+      lose: [...before.values()].filter((m) => !target.has(m.accountId)),
+      keep: [...target.values()].filter((m) => before.has(m.accountId)),
+    };
+  }
+
+  /**
+   * Moves items into another vault. Each item is re-encrypted here for the
+   * target vault and keeps its ID, creation date, attachments and the
+   * versions of its history this device can read. Show `movePreview`
+   * first. Items already in the target are skipped. Returns the moved IDs.
+   */
+  async moveItems(ids: readonly string[], targetVaultId: string): Promise<string[]> {
+    const target = this.vaults.get(targetVaultId);
+    if (!target) throw new Error("unknown vault");
+    if (!target.orgId) this.ensurePersonalVaultsAllowed();
+    const pending = [...new Set(ids)].filter((id) => {
+      const item = this.items.get(id);
+      if (!item) throw new Error("unknown item");
+      return item.vaultId !== targetVaultId;
+    });
+    for (let i = 0; i < pending.length; i += 100) {
+      const batch = pending.slice(i, i + 100);
+      try {
+        await this.moveBatch(batch, targetVaultId);
+      } catch (error) {
+        if (!(error instanceof ApiError && error.code === "conflict")) throw error;
+        await this.sync();
+        await this.moveBatch(batch, targetVaultId);
+      }
+    }
+    if (pending.length > 0) await this.sync();
+    return pending;
+  }
+
+  private async moveBatch(ids: string[], targetVaultId: string) {
+    const keyring = this.requireKeyring();
+    const keyEpoch = this.vaults.get(targetVaultId)?.keyEpoch ?? 0;
+    const items: MoveItemUpload[] = [];
+    for (const id of ids) {
+      const item = this.items.get(id);
+      if (!item) throw new Error("unknown item");
+      const { versions: history } = await this.api.itemVersions(id);
+      const json = serializeItemData(item.data);
+      const versions = [
+        {
+          revision: item.revision,
+          encryptedData: keyring.encryptItemAt(targetVaultId, keyEpoch, id, item.revision, json),
+        },
+      ];
+      for (const version of history) {
+        if (version.revision >= item.revision) continue;
+        let plain: string;
+        try {
+          plain = keyring.decryptItemAt(item.vaultId, version.keyEpoch, id, version.revision, version.encryptedData);
+        } catch {
+          continue;
+        }
+        versions.push({
+          revision: version.revision,
+          encryptedData: keyring.encryptItemAt(targetVaultId, keyEpoch, id, version.revision, plain),
+        });
+      }
+      items.push({
+        id,
+        revision: item.revision + 1,
+        encryptedData: keyring.encryptItemAt(targetVaultId, keyEpoch, id, item.revision + 1, json),
+        versions,
+      });
+    }
+    await this.api.comfort.moveItems({ targetVaultId, keyEpoch, items });
+  }
+
+  /**
+   * Encrypts a file here and attaches it to an item. `onProgress` reports
+   * encrypted bytes (0..1) before the upload. Fails with `ApiError` codes
+   * `file_too_large` or `quota_exceeded` when the server's limits do not
+   * allow it.
+   */
+  async addAttachment(
+    itemId: string,
+    file: { name: string; type: string; data: Uint8Array },
+    onProgress?: (fraction: number) => void,
+  ): Promise<Attachment> {
+    const name = file.name.trim();
+    if (!name || name.length > 255) throw new Error("a file name has 1 to 255 characters");
+    if (!this.items.get(itemId)) throw new Error("unknown item");
+    const id = this.core.newId();
+    const key = this.core.generateFileKey();
+    const blob = this.encryptFile(key, id, file.data, onProgress);
+    await this.api.comfort.uploadAttachment(id, itemId, blob);
+    const attachment: Attachment = {
+      id,
+      name,
+      type: file.type || "application/octet-stream",
+      size: file.data.length,
+      key,
+      createdAt: Date.now(),
+    };
+    try {
+      await this.changeAttachments(itemId, (list) => [...list, attachment]);
+    } catch (error) {
+      await this.api.comfort.deleteAttachment(id).catch(() => undefined);
+      throw error;
+    }
+    return attachment;
+  }
+
+  private encryptFile(key: string, id: string, data: Uint8Array, onProgress?: (fraction: number) => void) {
+    const encryptor = new this.core.FileEncryptor(key, id);
+    try {
+      const size = encryptor.chunkSize;
+      const out = new Uint8Array(this.core.encryptedFileLength(data.length));
+      const header = encryptor.header();
+      out.set(header, 0);
+      let offset = header.length;
+      let position = 0;
+      do {
+        const end = Math.min(position + size, data.length);
+        const last = end >= data.length;
+        const chunk = encryptor.encryptChunk(data.subarray(position, end), last);
+        out.set(chunk, offset);
+        offset += chunk.length;
+        position = end;
+        onProgress?.(data.length === 0 ? 1 : position / data.length);
+      } while (position < data.length);
+      return out.subarray(0, offset);
+    } finally {
+      encryptor.free();
+    }
+  }
+
+  /** Downloads and decrypts an attachment. */
+  async attachmentData(itemId: string, attachmentId: string): Promise<Uint8Array> {
+    const attachment = this.items.get(itemId)?.data.attachments?.find((a) => a.id === attachmentId);
+    if (!attachment) throw new Error("unknown attachment");
+    const blob = await this.api.comfort.downloadAttachment(attachmentId);
+    const headerLength = this.core.fileHeaderLength();
+    const decryptor = new this.core.FileDecryptor(attachment.key, attachmentId, blob.subarray(0, headerLength));
+    try {
+      const out = new Uint8Array(attachment.size);
+      const step = decryptor.encryptedChunkSize;
+      let offset = 0;
+      let position = headerLength;
+      for (;;) {
+        const last = blob.length - position <= step;
+        const chunk = decryptor.decryptChunk(blob.subarray(position, Math.min(position + step, blob.length)), last);
+        if (offset + chunk.length > out.length) throw new Error("the attachment is larger than expected");
+        out.set(chunk, offset);
+        offset += chunk.length;
+        position += step;
+        if (last) break;
+      }
+      decryptor.finish();
+      if (offset !== attachment.size) throw new Error("the attachment does not have the expected size");
+      return out;
+    } finally {
+      decryptor.free();
+    }
+  }
+
+  /** Removes an attachment from the item and deletes the file on the server. */
+  async removeAttachment(itemId: string, attachmentId: string): Promise<void> {
+    await this.changeAttachments(itemId, (list) => list.filter((a) => a.id !== attachmentId));
+    await this.api.comfort.deleteAttachment(attachmentId).catch((error: unknown) => {
+      if (!(error instanceof ApiError && error.status === 404)) throw error;
+    });
+  }
+
+  private async changeAttachments(itemId: string, change: (list: Attachment[]) => Attachment[]) {
+    for (let attempt = 0; ; attempt++) {
+      const item = this.items.get(itemId);
+      if (!item) throw new Error("unknown item");
+      const list = change(item.data.attachments ?? []);
+      const { attachments: _old, ...rest } = item.data;
+      const data: ItemData = list.length > 0 ? { ...rest, attachments: list } : rest;
+      try {
+        await this.writeItem(item.vaultId, itemId, item.revision + 1, data);
+        return;
+      } catch (error) {
+        if (!(error instanceof ConflictError) || attempt > 0) throw error;
+      }
+    }
+  }
+
+  /** Storage limits and use for attachments. */
+  attachmentUsage(): Promise<AttachmentUsageResponse> {
+    return this.api.comfort.attachmentUsage();
+  }
+
+  /**
+   * Creates a share link for people without an account. The snapshot is
+   * encrypted here; the key is only in the link's fragment, which never
+   * reaches the server. `vaultId` names where the item comes from so its
+   * organization's policy applies. Returns the link.
+   */
+  async createShareLink(options: {
+    snapshot: ShareSnapshot;
+    label: string;
+    expiresAt: number;
+    maxViews: number;
+    passphrase?: string;
+    vaultId?: string;
+    linkBase: string;
+  }): Promise<{ id: string; url: string }> {
+    const keyring = this.requireKeyring();
+    const id = this.core.newId();
+    const passphrase = options.passphrase?.length ? options.passphrase : undefined;
+    const link = JSON.parse(this.core.shareLinkCreate(id, JSON.stringify(options.snapshot), passphrase)) as {
+      key: string;
+      blob: string;
+      authHash: string;
+      salt: string | null;
+    };
+    await this.api.comfort.createShareLink({
+      id,
+      encryptedLabel: keyring.encryptLocal(SHARE_LINK_PURPOSE, JSON.stringify({ label: options.label })),
+      blob: link.blob,
+      authHash: link.authHash,
+      salt: link.salt,
+      expiresAt: options.expiresAt,
+      maxViews: options.maxViews,
+      ...(options.vaultId ? { vaultId: options.vaultId } : {}),
+    });
+    return { id, url: shareLinkUrl(options.linkBase, id, link.key) };
+  }
+
+  /** The account's share links that have not expired, with their labels. */
+  async shareLinks(): Promise<ShareLink[]> {
+    const keyring = this.requireKeyring();
+    const { links } = await this.api.comfort.shareLinks();
+    return links.map((link) => {
+      let label = "";
+      try {
+        label =
+          (JSON.parse(keyring.decryptLocal(SHARE_LINK_PURPOSE, link.encryptedLabel)) as { label?: string }).label ?? "";
+      } catch {
+        label = "";
+      }
+      return { ...link, label };
+    });
+  }
+
+  /** Ends a share link at once. */
+  deleteShareLink(id: string): Promise<void> {
+    return this.api.comfort.deleteShareLink(id);
+  }
+
+  /** Access requests for vaults this account manages, and its own. */
+  accessRequests(): Promise<{ incoming: AccessRequestRecord[]; outgoing: AccessRequestRecord[] }> {
+    return this.api.comfort.accessRequests();
+  }
+
+  /** Whether this account can open a vault it has a link to, and its request. */
+  vaultAccessRequest(vaultId: string) {
+    return this.api.comfort.vaultAccessRequest(vaultId);
+  }
+
+  /** Asks the vault's managers for access. */
+  requestVaultAccess(vaultId: string, role: VaultRole): Promise<AccessRequestRecord> {
+    return this.api.comfort.requestVaultAccess(vaultId, role);
+  }
+
+  /**
+   * Approves a request: shares the vault with the requester (a signed
+   * manifest version, after checking their key) and marks it approved.
+   */
+  async approveAccessRequest(request: AccessRequestRecord, role: VaultRole = request.role): Promise<void> {
+    await this.shareVault(request.vaultId, "account", request.accountId, role);
+    await this.api.comfort.approveAccessRequest(request.id);
+  }
+
+  denyAccessRequest(id: string): Promise<void> {
+    return this.api.comfort.denyAccessRequest(id);
+  }
+
+  cancelAccessRequest(id: string): Promise<void> {
+    return this.api.comfort.cancelAccessRequest(id);
   }
 }

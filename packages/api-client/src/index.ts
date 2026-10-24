@@ -1,3 +1,4 @@
+import { type ComfortApi, comfortApi } from "./comfort";
 import { type DeveloperApi, developerApi } from "./developer";
 import { type OrgAdminApi, orgAdminApi } from "./orgAdmin";
 import {
@@ -10,6 +11,7 @@ import {
 } from "./recovery";
 import { type SsoApi, ssoApi } from "./sso";
 
+export * from "./comfort";
 export * from "./developer";
 export * from "./orgAdmin";
 export * from "./recovery";
@@ -667,6 +669,8 @@ export interface PassboxApi extends AdminApi {
   orgAdmin: OrgAdminApi;
   /** Service accounts and AI agent grants (wave F). */
   developer: DeveloperApi;
+  /** Moving items, attachments, share links and access requests (B5, G2, B7, B9). */
+  comfort: ComfortApi;
   deleteItem(id: string, revision: number): Promise<WriteResponse>;
   /** Earlier versions of an item, newest first (up to 20). */
   itemVersions(id: string): Promise<{ versions: ItemVersionRecord[] }>;
@@ -700,6 +704,29 @@ export function createClient(options: ClientOptions = {}): PassboxApi {
     // CSV exports (the audit log).
     if (response.headers?.get("content-type")?.startsWith("text/csv")) return (await response.text()) as T;
     return (await response.json()) as T;
+  }
+
+  /** A request with a binary body or answer (attachments). */
+  async function raw(method: string, path: string, body?: Uint8Array): Promise<Response> {
+    const headers: Record<string, string> = { accept: "application/octet-stream, application/json" };
+    const token = options.getToken?.();
+    if (token) headers.authorization = `Bearer ${token}`;
+    const init: RequestInit = { method, headers };
+    if (body !== undefined) {
+      headers["content-type"] = "application/octet-stream";
+      init.body = body as unknown as BodyInit;
+    }
+    const response = await doFetch(`${baseUrl}${path}`, init);
+    if (!response.ok) {
+      let errorBody: ErrorBody | undefined;
+      try {
+        errorBody = (await response.json()) as ErrorBody;
+      } catch {
+        errorBody = undefined;
+      }
+      throw new ApiError(response.status, path, errorBody);
+    }
+    return response;
   }
 
   return {
@@ -777,6 +804,7 @@ export function createClient(options: ClientOptions = {}): PassboxApi {
     sso: ssoApi(call),
     orgAdmin: orgAdminApi(call),
     developer: developerApi(call),
+    comfort: comfortApi(call, raw),
   };
 }
 
