@@ -14,6 +14,9 @@ use passbox_core::totp::Totp;
 
 uniffi::setup_scaffolding!();
 
+#[cfg(target_os = "android")]
+mod android;
+
 // --- Errors ---------------------------------------------------------------------
 
 #[derive(Debug, thiserror::Error, uniffi::Error)]
