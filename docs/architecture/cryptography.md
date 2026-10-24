@@ -41,6 +41,18 @@ Passbox uses OPAQUE (RFC 9807) with ristretto255, 3DH and SHA-512 (`opaque-ke`).
 
 Code: [`crates/core/src/opaque.rs`](../../crates/core/src/opaque.rs), [`crates/server/src/api/auth.rs`](../../crates/server/src/api/auth.rs).
 
+## Login two-factor authentication (implemented)
+
+A second step after OPAQUE protects server sessions (session takeover, compliance requirements). It does not change any key: the vault stays protected by the master password and the Secret Key alone, and offline unlock on native clients needs no second factor.
+
+- **TOTP:** 160-bit secret, SHA-1, 6 digits, 30 seconds (what every authenticator app supports). The server checks the current step ±1 in constant time and stores the last accepted step, so each code works once. The secret is stored as an XChaCha20-Poly1305 envelope under the server's `two_factor_key` with the associated data `passbox/v1/server/totp-secret|{account_id}`. The key sits in `server_secrets` next to the other server secrets, so this protects against leaks of single tables or exports, not against a full database copy (see known gaps).
+- **Recovery codes:** 10 codes of 80 random bits each, shown once as `XXXX-XXXX-XXXX-XXXX` (Crockford Base32; O, I and L are read as 0, 1 and 1). The server stores `SHA-256("passbox/v1/recovery-code|{account_id}|{code}")`; with 80 bits per code a fast hash is enough. A used code is deleted.
+- **WebAuthn (security keys and passkeys):** the server is the relying party. `crates/core/src/webauthn.rs` verifies registrations and assertions for ES256 (`p256`) and Ed25519 (`ed25519-dalek`): clientData type, challenge (32 random bytes, single use), origin (https on the RP ID or a subdomain, http only for `localhost`, no cross-origin), RP ID hash, user presence and the signature over `authenticatorData || SHA-256(clientDataJSON)`. A signature counter that does not increase is rejected (synced passkeys that always report 0 are accepted). Attestation statements are not verified: Passbox asks for `"none"` and does not restrict authenticator models. The RP ID is the host the web vault is served from; the credential is bound to it, so a phishing page on another origin cannot get a usable assertion. `webauthn-rs` was not used because it requires OpenSSL (`openssl-sys`, a C library that complicates the static and cross builds) and is MPL-2.0; the verifier is small, uses the RustCrypto crates already in the core, has a bounded CBOR decoder, and is tested against the core's own authenticator, Ed25519 signatures and malformed input.
+- **Challenges** (login, key registration, checks before turning 2FA off) are random 256-bit tokens, stored as SHA-256 hashes, valid for 5 minutes and single use.
+- **Remember this device:** the device token (see above) gets a `two_factor_until` timestamp (30 days) that carries over when the token is rotated. It only skips the second step; the password is always needed.
+
+Code: [`crates/core/src/two_factor.rs`](../../crates/core/src/two_factor.rs), [`crates/core/src/webauthn.rs`](../../crates/core/src/webauthn.rs), [`crates/server/src/api/two_factor.rs`](../../crates/server/src/api/two_factor.rs).
+
 ## Key hierarchy (implemented)
 
 ```
@@ -96,7 +108,7 @@ The account key stays the same, so vaults and items are untouched. The client de
 
 - A server can still withhold changes or replay an entire older state of an item (old revision with its matching ciphertext). The signed revision chain below closes this.
 - Vault metadata is not bound to a revision yet.
-- Server secrets (OPAQUE server keys, prelogin key) are stored unencrypted in the database. They protect against account enumeration and server impersonation, not vault confidentiality.
+- Server secrets (OPAQUE server keys, prelogin key, two-factor key) are stored unencrypted in the database. They protect against account enumeration, server impersonation and second-factor bypass, not vault confidentiality. Loading them from outside the database (environment, KMS) is planned.
 
 ## Encryption envelope (implemented)
 
