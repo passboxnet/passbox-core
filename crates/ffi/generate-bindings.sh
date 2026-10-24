@@ -11,10 +11,12 @@ set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd)"
 out="${1:-$root/target/bindings}"
 
+target_dir="${CARGO_TARGET_DIR:-$root/target}"
+
 cargo build --manifest-path "$root/Cargo.toml" --package passbox-ffi
 case "$(uname -s)" in
-  Darwin) lib="$root/target/debug/libpassbox_ffi.dylib" ;;
-  *) lib="$root/target/debug/libpassbox_ffi.so" ;;
+  Darwin) lib="$target_dir/debug/libpassbox_ffi.dylib" ;;
+  *) lib="$target_dir/debug/libpassbox_ffi.so" ;;
 esac
 
 for language in swift kotlin; do
