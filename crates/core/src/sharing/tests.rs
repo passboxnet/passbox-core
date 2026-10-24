@@ -30,6 +30,7 @@ pub(crate) struct Server {
     vault_members: BTreeMap<String, Vec<(String, String, String)>>,
     vault_keys: Vec<VaultKeyRecord>,
     manifests: BTreeMap<String, Vec<ManifestRecord>>,
+    pub(crate) policies: BTreeMap<String, crate::policy::PolicyRecord>,
 }
 
 fn signer() -> LogSigner {
@@ -286,6 +287,12 @@ impl Server {
             manifests: vault_access
                 .iter()
                 .flat_map(|a| self.manifests[&a.vault_id].clone())
+                .collect(),
+            policies: self
+                .policies
+                .values()
+                .filter(|p| orgs.iter().any(|o| o.id == p.org_id))
+                .cloned()
                 .collect(),
             vault_access,
             orgs,

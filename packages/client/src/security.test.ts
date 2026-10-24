@@ -31,7 +31,7 @@ describe("estimateStrength", () => {
     expect(weak.label).toBe("Weak");
     expect(weak.warning).toBe("recent_year");
     expect(weak.acceptableMasterPassword).toBe(false);
-    expect(estimateStrength(core, "michael.doehler", ["michael.doehler@example.com"]).score).toBeLessThanOrEqual(1);
+    expect(estimateStrength(core, "erika.mustermann", ["erika.mustermann@example.com"]).score).toBeLessThanOrEqual(1);
     expect(estimateStrength(core, "correct-horse-battery-staple").acceptableMasterPassword).toBe(true);
   });
 });

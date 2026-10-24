@@ -31,6 +31,8 @@ pub struct SharingDelta {
     pub manifests: Vec<ManifestRecord>,
     /// Public bundles of manifest signers, including former members.
     pub signers: Vec<BundleRecord>,
+    /// The newest policy of each organization that has one (full list).
+    pub policies: Vec<crate::policy::PolicyRecord>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -183,6 +185,8 @@ pub struct SharingData {
     pub manifests: BTreeMap<String, Vec<ManifestRecord>>,
     /// Signer bundles by their Base64url canonical encoding.
     pub signers: BTreeMap<String, BundleRecord>,
+    /// The newest policy per organization.
+    pub policies: BTreeMap<String, crate::policy::PolicyRecord>,
 }
 
 impl SharingData {
@@ -191,6 +195,11 @@ impl SharingData {
     /// lost access to is dropped.
     pub fn merge(&mut self, delta: SharingDelta) {
         self.orgs = delta.orgs.into_iter().map(|o| (o.id.clone(), o)).collect();
+        self.policies = delta
+            .policies
+            .into_iter()
+            .map(|p| (p.org_id.clone(), p))
+            .collect();
         self.groups = delta
             .groups
             .into_iter()

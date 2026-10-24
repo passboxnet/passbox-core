@@ -424,9 +424,9 @@ mod tests {
 
     #[test]
     fn uses_personal_context() {
-        let email = "michael.doehler@example.com";
-        let with = estimate("michael.doehler", &[email]);
-        let without = estimate("michael.doehler", &[]);
+        let email = "erika.mustermann@example.com";
+        let with = estimate("erika.mustermann", &[email]);
+        let without = estimate("erika.mustermann", &[]);
         assert!(with.score < without.score.max(1), "{with:?} vs {without:?}");
         assert!(estimate("Passbox2026!", &["passbox.example.com"]).score <= 2);
     }

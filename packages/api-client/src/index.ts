@@ -1,3 +1,4 @@
+import { type OrgAdminApi, orgAdminApi } from "./orgAdmin";
 import {
   type DeviceLinkApi,
   deviceLinkApi,
@@ -8,6 +9,7 @@ import {
 } from "./recovery";
 import { type SsoApi, ssoApi } from "./sso";
 
+export * from "./orgAdmin";
 export * from "./recovery";
 export * from "./sso";
 
@@ -647,6 +649,8 @@ export interface PassboxApi extends AdminApi {
   deviceLinks: DeviceLinkApi;
   /** Single sign-on, trusted devices and SCIM (wave E). */
   sso: SsoApi;
+  /** Organization administration: policies, audit log, reports (wave D). */
+  orgAdmin: OrgAdminApi;
   deleteItem(id: string, revision: number): Promise<WriteResponse>;
   /** Earlier versions of an item, newest first (up to 20). */
   itemVersions(id: string): Promise<{ versions: ItemVersionRecord[] }>;
@@ -677,6 +681,8 @@ export function createClient(options: ClientOptions = {}): PassboxApi {
       throw new ApiError(response.status, path, errorBody);
     }
     if (response.status === 204) return undefined as T;
+    // CSV exports (the audit log).
+    if (response.headers?.get("content-type")?.startsWith("text/csv")) return (await response.text()) as T;
     return (await response.json()) as T;
   }
 
@@ -753,6 +759,7 @@ export function createClient(options: ClientOptions = {}): PassboxApi {
     emergency: emergencyApi(call),
     deviceLinks: deviceLinkApi(call),
     sso: ssoApi(call),
+    orgAdmin: orgAdminApi(call),
   };
 }
 

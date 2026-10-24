@@ -41,6 +41,8 @@ pub enum Error {
     InvalidGeneratorOptions(&'static str),
     #[error("WebAuthn verification failed: {0}")]
     WebAuthn(&'static str),
+    #[error("not allowed by the organization's policy: {0}")]
+    PolicyViolation(String),
 }
 
 pub type Result<T> = core::result::Result<T, Error>;

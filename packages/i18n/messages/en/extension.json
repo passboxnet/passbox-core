@@ -234,5 +234,6 @@
   "item.sharedVault": "{vault} · {org}",
   "item.viewOnly": "View only: you can copy and fill this entry, but not change it.",
   "item.error.readOnly": "You can only view this entry. Whoever manages the shared vault can give you edit rights.",
-  "save.sharedVault": "{vault} · {org}"
+  "save.sharedVault": "{vault} · {org}",
+  "settings.autoLockLimited": "Your organization allows at most {minutes} minutes. Passbox also locks when your screen locks and when you close the browser."
 }

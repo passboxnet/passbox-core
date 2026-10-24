@@ -733,6 +733,44 @@ impl Client {
     }
 }
 
+// --- Policies (wave D2) -------------------------------------------------------------
+
+impl Client {
+    /// The policies in force per organization (verified in sync, or pinned
+    /// when the server's copy is missing, older or invalid).
+    pub fn org_policies(&self) -> Result<Vec<passbox_core::policy::OrgPolicyView>> {
+        Ok(self.view()?.policies)
+    }
+
+    /// The combination of every policy this account is bound by. Clients
+    /// enforce it: two-factor sign-in, master password strength, auto-lock
+    /// limit, export, sharing outside the organization, personal vaults.
+    pub fn effective_policy(&self) -> Result<passbox_core::policy::EffectivePolicy> {
+        Ok(self.view()?.effective_policy)
+    }
+
+    /// Signs and uploads the next version of an organization's policy
+    /// (owners and admins).
+    pub fn set_org_policy(
+        &self,
+        org_id: &str,
+        rules: &passbox_core::policy::PolicyRules,
+    ) -> Result<()> {
+        self.sync()?;
+        let upload = self.with_keyring(|k| k.sign_org_policy(org_id, rules, now_ms()))?;
+        self.call(
+            "PUT",
+            &format!("/api/v1/orgs/{org_id}/policy"),
+            Some(json!({
+                "version": upload.version,
+                "policy": upload.policy,
+                "signature": upload.signature,
+            })),
+        )?;
+        self.sync()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

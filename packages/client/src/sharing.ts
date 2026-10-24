@@ -5,6 +5,8 @@
  * what the server claims (the server's view is in `serverRole`).
  */
 
+import type { EffectivePolicy, OrgPolicy } from "./admin";
+
 export type OrgKind = "family" | "team";
 export type OrgRole = "owner" | "admin" | "member" | "guest";
 export type VaultRole = "view" | "edit" | "manage";
@@ -87,7 +89,12 @@ export type SharingWarningKind =
   | "grant_invalid"
   | "role_mismatch"
   | "membership_mismatch"
-  | "group_unverified";
+  | "group_unverified"
+  | "policy_invalid"
+  | "policy_rollback"
+  | "policy_conflict"
+  | "policy_missing"
+  | "policy_needs_resign";
 
 export interface SharingWarning {
   kind: SharingWarningKind | string;
@@ -101,6 +108,9 @@ export interface SharingView {
   orgs: Org[];
   vaults: SharedVault[];
   warnings: SharingWarning[];
+  /** Policies in force per organization (wave D2). */
+  policies?: OrgPolicy[];
+  effectivePolicy?: EffectivePolicy;
 }
 
 export interface SharingReport {
