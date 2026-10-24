@@ -14,5 +14,10 @@ run("wasm-bindgen", [
   "web",
   "--out-dir",
   join(here, "pkg"),
-  join(process.env.CARGO_TARGET_DIR || join(root, "target"), "wasm32-unknown-unknown", "release", "passbox_core_wasm.wasm"),
+  join(
+    process.env.CARGO_TARGET_DIR || join(root, "target"),
+    "wasm32-unknown-unknown",
+    "release",
+    "passbox_core_wasm.wasm",
+  ),
 ]);
