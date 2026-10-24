@@ -35,6 +35,8 @@ pub enum PassboxError {
     NotFound { message: String },
     #[error("The server could not be reached: {message}")]
     Network { message: String },
+    /// For HTTP 429 (`rate_limited`) the message is
+    /// `too many attempts; try again in <seconds> seconds`.
     #[error("Server error: {message}")]
     Server { message: String },
     #[error("Storage error: {message}")]
@@ -606,6 +608,20 @@ impl PassboxClient {
             .change_master_password(&current_password, &new_password)?)
     }
 
+    /// Vaults and items that could not be decrypted (tampered with, or
+    /// written by a newer Passbox version), as technical descriptions. Show
+    /// a notice instead of letting them disappear silently.
+    pub fn decryption_errors(&self) -> Result<Vec<String>> {
+        Ok(self.inner.errors()?)
+    }
+
+    /// The Secret Key, for showing the Emergency Kit again. Needs the
+    /// unlocked vault and the current master password (checked locally);
+    /// fails with `InvalidCredentials` otherwise.
+    pub fn reveal_secret_key(&self, password: String) -> Result<String> {
+        Ok(self.inner.reveal_secret_key(&password)?)
+    }
+
     pub fn health(&self) -> Result<VaultHealth> {
         let h = self.inner.health()?;
         Ok(VaultHealth {
@@ -774,5 +790,13 @@ mod tests {
         .unwrap();
         assert_eq!(client.status().unwrap(), ClientStatus::SignedOut);
         assert!(matches!(client.items(), Err(PassboxError::Locked)));
+        assert!(matches!(
+            client.decryption_errors(),
+            Err(PassboxError::Locked)
+        ));
+        assert!(matches!(
+            client.reveal_secret_key("password".into()),
+            Err(PassboxError::NoAccount)
+        ));
     }
 }
