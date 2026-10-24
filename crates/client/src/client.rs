@@ -6,6 +6,7 @@
 use std::collections::BTreeMap;
 use std::sync::{Arc, Mutex, MutexGuard};
 
+use passbox_core::aead::SymmetricKey;
 use passbox_core::kdf::{self, KdfParams, MasterKeys, SALT_LEN};
 use passbox_core::keyring::Keyring;
 use passbox_core::opaque::{ClientLoginFlow, ClientRegistrationFlow};
@@ -46,8 +47,14 @@ struct Cache {
     items: BTreeMap<String, SyncItem>,
 }
 
+/// Version byte of the exported unlock key.
+const UNLOCK_KEY_VERSION: u8 = 1;
+const UNLOCK_KEY_LEN: usize = 1 + 32 + 32;
+
 struct Session {
     keyring: Keyring,
+    /// Kept while unlocked so apps can export an unlock key for biometric unlock.
+    auk: SymmetricKey,
     /// Kept while unlocked to reconnect after going offline or when the
     /// session token expires.
     auth_secret: Zeroizing<[u8; 32]>,
@@ -229,6 +236,49 @@ impl Client {
     pub fn unlock(&self, password: &str) -> Result<Connectivity> {
         let account = self.device_account()?.ok_or(Error::NoAccount)?;
         let keys = derive(&account, password)?;
+        self.unlock_with_master_keys(&account, &keys)
+    }
+
+    /// Returns the derived master keys of the unlocked session, for apps that
+    /// offer biometric unlock: store them protected by Face ID, Touch ID or
+    /// the Android Keystore and pass them to [`Client::unlock_with_key`].
+    /// Unlocking this way skips the memory-hard key derivation, which also
+    /// makes it usable in memory-constrained places such as the iOS AutoFill
+    /// extension. The master password itself is never stored.
+    pub fn unlock_key(&self) -> Result<Zeroizing<Vec<u8>>> {
+        let guard = self.lock_session();
+        let session = guard.as_ref().ok_or(Error::Locked)?;
+        let mut key = Zeroizing::new(Vec::with_capacity(UNLOCK_KEY_LEN));
+        key.push(UNLOCK_KEY_VERSION);
+        key.extend_from_slice(session.auk.as_bytes());
+        key.extend_from_slice(&*session.auth_secret);
+        Ok(key)
+    }
+
+    /// Unlocks with a key from [`Client::unlock_key`]. Fails with
+    /// [`Error::InvalidCredentials`] if the key does not belong to the account,
+    /// for example after the master password was changed.
+    pub fn unlock_with_key(&self, key: &[u8]) -> Result<Connectivity> {
+        let account = self.device_account()?.ok_or(Error::NoAccount)?;
+        if key.len() != UNLOCK_KEY_LEN || key[0] != UNLOCK_KEY_VERSION {
+            return Err(Error::InvalidCredentials);
+        }
+        let mut auk = [0u8; 32];
+        let mut auth_secret = Zeroizing::new([0u8; 32]);
+        auk.copy_from_slice(&key[1..33]);
+        auth_secret.copy_from_slice(&key[33..]);
+        let keys = MasterKeys {
+            auk: SymmetricKey::from_bytes(auk),
+            auth_secret,
+        };
+        self.unlock_with_master_keys(&account, &keys)
+    }
+
+    fn unlock_with_master_keys(
+        &self,
+        account: &DeviceAccount,
+        keys: &MasterKeys,
+    ) -> Result<Connectivity> {
         let cache: Option<Cache> = self
             .store
             .get(CACHE_KEY)?
@@ -237,7 +287,7 @@ impl Client {
             .filter(|cache: &Cache| cache.account_id == account.account_id);
 
         let Some(cache) = cache else {
-            self.login(&account, &keys)?;
+            self.login(account, keys)?;
             self.sync()?;
             return Ok(Connectivity::Online);
         };
@@ -247,6 +297,7 @@ impl Client {
             .map_err(|_| Error::InvalidCredentials)?;
         let mut session = Session {
             keyring,
+            auk: keys.auk.clone(),
             auth_secret: Zeroizing::new(*keys.auth_secret),
             token: None,
             cache: Cache::default(),
@@ -296,6 +347,7 @@ impl Client {
             .map_err(|_| Error::InvalidCredentials)?;
         *self.lock_session() = Some(Session {
             keyring,
+            auk: keys.auk.clone(),
             auth_secret: Zeroizing::new(*keys.auth_secret),
             token: Some(token),
             cache: Cache {
