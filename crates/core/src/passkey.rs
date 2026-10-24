@@ -37,7 +37,9 @@ pub const CREDENTIAL_ID_LEN: usize = 16;
 pub struct Flags {
     /// UP: the user confirmed the operation.
     pub user_present: bool,
-    /// UV: the user was verified (here: the vault was unlocked with the master password).
+    /// UV: the user was verified, that is, they entered the master password
+    /// (or used biometrics) right before this operation. Callers set it only
+    /// after such a fresh check; an unlock hours ago does not count.
     pub user_verified: bool,
     /// BE: the credential can be synced to other devices.
     pub backup_eligible: bool,
@@ -53,6 +55,15 @@ impl Flags {
         backup_eligible: true,
         backup_state: true,
     };
+
+    /// Flags for a synced Passbox passkey after an explicit user confirmation,
+    /// with UV set only when the user was verified for this operation.
+    pub const fn synced(user_verified: bool) -> Flags {
+        Flags {
+            user_verified,
+            ..Flags::SYNCED
+        }
+    }
 
     fn to_byte(self, attested: bool) -> u8 {
         let mut byte = 0;
@@ -455,6 +466,25 @@ mod tests {
         };
         assert_eq!(only_up.to_byte(false), 0x01);
         assert_eq!(Flags::default().to_byte(true), 0x40);
+    }
+
+    #[test]
+    fn user_verification_is_reported_only_when_requested() {
+        assert_eq!(Flags::synced(true), Flags::SYNCED);
+        assert_eq!(Flags::synced(true).to_byte(false), 0x1d);
+        assert_eq!(Flags::synced(false).to_byte(false), 0x19);
+        let created = create(RP, Flags::synced(false)).unwrap();
+        // Flags byte follows the 32-byte RP ID hash; AT (0x40) is set on creation.
+        assert_eq!(created.authenticator_data[32], 0x59);
+        let assertion = assert(
+            &created.private_key_pkcs8,
+            RP,
+            b"{}",
+            0,
+            Flags::synced(false),
+        )
+        .unwrap();
+        assert_eq!(assertion.authenticator_data[32] & 0x04, 0);
     }
 
     #[test]

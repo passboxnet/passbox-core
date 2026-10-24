@@ -32,6 +32,9 @@ importers:
       '@passbox/core-wasm':
         specifier: workspace:*
         version: link:../../crates/core-wasm
+      '@passbox/i18n':
+        specifier: workspace:*
+        version: link:../../packages/i18n
       '@passbox/ui':
         specifier: workspace:*
         version: link:../../packages/ui

@@ -80,8 +80,9 @@ Code: [`crates/core/src/export.rs`](../../crates/core/src/export.rs).
 
 Passbox acts as a WebAuthn authenticator for ES256 (ECDSA P-256 with SHA-256, COSE algorithm −7, RustCrypto `p256`):
 
-- **Registration:** a random 16-byte credential ID and a new P-256 key. The authenticator data contains the SHA-256 of the RP ID, the flags UP, UV, BE, BS and AT, a zero signature counter, a Passbox AAGUID, the credential ID and the COSE public key. The attestation object uses the `"none"` format, encoded with a small deterministic CBOR encoder in the core.
+- **Registration:** a random 16-byte credential ID and a new P-256 key. The authenticator data contains the SHA-256 of the RP ID, the flags UP, BE, BS and AT (UV only when the user entered the master password in the last five minutes, see below), a zero signature counter, a Passbox AAGUID, the credential ID and the COSE public key. The attestation object uses the `"none"` format, encoded with a small deterministic CBOR encoder in the core.
 - **Assertion:** an ECDSA signature (DER) over `authenticatorData || SHA-256(clientDataJSON)`. Passkeys are synced, so the counter stays 0, as with other synced passkey providers.
+- **User verification:** the UV flag means "the user proved who they are for this operation". Passbox sets it only when the master password was entered (sign-in, unlock or a re-check) in the last five minutes. When a relying party sets `userVerification: "required"` and the last entry is older, the dialog asks for the master password first; the extension checks it locally by opening the account key with the derived keys. Otherwise the flag stays 0.
 - **Storage:** the PKCS#8 private key lives in the login item's `passkeys` array and is encrypted like every other item field. Clients never display it.
 - **Origin rules:** the extension takes the calling origin from the browser (never from the page), requires https (http only on `localhost`), and accepts an RP ID only if it equals the origin's host or is a registrable suffix of it (never a public suffix, per the Public Suffix List). It builds `clientDataJSON` itself.
 
