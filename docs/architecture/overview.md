@@ -39,7 +39,11 @@
 | Extension | Manifest V3, React | Vault in the service worker, unlocked keys only in `chrome.storage.session`; server URL can be preset through enterprise policy (`managed_schema.json`). See [extension.md](extension.md) |
 | Desktop | Tauri 2 | Wraps the built web client; tray, global shortcut, lock on sleep. See [desktop.md](../desktop.md) |
 | Website | Next.js, static export | Shares the design tokens of `packages/ui` |
-| CLI | Rust, clap | Binary name `pbx` |
+| Rust client | Rust (`crates/client`) | Native client logic with encrypted offline cache; used by the CLI, iOS and Android |
+| Bindings | UniFFI (`crates/ffi`) | Swift and Kotlin bindings of the Rust client |
+| iOS / iPadOS | SwiftUI, AuthenticationServices | AutoFill extension, Face ID / Touch ID unlock. See [ios.md](../ios.md) |
+| Android | Kotlin, Jetpack Compose | Autofill service, biometric unlock. See [android.md](../android.md) |
+| CLI | Rust, clap | Binary name `pbx`. See [cli.md](../cli.md) |
 
 ## Server
 
@@ -47,18 +51,27 @@
 - **Sync:** a global change counter. Every write takes the next value inside its transaction; `GET /api/v1/sync?since=<cursor>` returns everything with a higher value. Deleted items remain as tombstones without data.
 - **Concurrency:** optimistic. A write names the revision it creates, which must be exactly one higher than the stored revision, otherwise the server answers `409 Conflict` with the current revision.
 
-## Client
+## Clients
 
-[`packages/client`](../../packages/client) contains the platform-neutral client logic used by the web app (and later the extension): sign-up, sign-in, unlock, sync, conflict handling and the item schema. It calls the Rust core through WebAssembly and keeps all keys inside WebAssembly memory.
+There are two implementations of the client logic, which talk to the same API and share the item format:
+
+- [`packages/client`](../../packages/client) (TypeScript) for the web app, the desktop app and the extension. It calls the Rust core through WebAssembly and keeps all keys inside WebAssembly memory.
+- [`crates/client`](../../crates/client) (Rust) for the CLI and the native mobile apps (through [`crates/ffi`](../../crates/ffi)). It adds an encrypted offline cache, so these clients unlock and read without a connection, and an *unlock key* for biometric unlock that skips Argon2id.
+
+Both are covered by integration tests against a real server; the Watchtower heuristics have shared test cases.
 
 ## Current state
 
 Implemented:
 
-- Core: Argon2id + Secret Key derivation, OPAQUE login, key hierarchy with context-bound XChaCha20-Poly1305 encryption, TOTP/HOTP, password and PIN generator
-- Server: registration, login, sessions, vaults, items, incremental sync on SQLite and PostgreSQL
-- Web client: sign-up with Emergency Kit, sign-in on new devices, unlock, logins/notes/cards with TOTP, favorites, tags, search, generator, auto-lock after 15 minutes, periodic sync
-- Extension: sign-in and unlock, sessions that survive service worker restarts, auto-lock, popup vault with suggestions for the current site, inline autofill menu (logins, multi-step forms, one-time codes, password suggestions), save and update prompts, passkeys (ES256) with fallback to the browser
-- Website, CLI tools, CI, Dockerfile
+- **Core:** Argon2id + Secret Key derivation, OPAQUE login, key hierarchy with context-bound XChaCha20-Poly1305 encryption, keyring session export, ES256 passkeys, TOTP/HOTP, password and PIN generator
+- **Server:** registration, login, sessions, vaults, items, incremental sync on SQLite and PostgreSQL, CORS for non-browser-origin clients
+- **Web client:** sign-up with Emergency Kit, sign-in on new devices, unlock, logins/notes/cards with TOTP and custom fields, vaults, favorites, tags, search, command palette, Watchtower, generator, settings, auto-lock, periodic sync, configurable server
+- **Extension:** sign-in and unlock, inline autofill (logins, multi-step forms, one-time codes, password suggestions), save and update prompts, passkeys with browser fallback
+- **Desktop (Windows, macOS, Linux):** Tauri 2 shell around the web client with tray, global shortcut and lock on sleep
+- **iOS / iPadOS:** native SwiftUI app with AutoFill credential provider, Face ID / Touch ID, iPad split view
+- **Android:** native Compose app with autofill service, biometric unlock and inline suggestions
+- **CLI:** sign-in, list/get/read, secret references and `pbx run`
+- Website, CI for every platform, Dockerfile
 
-Next: offline cache in the clients, sharing (account key pairs and vault membership), Watchtower, import from other password managers, rate limiting.
+Not yet: offline cache and offline unlock in the browser clients, sharing (account key pairs and vault membership), import from other password managers, passkeys on mobile, SSO/SCIM, rate limiting, signed releases, an external security audit.
