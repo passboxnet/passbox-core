@@ -68,7 +68,8 @@ const source: ExportSource = {
   trash: [{ vaultId: "v1", data: trashed }],
 };
 
-describe("encrypted export", () => {
+// Each export derives a key with Argon2id (128 MiB), which takes a while in WebAssembly.
+describe("encrypted export", { timeout: 60_000 }, () => {
   it("round-trips through the core and the importer", () => {
     const envelope = createEncryptedExport(core, source, "export password 1");
     expect(JSON.parse(envelope)).toMatchObject({ format: "passbox-export", version: 1, cipher: "xchacha20poly1305" });

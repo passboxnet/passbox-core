@@ -16,6 +16,7 @@ import { findDuplicates, mergeItem, parseImport } from "./index";
 
 const serverUrl = process.env.PASSBOX_TEST_SERVER_URL;
 const bench = Number(process.env.PASSBOX_IMPORT_BENCH ?? 0);
+const concurrency = process.env.PASSBOX_IMPORT_CONCURRENCY ? Number(process.env.PASSBOX_IMPORT_CONCURRENCY) : undefined;
 
 function newClient() {
   let client: PassboxClient | undefined;
@@ -32,7 +33,7 @@ function chromeCsv(count: number): Uint8Array {
   return new TextEncoder().encode(writeCsv(rows));
 }
 
-describe.skipIf(!serverUrl)("importing into a server", () => {
+describe.skipIf(!serverUrl)("importing into a server", { timeout: 60_000 }, () => {
   beforeAll(async () => {
     const require = createRequire(import.meta.url);
     const wasmPath = require.resolve("@passbox/core-wasm").replace(/\.js$/, "_bg.wasm");
@@ -44,6 +45,9 @@ describe.skipIf(!serverUrl)("importing into a server", () => {
     await client.signUp(`${core.newId()}@example.com`, "correct horse battery staple");
     const vault = client.getSnapshot().vaults[0];
     if (!vault) throw new Error("no vault");
+
+    expect(await client.verifyMasterPassword("not my password")).toBe(false);
+    expect(await client.verifyMasterPassword("correct horse battery staple")).toBe(true);
 
     const first = parseImport({ name: "a.csv", bytes: chromeCsv(30) });
     const progress: number[] = [];
@@ -96,6 +100,7 @@ describe.skipIf(!serverUrl)("importing into a server", () => {
         vault.id,
         result.items.map((i) => ({ data: i.data })),
         {
+          ...(concurrency ? { concurrency } : {}),
           onProgress: () => {
             const now = performance.now();
             longestGap = Math.max(longestGap, now - last);
