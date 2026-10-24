@@ -1,8 +1,7 @@
 {
   "orgAdmin.title": "Admin console",
   "orgAdmin.titleFor": "Admin console of {name}",
-  "orgAdmin.nav": "Admin: {name}",
-  "orgAdmin.open": "Admin console",
+  "orgAdmin.open": "Open admin console",
   "orgAdmin.back": "Back to {name}",
   "orgAdmin.sections": "Admin console sections",
   "orgAdmin.sectionsFor": "Admin console of {name}",
@@ -10,7 +9,6 @@
   "orgAdmin.unknownMember": "Former member",
   "orgAdmin.unknownGroup": "Deleted group",
   "orgAdmin.vaultWithoutAccess": "Vault …{id} (no access)",
-
   "orgAdmin.section.overview": "Overview",
   "orgAdmin.section.members": "Members",
   "orgAdmin.section.groups": "Groups",
@@ -21,7 +19,6 @@
   "orgAdmin.section.recovery": "Recovery",
   "orgAdmin.section.integrations": "Integrations",
   "orgAdmin.section.settings": "Settings",
-
   "orgAdmin.role.owner": "Owner",
   "orgAdmin.role.admin": "Admin",
   "orgAdmin.role.member": "Member",
@@ -35,7 +32,6 @@
   "orgAdmin.field.password_history": "a previous password",
   "orgAdmin.field.url": "the website",
   "orgAdmin.field.other": "a field",
-
   "orgAdmin.overview.description": "How your organization is doing, and what needs your attention.",
   "orgAdmin.overview.members": "Members",
   "orgAdmin.overview.membersHint": "{invited, plural, =0 {No open invitations} one {# open invitation} other {# open invitations}} · {waiting, plural, =0 {none waiting} other {# waiting}}",
@@ -64,7 +60,6 @@
   "orgAdmin.overview.review": "Review",
   "orgAdmin.overview.open": "Open",
   "orgAdmin.overview.setUp": "Set up",
-
   "orgAdmin.members.description": "Invite people, confirm them, change roles, pause access and offboard members who leave.",
   "orgAdmin.members.invite": "Invite",
   "orgAdmin.members.search": "Search members",
@@ -88,7 +83,6 @@
   "orgAdmin.members.notEnrolled": "Not enrolled",
   "orgAdmin.members.never": "Never",
   "orgAdmin.members.scoreTitle": "Reported {time}",
-
   "orgAdmin.offboard.menu": "Offboard…",
   "orgAdmin.offboard.title": "Offboard {name}",
   "orgAdmin.offboard.text": "{name} loses access to this organization at once. Every vault key {name} had is replaced, so new and changed items stay out of reach.",
@@ -109,7 +103,6 @@
   "orgAdmin.offboard.doneText": "{name} no longer has access. The vault keys this device manages were replaced.",
   "orgAdmin.offboard.pending": "{count, plural, one {# vault waits} other {# vaults wait}} for its manager to replace the key:",
   "orgAdmin.offboard.openVaults": "Open vaults",
-
   "orgAdmin.vaults.description": "Shared vaults of the organization, who can open them and how they are used.",
   "orgAdmin.vaults.col.vault": "Vault",
   "orgAdmin.vaults.col.people": "People",
@@ -134,9 +127,7 @@
   "orgAdmin.access.short.edit": "E",
   "orgAdmin.access.short.manage": "M",
   "orgAdmin.access.legend": "V view, E edit, M manage. * means access through a group.",
-
   "orgAdmin.groups.description": "Share a vault once with a group instead of with every person.",
-
   "orgAdmin.policy.description": "Rules for every member's apps. You sign each version with your key, so the server cannot loosen them.",
   "orgAdmin.policy.none": "No policy yet. Members' apps use their own settings.",
   "orgAdmin.policy.verified": "Verified",
@@ -192,7 +183,6 @@
   "orgAdmin.policy.howTitle": "How policies are protected",
   "orgAdmin.policy.howText": "Each version is signed by an owner or admin and checked by every member's app against the organization's verified members. A server can neither change the rules nor bring back an older, looser version on devices that saw the newer one.",
   "orgAdmin.policy.howLimits": "The apps enforce the rules; the server additionally refuses turning two-factor sign-in off and new personal vaults. A modified app can ignore a policy, and a server can withhold a new version from devices that have not seen it yet.",
-
   "orgAdmin.rule.twoFactor.on": "Two-factor sign-in is required.",
   "orgAdmin.rule.twoFactor.off": "Two-factor sign-in is optional.",
   "orgAdmin.rule.minScore.on": "Master passwords must be at least “{level}”.",
@@ -213,11 +203,9 @@
   "orgAdmin.rule.recovery.off": "Recovery enrollment is optional.",
   "orgAdmin.rule.usage.on": "Viewing, revealing, copying and filling items is logged.",
   "orgAdmin.rule.usage.off": "Item usage is not logged.",
-
   "orgAdmin.summary.title": "Policy",
   "orgAdmin.summary.text": "Rules your organization set for everyone (version {version}, signed by an admin).",
   "orgAdmin.summary.none": "The policy does not restrict anything.",
-
   "orgAdmin.banner.two_factor.title": "{orgs} requires two-factor sign-in",
   "orgAdmin.banner.two_factor.body": "Turn it on to keep access.",
   "orgAdmin.banner.two_factor.action": "Turn on",
@@ -230,7 +218,6 @@
   "orgAdmin.banner.update_app.title": "Your organization's policy has rules this app does not know",
   "orgAdmin.banner.update_app.body": "Update Passbox to follow them.",
   "orgAdmin.banner.enrolled": "You are enrolled in recovery through your organization.",
-
   "orgAdmin.audit.description": "What happened in your organization. Entries are hash-chained, so later changes and deletions are visible.",
   "orgAdmin.audit.filters": "Filters",
   "orgAdmin.audit.filter.category": "Type",
@@ -276,7 +263,6 @@
   "orgAdmin.audit.exported": "The activity log was exported.",
   "orgAdmin.audit.exportFailed": "The activity log could not be exported",
   "orgAdmin.audit.exportBroken": "Careful: the exported chain does not verify from entry #{seq} on.",
-
   "orgAdmin.audit.action.member_signed_in": "Signed in",
   "orgAdmin.audit.action.member_sign_in_failed": "Sign-in failed",
   "orgAdmin.audit.action.member_two_factor_failed": "Wrong two-factor code",
@@ -339,7 +325,6 @@
   "orgAdmin.audit.action.event_token_revoked": "Revoked an events API token",
   "orgAdmin.audit.action.webhook_created": "Added a webhook for {url}",
   "orgAdmin.audit.action.webhook_deleted": "Removed a webhook",
-
   "orgAdmin.reports.description": "Security and access across your organization. Members' apps report numbers only, never items or passwords.",
   "orgAdmin.reports.tabs": "Report",
   "orgAdmin.reports.tab.security": "Security",
@@ -363,7 +348,6 @@
   "orgAdmin.reports.unusedHint": "Vaults without changes or logged use in the last {days} days. Usage is only known when the policy logs item usage.",
   "orgAdmin.reports.noUnused": "Every vault was used recently.",
   "orgAdmin.reports.noUsage": "None logged",
-
   "orgAdmin.recovery.description": "Let admins help members who forget their master password, without seeing vault contents.",
   "orgAdmin.recovery.setup": "Recovery key",
   "orgAdmin.recovery.enrollment": "Enrollment",
@@ -372,7 +356,6 @@
   "orgAdmin.recovery.enrolledCount": "{count} of {total} members enrolled",
   "orgAdmin.recovery.missing": "Not enrolled yet",
   "orgAdmin.recovery.honest": "An admin who approves a recovery briefly holds the member's account key on their device. Every recovery is logged and the member is notified.",
-
   "orgAdmin.integrations.description": "Send the activity log to your SIEM: let it fetch entries with a token, or push new entries to a webhook.",
   "orgAdmin.integrations.tokens": "Events API tokens",
   "orgAdmin.integrations.tokensText": "A token lets a collector read this organization's activity log, and nothing else.",
@@ -411,7 +394,6 @@
   "orgAdmin.integrations.create": "Create",
   "orgAdmin.integrations.copy": "Copy",
   "orgAdmin.integrations.secret": "Secret",
-
   "orgAdmin.settings.description": "Name, how long the activity log is kept, and leaving or deleting the organization.",
   "orgAdmin.settings.retention": "Activity log retention",
   "orgAdmin.settings.retentionText": "Older entries are deleted automatically. The rest of the chain stays verifiable.",
@@ -422,9 +404,10 @@
   "orgAdmin.settings.saved": "Settings saved.",
   "orgAdmin.settings.retentionWarning": "Entries older than {count, plural, one {# day} other {# days}} are deleted for good. Export or connect a SIEM first if you need them longer.",
   "orgAdmin.settings.autoLockLimited": "Your organization allows at most {minutes} minutes.",
-
   "orgAdmin.export.blocked": "{count, plural, one {# vault is} other {# vaults are}} left out: your organization does not allow exporting them.",
   "orgAdmin.error.personalVault": "Your organization does not allow personal vaults. Save items in one of its shared vaults.",
   "orgAdmin.error.twoFactorRequired": "Your organization requires two-factor sign-in, so you cannot turn it off.",
-  "orgAdmin.error.policy": "Your organization's policy does not allow this."
+  "orgAdmin.error.policy": "Your organization's policy does not allow this.",
+  "orgAdmin.switchOrg": "Organization",
+  "orgAdmin.members.lastSignIn": "Last sign-in: {time}"
 }

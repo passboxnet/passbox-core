@@ -1,8 +1,7 @@
 {
   "orgAdmin.title": "Admin-Konsole",
   "orgAdmin.titleFor": "Admin-Konsole von {name}",
-  "orgAdmin.nav": "Verwaltung: {name}",
-  "orgAdmin.open": "Admin-Konsole",
+  "orgAdmin.open": "Admin-Konsole öffnen",
   "orgAdmin.back": "Zurück zu {name}",
   "orgAdmin.sections": "Bereiche der Admin-Konsole",
   "orgAdmin.sectionsFor": "Admin-Konsole von {name}",
@@ -10,7 +9,6 @@
   "orgAdmin.unknownMember": "Ehemaliges Mitglied",
   "orgAdmin.unknownGroup": "Gelöschte Gruppe",
   "orgAdmin.vaultWithoutAccess": "Tresor …{id} (kein Zugriff)",
-
   "orgAdmin.section.overview": "Übersicht",
   "orgAdmin.section.members": "Mitglieder",
   "orgAdmin.section.groups": "Gruppen",
@@ -21,7 +19,6 @@
   "orgAdmin.section.recovery": "Wiederherstellung",
   "orgAdmin.section.integrations": "Anbindungen",
   "orgAdmin.section.settings": "Einstellungen",
-
   "orgAdmin.role.owner": "Eigentümer",
   "orgAdmin.role.admin": "Administrator",
   "orgAdmin.role.member": "Mitglied",
@@ -35,7 +32,6 @@
   "orgAdmin.field.password_history": "ein früheres Passwort",
   "orgAdmin.field.url": "die Website",
   "orgAdmin.field.other": "ein Feld",
-
   "orgAdmin.overview.description": "Wie es um Ihre Organisation steht und was Ihre Aufmerksamkeit braucht.",
   "orgAdmin.overview.members": "Mitglieder",
   "orgAdmin.overview.membersHint": "{invited, plural, =0 {Keine offenen Einladungen} one {# offene Einladung} other {# offene Einladungen}} · {waiting, plural, =0 {niemand wartet} other {# warten}}",
@@ -64,7 +60,6 @@
   "orgAdmin.overview.review": "Prüfen",
   "orgAdmin.overview.open": "Öffnen",
   "orgAdmin.overview.setUp": "Einrichten",
-
   "orgAdmin.members.description": "Laden Sie Personen ein, bestätigen Sie sie, ändern Sie Rollen, pausieren Sie Zugriffe und beenden Sie den Zugang von Mitgliedern, die gehen.",
   "orgAdmin.members.invite": "Einladen",
   "orgAdmin.members.search": "Mitglieder suchen",
@@ -88,7 +83,6 @@
   "orgAdmin.members.notEnrolled": "Nicht eingerichtet",
   "orgAdmin.members.never": "Nie",
   "orgAdmin.members.scoreTitle": "Gemeldet {time}",
-
   "orgAdmin.offboard.menu": "Zugang beenden…",
   "orgAdmin.offboard.title": "Zugang von {name} beenden",
   "orgAdmin.offboard.text": "{name} verliert sofort den Zugriff auf diese Organisation. Jeder Tresorschlüssel, den {name} hatte, wird ersetzt, damit neue und geänderte Einträge unerreichbar bleiben.",
@@ -109,7 +103,6 @@
   "orgAdmin.offboard.doneText": "{name} hat keinen Zugriff mehr. Die Tresorschlüssel, die dieses Gerät verwaltet, wurden ersetzt.",
   "orgAdmin.offboard.pending": "{count, plural, one {# Tresor wartet} other {# Tresore warten}} darauf, dass die Verwaltung den Schlüssel ersetzt:",
   "orgAdmin.offboard.openVaults": "Tresore öffnen",
-
   "orgAdmin.vaults.description": "Die geteilten Tresore der Organisation, wer sie öffnen kann und wie sie genutzt werden.",
   "orgAdmin.vaults.col.vault": "Tresor",
   "orgAdmin.vaults.col.people": "Personen",
@@ -134,9 +127,7 @@
   "orgAdmin.access.short.edit": "B",
   "orgAdmin.access.short.manage": "V",
   "orgAdmin.access.legend": "A Ansehen, B Bearbeiten, V Verwalten. * bedeutet Zugriff über eine Gruppe.",
-
   "orgAdmin.groups.description": "Teilen Sie einen Tresor einmal mit einer Gruppe statt mit jeder Person einzeln.",
-
   "orgAdmin.policy.description": "Regeln für die Apps aller Mitglieder. Sie unterschreiben jede Version mit Ihrem Schlüssel, daher kann der Server sie nicht lockern.",
   "orgAdmin.policy.none": "Noch keine Richtlinie. Die Apps der Mitglieder nutzen ihre eigenen Einstellungen.",
   "orgAdmin.policy.verified": "Geprüft",
@@ -192,7 +183,6 @@
   "orgAdmin.policy.howTitle": "So sind Richtlinien geschützt",
   "orgAdmin.policy.howText": "Jede Version wird von einem Eigentümer oder Administrator unterschrieben und von der App jedes Mitglieds gegen die geprüften Mitglieder der Organisation kontrolliert. Ein Server kann die Regeln weder ändern noch auf Geräten, die die neuere Version kennen, eine ältere, lockerere zurückbringen.",
   "orgAdmin.policy.howLimits": "Die Apps setzen die Regeln durch; der Server verweigert zusätzlich das Ausschalten der Zwei-Faktor-Anmeldung und neue persönliche Tresore. Eine veränderte App kann eine Richtlinie ignorieren, und ein Server kann eine neue Version Geräten vorenthalten, die sie noch nicht kennen.",
-
   "orgAdmin.rule.twoFactor.on": "Zwei-Faktor-Anmeldung ist Pflicht.",
   "orgAdmin.rule.twoFactor.off": "Zwei-Faktor-Anmeldung ist freiwillig.",
   "orgAdmin.rule.minScore.on": "Master-Passwörter müssen mindestens „{level}“ sein.",
@@ -213,11 +203,9 @@
   "orgAdmin.rule.recovery.off": "Die Wiederherstellung ist freiwillig.",
   "orgAdmin.rule.usage.on": "Ansehen, Aufdecken, Kopieren und Ausfüllen von Einträgen wird protokolliert.",
   "orgAdmin.rule.usage.off": "Die Nutzung von Einträgen wird nicht protokolliert.",
-
   "orgAdmin.summary.title": "Richtlinie",
   "orgAdmin.summary.text": "Regeln, die Ihre Organisation für alle festgelegt hat (Version {version}, von einem Administrator unterschrieben).",
   "orgAdmin.summary.none": "Die Richtlinie schränkt nichts ein.",
-
   "orgAdmin.banner.two_factor.title": "{orgs} verlangt die Zwei-Faktor-Anmeldung",
   "orgAdmin.banner.two_factor.body": "Schalten Sie sie ein, um den Zugriff zu behalten.",
   "orgAdmin.banner.two_factor.action": "Einschalten",
@@ -230,7 +218,6 @@
   "orgAdmin.banner.update_app.title": "Die Richtlinie Ihrer Organisation enthält Regeln, die diese App nicht kennt",
   "orgAdmin.banner.update_app.body": "Aktualisieren Sie Passbox, um sie einzuhalten.",
   "orgAdmin.banner.enrolled": "Die Wiederherstellung über Ihre Organisation ist eingerichtet.",
-
   "orgAdmin.audit.description": "Was in Ihrer Organisation passiert ist. Die Einträge sind per Hash verkettet, daher werden spätere Änderungen und Löschungen sichtbar.",
   "orgAdmin.audit.filters": "Filter",
   "orgAdmin.audit.filter.category": "Art",
@@ -276,7 +263,6 @@
   "orgAdmin.audit.exported": "Das Aktivitätsprotokoll wurde exportiert.",
   "orgAdmin.audit.exportFailed": "Das Aktivitätsprotokoll konnte nicht exportiert werden",
   "orgAdmin.audit.exportBroken": "Achtung: Die exportierte Kette lässt sich ab Eintrag #{seq} nicht prüfen.",
-
   "orgAdmin.audit.action.member_signed_in": "Angemeldet",
   "orgAdmin.audit.action.member_sign_in_failed": "Anmeldung fehlgeschlagen",
   "orgAdmin.audit.action.member_two_factor_failed": "Falscher Zwei-Faktor-Code",
@@ -339,7 +325,6 @@
   "orgAdmin.audit.action.event_token_revoked": "Ein Token für die Ereignis-API widerrufen",
   "orgAdmin.audit.action.webhook_created": "Webhook für {url} hinzugefügt",
   "orgAdmin.audit.action.webhook_deleted": "Einen Webhook entfernt",
-
   "orgAdmin.reports.description": "Sicherheit und Zugriffe in Ihrer Organisation. Die Apps der Mitglieder melden nur Zahlen, nie Einträge oder Passwörter.",
   "orgAdmin.reports.tabs": "Bericht",
   "orgAdmin.reports.tab.security": "Sicherheit",
@@ -363,7 +348,6 @@
   "orgAdmin.reports.unusedHint": "Tresore ohne Änderungen oder protokollierte Nutzung in den letzten {days} Tagen. Die Nutzung ist nur bekannt, wenn die Richtlinie sie protokolliert.",
   "orgAdmin.reports.noUnused": "Alle Tresore wurden kürzlich genutzt.",
   "orgAdmin.reports.noUsage": "Nichts protokolliert",
-
   "orgAdmin.recovery.description": "Administratoren können Mitgliedern helfen, die ihr Master-Passwort vergessen, ohne Tresorinhalte zu sehen.",
   "orgAdmin.recovery.setup": "Wiederherstellungsschlüssel",
   "orgAdmin.recovery.enrollment": "Teilnahme",
@@ -372,7 +356,6 @@
   "orgAdmin.recovery.enrolledCount": "{count} von {total} Mitgliedern nehmen teil",
   "orgAdmin.recovery.missing": "Noch nicht eingerichtet",
   "orgAdmin.recovery.honest": "Wer eine Wiederherstellung freigibt, hält den Kontoschlüssel des Mitglieds kurz auf dem eigenen Gerät. Jede Wiederherstellung wird protokolliert und das Mitglied benachrichtigt.",
-
   "orgAdmin.integrations.description": "Senden Sie das Aktivitätsprotokoll an Ihr SIEM: Lassen Sie es Einträge mit einem Token abholen, oder schicken Sie neue Einträge an einen Webhook.",
   "orgAdmin.integrations.tokens": "Tokens für die Ereignis-API",
   "orgAdmin.integrations.tokensText": "Ein Token erlaubt einem Sammeldienst, das Aktivitätsprotokoll dieser Organisation zu lesen, und sonst nichts.",
@@ -411,7 +394,6 @@
   "orgAdmin.integrations.create": "Erstellen",
   "orgAdmin.integrations.copy": "Kopieren",
   "orgAdmin.integrations.secret": "Geheimnis",
-
   "orgAdmin.settings.description": "Name, Aufbewahrung des Aktivitätsprotokolls sowie Verlassen oder Löschen der Organisation.",
   "orgAdmin.settings.retention": "Aufbewahrung des Aktivitätsprotokolls",
   "orgAdmin.settings.retentionText": "Ältere Einträge werden automatisch gelöscht. Der Rest der Kette bleibt prüfbar.",
@@ -422,9 +404,10 @@
   "orgAdmin.settings.saved": "Einstellungen gespeichert.",
   "orgAdmin.settings.retentionWarning": "Einträge, die älter als {count, plural, one {# Tag} other {# Tage}} sind, werden endgültig gelöscht. Exportieren Sie sie vorher oder binden Sie ein SIEM an, wenn Sie sie länger brauchen.",
   "orgAdmin.settings.autoLockLimited": "Ihre Organisation erlaubt höchstens {minutes} Minuten.",
-
   "orgAdmin.export.blocked": "{count, plural, one {# Tresor bleibt} other {# Tresore bleiben}} außen vor: Ihre Organisation erlaubt keinen Export.",
   "orgAdmin.error.personalVault": "Ihre Organisation erlaubt keine persönlichen Tresore. Speichern Sie Einträge in einem ihrer geteilten Tresore.",
   "orgAdmin.error.twoFactorRequired": "Ihre Organisation verlangt die Zwei-Faktor-Anmeldung, daher können Sie sie nicht ausschalten.",
-  "orgAdmin.error.policy": "Die Richtlinie Ihrer Organisation erlaubt das nicht."
+  "orgAdmin.error.policy": "Die Richtlinie Ihrer Organisation erlaubt das nicht.",
+  "orgAdmin.switchOrg": "Organisation",
+  "orgAdmin.members.lastSignIn": "Letzte Anmeldung: {time}"
 }
