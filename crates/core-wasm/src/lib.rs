@@ -10,11 +10,19 @@
 //! Build with `pnpm --filter @passbox/core-wasm build`.
 
 use passbox_core::aead::{KEY_LEN, SymmetricKey};
+use passbox_core::device_link::{
+    DeviceLinkOffer as CoreDeviceLinkOffer, DeviceLinkRequest as CoreDeviceLinkRequest,
+};
+use passbox_core::emergency::EmergencyKeys as CoreEmergencyKeys;
 use passbox_core::generator::{self, PassphraseOptions, PasswordOptions};
 use passbox_core::kdf::{self, KdfParams, MasterKeys as CoreMasterKeys};
 use passbox_core::keyring::Keyring as CoreKeyring;
 use passbox_core::opaque::{ClientLoginFlow, ClientRegistrationFlow};
 use passbox_core::passkey::{self, Flags};
+use passbox_core::recovery::code::{RecoveryCode, RecoveryKeys as CoreRecoveryKeys};
+use passbox_core::recovery::org::{
+    self as org_recovery, RecoveryRequestKey as CoreRecoveryRequestKey,
+};
 use passbox_core::secret_key::SecretKey;
 use passbox_core::sharing::objects::{OrgKind, OrgRole, PrincipalType, VaultRole};
 use passbox_core::strength;
@@ -896,5 +904,467 @@ impl Keyring {
         self.inner
             .encrypt_group_meta(org_id, group_id, epoch(key_epoch)?, meta_json)
             .map_err(js_error)
+    }
+}
+
+// --- Account recovery, emergency access, device links (wave C) -----------------------
+//
+// See `docs/architecture/recovery.md`. Secret material (recovery keys,
+// ephemeral keys, released vault keys) stays inside these objects.
+
+fn recovery_code_error(err: Error) -> JsValue {
+    let invalid = err == Error::InvalidRecoveryCode;
+    let value = js_error(err);
+    if invalid {
+        js_sys::Reflect::set(&value, &"name".into(), &"InvalidRecoveryCodeError".into()).ok();
+    }
+    value
+}
+
+fn device_code_error(err: Error) -> JsValue {
+    let invalid = err == Error::InvalidDeviceCode;
+    let value = js_error(err);
+    if invalid {
+        js_sys::Reflect::set(&value, &"name".into(), &"InvalidDeviceCodeError".into()).ok();
+    }
+    value
+}
+
+fn seed_from(value: &str) -> Result<zeroize::Zeroizing<[u8; 32]>, JsValue> {
+    let bytes = zeroize::Zeroizing::new(encoding::decode(value).map_err(js_error)?);
+    let seed: [u8; 32] = bytes
+        .as_slice()
+        .try_into()
+        .map_err(|_| JsValue::from(js_sys::Error::new("seed must be 32 bytes")))?;
+    Ok(zeroize::Zeroizing::new(seed))
+}
+
+/// Generates a new recovery code in display format (`R1-XXXXX-…`).
+#[wasm_bindgen(js_name = generateRecoveryCode)]
+pub fn generate_recovery_code() -> Result<String, JsValue> {
+    Ok(RecoveryCode::generate()
+        .map_err(js_error)?
+        .to_display_string())
+}
+
+/// The normalized display format of a recovery code. Throws an error named
+/// `InvalidRecoveryCodeError` if it is incomplete or has a typo.
+#[wasm_bindgen(js_name = normalizeRecoveryCode)]
+pub fn normalize_recovery_code(input: &str) -> Result<String, JsValue> {
+    Ok(RecoveryCode::parse(input)
+        .map_err(recovery_code_error)?
+        .to_display_string())
+}
+
+/// Whether `input` is a complete recovery code (format and checksum).
+#[wasm_bindgen(js_name = isRecoveryCode)]
+pub fn is_recovery_code(input: &str) -> bool {
+    RecoveryCode::is_valid(input)
+}
+
+/// The comparison code of a recovery request (4 groups of five digits)
+/// for an ephemeral public key (Base64url).
+#[wasm_bindgen(js_name = recoveryRequestCode)]
+pub fn recovery_request_code(ephemeral_key: &str) -> Result<String, JsValue> {
+    Ok(org_recovery::request_code(
+        &encoding::decode(ephemeral_key).map_err(js_error)?,
+    ))
+}
+
+/// Whether `input` has the shape of a device code (`XXXX-XXXX-XXXX-XXXX`).
+#[wasm_bindgen(js_name = isDeviceCode)]
+pub fn is_device_code(input: &str) -> bool {
+    CoreDeviceLinkRequest::is_valid_code(input)
+}
+
+/// Keys derived from a recovery code.
+#[wasm_bindgen]
+pub struct RecoveryKeys(CoreRecoveryKeys);
+
+#[wasm_bindgen]
+impl RecoveryKeys {
+    /// Throws `InvalidRecoveryCodeError` for a malformed code.
+    #[wasm_bindgen(js_name = fromCode)]
+    pub fn from_code(code: &str) -> Result<RecoveryKeys, JsValue> {
+        let code = RecoveryCode::parse(code).map_err(recovery_code_error)?;
+        Ok(Self(code.keys().map_err(js_error)?))
+    }
+}
+
+#[wasm_bindgen]
+impl RegistrationFlow {
+    /// Starts registering the OPAQUE record of a recovery code.
+    #[wasm_bindgen(js_name = startRecovery)]
+    pub fn start_recovery(keys: &RecoveryKeys) -> Result<RegistrationFlow, JsValue> {
+        let (flow, request) =
+            ClientRegistrationFlow::start(&*keys.0.auth_secret).map_err(js_error)?;
+        Ok(Self {
+            flow: Some(flow),
+            request: encoding::encode(&request),
+        })
+    }
+}
+
+#[wasm_bindgen]
+impl LoginFlow {
+    /// Starts the recovery-code login.
+    #[wasm_bindgen(js_name = startRecovery)]
+    pub fn start_recovery(keys: &RecoveryKeys) -> Result<LoginFlow, JsValue> {
+        let (flow, request) = ClientLoginFlow::start(&*keys.0.auth_secret).map_err(js_error)?;
+        Ok(Self {
+            flow: Some(flow),
+            request: encoding::encode(&request),
+        })
+    }
+}
+
+#[wasm_bindgen]
+impl Keyring {
+    /// The account key wrapped for a recovery code (Base64url).
+    #[wasm_bindgen(js_name = wrapAccountKeyForRecovery)]
+    pub fn wrap_account_key_for_recovery(&self, keys: &RecoveryKeys) -> Result<String, JsValue> {
+        self.inner
+            .wrap_account_key_for_recovery(&keys.0.wrap_key)
+            .map_err(js_error)
+    }
+
+    /// Opens the recovery copy of the account key. Throws
+    /// `InvalidCredentialsError` for a wrong code.
+    #[wasm_bindgen(js_name = unlockWithRecovery)]
+    pub fn unlock_with_recovery(
+        keys: &RecoveryKeys,
+        account_id: &str,
+        wrapped_account_key: &str,
+    ) -> Result<Keyring, JsValue> {
+        let inner =
+            CoreKeyring::unlock_with_recovery(&keys.0.wrap_key, account_id, wrapped_account_key)
+                .map_err(js_error)?;
+        Ok(Self {
+            inner,
+            encrypted_account_key: None,
+        })
+    }
+
+    /// `POST /api/v1/orgs/{orgId}/recovery/keys` body.
+    #[wasm_bindgen(js_name = createOrgRecoveryKey)]
+    pub fn create_org_recovery_key(
+        &self,
+        org_id: &str,
+        key_version: f64,
+        now_ms: f64,
+    ) -> Result<String, JsValue> {
+        to_json(
+            &self
+                .inner
+                .create_org_recovery_key(org_id, epoch(key_version)?, now(now_ms))
+                .map_err(js_error)?,
+        )
+    }
+
+    /// Verifies `GET /api/v1/orgs/{orgId}/recovery` (`key`). Returns JSON
+    /// `{ orgId, keyVersion, fingerprint, creatorId, admins, canApprove }`.
+    #[wasm_bindgen(js_name = verifyOrgRecovery)]
+    pub fn verify_org_recovery(&self, org_id: &str, record_json: &str) -> Result<String, JsValue> {
+        let record = from_json(record_json)?;
+        to_json(
+            &self
+                .inner
+                .verify_org_recovery(org_id, &record)
+                .map_err(js_error)?,
+        )
+    }
+
+    /// `POST /api/v1/orgs/{orgId}/recovery/grants` body.
+    #[wasm_bindgen(js_name = grantOrgRecovery)]
+    pub fn grant_org_recovery(
+        &self,
+        org_id: &str,
+        record_json: &str,
+        admin_id: &str,
+        now_ms: f64,
+    ) -> Result<String, JsValue> {
+        let record = from_json(record_json)?;
+        to_json(
+            &self
+                .inner
+                .grant_org_recovery(org_id, &record, admin_id, now(now_ms))
+                .map_err(js_error)?,
+        )
+    }
+
+    /// `PUT /api/v1/orgs/{orgId}/recovery/escrow` body (opt in).
+    #[wasm_bindgen(js_name = enrollOrgRecovery)]
+    pub fn enroll_org_recovery(
+        &self,
+        org_id: &str,
+        record_json: &str,
+        now_ms: f64,
+    ) -> Result<String, JsValue> {
+        let record = from_json(record_json)?;
+        to_json(
+            &self
+                .inner
+                .enroll_org_recovery(org_id, &record, now(now_ms))
+                .map_err(js_error)?,
+        )
+    }
+
+    /// `POST .../recovery/requests/{id}/approve` body. Compare the request
+    /// code with the member first.
+    #[wasm_bindgen(js_name = approveOrgRecovery)]
+    pub fn approve_org_recovery(
+        &self,
+        record_json: &str,
+        request_json: &str,
+        now_ms: f64,
+    ) -> Result<String, JsValue> {
+        let record = from_json(record_json)?;
+        let request = from_json(request_json)?;
+        to_json(
+            &self
+                .inner
+                .approve_org_recovery(&record, &request, now(now_ms))
+                .map_err(js_error)?,
+        )
+    }
+
+    /// `POST /api/v1/emergency/grants/{id}/confirm` body. Look the grantee
+    /// up in the key directory first. `vault_ids_json` is a JSON array.
+    #[wasm_bindgen(js_name = sealEmergencyAccess)]
+    pub fn seal_emergency_access(
+        &self,
+        grant_id: &str,
+        grantee_id: &str,
+        wait_days: f64,
+        vault_ids_json: &str,
+        version: f64,
+        now_ms: f64,
+    ) -> Result<String, JsValue> {
+        let vault_ids: Vec<String> = from_json(vault_ids_json)?;
+        to_json(
+            &self
+                .inner
+                .seal_emergency_access(
+                    grant_id,
+                    grantee_id,
+                    u64::from(epoch(wait_days)?),
+                    &vault_ids,
+                    u64::from(epoch(version)?),
+                    now(now_ms),
+                )
+                .map_err(js_error)?,
+        )
+    }
+
+    /// `{ grantId, grantorId, granteeId, waitDays, vaultIds, version }` of an
+    /// own grant.
+    #[wasm_bindgen(js_name = emergencyGrantInfo)]
+    pub fn emergency_grant_info(&self, grant: &str, signature: &str) -> Result<String, JsValue> {
+        to_json(
+            &self
+                .inner
+                .emergency_grant_info(grant, signature)
+                .map_err(js_error)?,
+        )
+    }
+
+    /// Whether an own grant must be sealed again (new key epochs, vaults
+    /// gone, own key changed).
+    #[wasm_bindgen(js_name = emergencyResealNeeded)]
+    pub fn emergency_reseal_needed(
+        &self,
+        grant: &str,
+        signature: &str,
+        vault_ids_json: &str,
+    ) -> Result<bool, JsValue> {
+        let vault_ids: Vec<String> = from_json(vault_ids_json)?;
+        self.inner
+            .emergency_reseal_needed(grant, signature, &vault_ids)
+            .map_err(js_error)
+    }
+
+    /// Opens released emergency access. Look the grantor up in the key
+    /// directory first.
+    #[wasm_bindgen(js_name = openEmergencyAccess)]
+    pub fn open_emergency_access(
+        &self,
+        grant: &str,
+        signature: &str,
+        sealed_keys: &str,
+    ) -> Result<EmergencyKeys, JsValue> {
+        Ok(EmergencyKeys(
+            self.inner
+                .open_emergency_access(grant, signature, sealed_keys)
+                .map_err(js_error)?,
+        ))
+    }
+}
+
+/// Vault keys released through emergency access.
+#[wasm_bindgen]
+pub struct EmergencyKeys(CoreEmergencyKeys);
+
+#[wasm_bindgen]
+impl EmergencyKeys {
+    #[wasm_bindgen(getter, js_name = grantorId)]
+    pub fn grantor_id(&self) -> String {
+        self.0.grantor_id.clone()
+    }
+
+    /// The vault IDs as a JSON array.
+    #[wasm_bindgen(js_name = vaultIds)]
+    pub fn vault_ids(&self) -> Result<String, JsValue> {
+        to_json(&self.0.vault_ids())
+    }
+
+    #[wasm_bindgen(js_name = decryptVaultMeta)]
+    pub fn decrypt_vault_meta(
+        &self,
+        vault_id: &str,
+        key_epoch: f64,
+        encrypted: &str,
+    ) -> Result<String, JsValue> {
+        self.0
+            .decrypt_vault_meta(vault_id, epoch(key_epoch)?, encrypted)
+            .map_err(js_error)
+    }
+
+    #[wasm_bindgen(js_name = decryptItem)]
+    pub fn decrypt_item(
+        &self,
+        vault_id: &str,
+        key_epoch: f64,
+        item_id: &str,
+        revision_: f64,
+        encrypted: &str,
+    ) -> Result<String, JsValue> {
+        self.0
+            .decrypt_item(
+                vault_id,
+                epoch(key_epoch)?,
+                item_id,
+                revision(revision_)?,
+                encrypted,
+            )
+            .map_err(js_error)
+    }
+}
+
+/// The ephemeral key of a device that asks its organization for recovery.
+#[wasm_bindgen]
+pub struct RecoveryRequestKey(CoreRecoveryRequestKey);
+
+#[wasm_bindgen]
+impl RecoveryRequestKey {
+    pub fn generate() -> Result<RecoveryRequestKey, JsValue> {
+        Ok(Self(CoreRecoveryRequestKey::generate().map_err(js_error)?))
+    }
+
+    /// Restores a key saved with `seed` (Base64url).
+    #[wasm_bindgen(js_name = fromSeed)]
+    pub fn from_seed(seed: &str) -> Result<RecoveryRequestKey, JsValue> {
+        Ok(Self(CoreRecoveryRequestKey::from_seed(&*seed_from(seed)?)))
+    }
+
+    /// The private seed (Base64url), to keep the request across reloads on
+    /// this device. It is useless once the request expired.
+    #[wasm_bindgen(getter)]
+    pub fn seed(&self) -> String {
+        encoding::encode(self.0.seed())
+    }
+
+    #[wasm_bindgen(getter, js_name = publicKey)]
+    pub fn public_key(&self) -> String {
+        encoding::encode(&self.0.public_key())
+    }
+
+    /// The code to read to the approving admin.
+    #[wasm_bindgen(getter, js_name = requestCode)]
+    pub fn request_code(&self) -> String {
+        self.0.request_code()
+    }
+
+    /// Opens the account key from the `approved` object of
+    /// `POST /api/v1/recovery/org/status`.
+    pub fn open(&self, approved_json: &str) -> Result<Keyring, JsValue> {
+        let approved = from_json(approved_json)?;
+        Ok(Keyring {
+            inner: self.0.open(&approved).map_err(js_error)?,
+            encrypted_account_key: None,
+        })
+    }
+}
+
+/// The signed-in device's side of adding a device by code.
+#[wasm_bindgen]
+pub struct DeviceLinkOffer(CoreDeviceLinkOffer);
+
+#[wasm_bindgen]
+impl DeviceLinkOffer {
+    /// Adds a secret to the server's short ID.
+    #[wasm_bindgen(constructor)]
+    pub fn new(short_id: &str) -> Result<DeviceLinkOffer, JsValue> {
+        Ok(Self(
+            CoreDeviceLinkOffer::new(short_id).map_err(device_code_error)?,
+        ))
+    }
+
+    /// `XXXX-XXXX-XXXX-XXXX`, to show and put into the QR code.
+    #[wasm_bindgen(getter)]
+    pub fn code(&self) -> String {
+        self.0.code()
+    }
+
+    /// Checks the claim (Base64url key and MAC) and seals `payload_json`.
+    /// Throws `InvalidDeviceCodeError` if the claim did not come from a
+    /// device that knows the code.
+    pub fn seal(
+        &self,
+        ephemeral_key: &str,
+        mac: &str,
+        payload_json: &str,
+    ) -> Result<String, JsValue> {
+        self.0
+            .seal(
+                &encoding::decode(ephemeral_key).map_err(js_error)?,
+                &encoding::decode(mac).map_err(js_error)?,
+                payload_json,
+            )
+            .map_err(device_code_error)
+    }
+}
+
+/// The new device's side of adding a device by code.
+#[wasm_bindgen]
+pub struct DeviceLinkRequest(CoreDeviceLinkRequest);
+
+#[wasm_bindgen]
+impl DeviceLinkRequest {
+    /// Throws `InvalidDeviceCodeError` for a malformed code.
+    #[wasm_bindgen(constructor)]
+    pub fn new(code: &str) -> Result<DeviceLinkRequest, JsValue> {
+        Ok(Self(
+            CoreDeviceLinkRequest::new(code).map_err(device_code_error)?,
+        ))
+    }
+
+    #[wasm_bindgen(getter, js_name = shortId)]
+    pub fn short_id(&self) -> String {
+        self.0.short_id().to_owned()
+    }
+
+    #[wasm_bindgen(getter, js_name = publicKey)]
+    pub fn public_key(&self) -> String {
+        encoding::encode(&self.0.public_key())
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn mac(&self) -> String {
+        encoding::encode(self.0.mac())
+    }
+
+    /// Opens the sealed payload (JSON).
+    pub fn open(&self, sealed: &str) -> Result<String, JsValue> {
+        self.0.open(sealed).map_err(js_error)
     }
 }
