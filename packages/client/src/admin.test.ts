@@ -52,8 +52,9 @@ describe("policy helpers", () => {
     expect(policyTasks(strict, { twoFactor: undefined, passwordScore: undefined, enrolledOrgs: ["o", "p"] })).toEqual(
       [],
     );
-    expect(policyTasks({ ...NO_POLICY, hasUnknownRules: true }, { twoFactor: true, passwordScore: 4, enrolledOrgs: [] }))
-      .toEqual([{ kind: "update_app", orgIds: [] }]);
+    expect(
+      policyTasks({ ...NO_POLICY, hasUnknownRules: true }, { twoFactor: true, passwordScore: 4, enrolledOrgs: [] }),
+    ).toEqual([{ kind: "update_app", orgIds: [] }]);
   });
 });
 

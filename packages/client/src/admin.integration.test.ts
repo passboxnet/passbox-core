@@ -89,7 +89,9 @@ describe.skipIf(!serverUrl)("organization administration against a server", () =
     const { data: log, check } = await alice.client.exportAuditLog(orgId);
     expect(check.valid).toBe(true);
     const actions = log.events.map((e) => e.action);
-    expect(actions).toEqual(expect.arrayContaining(["policy_updated", "item_created", "item_copied", "secret_revealed"]));
+    expect(actions).toEqual(
+      expect.arrayContaining(["policy_updated", "item_created", "item_copied", "secret_revealed"]),
+    );
     const page = await alice.client.orgAdmin.audit(orgId, { source: "client" });
     expect(page.events.map((e) => e.action).sort()).toEqual(["item_copied", "secret_revealed"]);
     const csv = await alice.client.orgAdmin.exportAuditCsv(orgId);

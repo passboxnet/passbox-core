@@ -30,6 +30,14 @@ import {
 } from "@passbox/api-client";
 import type * as Core from "@passbox/core-wasm";
 import {
+  type EffectivePolicy,
+  NO_POLICY,
+  type OrgPolicy,
+  type PolicyRules,
+  PolicyViolationError,
+  securityAggregate,
+} from "./admin";
+import {
   FIELD,
   fieldValue,
   type ItemData,
@@ -58,14 +66,6 @@ import {
   type RecoveryResult,
   RecoveryVerificationError,
 } from "./recovery";
-import {
-  type EffectivePolicy,
-  NO_POLICY,
-  type OrgPolicy,
-  type PolicyRules,
-  PolicyViolationError,
-  securityAggregate,
-} from "./admin";
 import { analyzeVault, estimateStrength, type Strength, type VaultHealth } from "./security";
 import {
   type Invitation,
@@ -2697,7 +2697,8 @@ export class PassboxClient {
     const queue = this.usageQueue(keyring.accountId);
     if (queue.length === 0) return 0;
     const byOrg = new Map<string, SignedClientEvent[]>();
-    for (const { orgId, event, signature } of queue) byOrg.set(orgId, [...(byOrg.get(orgId) ?? []), { event, signature }]);
+    for (const { orgId, event, signature } of queue)
+      byOrg.set(orgId, [...(byOrg.get(orgId) ?? []), { event, signature }]);
     const failed: ({ orgId: string } & SignedClientEvent)[] = [];
     let sent = 0;
     for (const [orgId, events] of byOrg) {

@@ -126,7 +126,11 @@ export function policyTasks(
   if (policy.requireTwoFactor && state.twoFactor === false) {
     tasks.push({ kind: "two_factor", orgIds: policy.twoFactorOrgs });
   }
-  if (policy.minPasswordScore > 0 && state.passwordScore !== undefined && state.passwordScore < policy.minPasswordScore) {
+  if (
+    policy.minPasswordScore > 0 &&
+    state.passwordScore !== undefined &&
+    state.passwordScore < policy.minPasswordScore
+  ) {
     tasks.push({ kind: "password_strength", orgIds: [] });
   }
   const missing = policy.recoveryEnrollmentOrgs.filter((org) => !state.enrolledOrgs.includes(org));
