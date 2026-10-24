@@ -88,8 +88,8 @@ describe.skipIf(!serverUrl)("item extras against a server", () => {
     ).toBe(true);
     await client.dismissFinding(reused, "insecure_url", false);
     expect(client.checkLookalike("githuh.com")?.looksLike).toBe("github.com");
-    // Email monitoring needs an API key on the server.
-    expect((await client.emailMonitoring()).available).toBe(false);
+    // Email monitoring is available when the server has an API key.
+    expect(typeof (await client.emailMonitoring()).available).toBe("boolean");
 
     // Usage stays on this device, encrypted.
     expect(client.itemUsage(id)).toBeUndefined();
