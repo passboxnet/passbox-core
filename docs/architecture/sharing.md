@@ -2,7 +2,7 @@
 
 > **Draft.** Not reviewed by cryptographers and not audited. Formats may still change before the first release that ships them.
 
-This document describes waves A1 (account key pairs), A4 (key directory, first version), B1 (organizations, invitations, roles), B2 (shared vaults), B3 (groups) and B4 (families) as implemented. The planning sketch is in [docs/planning/feature-gap.md](../planning/feature-gap.md) §5.1–5.2 (German); where this document differs, this document is what the code does.
+This document describes waves A1 (account key pairs), A4 (key directory, first version), B1 (organizations, invitations, roles), B2 (shared vaults), B3 (groups), B4 (families), B5 (moving items between vaults), B7 (share links), B8 (guests) and B9 (access requests) as implemented. The planning sketch is in [docs/planning/feature-gap.md](../planning/feature-gap.md) §5.1–5.2 (German); where this document differs, this document is what the code does.
 
 All cryptography is in [`crates/core`](../../crates/core): `identity` (key pairs, sealing, signatures), `canon` (canonical encoding), `directory` (key log), `sharing/*` (signed objects, verification, request builders). The TypeScript client uses it through `@passbox/core-wasm`, the native clients through `crates/client` and `crates/ffi`. The server stores and serves; it verifies uploads only to keep garbage out, never as a security boundary for clients.
 
@@ -107,7 +107,7 @@ metadata    = XChaCha20-Poly1305(org key, {"name": ...}, aad = "passbox/v1/org-m
 
 ## Shared vaults (B2)
 
-Shared vaults belong to an organization (`vaults.org_id`); personal vaults keep working exactly as before (epoch 0, version-1 associated data, `vaults.encrypted_key` wrapped with the account key). Personal vaults cannot be shared; share by creating a shared vault (moving items between vaults is B5).
+Shared vaults belong to an organization (`vaults.org_id`); personal vaults keep working exactly as before (epoch 0, version-1 associated data, `vaults.encrypted_key` wrapped with the account key). Personal vaults cannot be shared; share by creating a shared vault and moving items into it (B5, below).
 
 ```
 vault key (epoch e ≥ 1) sealed per principal:
@@ -133,6 +133,44 @@ item      = aad "passbox/v2/item|{vault_id}|{item_id}|{revision}|{epoch}"   (per
 ## Groups (B3)
 
 A group is a principal with its own X-Wing key pair. Its public bundle `{group_id, org_id, key_version, enc_pk, creator_id, created_at}` is signed by an admin; its private seed is sealed for each member with a signed group-key grant. Vault keys are sealed to the group. Adding a member is one sealing, regardless of the number of vaults. Only admins who are members of the group can add members (they need the group key), so the creator is always a member. Removing a member rotates the group key (new version, sealed for the remaining members) and marks the group's vaults for rotation; the client rotates them (the manifest then names the group's new key hash). Members see the verified member list from the signed grants; others see the server's list. Group names are encrypted with the organization key.
+
+## Moving items between vaults (B5)
+
+Moving is a re-encryption on the device, not a copy: the item keeps its ID, creation date, attachments and history.
+
+1. The client reads the item's history (`GET /items/{id}/versions`), decrypts every version it can with the source vault's key and encrypts it again for the target vault (bound to the target vault ID, its revision and the target's current key epoch). The version being replaced is added to that history.
+2. It encrypts the current data as the next revision for the target vault and sends everything in one request: `POST /api/v1/items/move { targetVaultId, keyEpoch, items: [{ id, revision, encryptedData, versions: [{ revision, encryptedData }] }] }` (at most 100 items, all or nothing; clients send larger moves in batches and retry a conflict once after a sync).
+3. The server requires write access to the source and the target vault and the target's current epoch, replaces the item's history with the re-encrypted versions (keeping their times and devices; versions the device could not read are dropped), moves the attachments (counted against the target's quota), records `item_moved` in the audit logs of both organizations and stores a row in `item_moves`.
+4. **Sync** sends a tombstone (`deleted: true`, the old `vaultId`) for every item that left a vault the account can see, before the other items. Devices that only see the old vault drop the item; devices that see both remove the old copy and add the new one. New clients additionally ignore a tombstone whose vault differs from the vault they have the item in.
+
+Policies apply: `forbid_external_sharing` keeps an organization's items in its vaults (403 `policy_violation`, checked by the server and before by the clients), and moving into a personal vault needs personal vaults to be allowed.
+
+**Permission preview.** Before moving, clients show who gains and who loses access: `movePreview(ids, vaultId)` (TypeScript) compares the verified member lists of the source and target vaults, groups expanded to their members; a personal vault counts as "only you". People who lose access may have seen the item before (the app says so and suggests changing its password). The web app offers "Move to another vault" in the item menu and for a selection of items; the "Share" action of a personal item moves it into a shared vault and offers to move it back. Rust and FFI: `move_items(ids, vault_id)` / `moveItems(ids, vaultId)`; the iOS and Android apps use it instead of copy and trash.
+
+## Share links for people without an account (B7)
+
+A share link carries a snapshot (selected fields of an item, or free text), encrypted on the sender's device (`passbox_core::share_link`):
+
+```
+k_link  = random(32)                                          → only in the URL fragment: {base}/s/{link_id}#{k_link}
+ikm     = k_link  ||  Argon2id(passphrase, salt)               (passphrase optional; salt random(16); 64 MiB, 3 passes)
+enc_key = HKDF-SHA256(ikm, "passbox/v1/link-key|{link_id}")
+auth    = HKDF-SHA256(ikm, "passbox/v1/link-auth|{link_id}")
+blob    = XChaCha20-Poly1305(enc_key, snapshot, aad = "passbox/v1/link|{link_id}")
+server  ← { blob, SHA-256("passbox/v1/link-auth-hash\0" || auth), salt, expiresAt (≤ 365 days), maxViews, label encrypted with the account key }
+```
+
+The viewer page (`/s/{id}`, part of the web app, no account needed) shows whether a passphrase is needed (`GET /api/v1/public/share-links/{id}`), asks before opening because opening counts a view, derives `auth` and fetches the blob (`POST …/open { auth }`), and decrypts in the browser. The server only answers with the blob for the right `auth`: knowing the link ID alone (for example from a log) reveals nothing and uses up no views. A wrong passphrase is refused without a view; after 10 wrong attempts the link is deleted. The server cannot try passphrases offline because it never sees `k_link`. The last allowed view deletes the link, and so does its creator (`DELETE /api/v1/share-links/{id}`, Settings → Share links in the web app). Expired links are deleted. Public endpoints are rate-limited per IP.
+
+Snapshots never contain passkeys, password history, attachments or one-time password secrets. **Policies (D2):** `share_links = forbidden` or `restricted` (longest lifetime, most views) apply to links for items of the organization's vaults; the client applies them in the dialog and the server checks the vault the client names. A modified client could create a link without naming the vault: like export, this rule guards honest clients, it is not a cryptographic boundary. Not implemented yet: limiting a link to an email address (with a confirmation code), files in links, links from the mobile apps and the extension.
+
+## Guests (B8)
+
+Guests are organization members with the role `guest`: they see only the vaults shared with them (directly or through a group), and the roster shows them only themselves and the owners and admins. They do not see groups. Pricing (whether guests count as members) is open.
+
+## Access requests (B9)
+
+A confirmed member of an organization who opens a link to one of its shared vaults without access (`#/vault/{id}`; managers copy it in the vault's sharing dialog) can ask for access with a role (`POST /api/v1/vaults/{id}/access-requests`, one pending request per vault, 20 per day). Everyone else gets 404, so outsiders cannot tell whether the vault exists. Managers of the vault (and organization admins who are members of it) see pending requests (`GET /api/v1/access-requests` → `incoming`) in the vault's sharing dialog. **Approving** is a normal share, signed by the manager's client after it checked the requester's key (`shareVault`); afterwards the client marks the request approved (`POST …/approve`, which the server refuses until the requester actually has access). **Declining** (`POST …/deny`) and withdrawing (`DELETE …`) only change the status. Requests and decisions are in the organization's audit log (`vault_access_requested`, `vault_access_request_approved`, `vault_access_request_denied`).
 
 ## Server storage
 
@@ -164,3 +202,5 @@ Key pairs are created for existing accounts on the next unlock. The trust store 
 - Group-delivered vault keys are opened through the group key on every unlock (no own copy).
 - The roster is delivered whole when it changes; very large organizations need paging.
 - Server-side validation of shared vault manifests checks entries against current keys; a member whose key changed blocks role changes until re-attested.
+- Moving items re-encrypts the item and its history but not its attachment blobs (their keys move inside the item); a member removed from the old vault who kept the item still has the file keys.
+- Access request notifications are shown in the web app only; there is no mail yet.
