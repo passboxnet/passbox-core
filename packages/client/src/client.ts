@@ -5,18 +5,23 @@ import {
   type AccountPreferences,
   type AdminApi,
   ApiError,
+  type AuditExport,
+  type AuditQuery,
+  type ChainCheck,
   type ClientKind,
   type InvitationPreview,
   isTwoFactorChallenge,
   type KdfParams,
   type LoginFinishResult,
   type MailLocale,
+  type OrgAdminApi,
   type OrgInvitationInfo,
   type PassboxApi,
   type RecoveryGrant,
   type RecoveryStatus,
   type SecondFactor,
   type SessionInfo,
+  type SignedClientEvent,
   type SyncResponse,
   type TwoFactorChallenge,
   type TwoFactorMethod,
@@ -53,6 +58,14 @@ import {
   type RecoveryResult,
   RecoveryVerificationError,
 } from "./recovery";
+import {
+  type EffectivePolicy,
+  NO_POLICY,
+  type OrgPolicy,
+  type PolicyRules,
+  PolicyViolationError,
+  securityAggregate,
+} from "./admin";
 import { analyzeVault, estimateStrength, type Strength, type VaultHealth } from "./security";
 import {
   type Invitation,
@@ -165,6 +178,10 @@ export interface ClientSnapshot {
   sharedVaults: SharedVault[];
   /** Problems found while verifying sharing data, for example changed keys. */
   sharingWarnings: SharingWarning[];
+  /** Policies in force per organization (wave D2). */
+  policies: OrgPolicy[];
+  /** Every policy this account is bound by, combined. */
+  effectivePolicy: EffectivePolicy;
 }
 
 /** Thrown when the email, master password or Secret Key is wrong. */
@@ -275,6 +292,16 @@ const TRUST_KEY = "passbox.trust";
  * unlocking) and grants no access by itself. Every login replaces it.
  */
 const DEVICE_TOKEN_KEY = "passbox.deviceToken";
+/** Signed item usage events waiting for upload, per account (wave D3). */
+const USAGE_QUEUE_KEY = "passbox.usageQueue";
+const MAX_USAGE_QUEUE = 1000;
+const USAGE_FLUSH_DELAY_MS = 5000;
+/** When the security aggregate was last reported, per account and organization (wave D6). */
+const SECURITY_REPORT_KEY = "passbox.securityReport";
+const SECURITY_REPORT_INTERVAL_MS = 24 * 60 * 60 * 1000;
+
+/** What a client reports about an item of an organization's vault. */
+export type ClientAuditAction = "item_viewed" | "secret_revealed" | "item_copied" | "item_filled";
 
 /** Maps recovery error codes to typed errors. */
 function recoveryError(error: unknown): unknown {
@@ -346,6 +373,9 @@ export class PassboxClient {
   private deviceLinkOffers = new Map<string, Core.DeviceLinkOffer>();
   /** The device code this (new) device entered. */
   private deviceLinkRequest: { request: Core.DeviceLinkRequest; claimToken: string } | undefined;
+  /** Strength score of the master password entered at the last unlock. */
+  private passwordScore: number | undefined;
+  private usageTimer: ReturnType<typeof setTimeout> | undefined;
   /** Session token of the current unlock. */
   token: string | undefined;
 
@@ -391,6 +421,8 @@ export class PassboxClient {
       orgs: sharing.orgs,
       sharedVaults: sharing.vaults,
       sharingWarnings: sharing.warnings,
+      policies: sharing.policies ?? [],
+      effectivePolicy: sharing.effectivePolicy ?? NO_POLICY,
       items: [...this.items.values()]
         .filter((item) => item.data.trashedAt === undefined)
         .sort((a, b) => a.data.title.localeCompare(b.data.title)),
@@ -490,6 +522,7 @@ export class PassboxClient {
     } finally {
       this.releaseKeys(keys);
     }
+    this.passwordScore = this.estimateStrength(password).score;
     await this.sync();
   }
 
@@ -507,7 +540,9 @@ export class PassboxClient {
     } finally {
       this.releaseKeys(keys);
     }
+    this.passwordScore = this.estimateStrength(password).score;
     await this.sync();
+    void this.flushItemUsage().catch(() => undefined);
   }
 
   // --- Two-factor sign-in ----------------------------------------------------------
@@ -873,6 +908,9 @@ export class PassboxClient {
     this.items.clear();
     this.errors.clear();
     this.sharingView = EMPTY_SHARING;
+    this.passwordScore = undefined;
+    if (this.usageTimer) clearTimeout(this.usageTimer);
+    this.usageTimer = undefined;
   }
 
   private deriveKeys(account: DeviceAccount, password: string): Core.MasterKeys {
@@ -1111,6 +1149,7 @@ export class PassboxClient {
   /** Creates a new vault and returns its ID. */
   async createVault(name: string): Promise<string> {
     const keyring = this.requireKeyring();
+    this.ensurePersonalVaultsAllowed();
     const vault = JSON.parse(keyring.createVault(JSON.stringify({ name }))) as {
       id: string;
       encryptedKey: string;
@@ -1141,6 +1180,7 @@ export class PassboxClient {
 
   /** Creates an item and returns its ID. */
   async createItem(vaultId: string, data: ItemData): Promise<string> {
+    if (!this.vaults.get(vaultId)?.orgId) this.ensurePersonalVaultsAllowed();
     const id = this.core.newId();
     await this.writeItem(vaultId, id, 1, data);
     return id;
@@ -2477,6 +2517,240 @@ export class PassboxClient {
   cancelDeviceLinkClaim(): void {
     this.deviceLinkRequest?.request.free();
     this.deviceLinkRequest = undefined;
+  }
+
+  // --- Organization administration (wave D) ----------------------------------------
+  //
+  // Policies are signed by an owner or admin and verified in the Rust core
+  // during `sync`; this client enforces them where it acts (personal vaults,
+  // export, auto-lock, master password strength) and reports item usage
+  // when an organization's policy asks for it. See
+  // docs/architecture/administration.md.
+
+  /** Policies in force per organization. */
+  policies(): OrgPolicy[] {
+    return this.viewNow().policies ?? [];
+  }
+
+  /** The policy of one organization, if it has one. */
+  orgPolicy(orgId: string): OrgPolicy | undefined {
+    return this.policies().find((p) => p.orgId === orgId);
+  }
+
+  /** Every policy this account is bound by, combined. */
+  effectivePolicy(): EffectivePolicy {
+    return this.viewNow().effectivePolicy ?? NO_POLICY;
+  }
+
+  /**
+   * Strength score (0–4) of the master password as entered at the last
+   * unlock on this device; `undefined` before that. The password itself is
+   * not kept.
+   */
+  get unlockPasswordScore(): number | undefined {
+    return this.passwordScore;
+  }
+
+  /** Raw API for organization administration (reports, settings, tokens, webhooks). */
+  get orgAdmin(): OrgAdminApi {
+    this.requireKeyring();
+    return this.api.orgAdmin;
+  }
+
+  /**
+   * Signs and uploads the next version of an organization's policy (owners
+   * and admins). Retries once after a sync if another admin changed it
+   * meanwhile.
+   */
+  async setOrgPolicy(orgId: string, rules: PolicyRules): Promise<OrgPolicy> {
+    const upload = async () => {
+      await this.sync();
+      const body = JSON.parse(this.requireKeyring().signOrgPolicy(orgId, JSON.stringify(rules), Date.now())) as {
+        version: number;
+        policy: string;
+        signature: string;
+      };
+      await this.api.orgAdmin.putPolicy(orgId, body);
+    };
+    try {
+      await upload();
+    } catch (error) {
+      if (!(error instanceof ApiError && error.code === "conflict")) throw error;
+      await upload();
+    }
+    await this.sync();
+    const policy = this.orgPolicy(orgId);
+    if (!policy) throw new Error("the new policy could not be verified");
+    return policy;
+  }
+
+  /** Every version of an organization's policy, newest first, each verified on this device (admins). */
+  async policyHistory(orgId: string): Promise<(OrgPolicy | { version: number; problem: string })[]> {
+    const keyring = this.requireKeyring();
+    const state = await this.api.orgAdmin.policy(orgId);
+    return [...state.history].reverse().map((record) => {
+      try {
+        return JSON.parse(keyring.verifyOrgPolicy(orgId, JSON.stringify(record))) as OrgPolicy;
+      } catch (error) {
+        return { version: record.version, problem: String(error) };
+      }
+    });
+  }
+
+  /**
+   * Downloads the audit log as JSON and checks its hash chain on this
+   * device (independently of the server's own check).
+   */
+  async exportAuditLog(orgId: string, query: AuditQuery = {}): Promise<{ data: AuditExport; check: ChainCheck }> {
+    this.requireKeyring();
+    const data = await this.api.orgAdmin.exportAudit(orgId, "json", query);
+    return { data, check: this.verifyAuditExport(data, query) };
+  }
+
+  /** Checks an audit export's hash chain with the core. */
+  verifyAuditExport(data: AuditExport, query: AuditQuery = {}): ChainCheck {
+    const filtered = Object.values(query).some((v) => v !== undefined && v !== "");
+    const first = data.events[0];
+    // A filtered export has gaps; only an unfiltered one can be checked end to end.
+    if (filtered) {
+      return { valid: true, length: data.events.length, problem: "filtered export: entries are checked one by one" };
+    }
+    const anchor = first && first.seq === data.head.prunedSeq + 1 ? data.head.prunedHash : undefined;
+    return JSON.parse(this.core.verifyAuditChain(JSON.stringify(data.events), anchor)) as ChainCheck;
+  }
+
+  /**
+   * Offboards a member (owners and admins): optionally hands vaults over
+   * first (grants `manage` to a successor; this device must hold the vault
+   * key), optionally signs the member out everywhere (team organizations),
+   * then removes them, which rotates the keys of every vault this account
+   * manages. Returns vaults that still wait for a manager to rotate them.
+   */
+  async offboardMember(
+    orgId: string,
+    accountId: string,
+    options: { handovers?: { vaultId: string; successorId: string }[]; endSessions?: boolean } = {},
+  ): Promise<{ pendingRotation: string[] }> {
+    await this.sync();
+    for (const handover of options.handovers ?? []) {
+      await this.shareVault(handover.vaultId, "account", handover.successorId, "manage");
+    }
+    if (options.endSessions) await this.api.orgAdmin.endSessions(orgId, accountId);
+    const signedPolicy = this.orgPolicy(orgId)?.signerId === accountId;
+    await this.removeMember(orgId, accountId);
+    // A policy signed by the removed admin would stop verifying: sign it again.
+    const policy = this.orgPolicy(orgId);
+    if (signedPolicy && policy) await this.setOrgPolicy(orgId, policy.rules);
+    return {
+      pendingRotation: this.viewNow()
+        .vaults.filter((v) => v.orgId === orgId && v.rotationPending)
+        .map((v) => v.vaultId),
+    };
+  }
+
+  /**
+   * Records that the user viewed, revealed, copied or filled an item, if
+   * the item's organization asks for item usage in its policy. Events are
+   * signed at once and uploaded in the background; nothing is recorded for
+   * personal vaults.
+   */
+  reportItemUsage(itemId: string, action: ClientAuditAction, field = ""): void {
+    const keyring = this.keyring;
+    const item = this.items.get(itemId);
+    if (!keyring || !item) return;
+    const orgId = this.vaults.get(item.vaultId)?.orgId;
+    if (!orgId || !this.effectivePolicy().itemUsageOrgs.includes(orgId)) return;
+    try {
+      const signed = JSON.parse(
+        keyring.signClientEvents(
+          orgId,
+          JSON.stringify([{ action, vaultId: item.vaultId, itemId, field, occurredAt: Date.now() }]),
+        ),
+      ) as SignedClientEvent[];
+      const queue = this.usageQueue(keyring.accountId);
+      queue.push(...signed.map((event) => ({ orgId, ...event })));
+      this.storage.setItem(`${USAGE_QUEUE_KEY}.${keyring.accountId}`, JSON.stringify(queue.slice(-MAX_USAGE_QUEUE)));
+    } catch {
+      return;
+    }
+    if (!this.usageTimer) {
+      this.usageTimer = setTimeout(() => {
+        this.usageTimer = undefined;
+        void this.flushItemUsage().catch(() => undefined);
+      }, USAGE_FLUSH_DELAY_MS);
+    }
+  }
+
+  private usageQueue(accountId: string): ({ orgId: string } & SignedClientEvent)[] {
+    try {
+      const raw = this.storage.getItem(`${USAGE_QUEUE_KEY}.${accountId}`);
+      return raw ? (JSON.parse(raw) as ({ orgId: string } & SignedClientEvent)[]) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  /** Uploads queued item usage events (also after the next unlock). */
+  async flushItemUsage(): Promise<number> {
+    const keyring = this.keyring;
+    if (!keyring || !this.token) return 0;
+    const queue = this.usageQueue(keyring.accountId);
+    if (queue.length === 0) return 0;
+    const byOrg = new Map<string, SignedClientEvent[]>();
+    for (const { orgId, event, signature } of queue) byOrg.set(orgId, [...(byOrg.get(orgId) ?? []), { event, signature }]);
+    const failed: ({ orgId: string } & SignedClientEvent)[] = [];
+    let sent = 0;
+    for (const [orgId, events] of byOrg) {
+      try {
+        await this.api.orgAdmin.clientEvents(orgId, events.slice(0, 200));
+        sent += Math.min(events.length, 200);
+        failed.push(...events.slice(200).map((e) => ({ orgId, ...e })));
+      } catch (error) {
+        // Policy turned off or the account left: drop; network errors: keep.
+        if (!(error instanceof ApiError && (error.status === 403 || error.status === 404 || error.status === 400))) {
+          failed.push(...events.map((e) => ({ orgId, ...e })));
+        }
+      }
+    }
+    this.storage.setItem(`${USAGE_QUEUE_KEY}.${keyring.accountId}`, JSON.stringify(failed));
+    return sent;
+  }
+
+  /**
+   * Reports this account's security aggregate (scores and counts, never
+   * items or passwords) to each team organization it is a confirmed
+   * member of, at most once a day per organization.
+   */
+  async reportSecurityAggregates(now = Date.now()): Promise<number> {
+    const keyring = this.requireKeyring();
+    const policy = this.effectivePolicy();
+    const meets =
+      this.passwordScore === undefined || policy.minPasswordScore === 0
+        ? undefined
+        : this.passwordScore >= policy.minPasswordScore;
+    const aggregate = securityAggregate(this.health(), meets);
+    let reported = 0;
+    for (const org of this.orgs()) {
+      if (org.kind !== "team" || org.status !== "confirmed") continue;
+      const key = `${SECURITY_REPORT_KEY}.${keyring.accountId}.${org.id}`;
+      const last = Number(this.storage.getItem(key) ?? 0);
+      if (now - last < SECURITY_REPORT_INTERVAL_MS) continue;
+      await this.api.orgAdmin.putSecurityReport(org.id, aggregate);
+      this.storage.setItem(key, String(now));
+      reported++;
+    }
+    return reported;
+  }
+
+  private ensurePersonalVaultsAllowed(): void {
+    const policy = this.effectivePolicy();
+    if (!policy.allowPersonalVault) {
+      throw new PolicyViolationError(
+        "personal_vault",
+        policy.personalVaultOrgs,
+        "your organization does not allow personal vaults; save items in a shared vault",
+      );
+    }
   }
 
   private async handleWriteError(error: unknown): Promise<never> {

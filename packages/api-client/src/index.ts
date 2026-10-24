@@ -1,3 +1,4 @@
+import { type OrgAdminApi, orgAdminApi } from "./orgAdmin";
 import {
   type DeviceLinkApi,
   deviceLinkApi,
@@ -7,6 +8,7 @@ import {
   recoveryApi,
 } from "./recovery";
 
+export * from "./orgAdmin";
 export * from "./recovery";
 
 /** Argon2id cost parameters. Mirrors `passbox_core::kdf::KdfParams`. */
@@ -616,6 +618,8 @@ export interface PassboxApi extends AdminApi {
   emergency: EmergencyApi;
   /** Adding a device by code (wave C4). */
   deviceLinks: DeviceLinkApi;
+  /** Organization administration: policies, audit log, reports (wave D). */
+  orgAdmin: OrgAdminApi;
   deleteItem(id: string, revision: number): Promise<WriteResponse>;
 }
 
@@ -642,6 +646,8 @@ export function createClient(options: ClientOptions = {}): PassboxApi {
       throw new ApiError(response.status, path, errorBody);
     }
     if (response.status === 204) return undefined as T;
+    // CSV exports and other text answers.
+    if (response.headers?.get("content-type")?.startsWith("text/")) return (await response.text()) as T;
     return (await response.json()) as T;
   }
 
@@ -695,6 +701,7 @@ export function createClient(options: ClientOptions = {}): PassboxApi {
     recovery: recoveryApi(call),
     emergency: emergencyApi(call),
     deviceLinks: deviceLinkApi(call),
+    orgAdmin: orgAdminApi(call),
   };
 }
 
