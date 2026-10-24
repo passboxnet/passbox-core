@@ -27,7 +27,10 @@ pub(crate) fn crockford() -> Encoding {
     spec.symbols.push_str("0123456789ABCDEFGHJKMNPQRSTVWXYZ");
     spec.translate.from.push_str("abcdefghjkmnpqrstvwxyzIiLlOo");
     spec.translate.to.push_str("ABCDEFGHJKMNPQRSTVWXYZ111100");
-    spec.check_trailing_bits = false;
+    // The last character carries unused bits. Our encoder sets them to
+    // zero; rejecting anything else turns a typo there into an error
+    // instead of silently decoding to the same key.
+    spec.check_trailing_bits = true;
     spec.encoding()
         .expect("valid Crockford Base32 specification")
 }
@@ -147,5 +150,18 @@ mod tests {
     fn debug_does_not_leak() {
         let key = SecretKey::generate().unwrap();
         assert_eq!(format!("{key:?}"), "SecretKey(<redacted>)");
+    }
+
+    #[test]
+    fn rejects_typos_in_the_unused_bits_of_the_last_character() {
+        let key = SecretKey::generate().unwrap().to_display_string();
+        let last = key.chars().last().unwrap();
+        let symbols = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
+        let value = symbols.find(last).unwrap();
+        // Flip the lowest bit, which is padding for a 16-byte key.
+        let typo = symbols.chars().nth(value ^ 1).unwrap();
+        let changed = format!("{}{typo}", &key[..key.len() - 1]);
+        assert!(SecretKey::parse(&key).is_ok());
+        assert!(SecretKey::parse(&changed).is_err(), "{changed}");
     }
 }
