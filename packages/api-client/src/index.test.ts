@@ -71,4 +71,38 @@ describe("createClient", () => {
       rememberDevice: true,
     });
   });
+
+  it("calls the admin endpoints with query strings and bodies", async () => {
+    const fetch = fakeFetch(200, { users: [], total: 0 });
+    const client = createClient({ fetch, getToken: () => "tok" });
+
+    await client.adminUsers({ q: "ada smith", limit: 20, offset: 40 });
+    await client.adminUsers();
+    await client.disableUser("abc/def");
+    await client.sendTestMail();
+    await client.sendTestMail("ops@example.com");
+    await client.adminEvents({ before: 7 });
+    await client.updatePreferences({ notifyNewDevice: false });
+
+    const calls = fetch.mock.calls.map(([url, init]) => [url, init?.method, init?.body]);
+    expect(calls).toEqual([
+      ["/api/v1/admin/users?q=ada+smith&limit=20&offset=40", "GET", undefined],
+      ["/api/v1/admin/users", "GET", undefined],
+      ["/api/v1/admin/users/abc%2Fdef/disable", "POST", "{}"],
+      ["/api/v1/admin/mail/test", "POST", "{}"],
+      ["/api/v1/admin/mail/test", "POST", JSON.stringify({ to: "ops@example.com" })],
+      ["/api/v1/admin/events?before=7", "GET", undefined],
+      ["/api/v1/account/preferences", "PUT", JSON.stringify({ notifyNewDevice: false })],
+    ]);
+  });
+
+  it("exposes the registration error codes", async () => {
+    const client = createClient({
+      fetch: fakeFetch(403, { error: "registration_closed", message: "registration requires an invitation" }),
+    });
+    const error = await client
+      .registerStart({ accountId: "a", email: "x@example.com", registrationRequest: "r", inviteToken: "t" })
+      .catch((e: unknown) => e);
+    expect(error).toMatchObject({ status: 403, code: "registration_closed" });
+  });
 });

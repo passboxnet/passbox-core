@@ -24,6 +24,8 @@ ed25519-dalek = { version = "3", default-features = false }
 getrandom = "0.4"
 hkdf = "0.13"
 hmac = "0.13"
+# SMTP with rustls (ring) and the platform's certificate store; no OpenSSL.
+lettre = { version = "=0.11.23", default-features = false, features = ["builder", "hostname", "smtp-transport", "tokio1", "tokio1-rustls", "ring", "rustls-platform-verifier"] }
 opaque-ke = { version = "4.0.1", default-features = false, features = ["ristretto255"] }
 # opaque-ke 4 is built on the previous RustCrypto and rand generations.
 opaque-rand-core = { package = "rand_core", version = "0.6", features = ["getrandom"] }
