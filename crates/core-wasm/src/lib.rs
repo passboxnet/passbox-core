@@ -405,6 +405,21 @@ impl Keyring {
         self.inner.wrap_account_key(&keys.0.auk).map_err(js_error)
     }
 
+    /// Encrypts device-local data (JSON, for example item usage) with the
+    /// account key; `purpose` is bound as associated data. Returns Base64url.
+    #[wasm_bindgen(js_name = encryptLocal)]
+    pub fn encrypt_local(&self, purpose: &str, json: &str) -> Result<String, JsValue> {
+        self.inner.encrypt_local(purpose, json).map_err(js_error)
+    }
+
+    /// Decrypts data from `encryptLocal` with the same `purpose`.
+    #[wasm_bindgen(js_name = decryptLocal)]
+    pub fn decrypt_local(&self, purpose: &str, encrypted: &str) -> Result<String, JsValue> {
+        self.inner
+            .decrypt_local(purpose, encrypted)
+            .map_err(js_error)
+    }
+
     /// The account key encrypted with the Account Unlock Key (Base64url).
     #[wasm_bindgen(getter, js_name = encryptedAccountKey)]
     pub fn encrypted_account_key(&self) -> Option<String> {

@@ -231,6 +231,7 @@ mod tests {
             vault_id: "v1".into(),
             revision: 1,
             updated_at: 0,
+            created_at: 0,
             key_epoch: 0,
             data,
         };

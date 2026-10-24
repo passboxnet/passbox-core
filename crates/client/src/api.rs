@@ -240,6 +240,29 @@ pub struct SyncItem {
     /// Vault key epoch of `encrypted_data` (0 for personal vaults).
     #[serde(default)]
     pub key_epoch: u32,
+    /// When the item was created (Unix ms); 0 from servers before 0.1 that
+    /// did not send it.
+    #[serde(default)]
+    pub created_at: i64,
+}
+
+/// An earlier, still encrypted version of an item
+/// (`GET /api/v1/items/{id}/versions`).
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ItemVersionRecord {
+    pub revision: u64,
+    #[serde(default)]
+    pub key_epoch: u32,
+    pub encrypted_data: String,
+    pub updated_at: i64,
+    #[serde(default)]
+    pub updated_by: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+struct ItemVersions {
+    versions: Vec<ItemVersionRecord>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -646,6 +669,43 @@ impl Api {
             Some(token),
             Some(serde_json::json!({ "vaultId": vault_id, "revision": revision, "encryptedData": encrypted_data, "keyEpoch": key_epoch })),
         )
+    }
+
+    /// Earlier versions of an item, newest first.
+    pub fn item_versions(&self, token: &str, id: &str) -> Result<Vec<ItemVersionRecord>> {
+        let versions: ItemVersions = self.call(
+            "GET",
+            &format!("/api/v1/items/{id}/versions"),
+            Some(token),
+            None,
+        )?;
+        Ok(versions.versions)
+    }
+
+    /// The website icon of `domain` from `GET /api/v1/icons/{domain}`:
+    /// `None` when the server has none (404), refuses the name (400) or has
+    /// icons turned off.
+    pub fn icon(&self, token: &str, domain: &str) -> Result<Option<Vec<u8>>> {
+        let (status, bytes) = self.transport.send(
+            "GET",
+            &format!("{}/api/v1/icons/{domain}", self.base_url),
+            Some(token),
+            None,
+        )?;
+        match status {
+            200 => Ok(Some(bytes)),
+            400 | 404 => Ok(None),
+            401 => Err(Error::Server {
+                status,
+                code: "unauthorized".into(),
+                message: "the session expired".into(),
+            }),
+            _ => Err(Error::Server {
+                status,
+                code: String::new(),
+                message: String::from_utf8_lossy(&bytes).into_owned(),
+            }),
+        }
     }
 
     pub fn delete_item(&self, token: &str, id: &str, revision: u64) -> Result<WriteResponse> {

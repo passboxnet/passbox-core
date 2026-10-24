@@ -63,7 +63,7 @@ import {
   type RecoveryResult,
   RecoveryVerificationError,
 } from "./recovery";
-import { analyzeVault, estimateStrength, type Strength, type VaultHealth } from "./security";
+import { analyzeVault, breachCount, estimateStrength, type Strength, type VaultHealth } from "./security";
 import {
   type Invitation,
   type KeyLookup,
@@ -116,9 +116,60 @@ export interface Item {
   vaultId: string;
   revision: number;
   updatedAt: number;
+  /** When the item was created (Unix ms); 0 or absent when the server did not say. */
+  createdAt?: number;
   /** Vault key epoch the item is encrypted with (0 or absent for personal vaults). */
   keyEpoch?: number;
   data: ItemData;
+}
+
+/** An earlier version of an item ("Eintragsverlauf"). */
+export interface ItemVersion {
+  revision: number;
+  /** When this version was saved (Unix ms). */
+  updatedAt: number;
+  /** Public ID of the session (device) that saved it, if known; see `sessions()`. */
+  updatedBy: string | null;
+  /** `null` when it cannot be decrypted here (an old key epoch of a shared vault). */
+  data: ItemData | null;
+}
+
+/** How an item was used on this device. */
+export type UsageKind = "copy" | "autofill" | "open";
+
+/** Device-local usage of an item; never synced. */
+export interface ItemUsage {
+  /** Last copy, autofill or open (Unix ms; 0 = never). */
+  lastUsedAt: number;
+  /** Last autofill (Unix ms; 0 = never). */
+  lastAutofilledAt: number;
+  useCount: number;
+}
+
+/** A problem shown in an item's security check. Same codes as the Rust client. */
+export type ItemProblem = "weak" | "reused" | "insecure_url" | "missing_totp" | "breached";
+
+export interface ItemHealth {
+  /** In the order weak, reused, insecure URL, missing 2FA, breached. */
+  problems: ItemProblem[];
+  /** Strength score 0–4 of the password, or `null` without one. */
+  strength: number | null;
+  /** Other items with the same password. */
+  reusedWith: string[];
+  /** Breach count from this session's `checkBreachedItems`, or `null` if unknown. */
+  breachCount: number | null;
+}
+
+/** A login whose password appears in known data breaches. */
+export interface BreachedItem {
+  itemId: string;
+  count: number;
+}
+
+/** An item a bulk change could not apply to. */
+export interface BulkFailure {
+  itemId: string;
+  error: string;
 }
 
 /**
@@ -285,6 +336,20 @@ const TRUST_KEY = "passbox.trust";
  * unlocking) and grants no access by itself. Every login replaces it.
  */
 const DEVICE_TOKEN_KEY = "passbox.deviceToken";
+/** Device-local item usage per account, encrypted with the account key. */
+const USAGE_KEY = "passbox.usage";
+/** Associated-data purpose of the usage map (`Keyring.encryptLocal`). */
+const USAGE_PURPOSE = "item-usage";
+/** Content types the server serves for website icons. */
+const ICON_TYPES = new Set(["image/png", "image/x-icon", "image/jpeg", "image/gif", "image/webp"]);
+
+function bytesToBase64(bytes: Uint8Array): string {
+  let binary = "";
+  for (let i = 0; i < bytes.length; i += 0x8000) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  }
+  return btoa(binary);
+}
 
 /** Maps recovery error codes to typed errors. */
 function recoveryError(error: unknown): unknown {
@@ -345,6 +410,10 @@ export class PassboxClient {
   private items = new Map<string, Item>();
   private errors = new Map<string, string>();
   private sharingView: SharingView = EMPTY_SHARING;
+  /** Website icons as data URLs (`null` = none), by domain. */
+  private icons = new Map<string, Promise<string | null>>();
+  /** Breach counts by password from `checkBreachedItems`; cleared on lock. */
+  private breachCounts = new Map<string, number>();
   private listeners = new Set<() => void>();
   private snapshot: ClientSnapshot;
   /** A recovery by code waiting for its second factor. */
@@ -866,7 +935,9 @@ export class PassboxClient {
 
   /** Locks and removes the account from this device. */
   signOut(): void {
+    const account = this.deviceAccount;
     this.lock();
+    if (account) this.storage.removeItem(`${USAGE_KEY}.${account.accountId}`);
     this.storage.removeItem(ACCOUNT_KEY);
     this.storage.removeItem(DEVICE_TOKEN_KEY);
     this.emit();
@@ -882,6 +953,7 @@ export class PassboxClient {
     this.vaults.clear();
     this.items.clear();
     this.errors.clear();
+    this.breachCounts.clear();
     this.sharingView = EMPTY_SHARING;
   }
 
@@ -1094,6 +1166,7 @@ export class PassboxClient {
           vaultId: item.vaultId,
           revision: item.revision,
           updatedAt: item.updatedAt,
+          createdAt: item.createdAt ?? 0,
           keyEpoch,
           data: parseItemData(json),
         });
@@ -1323,6 +1396,191 @@ export class PassboxClient {
     return analyzeVault(this.core, this.snapshot.items, this.strengthContext());
   }
 
+  // --- Item extras ---------------------------------------------------------------
+
+  /**
+   * Earlier versions of an item (up to 20, newest first), decrypted here.
+   * To restore one, pass its `data` to `updateItem`: that saves it as a new
+   * version and keeps the password history.
+   */
+  async itemHistory(id: string): Promise<ItemVersion[]> {
+    const keyring = this.requireKeyring();
+    const item = this.items.get(id);
+    if (!item) throw new Error("unknown item");
+    const { versions } = await this.api.itemVersions(id);
+    return versions.map((version) => {
+      let data: ItemData | null = null;
+      try {
+        data = parseItemData(
+          keyring.decryptItemAt(item.vaultId, version.keyEpoch, id, version.revision, version.encryptedData),
+        );
+      } catch {
+        data = null;
+      }
+      return { revision: version.revision, updatedAt: version.updatedAt, updatedBy: version.updatedBy, data };
+    });
+  }
+
+  /**
+   * The website icon of `domain` as a `data:` URL for an `<img>`, loaded
+   * through the user's own server (no request reaches the website from this
+   * device), or `null`. Cached in memory. Respect the user's icon setting.
+   */
+  iconUrl(domain: string): Promise<string | null> {
+    const key = domain.trim().toLowerCase();
+    if (!key) return Promise.resolve(null);
+    let icon = this.icons.get(key);
+    if (!icon) {
+      icon = this.api.icon(key).then(
+        (response) =>
+          response && ICON_TYPES.has(response.contentType)
+            ? `data:${response.contentType};base64,${bytesToBase64(response.bytes)}`
+            : null,
+        (error: unknown) => {
+          // Try again next time (offline, rate limited).
+          this.icons.delete(key);
+          throw error;
+        },
+      );
+      this.icons.set(key, icon);
+    }
+    return icon;
+  }
+
+  /**
+   * Checks the passwords of all logins outside the trash against Have I
+   * Been Pwned (k-anonymity, see `breachCount`) and returns the breached
+   * ones, most breached first. Results stay in memory until the vault locks
+   * and feed `itemHealth`. Opt-in only.
+   */
+  async checkBreachedItems(fetchImpl?: typeof globalThis.fetch): Promise<BreachedItem[]> {
+    const byPassword = new Map<string, string[]>();
+    for (const item of this.snapshot.items) {
+      const password = item.data.category === "login" ? fieldValue(item.data, FIELD.password) : undefined;
+      if (password) byPassword.set(password, [...(byPassword.get(password) ?? []), item.id]);
+    }
+    const found: BreachedItem[] = [];
+    for (const [password, ids] of byPassword) {
+      let count = this.breachCounts.get(password);
+      if (count === undefined) {
+        count = await breachCount(password, fetchImpl);
+        this.breachCounts.set(password, count);
+      }
+      if (count > 0) found.push(...ids.map((itemId) => ({ itemId, count })));
+    }
+    return found.sort((a, b) => b.count - a.count || a.itemId.localeCompare(b.itemId));
+  }
+
+  /** The problems of one item for its security check card. */
+  itemHealth(id: string): ItemHealth {
+    const item = this.items.get(id);
+    if (!item) throw new Error("unknown item");
+    const result: ItemHealth = { problems: [], strength: null, reusedWith: [], breachCount: null };
+    if (item.data.category !== "login" || item.data.trashedAt !== undefined) return result;
+    const health = this.health();
+    const password = fieldValue(item.data, FIELD.password);
+    if (password) result.strength = this.estimateStrength(password).score;
+    if (health.weak.includes(id)) result.problems.push("weak");
+    const group = health.reused.find((ids) => ids.includes(id));
+    if (group) {
+      result.problems.push("reused");
+      result.reusedWith = group.filter((other) => other !== id);
+    }
+    if (health.insecureUrls.includes(id)) result.problems.push("insecure_url");
+    if (health.withoutTotp.includes(id)) result.problems.push("missing_totp");
+    const count = password ? this.breachCounts.get(password) : undefined;
+    if (count !== undefined) {
+      result.breachCount = count;
+      if (count > 0) result.problems.push("breached");
+    }
+    return result;
+  }
+
+  private usageStorageKey(keyring: Core.Keyring): string {
+    return `${USAGE_KEY}.${keyring.accountId}`;
+  }
+
+  private loadUsage(keyring: Core.Keyring): Record<string, ItemUsage> {
+    const raw = this.storage.getItem(this.usageStorageKey(keyring));
+    if (!raw) return {};
+    try {
+      return (
+        (JSON.parse(keyring.decryptLocal(USAGE_PURPOSE, raw)) as { items?: Record<string, ItemUsage> }).items ?? {}
+      );
+    } catch {
+      return {};
+    }
+  }
+
+  /**
+   * Records a use of an item on this device ("Zuletzt verwendet",
+   * "Letztes Auto-Ausfüllen"). Stored encrypted in this device's storage,
+   * never sent to the server.
+   */
+  recordItemUse(id: string, kind: UsageKind): ItemUsage {
+    const keyring = this.requireKeyring();
+    if (!this.items.has(id)) throw new Error("unknown item");
+    const all = this.loadUsage(keyring);
+    const now = Date.now();
+    const previous = all[id] ?? { lastUsedAt: 0, lastAutofilledAt: 0, useCount: 0 };
+    const usage: ItemUsage = {
+      lastUsedAt: now,
+      lastAutofilledAt: kind === "autofill" ? now : previous.lastAutofilledAt,
+      useCount: previous.useCount + 1,
+    };
+    const items: Record<string, ItemUsage> = { [id]: usage };
+    for (const [other, value] of Object.entries(all)) {
+      if (other !== id && this.items.has(other)) items[other] = value;
+    }
+    this.storage.setItem(this.usageStorageKey(keyring), keyring.encryptLocal(USAGE_PURPOSE, JSON.stringify({ items })));
+    return usage;
+  }
+
+  /** This device's usage of an item, if it was used here. */
+  itemUsage(id: string): ItemUsage | undefined {
+    return this.loadUsage(this.requireKeyring())[id];
+  }
+
+  /** This device's usage of all items by ID, for sorting by recent use. */
+  itemUsages(): Record<string, ItemUsage> {
+    return this.loadUsage(this.requireKeyring());
+  }
+
+  /** Moves several items to the trash with one sync at the end. Returns the items that failed. */
+  async trashItems(ids: readonly string[]): Promise<BulkFailure[]> {
+    const at = Date.now();
+    return this.bulk(ids, (data) => (data.trashedAt === undefined ? { ...data, trashedAt: at } : undefined));
+  }
+
+  /** Marks several items as favorites (or not) with one sync at the end. Returns the items that failed. */
+  async setFavorite(ids: readonly string[], favorite: boolean): Promise<BulkFailure[]> {
+    return this.bulk(ids, (data) => (data.favorite === favorite ? undefined : { ...data, favorite }));
+  }
+
+  private async bulk(ids: readonly string[], change: (data: ItemData) => ItemData | undefined): Promise<BulkFailure[]> {
+    const keyring = this.requireKeyring();
+    const failed: BulkFailure[] = [];
+    let changed = false;
+    for (const id of new Set(ids)) {
+      const item = this.items.get(id);
+      if (!item) {
+        failed.push({ itemId: id, error: "unknown item" });
+        continue;
+      }
+      const next = change(item.data);
+      if (!next) continue;
+      try {
+        await this.putItem(item.vaultId, id, item.revision + 1, next);
+        changed = true;
+      } catch (error) {
+        failed.push({ itemId: id, error: error instanceof Error ? error.message : String(error) });
+      }
+    }
+    if (changed) this.emit();
+    if ((changed || failed.length > 0) && this.keyring === keyring) await this.sync();
+    return failed;
+  }
+
   private strengthContext(): string[] {
     const account = this.deviceAccount;
     return account ? [account.email] : [];
@@ -1364,7 +1622,8 @@ export class PassboxClient {
       ...(keyEpoch ? { keyEpoch } : {}),
     });
     if (this.keyring === keyring) {
-      this.items.set(id, { id, vaultId, revision: result.revision, updatedAt: Date.now(), keyEpoch, data });
+      const createdAt = this.items.get(id)?.createdAt ?? Date.now();
+      this.items.set(id, { id, vaultId, revision: result.revision, updatedAt: Date.now(), createdAt, keyEpoch, data });
     }
   }
 

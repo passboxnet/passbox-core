@@ -50,6 +50,8 @@ struct StateItem {
     encrypted_data: String,
     key_epoch: u32,
     updated_at: i64,
+    #[serde(default)]
+    created_at: i64,
 }
 
 #[derive(Debug, Deserialize)]
@@ -246,6 +248,7 @@ impl ServiceAccountClient {
                             vault_id: item.vault_id,
                             revision: item.revision,
                             updated_at: item.updated_at,
+                            created_at: item.created_at,
                             key_epoch: item.key_epoch,
                             data,
                         },

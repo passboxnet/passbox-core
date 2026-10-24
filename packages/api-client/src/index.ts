@@ -52,6 +52,8 @@ export interface ServerMeta {
   supportUrl?: string | null;
   defaultLocale?: MailLocale;
   passwordPolicy?: PasswordPolicy;
+  /** Whether the server loads website icons (`/api/v1/icons/{domain}`). Missing on older servers. */
+  icons?: boolean;
 }
 
 export interface PreloginResponse {
@@ -431,6 +433,29 @@ export interface SyncItem {
   updatedAt: number;
   /** Vault key epoch of `encryptedData` (0 for personal vaults). */
   keyEpoch?: number;
+  /** When the item was created (Unix ms). Missing on older servers. */
+  createdAt?: number;
+}
+
+/** An earlier, still encrypted version of an item (`GET /api/v1/items/{id}/versions`). */
+export interface ItemVersionRecord {
+  revision: number;
+  keyEpoch: number;
+  encryptedData: string;
+  updatedAt: number;
+  /** Public ID of the session (device) that saved it, if known. */
+  updatedBy: string | null;
+}
+
+/** A website icon from `GET /api/v1/icons/{domain}`. */
+export interface IconResponse {
+  contentType: string;
+  bytes: Uint8Array;
+}
+
+/** Path of a domain's website icon on the server (needs a session token). */
+export function iconPath(domain: string): string {
+  return `/api/v1/icons/${encodeURIComponent(domain.trim().toLowerCase())}`;
 }
 
 export interface SyncResponse {
@@ -633,6 +658,10 @@ export interface PassboxApi extends AdminApi {
   /** Service accounts and AI agent grants (wave F). */
   developer: DeveloperApi;
   deleteItem(id: string, revision: number): Promise<WriteResponse>;
+  /** Earlier versions of an item, newest first (up to 20). */
+  itemVersions(id: string): Promise<{ versions: ItemVersionRecord[] }>;
+  /** The website icon of `domain`, or `null` when there is none (404/400 or icons turned off). */
+  icon(domain: string): Promise<IconResponse | null>;
 }
 
 export function createClient(options: ClientOptions = {}): PassboxApi {
@@ -697,6 +726,28 @@ export function createClient(options: ClientOptions = {}): PassboxApi {
     putItem: (id, req) => call("PUT", `/api/v1/items/${encodeURIComponent(id)}`, req),
     deleteItem: (id, revision) =>
       call("DELETE", `/api/v1/items/${encodeURIComponent(id)}?revision=${encodeURIComponent(revision)}`),
+    itemVersions: (id) => call("GET", `/api/v1/items/${encodeURIComponent(id)}/versions`),
+    icon: async (domain) => {
+      const headers: Record<string, string> = { accept: "image/*" };
+      const token = options.getToken?.();
+      if (token) headers.authorization = `Bearer ${token}`;
+      const path = iconPath(domain);
+      const response = await doFetch(`${baseUrl}${path}`, { method: "GET", headers });
+      if (response.status === 404 || response.status === 400) return null;
+      if (!response.ok) {
+        let errorBody: ErrorBody | undefined;
+        try {
+          errorBody = (await response.json()) as ErrorBody;
+        } catch {
+          errorBody = undefined;
+        }
+        throw new ApiError(response.status, path, errorBody);
+      }
+      return {
+        contentType: response.headers.get("content-type") ?? "application/octet-stream",
+        bytes: new Uint8Array(await response.arrayBuffer()),
+      };
+    },
     adminSettings: () => call("GET", "/api/v1/admin/settings"),
     updateAdminSettings: (settings) => call("PUT", "/api/v1/admin/settings", settings),
     adminUsers: (query = {}) => call("GET", `/api/v1/admin/users${queryString(query)}`),

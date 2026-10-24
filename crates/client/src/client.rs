@@ -5,6 +5,7 @@
 
 mod agent;
 pub mod developer;
+pub mod item_tools;
 pub mod recovery;
 pub mod sharing;
 
@@ -135,6 +136,8 @@ pub struct Client {
     device: Mutex<(String, String)>,
     /// Recoveries and device codes in progress.
     recovery: Mutex<recovery::RecoveryState>,
+    /// Have I Been Pwned lookups and their results while unlocked.
+    breach: Mutex<item_tools::BreachState>,
 }
 
 fn is_network(error: &Error) -> bool {
@@ -159,6 +162,7 @@ impl Client {
             pending: Mutex::new(None),
             device: Mutex::new((String::new(), String::new())),
             recovery: Mutex::new(recovery::RecoveryState::default()),
+            breach: Mutex::new(item_tools::BreachState::default()),
         }
     }
 
@@ -662,6 +666,7 @@ impl Client {
     /// offline cache stay on this device.
     pub fn lock(&self) {
         self.cancel_two_factor();
+        self.clear_breach_results();
         let session = self.lock_session().take();
         if let Some(token) = session.and_then(|s| s.token) {
             // Best effort; the session expires anyway.
@@ -782,6 +787,7 @@ impl Client {
         self.store.delete(CACHE_KEY)?;
         self.store.delete(DEVICE_TOKEN_KEY)?;
         self.store.delete(TRUST_KEY)?;
+        self.store.delete(item_tools::USAGE_KEY)?;
         self.store.delete(ACCOUNT_KEY)
     }
 
@@ -1111,6 +1117,18 @@ impl Client {
         revision: u64,
         data: &ItemData,
     ) -> Result<()> {
+        let result = self.put_item(vault_id, item_id, revision, data);
+        self.finish_write(result)
+    }
+
+    /// Encrypts and uploads one item version without syncing.
+    fn put_item(
+        &self,
+        vault_id: &str,
+        item_id: &str,
+        revision: u64,
+        data: &ItemData,
+    ) -> Result<()> {
         let json = serde_json::to_string(data)?;
         let (encrypted, epoch) = {
             let guard = self.lock_session();
@@ -1123,11 +1141,11 @@ impl Client {
                 epoch,
             )
         };
-        let result = self.with_token(|token| {
+        self.with_token(|token| {
             self.api
                 .put_item(token, item_id, vault_id, revision, &encrypted, epoch)
-        });
-        self.finish_write(result)
+        })
+        .map(drop)
     }
 
     /// Syncs after a write, so local state always mirrors the server. On a
@@ -1328,6 +1346,7 @@ fn apply_delta(session: &mut Session, mut delta: SyncResponse) -> Vec<WrappedKey
                         vault_id: item.vault_id.clone(),
                         revision: item.revision,
                         updated_at: item.updated_at,
+                        created_at: item.created_at,
                         key_epoch: item.key_epoch,
                         data,
                     },
