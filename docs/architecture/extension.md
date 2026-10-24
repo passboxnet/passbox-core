@@ -45,7 +45,7 @@ The page controls the iframe element and could make it transparent, cover it or 
 
 ## Passkeys
 
-The MAIN-world script wraps `navigator.credentials.create` and `get` for `publicKey` requests (conditional mediation stays with the browser) and forwards them through the content script. The service worker checks the RP ID against the frame's origin (see [cryptography.md](cryptography.md#passkeys-implemented)), shows the dialog in the top frame and answers with a credential, an error or "fallback". "Use device or security key instead" and requests Passbox cannot serve (no matching passkey, no ES256, cross-platform attachment requested) run the browser's original implementation.
+The MAIN-world script wraps `navigator.credentials.create` and `get` for `publicKey` requests (conditional mediation stays with the browser) and forwards them through the content script. The service worker checks the RP ID against the frame's origin (see [cryptography.md](cryptography.md#passkeys-implemented)), shows the dialog in the top frame and answers with a credential, an error or "fallback". "Use device or security key instead" and requests Passbox cannot serve (no matching passkey, no ES256, cross-platform attachment requested, calls from iframes, where the browser enforces the `publickey-credentials-*` permissions policy) run the browser's original implementation.
 
 ## Permissions
 
@@ -57,3 +57,5 @@ The MAIN-world script wraps `navigator.credentials.create` and `get` for `public
 - The clipboard is cleared after 90 seconds only while the popup stays open.
 - Pending save prompts live in service worker memory and are lost if the worker stops between submit and the next page.
 - Tabs opened before the extension was installed need a reload to get the content script.
+- Save prompts are only offered while the vault is unlocked.
+- Passkeys inside iframes are left to the browser.
