@@ -8,6 +8,7 @@
 //! **The scheme is a draft and has not been reviewed or audited yet.**
 
 pub mod aead;
+pub mod agent_grant;
 pub mod canon;
 pub mod device_link;
 pub mod directory;
@@ -25,6 +26,7 @@ pub mod passkey;
 pub mod random;
 pub mod recovery;
 pub mod secret_key;
+pub mod service_account;
 pub mod sharing;
 pub mod strength;
 pub mod totp;
