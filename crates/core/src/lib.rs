@@ -20,6 +20,8 @@ pub mod id;
 pub mod identity;
 pub mod kdf;
 pub mod keyring;
+#[cfg(feature = "oidc")]
+pub mod oidc;
 pub mod opaque;
 pub mod passkey;
 pub mod random;
@@ -28,6 +30,7 @@ pub mod secret_key;
 pub mod sharing;
 pub mod strength;
 pub mod totp;
+pub mod trusted_device;
 pub mod two_factor;
 pub mod webauthn;
 
