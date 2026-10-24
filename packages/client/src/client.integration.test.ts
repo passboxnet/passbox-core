@@ -4,10 +4,14 @@
  *
  *   PASSBOX_DATABASE_URL=sqlite::memory: cargo run -p passbox-server &
  *   PASSBOX_TEST_SERVER_URL=http://127.0.0.1:8080 pnpm --filter @passbox/client test
+ *
+ * The administration test also needs an admin: start the server with
+ * PASSBOX_ADMIN_EMAILS=<email> and set PASSBOX_TEST_ADMIN_EMAIL=<email>
+ * (an email without an account yet).
  */
 import { readFile } from "node:fs/promises";
 import { createRequire } from "node:module";
-import { createClient } from "@passbox/api-client";
+import { ApiError, createClient } from "@passbox/api-client";
 import * as core from "@passbox/core-wasm";
 import { beforeAll, describe, expect, it } from "vitest";
 import { ConflictError, InvalidCredentialsError, PassboxClient } from "./client";
@@ -15,6 +19,7 @@ import { FIELD, fieldValue, newItemData } from "./items";
 import { memoryStorage } from "./storage";
 
 const serverUrl = process.env.PASSBOX_TEST_SERVER_URL;
+const adminEmail = process.env.PASSBOX_TEST_ADMIN_EMAIL;
 
 function newClient() {
   const storage = memoryStorage();
@@ -175,4 +180,69 @@ describe.skipIf(!serverUrl)("PassboxClient against a server", () => {
     );
     await expect(newClient().signIn(email, "pw-123456", "not a key")).rejects.toBeInstanceOf(InvalidCredentialsError);
   });
+
+  it.skipIf(!adminEmail)(
+    "administers the instance",
+    async () => {
+      const admin = newClient();
+      await admin.signUp(adminEmail ?? "", "correct horse battery staple", { locale: "de" });
+      expect((await admin.accountInfo()).instanceAdmin).toBe(true);
+      expect(await admin.preferences()).toEqual({ locale: "de", notifyNewDevice: true });
+
+      const member = newClient();
+      const memberEmail = `${core.newId()}@example.com`;
+      await member.signUp(memberEmail, "correct horse battery staple");
+      expect((await member.accountInfo()).instanceAdmin).toBe(false);
+      await expect(member.admin.adminSettings()).rejects.toMatchObject({ status: 403, code: "forbidden" });
+
+      // Only example.com may register (the other tests use it), plus invitations.
+      const { settings, mail } = await admin.admin.adminSettings();
+      expect(mail.configured).toBe(false);
+      try {
+        await admin.admin.updateAdminSettings({
+          ...settings,
+          registration: "domains",
+          allowedDomains: ["example.com"],
+        });
+        const meta = await createClient({ baseUrl: serverUrl ?? "" }).meta();
+        expect(meta.registration).toBe("domains");
+        expect(meta.allowedDomains).toEqual(["example.com"]);
+
+        const outsiderEmail = `${core.newId()}@outside.example`;
+        const refused = await newClient()
+          .signUp(outsiderEmail, "correct horse battery staple")
+          .catch((e: unknown) => e);
+        expect(refused).toBeInstanceOf(ApiError);
+        expect((refused as ApiError).code).toBe("domain_not_allowed");
+
+        const invite = await admin.admin.createInvite({ email: outsiderEmail, linkBase: "https://vault.example.com" });
+        const token = new URLSearchParams(invite.link?.split("#/?")[1]).get("invite") ?? "";
+        await newClient().signUp(outsiderEmail, "correct horse battery staple", { inviteToken: token });
+        expect((await admin.admin.adminInvites()).find((i) => i.id === invite.id)?.status).toBe("used");
+      } finally {
+        await admin.admin.updateAdminSettings(settings);
+      }
+
+      // Disabling ends the member's session and blocks sign-in.
+      const { users } = await admin.admin.adminUsers({ q: memberEmail });
+      const user = users[0];
+      expect(user).toMatchObject({ email: memberEmail, status: "active" });
+      await admin.admin.disableUser(user?.id ?? "");
+      await expect(member.sync()).rejects.toMatchObject({ status: 401 });
+      member.lock();
+      await expect(member.unlock("correct horse battery staple")).rejects.toMatchObject({ code: "account_disabled" });
+      await admin.admin.enableUser(user?.id ?? "");
+      await member.unlock("correct horse battery staple");
+
+      const test = await admin.admin.sendTestMail();
+      expect(test).toMatchObject({ to: adminEmail, mailConfigured: false });
+      const { events, chain } = await admin.admin.adminEvents();
+      expect(chain.valid).toBe(true);
+      expect(events.map((e) => e.action)).toEqual(
+        expect.arrayContaining(["settings_updated", "invite_created", "invite_used", "user_disabled", "user_enabled"]),
+      );
+      expect(events[0]?.action).toBe("test_mail_sent");
+    },
+    60_000,
+  );
 });

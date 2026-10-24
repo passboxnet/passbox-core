@@ -49,7 +49,35 @@
 
 - **Database:** SQLite (default, single file) or PostgreSQL, selected by `PASSBOX_DATABASE_URL`. One code path serves both through the sqlx `Any` driver and portable SQL migrations in [`crates/server/migrations`](../../crates/server/migrations). Binary values are stored as Base64url text and timestamps as Unix milliseconds.
 - **Sync:** a global change counter. Every write takes the next value inside its transaction; `GET /api/v1/sync?since=<cursor>` returns everything with a higher value. Deleted items remain as tombstones without data.
+- **Instance administration:** `crates/server/src/instance.rs` holds the instance settings (registration mode, name, help address, default mail language, master password policy) as a JSON document in `instance_state`, decides who may register, and knows who is an instance admin (first account, `PASSBOX_ADMIN_EMAILS`). `api/admin.rs` serves `/api/v1/admin/*` behind the `AdminSession` extractor and writes the hash-chained `admin_events` log; record new admin actions with `admin::record` or, inside a write transaction, `admin::record_in`.
+- **Mail:** see [Sending mail](#sending-mail-from-server-modules).
 - **Concurrency:** optimistic. A write names the revision it creates, which must be exactly one higher than the stored revision, otherwise the server answers `409 Conflict` with the current revision.
+
+## Sending mail from server modules
+
+Modules never talk to SMTP. They queue a mail with the `Mailer` in `AppState` (`crates/server/src/mail`), and a background task sends it with retries:
+
+```rust
+use crate::mail::{Locale, Mailer, Template};
+
+// To an account, in its language (or the instance default); adds `email` to the parameters:
+state.mailer.enqueue_for_account(&account_id, Template::NewDevice, json!({ "device": name, "ip": ip, "time": now })).await?;
+
+// To any address, in a given language:
+state.mailer.enqueue("ada@example.com", Template::Invitation, Locale::De, json!({
+    "inviter": admin_email, "organization": org_name, "link": link, "expiresAt": expires_at,
+})).await?;
+
+// Only if a transaction commits (for example together with an invitation row):
+Mailer::enqueue_in(&mut tx, &to, Template::Invitation, locale, &params).await?;
+tx.commit().await?;
+state.mailer.wake();
+```
+
+- **Templates** (`mail/templates.rs`, English and German with "Sie", text and HTML): `Invitation` (`inviter`, `link`, `expiresAt`, optional `organization`), `NewDevice`, `MasterPasswordChanged` (`device`, `ip`, `time`), `TwoFactorChanged` (plus `change`: `enabled`, `disabled` or `changed`), `EmergencyAccess` (`requester`, `event`, `link`) and `Recovery` (`event`, `link`) as placeholders for C1/C3, and `Test`. Missing parameters render as empty text. Add a template by extending the enum and `render`, with both languages. Never put secrets other than single-use links into parameters; they are stored until the mail is sent.
+- **Links:** build them from `state.mailer.public_url()` (`PASSBOX_PUBLIC_URL`, no trailing slash) and the web app's hash routes, for example `{public_url}/#/?invite=…`. It is `None` when not configured; then offer the link to the acting user instead (as instance invitations do).
+- **Language:** `Locale::parse`, `mail::request_locale` (explicit value or `Accept-Language`); accounts store theirs in `accounts.locale` (`/api/v1/account/preferences`).
+- Queuing never fails a request because the mail server is down. Security notifications should log a failure to queue rather than fail the request (see `api/notify.rs`).
 
 ## Clients
 
@@ -65,7 +93,7 @@ Both are covered by integration tests against a real server; the Watchtower heur
 Implemented:
 
 - **Core:** Argon2id + Secret Key derivation, OPAQUE login, key hierarchy with context-bound XChaCha20-Poly1305 encryption, keyring session export, ES256 passkeys, TOTP/HOTP, password and PIN generator
-- **Server:** registration, login, sessions, vaults, items, incremental sync on SQLite and PostgreSQL, CORS for non-browser-origin clients
+- **Server:** registration, login, sessions, vaults, items, incremental sync on SQLite and PostgreSQL, CORS for non-browser-origin clients, instance administration (registration modes, invitations, disabling accounts, hash-chained admin log) and mail over SMTP with a durable outbox
 - **Web client:** sign-up with Emergency Kit, sign-in on new devices, unlock, logins/notes/cards with TOTP and custom fields, vaults, favorites, tags, search, command palette, Watchtower, generator, settings, auto-lock, periodic sync, configurable server
 - **Extension:** sign-in and unlock, inline autofill (logins, multi-step forms, one-time codes, password suggestions), save and update prompts, passkeys with browser fallback
 - **Desktop (Windows, macOS, Linux):** Tauri 2 shell around the web client with tray, global shortcut and lock on sleep
