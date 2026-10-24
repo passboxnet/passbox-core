@@ -73,6 +73,24 @@ describe.skipIf(!serverUrl)("item extras against a server", () => {
     expect(health.reusedWith).toEqual([id]);
     expect(health.breachCount).toBe(9659365);
 
+    // The security report uses the same results; dismissals are synced in the item.
+    const report = client.securityReport();
+    expect(report.breachChecked).toBe(true);
+    expect(report.fixFirst[0]?.kinds[0]).toBe("breached");
+    await client.dismissFinding(reused, "insecure_url", true);
+    await client.sync();
+    const stored = client.getSnapshot().items.find((item) => item.id === reused)?.data as ItemData & {
+      securityIgnore?: string[];
+    };
+    expect(stored.securityIgnore).toEqual(["insecure_url"]);
+    expect(
+      client.securityReport().findings.find((f) => f.itemId === reused && f.kind === "insecure_url")?.dismissed,
+    ).toBe(true);
+    await client.dismissFinding(reused, "insecure_url", false);
+    expect(client.checkLookalike("githuh.com")?.looksLike).toBe("github.com");
+    // Email monitoring needs an API key on the server.
+    expect((await client.emailMonitoring()).available).toBe(false);
+
     // Usage stays on this device, encrypted.
     expect(client.itemUsage(id)).toBeUndefined();
     client.recordItemUse(id, "copy");

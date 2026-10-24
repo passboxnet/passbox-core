@@ -1,3 +1,4 @@
+import { type BreachApi, breachApi } from "./breach";
 import { type OrgAdminApi, orgAdminApi } from "./orgAdmin";
 import {
   type DeviceLinkApi,
@@ -9,6 +10,7 @@ import {
 } from "./recovery";
 import { type SsoApi, ssoApi } from "./sso";
 
+export * from "./breach";
 export * from "./orgAdmin";
 export * from "./recovery";
 export * from "./sso";
@@ -56,6 +58,10 @@ export interface ServerMeta {
   passwordPolicy?: PasswordPolicy;
   /** Whether the server loads website icons (`/api/v1/icons/{domain}`). Missing on older servers. */
   icons?: boolean;
+  /** Whether `/api/v1/breach/range/{prefix}` proxies Have I Been Pwned. Missing on older servers. */
+  breachProxy?: boolean;
+  /** Whether email breach monitoring is available. Missing on older servers. */
+  emailMonitoring?: boolean;
 }
 
 export interface PreloginResponse {
@@ -651,6 +657,7 @@ export interface PassboxApi extends AdminApi {
   sso: SsoApi;
   /** Organization administration: policies, audit log, reports (wave D). */
   orgAdmin: OrgAdminApi;
+  breach: BreachApi;
   deleteItem(id: string, revision: number): Promise<WriteResponse>;
   /** Earlier versions of an item, newest first (up to 20). */
   itemVersions(id: string): Promise<{ versions: ItemVersionRecord[] }>;
@@ -760,6 +767,23 @@ export function createClient(options: ClientOptions = {}): PassboxApi {
     deviceLinks: deviceLinkApi(call),
     sso: ssoApi(call),
     orgAdmin: orgAdminApi(call),
+    breach: breachApi(call, async (path) => {
+      const headers: Record<string, string> = { accept: "text/plain" };
+      const token = options.getToken?.();
+      if (token) headers.authorization = `Bearer ${token}`;
+      const response = await doFetch(`${baseUrl}${path}`, { method: "GET", headers });
+      if (response.status === 404) return null;
+      if (!response.ok) {
+        let errorBody: ErrorBody | undefined;
+        try {
+          errorBody = (await response.json()) as ErrorBody;
+        } catch {
+          errorBody = undefined;
+        }
+        throw new ApiError(response.status, path, errorBody);
+      }
+      return response.text();
+    }),
   };
 }
 

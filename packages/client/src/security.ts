@@ -108,6 +108,40 @@ export function analyzeVault(
   return { weak, reused, insecureUrls, withoutTotp, secure, score, analyzed };
 }
 
+/** Pwned Passwords range endpoint; append the 5-character prefix. */
+export const PWNED_RANGE_URL = "https://api.pwnedpasswords.com/range/";
+
+/** The SHA-1 of a password as upper-case hex, split into the 5-character prefix that is sent and the rest. */
+export async function breachHashParts(password: string): Promise<{ prefix: string; suffix: string }> {
+  const digest = await crypto.subtle.digest("SHA-1", new TextEncoder().encode(password));
+  const hex = Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0"))
+    .join("")
+    .toUpperCase();
+  return { prefix: hex.slice(0, 5), suffix: hex.slice(5) };
+}
+
+/** How often `suffix` appears in a range response (`SUFFIX:COUNT` lines; padding has count 0). */
+export function countInRange(body: string, suffix: string): number {
+  for (const line of body.split("\n")) {
+    const [candidate, count] = line.trim().split(":");
+    if (candidate?.toUpperCase() === suffix) return Number(count) || 0;
+  }
+  return 0;
+}
+
+/** Fetches a padded range directly from Have I Been Pwned. */
+export async function fetchPwnedRange(
+  prefix: string,
+  fetchImpl: typeof globalThis.fetch = globalThis.fetch.bind(globalThis),
+): Promise<string> {
+  const response = await fetchImpl(`${PWNED_RANGE_URL}${prefix}`, {
+    // Padding hides the number of real matches from observers.
+    headers: { "Add-Padding": "true" },
+  });
+  if (!response.ok) throw new Error(`breach check failed with status ${response.status}`);
+  return response.text();
+}
+
 /**
  * Checks a password against Have I Been Pwned with k-anonymity: only the
  * first 5 hex characters of its SHA-1 hash leave the device. Returns how
@@ -118,20 +152,6 @@ export async function breachCount(
   fetchImpl: typeof globalThis.fetch = globalThis.fetch.bind(globalThis),
 ): Promise<number> {
   if (!password) return 0;
-  const digest = await crypto.subtle.digest("SHA-1", new TextEncoder().encode(password));
-  const hex = Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0"))
-    .join("")
-    .toUpperCase();
-  const prefix = hex.slice(0, 5);
-  const suffix = hex.slice(5);
-  const response = await fetchImpl(`https://api.pwnedpasswords.com/range/${prefix}`, {
-    // Padding hides the number of real matches from observers.
-    headers: { "Add-Padding": "true" },
-  });
-  if (!response.ok) throw new Error(`breach check failed with status ${response.status}`);
-  for (const line of (await response.text()).split("\n")) {
-    const [candidate, count] = line.trim().split(":");
-    if (candidate === suffix) return Number(count) || 0;
-  }
-  return 0;
+  const { prefix, suffix } = await breachHashParts(password);
+  return countInRange(await fetchPwnedRange(prefix, fetchImpl), suffix);
 }
