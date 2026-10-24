@@ -276,6 +276,12 @@ pub struct BulkFailure {
 pub struct Vault {
     pub id: String,
     pub name: String,
+    /// Icon chosen for the vault (`home`, `family`, `briefcase`, …), if any.
+    #[uniffi(default = None)]
+    pub icon: Option<String>,
+    /// Color chosen for the vault (`blue`, `green`, …), if any.
+    #[uniffi(default = None)]
+    pub color: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
@@ -626,6 +632,8 @@ impl PassboxClient {
             .map(|v| Vault {
                 id: v.id,
                 name: v.name,
+                icon: v.icon,
+                color: v.color,
             })
             .collect())
     }
@@ -690,6 +698,19 @@ impl PassboxClient {
 
     pub fn rename_vault(&self, id: String, name: String) -> Result<()> {
         Ok(self.inner.rename_vault(&id, &name)?)
+    }
+
+    /// Sets a vault's icon and color (stored in its encrypted metadata;
+    /// `None` removes the choice).
+    pub fn set_vault_appearance(
+        &self,
+        id: String,
+        icon: Option<String>,
+        color: Option<String>,
+    ) -> Result<()> {
+        Ok(self
+            .inner
+            .set_vault_appearance(&id, icon.as_deref(), color.as_deref())?)
     }
 
     /// Devices signed in to the account, most recently used first.
