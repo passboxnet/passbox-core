@@ -131,6 +131,12 @@ The master password cannot be reset. Recovery works through a second, independen
 - **Emergency access:** a vault-key bundle sealed to a trusted person's directory key (fingerprint checked), released by the server after a signed waiting period (1–30 days) unless the owner denies it. The server enforces the waiting period.
 - **Device codes:** the Secret Key and email move to a new device over an X-Wing seal with a code-derived MAC; the master password is never transferred.
 
+## Single sign-on and trusted devices (implemented)
+
+Single sign-on (OpenID Connect) only proves identity: the server checks the provider's ID token (`passbox_core::oidc`, feature `oidc`, RS/PS/ES algorithms with `ring`, never `none` or HMAC) and issues a single-use proof. Without a trusted device the client still derives its keys from the master password and the Secret Key and sends the proof with the OPAQUE login. On a **trusted device** the account key is sealed to the device's X-Wing key (purpose `trusted-device`, context account and device ID) with a grant signed by the account's Ed25519 key; after an SSO sign-in the device opens it locally and verifies it against the account's own key pairs. New devices are approved by an existing device after comparing a 66-bit code derived from the new device's public key. On that path the account key is protected by the device key and the identity provider instead of Argon2id and the Secret Key; organizations opt in. Design, formats and threat model: [sso.md](sso.md).
+
+Code: [`crates/core/src/oidc.rs`](../../crates/core/src/oidc.rs), [`crates/core/src/trusted_device.rs`](../../crates/core/src/trusted_device.rs).
+
 ## Known gaps
 
 - A server can still withhold changes or replay an entire older state of an item (old revision with its matching ciphertext). The signed revision chain below closes this.
@@ -158,5 +164,5 @@ Code: [`crates/core/src/aead.rs`](../../crates/core/src/aead.rs).
 | Key rotation | Account key version 2 and owner transfer; hybrid ML-DSA signatures |
 | Rollback protection | Signed revision chain per vault; clients remember the latest revision they have seen |
 | Metadata | Titles, URLs, tags and field names are encrypted; the server only sees IDs, sizes, timestamps and revisions |
-| SSO unlock | Trusted device keys (TPM, Secure Enclave or WebAuthn PRF); organization recovery split across administrators with Shamir secret sharing (single-admin organization recovery is implemented, see [recovery.md](recovery.md)) |
+| SSO unlock | Hardware-backed device keys (TPM, Secure Enclave, Android Keystore, WebAuthn PRF) in the native apps and the browser (trusted devices with software keys are implemented, see [sso.md](sso.md)); organization recovery split across administrators with Shamir secret sharing (single-admin organization recovery is implemented, see [recovery.md](recovery.md)) |
 | Passkey unlock | WebAuthn PRF extension as an alternative to the master password |
