@@ -1175,6 +1175,39 @@ impl Client {
     }
 
     pub fn rename_vault(&self, vault_id: &str, name: &str) -> Result<()> {
+        self.update_vault_meta(vault_id, |meta| {
+            meta.insert("name".into(), serde_json::Value::from(name));
+        })
+    }
+
+    /// Sets the icon and color of a vault (`None` removes the choice). Other
+    /// metadata keys, including ones this version does not know, are kept.
+    pub fn set_vault_appearance(
+        &self,
+        vault_id: &str,
+        icon: Option<&str>,
+        color: Option<&str>,
+    ) -> Result<()> {
+        self.update_vault_meta(vault_id, |meta| {
+            for (key, value) in [("icon", icon), ("color", color)] {
+                match value.filter(|v| !v.is_empty()) {
+                    Some(v) => {
+                        meta.insert(key.into(), serde_json::Value::from(v));
+                    }
+                    None => {
+                        meta.remove(key);
+                    }
+                }
+            }
+        })
+    }
+
+    /// Re-encrypts the vault metadata after `change`, keeping unknown keys.
+    fn update_vault_meta(
+        &self,
+        vault_id: &str,
+        change: impl FnOnce(&mut serde_json::Map<String, serde_json::Value>),
+    ) -> Result<()> {
         let (revision, encrypted, epoch) = {
             let guard = self.lock_session();
             let session = guard.as_ref().ok_or(Error::Locked)?;
@@ -1182,7 +1215,12 @@ impl Client {
                 .vaults
                 .get(vault_id)
                 .ok_or_else(|| Error::NotFound(vault_id.to_owned()))?;
-            let meta = serde_json::json!({ "name": name }).to_string();
+            let mut meta = vault.meta.clone();
+            if !meta.contains_key("name") {
+                meta.insert("name".into(), serde_json::Value::from(vault.name.as_str()));
+            }
+            change(&mut meta);
+            let meta = serde_json::Value::Object(meta).to_string();
             (
                 vault.revision + 1,
                 session
@@ -1268,7 +1306,7 @@ fn apply_delta(session: &mut Session, mut delta: SyncResponse) -> Vec<WrappedKey
         if !id::is_valid_id(&vault.id) {
             continue;
         }
-        let decrypted = (|| -> Result<String> {
+        let decrypted = (|| -> Result<serde_json::Map<String, serde_json::Value>> {
             if vault.org_id.is_none() && !session.keyring.has_vault(&vault.id) {
                 session.keyring.add_vault(&vault.id, &vault.encrypted_key)?;
             }
@@ -1278,22 +1316,27 @@ fn apply_delta(session: &mut Session, mut delta: SyncResponse) -> Vec<WrappedKey
                     vault.key_epoch,
                     &vault.encrypted_meta,
                 )?)?;
-            Ok(meta["name"]
-                .as_str()
-                .filter(|n| !n.is_empty())
-                .unwrap_or("Vault")
-                .to_owned())
+            Ok(meta.as_object().cloned().unwrap_or_default())
         })();
         match decrypted {
-            Ok(name) => {
+            Ok(meta) => {
+                let text = |key: &str| {
+                    meta.get(key)
+                        .and_then(|v| v.as_str())
+                        .filter(|v| !v.is_empty())
+                        .map(str::to_owned)
+                };
                 session.vaults.insert(
                     vault.id.clone(),
                     Vault {
                         id: vault.id.clone(),
-                        name,
+                        name: text("name").unwrap_or_else(|| "Vault".to_owned()),
                         revision: vault.revision,
                         org_id: vault.org_id.clone(),
                         key_epoch: vault.key_epoch,
+                        icon: text("icon"),
+                        color: text("color"),
+                        meta: meta.clone(),
                     },
                 );
                 session.cache.vaults.insert(vault.id.clone(), vault);

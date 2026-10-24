@@ -221,6 +221,14 @@ pub struct Vault {
     pub org_id: Option<String>,
     /// Current key epoch (0 for personal vaults).
     pub key_epoch: u32,
+    /// Icon chosen for the vault (`home`, `family`, `briefcase`, …), from the
+    /// encrypted metadata; `None` when not set.
+    pub icon: Option<String>,
+    /// Color chosen for the vault (`blue`, `green`, …); `None` when not set.
+    pub color: Option<String>,
+    /// The decrypted metadata as received, so that changes keep keys this
+    /// version does not know.
+    pub meta: serde_json::Map<String, serde_json::Value>,
 }
 
 #[derive(Debug, Clone, PartialEq)]
