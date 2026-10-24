@@ -1,8 +1,12 @@
 import {
+  type Account,
   type AccountEvent,
+  type AccountPreferences,
+  type AdminApi,
   ApiError,
   type ClientKind,
   type KdfParams,
+  type MailLocale,
   type PassboxApi,
   type SessionInfo,
   type SyncResponse,
@@ -210,8 +214,15 @@ export class PassboxClient {
   /**
    * Creates an account with a personal vault and unlocks it. Returns the new
    * Secret Key, which the user must store in their Emergency Kit.
+   *
+   * `inviteToken` comes from an invitation link and is needed when the server
+   * only allows invited accounts; `locale` is the language of mails.
    */
-  async signUp(email: string, password: string): Promise<{ secretKey: string; accountId: string }> {
+  async signUp(
+    email: string,
+    password: string,
+    options: { inviteToken?: string; locale?: MailLocale } = {},
+  ): Promise<{ secretKey: string; accountId: string }> {
     const { core } = this;
     const account: DeviceAccount = {
       email: email.trim().toLowerCase(),
@@ -227,6 +238,7 @@ export class PassboxClient {
         accountId: account.accountId,
         email: account.email,
         registrationRequest: registration.request,
+        ...(options.inviteToken ? { inviteToken: options.inviteToken } : {}),
       });
       const registrationUpload = registration.finish(registrationResponse);
       registration.free();
@@ -245,6 +257,8 @@ export class PassboxClient {
         kdfParams: account.kdfParams,
         encryptedAccountKey: keyring.encryptedAccountKey ?? "",
         vault,
+        ...(options.inviteToken ? { inviteToken: options.inviteToken } : {}),
+        ...(options.locale ? { locale: options.locale } : {}),
       });
       keyring.free();
 
@@ -315,6 +329,36 @@ export class PassboxClient {
   async revokeOtherSessions(): Promise<void> {
     this.requireKeyring();
     await this.api.revokeOtherSessions();
+  }
+
+  /** The account as the server sees it, including whether it is an instance admin. */
+  async accountInfo(): Promise<Account> {
+    this.requireKeyring();
+    return this.api.account();
+  }
+
+  /** Mail language and notification settings stored on the server. */
+  async preferences(): Promise<AccountPreferences> {
+    this.requireKeyring();
+    return this.api.preferences();
+  }
+
+  async updatePreferences(changes: {
+    locale?: MailLocale | "";
+    notifyNewDevice?: boolean;
+  }): Promise<AccountPreferences> {
+    this.requireKeyring();
+    return this.api.updatePreferences(changes);
+  }
+
+  /**
+   * Instance administration (settings, accounts, mail, invitations, audit
+   * log). The server answers 403 `forbidden` unless the account is an
+   * instance admin.
+   */
+  get admin(): AdminApi {
+    this.requireKeyring();
+    return this.api;
   }
 
   /** Recent sign-ins, failed attempts and other security events. */

@@ -9,11 +9,36 @@ export interface Health {
   status: "ok";
 }
 
+/** Who may create an account on a server. */
+export type RegistrationMode = "open" | "invite_only" | "domains";
+
+export type MailLocale = "en" | "de";
+
+/**
+ * Minimum strength of new master passwords. The server never sees the
+ * password, so clients enforce it (together with their own minimum).
+ */
+export interface PasswordPolicy {
+  /** Lowest strength score: 3 (strong) or 4 (very strong). */
+  minScore: number;
+  /** Lowest number of characters (at least 12). */
+  minLength: number;
+}
+
 export interface ServerMeta {
   name: string;
   version: string;
   apiVersion: number;
   minKdfParams: KdfParams;
+  /** Name the admins gave the server. Missing on servers before instance settings. */
+  instanceName?: string;
+  registration?: RegistrationMode;
+  /** In `domains` mode: the email domains that may register. */
+  allowedDomains?: string[];
+  /** Where users get help, if the admins set it. */
+  supportUrl?: string | null;
+  defaultLocale?: MailLocale;
+  passwordPolicy?: PasswordPolicy;
 }
 
 export interface PreloginResponse {
@@ -36,6 +61,10 @@ export interface RegisterFinishRequest {
   kdfParams: KdfParams;
   encryptedAccountKey: string;
   vault: NewVault;
+  /** Token from an invitation link (`#/?invite=…`). */
+  inviteToken?: string;
+  /** Language for mails from the server. */
+  locale?: MailLocale;
 }
 
 export interface LoginStartResponse {
@@ -94,6 +123,125 @@ export interface Account {
   kdfSalt: string;
   kdfParams: KdfParams;
   encryptedAccountKey: string;
+  /** Whether the account may use the instance administration. */
+  instanceAdmin?: boolean;
+}
+
+/** Preferences the server needs: mail language and notifications. */
+export interface AccountPreferences {
+  /** `null`: the server's default language. */
+  locale: MailLocale | null;
+  /** Mail when a new device signs in. */
+  notifyNewDevice: boolean;
+}
+
+export interface InstanceSettings {
+  instanceName: string;
+  registration: RegistrationMode;
+  allowedDomains: string[];
+  /** `""` for none. */
+  supportUrl: string;
+  defaultLocale: MailLocale;
+  passwordPolicy: PasswordPolicy;
+}
+
+export interface MailStatus {
+  /** False when no SMTP server is configured: mails are only written to the server log. */
+  configured: boolean;
+  transport: "smtps" | "starttls" | "smtp" | "log";
+  host: string | null;
+  from: string;
+  publicUrl: string | null;
+  pending: number;
+  failed: number;
+  lastSentAt: number | null;
+  lastError: string | null;
+}
+
+export interface AdminSettings {
+  settings: InstanceSettings;
+  mail: MailStatus;
+  /** Admins configured with `PASSBOX_ADMIN_EMAILS`. */
+  envAdminEmails: string[];
+}
+
+export interface AdminUser {
+  id: string;
+  email: string;
+  createdAt: number;
+  lastActivityAt: number | null;
+  status: "active" | "disabled";
+  disabledAt: number | null;
+  instanceAdmin: boolean;
+  activeSessions: number;
+  /** `null` while the server has no two-step sign-in. */
+  twoFactorEnabled: boolean | null;
+}
+
+export interface AdminUsers {
+  users: AdminUser[];
+  total: number;
+}
+
+export type AdminEventAction =
+  | "instance_admin_bootstrap"
+  | "settings_updated"
+  | "user_disabled"
+  | "user_enabled"
+  | "test_mail_sent"
+  | "invite_created"
+  | "invite_used"
+  | "invite_revoked";
+
+export interface AdminEvent {
+  seq: number;
+  id: string;
+  actorId: string;
+  actorEmail: string;
+  action: AdminEventAction | string;
+  target: string;
+  details: Record<string, unknown> | null;
+  ip: string;
+  createdAt: number;
+  prevHash: string;
+  hash: string;
+}
+
+export interface AdminEvents {
+  /** Newest first. */
+  events: AdminEvent[];
+  /** Result of checking the whole hash chain on the server. */
+  chain: { valid: boolean; length: number; brokenAt: number | null };
+}
+
+export interface Invite {
+  id: string;
+  email: string;
+  invitedBy: string;
+  createdAt: number;
+  expiresAt: number;
+  usedAt: number | null;
+  status: "pending" | "used" | "expired";
+}
+
+export interface InviteCreated extends Invite {
+  /** The invitation link, also sent by mail; `null` if the server knows no public address. */
+  link: string | null;
+  mailConfigured: boolean;
+}
+
+/** Instance administration; every call needs an instance admin (else 403 `forbidden`). */
+export interface AdminApi {
+  adminSettings(): Promise<AdminSettings>;
+  updateAdminSettings(settings: InstanceSettings): Promise<AdminSettings>;
+  adminUsers(query?: { q?: string; limit?: number; offset?: number }): Promise<AdminUsers>;
+  disableUser(id: string): Promise<void>;
+  enableUser(id: string): Promise<void>;
+  sendTestMail(to?: string): Promise<{ id: string; to: string; mailConfigured: boolean }>;
+  adminEvents(query?: { limit?: number; before?: number }): Promise<AdminEvents>;
+  adminInvites(): Promise<Invite[]>;
+  createInvite(req: { email: string; locale?: MailLocale; linkBase?: string }): Promise<InviteCreated>;
+  revokeInvite(id: string): Promise<void>;
 }
 
 export interface SyncVault {
@@ -156,11 +304,11 @@ export interface ClientOptions {
   getToken?: () => string | undefined;
 }
 
-export interface PassboxApi {
+export interface PassboxApi extends AdminApi {
   health(): Promise<Health>;
   meta(): Promise<ServerMeta>;
   prelogin(email: string): Promise<PreloginResponse>;
-  registerStart(req: { accountId: string; email: string; registrationRequest: string }): Promise<{
+  registerStart(req: { accountId: string; email: string; registrationRequest: string; inviteToken?: string }): Promise<{
     registrationResponse: string;
   }>;
   registerFinish(req: RegisterFinishRequest): Promise<{ accountId: string }>;
@@ -178,6 +326,9 @@ export interface PassboxApi {
   }): Promise<LoginFinishResponse>;
   logout(): Promise<void>;
   account(): Promise<Account>;
+  preferences(): Promise<AccountPreferences>;
+  /** Changes the given preferences; `locale: ""` resets to the server default. */
+  updatePreferences(changes: { locale?: MailLocale | ""; notifyNewDevice?: boolean }): Promise<AccountPreferences>;
   accountEvents(limit?: number): Promise<AccountEvent[]>;
   passwordChangeStart(req: { registrationRequest: string }): Promise<{ registrationResponse: string }>;
   passwordChangeFinish(req: {
@@ -232,6 +383,8 @@ export function createClient(options: ClientOptions = {}): PassboxApi {
     loginFinish: (req) => call("POST", "/api/v1/auth/login/finish", req),
     logout: () => call("POST", "/api/v1/auth/logout", {}),
     account: () => call("GET", "/api/v1/account"),
+    preferences: () => call("GET", "/api/v1/account/preferences"),
+    updatePreferences: (changes) => call("PUT", "/api/v1/account/preferences", changes),
     accountEvents: (limit = 50) => call("GET", `/api/v1/account/events?limit=${encodeURIComponent(limit)}`),
     passwordChangeStart: (req) => call("POST", "/api/v1/account/password/start", req),
     passwordChangeFinish: (req) => call("POST", "/api/v1/account/password/finish", req),
@@ -244,5 +397,25 @@ export function createClient(options: ClientOptions = {}): PassboxApi {
     putItem: (id, req) => call("PUT", `/api/v1/items/${encodeURIComponent(id)}`, req),
     deleteItem: (id, revision) =>
       call("DELETE", `/api/v1/items/${encodeURIComponent(id)}?revision=${encodeURIComponent(revision)}`),
+    adminSettings: () => call("GET", "/api/v1/admin/settings"),
+    updateAdminSettings: (settings) => call("PUT", "/api/v1/admin/settings", settings),
+    adminUsers: (query = {}) => call("GET", `/api/v1/admin/users${queryString(query)}`),
+    disableUser: (id) => call("POST", `/api/v1/admin/users/${encodeURIComponent(id)}/disable`, {}),
+    enableUser: (id) => call("POST", `/api/v1/admin/users/${encodeURIComponent(id)}/enable`, {}),
+    sendTestMail: (to) => call("POST", "/api/v1/admin/mail/test", to ? { to } : {}),
+    adminEvents: (query = {}) => call("GET", `/api/v1/admin/events${queryString(query)}`),
+    adminInvites: () => call("GET", "/api/v1/admin/invites"),
+    createInvite: (req) => call("POST", "/api/v1/admin/invites", req),
+    revokeInvite: (id) => call("DELETE", `/api/v1/admin/invites/${encodeURIComponent(id)}`),
   };
+}
+
+/** `?a=1&b=x` from the defined values, or `""`. */
+function queryString(params: Record<string, string | number | undefined>): string {
+  const search = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== "") search.set(key, String(value));
+  }
+  const query = search.toString();
+  return query ? `?${query}` : "";
 }
