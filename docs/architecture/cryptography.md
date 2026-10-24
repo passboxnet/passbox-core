@@ -37,6 +37,7 @@ Passbox uses OPAQUE (RFC 9807) with ristretto255, 3DH and SHA-512 (`opaque-ke`).
 - Login is a two-round protocol. The server keeps the login state between the rounds in the database (5 minutes, single use) and issues a random 256-bit session token after verifying the client. Only the SHA-256 hash of the token is stored. Sessions last 30 days.
 - Unknown emails get a stable fake prelogin answer and a fake OPAQUE response, so the API does not reveal which accounts exist. (Sign-up does reveal whether an email is taken.)
 - The web client performs a full OPAQUE login on every unlock and keeps the session token in memory only.
+- Online guessing is rate limited. Because every unlock is a login, a successful login also returns a random 256-bit device token (stored by the client, SHA-256 hash on the server, replaced on every login). A login that presents it is exempt from the per-email lockout, so failed attempts by someone who only knows the email cannot lock the user out of their devices. Without a device token, failures are limited per (email, IP) pair and, as a backstop, per email; see [Security behavior](../self-hosting.md#security-behavior).
 
 Code: [`crates/core/src/opaque.rs`](../../crates/core/src/opaque.rs), [`crates/server/src/api/auth.rs`](../../crates/server/src/api/auth.rs).
 

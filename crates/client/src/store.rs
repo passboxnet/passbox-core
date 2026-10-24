@@ -19,6 +19,10 @@ use crate::{Error, Result};
 pub const ACCOUNT_KEY: &str = "account";
 /// Key under which the encrypted offline cache is stored.
 pub const CACHE_KEY: &str = "cache";
+/// Key under which the server's device token is stored (UTF-8). It exempts
+/// this device from the server's per-email login lockout and grants no
+/// access by itself.
+pub const DEVICE_TOKEN_KEY: &str = "device_token";
 
 pub trait Store: Send + Sync {
     fn get(&self, key: &str) -> Result<Option<Vec<u8>>>;

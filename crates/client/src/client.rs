@@ -21,7 +21,7 @@ use crate::api::{
 };
 use crate::model::{DeviceAccount, Item, ItemData, Vault};
 use crate::security::{VaultHealth, analyze_vault};
-use crate::store::{ACCOUNT_KEY, CACHE_KEY, Store};
+use crate::store::{ACCOUNT_KEY, CACHE_KEY, DEVICE_TOKEN_KEY, Store};
 use crate::{Error, Result};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -431,6 +431,7 @@ impl Client {
     pub fn sign_out(&self) -> Result<()> {
         self.lock();
         self.store.delete(CACHE_KEY)?;
+        self.store.delete(DEVICE_TOKEN_KEY)?;
         self.store.delete(ACCOUNT_KEY)
     }
 
@@ -460,7 +461,14 @@ impl Client {
 
     fn opaque_login(&self, email: &str, auth_secret: &[u8; 32]) -> Result<String> {
         let (flow, request) = ClientLoginFlow::start(auth_secret)?;
-        let start = self.api.login_start(email, &encoding::encode(&request))?;
+        // The server ignores a token that does not belong to this account.
+        let device_token = self
+            .store
+            .get(DEVICE_TOKEN_KEY)?
+            .and_then(|bytes| String::from_utf8(bytes).ok());
+        let start =
+            self.api
+                .login_start(email, &encoding::encode(&request), device_token.as_deref())?;
         let finish = flow
             .finish(&encoding::decode(&start.credential_response)?)
             .map_err(|_| Error::InvalidCredentials)?;
@@ -469,15 +477,17 @@ impl Client {
             .lock()
             .unwrap_or_else(std::sync::PoisonError::into_inner)
             .clone();
-        Ok(self
-            .api
-            .login_finish(
-                &start.login_id,
-                &encoding::encode(&finish.finalization),
-                &device_name,
-                &client_kind,
-            )?
-            .token)
+        let response = self.api.login_finish(
+            &start.login_id,
+            &encoding::encode(&finish.finalization),
+            &device_name,
+            &client_kind,
+        )?;
+        if !response.device_token.is_empty() {
+            self.store
+                .put(DEVICE_TOKEN_KEY, response.device_token.as_bytes())?;
+        }
+        Ok(response.token)
     }
 
     /// Gets a new session token with the auth secret of the unlocked session.
