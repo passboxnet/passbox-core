@@ -9,10 +9,12 @@
 //!
 //! Build with `pnpm --filter @passbox/core-wasm build`.
 
+use passbox_core::aead::{KEY_LEN, SymmetricKey};
 use passbox_core::generator::{self, PasswordOptions};
 use passbox_core::kdf::{self, KdfParams, MasterKeys as CoreMasterKeys};
 use passbox_core::keyring::Keyring as CoreKeyring;
 use passbox_core::opaque::{ClientLoginFlow, ClientRegistrationFlow};
+use passbox_core::passkey::{self, Flags};
 use passbox_core::secret_key::SecretKey;
 use passbox_core::totp::Totp;
 use passbox_core::{Error, encoding, id};
@@ -93,6 +95,53 @@ pub fn totp_code(uri_or_secret: &str, unix_time: f64) -> Result<String, JsValue>
     .map_err(js_error)?;
     // Time values from JavaScript are non-negative and well within u64 range.
     Ok(totp.generate(unix_time.max(0.0) as u64))
+}
+
+// --- Passkeys ----------------------------------------------------------------
+
+/// Creates an ES256 passkey for `rp_id`. The caller must have checked the
+/// relying party ID against the requesting origin. Returns JSON with Base64url
+/// values: `{ credentialId, privateKey (PKCS#8), publicKeyCose, publicKeySpki,
+/// authenticatorData, attestationObject, algorithm }`.
+#[wasm_bindgen(js_name = passkeyCreate)]
+pub fn passkey_create(rp_id: &str) -> Result<String, JsValue> {
+    let created = passkey::create(rp_id, Flags::SYNCED).map_err(js_error)?;
+    Ok(serde_json::json!({
+        "credentialId": encoding::encode(&created.credential_id),
+        "privateKey": encoding::encode(&created.private_key_pkcs8),
+        "publicKeyCose": encoding::encode(&created.public_key_cose),
+        "publicKeySpki": encoding::encode(&created.public_key_spki),
+        "authenticatorData": encoding::encode(&created.authenticator_data),
+        "attestationObject": encoding::encode(&created.attestation_object),
+        "algorithm": passkey::ALG_ES256,
+    })
+    .to_string())
+}
+
+/// Signs a WebAuthn assertion with a stored passkey (`private_key`: PKCS#8,
+/// Base64url) over `authenticatorData || SHA-256(client_data_json)`. Returns
+/// JSON `{ authenticatorData, signature }` (Base64url, DER signature).
+#[wasm_bindgen(js_name = passkeyAssert)]
+pub fn passkey_assert(
+    private_key: &str,
+    rp_id: &str,
+    client_data_json: &str,
+    sign_count: u32,
+) -> Result<String, JsValue> {
+    let der = zeroize::Zeroizing::new(encoding::decode(private_key).map_err(js_error)?);
+    let assertion = passkey::assert(
+        &der,
+        rp_id,
+        client_data_json.as_bytes(),
+        sign_count,
+        Flags::SYNCED,
+    )
+    .map_err(js_error)?;
+    Ok(serde_json::json!({
+        "authenticatorData": encoding::encode(&assertion.authenticator_data),
+        "signature": encoding::encode(&assertion.signature),
+    })
+    .to_string())
 }
 
 // --- Keys ---------------------------------------------------------------------
@@ -236,6 +285,40 @@ impl Keyring {
             inner,
             encrypted_account_key: Some(encrypted_account_key.to_owned()),
         })
+    }
+
+    /// Restores a keyring exported with `exportSession`. Throws if the session
+    /// key, account ID or blob do not match.
+    #[wasm_bindgen(js_name = importSession)]
+    pub fn import_session(
+        session_key: &str,
+        account_id: &str,
+        blob: &str,
+    ) -> Result<Keyring, JsValue> {
+        let bytes = zeroize::Zeroizing::new(encoding::decode(session_key).map_err(js_error)?);
+        let key: [u8; KEY_LEN] = bytes
+            .as_slice()
+            .try_into()
+            .map_err(|_| JsValue::from(js_sys::Error::new("session key must be 32 bytes")))?;
+        let inner = CoreKeyring::import_session(&SymmetricKey::from_bytes(key), account_id, blob)
+            .map_err(js_error)?;
+        Ok(Self {
+            inner,
+            encrypted_account_key: None,
+        })
+    }
+
+    /// Exports the unlocked keys encrypted under a fresh session key. Returns
+    /// JSON `{ sessionKey, blob }` (Base64url). Keep both in memory-only
+    /// storage (for example `chrome.storage.session`) and delete them on lock.
+    #[wasm_bindgen(js_name = exportSession)]
+    pub fn export_session(&self) -> Result<String, JsValue> {
+        let (key, blob) = self.inner.export_session().map_err(js_error)?;
+        Ok(serde_json::json!({
+            "sessionKey": encoding::encode(key.as_bytes()),
+            "blob": blob,
+        })
+        .to_string())
     }
 
     /// The account key encrypted with the Account Unlock Key (Base64url).
