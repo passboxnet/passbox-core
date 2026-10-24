@@ -1,3 +1,14 @@
+import {
+  type DeviceLinkApi,
+  deviceLinkApi,
+  type EmergencyApi,
+  emergencyApi,
+  type RecoveryApi,
+  recoveryApi,
+} from "./recovery";
+
+export * from "./recovery";
+
 /** Argon2id cost parameters. Mirrors `passbox_core::kdf::KdfParams`. */
 export interface KdfParams {
   memoryKib: number;
@@ -222,7 +233,30 @@ export type AccountEventKind =
   | "vault_member_changed"
   | "vault_key_rotated"
   | "group_joined"
-  | "group_left";
+  | "group_left"
+  | "account_recovery_code_created"
+  | "account_recovery_code_removed"
+  | "account_recovery_failed"
+  | "account_recovered_code"
+  | "account_recovered_org"
+  | "org_recovery_enabled"
+  | "org_recovery_admin_added"
+  | "org_recovery_enrolled"
+  | "org_recovery_withdrawn"
+  | "org_recovery_requested"
+  | "org_recovery_approved"
+  | "org_recovery_denied"
+  | "org_member_recovered"
+  | "emergency_contact_added"
+  | "emergency_contact_removed"
+  | "emergency_invitation_accepted"
+  | "emergency_access_confirmed"
+  | "emergency_access_requested"
+  | "emergency_access_approved"
+  | "emergency_access_denied"
+  | "emergency_access_used"
+  | "device_link_created"
+  | "device_link_approved";
 
 export interface AccountEvent {
   id: string;
@@ -574,6 +608,12 @@ export interface PassboxApi extends AdminApi {
     req: { vaultId: string; revision: number; encryptedData: string; keyEpoch?: number },
   ): Promise<WriteResponse>;
   sharing: SharingApi;
+  /** Recovery code, organization recovery (wave C1/C2). */
+  recovery: RecoveryApi;
+  /** Emergency access (wave C3). */
+  emergency: EmergencyApi;
+  /** Adding a device by code (wave C4). */
+  deviceLinks: DeviceLinkApi;
   deleteItem(id: string, revision: number): Promise<WriteResponse>;
 }
 
@@ -650,6 +690,9 @@ export function createClient(options: ClientOptions = {}): PassboxApi {
     createInvite: (req) => call("POST", "/api/v1/admin/invites", req),
     revokeInvite: (id) => call("DELETE", `/api/v1/admin/invites/${encodeURIComponent(id)}`),
     sharing: sharingApi(call),
+    recovery: recoveryApi(call),
+    emergency: emergencyApi(call),
+    deviceLinks: deviceLinkApi(call),
   };
 }
 

@@ -13,6 +13,8 @@ import {
   type MailLocale,
   type OrgInvitationInfo,
   type PassboxApi,
+  type RecoveryGrant,
+  type RecoveryStatus,
   type SecondFactor,
   type SessionInfo,
   type SyncResponse,
@@ -31,6 +33,26 @@ import {
   parseVaultMeta,
   TRASH_RETENTION_MS,
 } from "./items";
+import {
+  type CodeRecoveryStart,
+  type DeviceLinkStart,
+  type DeviceLinkState,
+  type EmergencyContact,
+  type EmergencyVaults,
+  InvalidDeviceCodeError,
+  InvalidRecoveryCodeError,
+  type LinkedAccount,
+  ORG_RECOVERY_KEY,
+  type OrgRecoveryInfo,
+  type OrgRecoveryRequestStatus,
+  type PendingOrgRecovery,
+  RECOVERY_OPTIONS_KEY,
+  RecoveryExpiredError,
+  type RecoveryOptions,
+  type RecoveryRequest,
+  type RecoveryResult,
+  RecoveryVerificationError,
+} from "./recovery";
 import { analyzeVault, estimateStrength, type Strength, type VaultHealth } from "./security";
 import {
   type Invitation,
@@ -254,6 +276,17 @@ const TRUST_KEY = "passbox.trust";
  */
 const DEVICE_TOKEN_KEY = "passbox.deviceToken";
 
+/** Maps recovery error codes to typed errors. */
+function recoveryError(error: unknown): unknown {
+  if (error instanceof ApiError && error.code === "recovery_expired") return new RecoveryExpiredError();
+  return error;
+}
+
+function deviceLinkError(error: unknown): unknown {
+  if (error instanceof ApiError && error.code === "device_link_expired") return new InvalidDeviceCodeError();
+  return error;
+}
+
 function isInvalidCredentials(error: unknown): boolean {
   return (
     (error instanceof Error && error.name === "InvalidCredentialsError") ||
@@ -304,6 +337,15 @@ export class PassboxClient {
   private sharingView: SharingView = EMPTY_SHARING;
   private listeners = new Set<() => void>();
   private snapshot: ClientSnapshot;
+  /** A recovery by code waiting for its second factor. */
+  private pendingCodeRecovery: { grant: RecoveryGrant; keys: Core.RecoveryKeys } | undefined;
+  /** A proven recovery: the recovered account key and the token to set new credentials. */
+  private recovering: { grant: RecoveryGrant; keyring: Core.Keyring } | undefined;
+  private accountKeyCiphertextAfterRecovery: string | undefined;
+  /** Device links opened on this device, by link ID. */
+  private deviceLinkOffers = new Map<string, Core.DeviceLinkOffer>();
+  /** The device code this (new) device entered. */
+  private deviceLinkRequest: { request: Core.DeviceLinkRequest; claimToken: string } | undefined;
   /** Session token of the current unlock. */
   token: string | undefined;
 
@@ -1711,6 +1753,730 @@ export class PassboxClient {
   private async rotateGroup(orgId: string, groupId: string, removed: string[]): Promise<void> {
     const body = JSON.parse(this.requireKeyring().rotateGroup(groupId, JSON.stringify(removed), Date.now()));
     await this.api.sharing.rotateGroup(orgId, groupId, body);
+  }
+
+  // --- Recovery code (C2) ---------------------------------------------------------
+
+  /** Recovery options set up on the server (recovery code, organization escrows). */
+  async recoveryStatus(): Promise<RecoveryStatus> {
+    this.requireKeyring();
+    return this.api.recovery.status();
+  }
+
+  /**
+   * Creates a recovery code (replacing an earlier one) and returns it in
+   * display format. Show it once, for the Emergency Kit; it is not stored.
+   * Throws `ReauthenticationRequiredError` without a recent login.
+   */
+  async createRecoveryCode(): Promise<string> {
+    const keyring = this.requireKeyring();
+    const code = this.core.generateRecoveryCode();
+    const keys = this.core.RecoveryKeys.fromCode(code);
+    try {
+      const flow = this.core.RegistrationFlow.startRecovery(keys);
+      const { registrationResponse } = await this.twoFactorCall(() =>
+        this.api.recovery.codeStart({ registrationRequest: flow.request }),
+      );
+      const registrationUpload = flow.finish(registrationResponse);
+      flow.free();
+      await this.twoFactorCall(() =>
+        this.api.recovery.codeFinish({
+          registrationUpload,
+          wrappedAccountKey: keyring.wrapAccountKeyForRecovery(keys),
+        }),
+      );
+    } finally {
+      keys.free();
+    }
+    await this.refreshRecoveryOptions().catch(() => undefined);
+    return code;
+  }
+
+  /** Deletes the recovery code. Throws `ReauthenticationRequiredError` without a recent login. */
+  async removeRecoveryCode(): Promise<void> {
+    this.requireKeyring();
+    await this.twoFactorCall(() => this.api.recovery.codeDelete());
+    await this.refreshRecoveryOptions().catch(() => undefined);
+  }
+
+  /** Whether `input` is a complete recovery code (checked on the device, including the checksum). */
+  isRecoveryCode(input: string): boolean {
+    return this.core.isRecoveryCode(input);
+  }
+
+  /**
+   * What recovery options this device remembers for its account (also while
+   * locked, for "Forgot master password?"). `undefined` before the first
+   * unlock after the update.
+   */
+  get recoveryOptions(): RecoveryOptions | undefined {
+    const account = this.deviceAccount;
+    if (!account) return undefined;
+    const raw = this.storage.getItem(`${RECOVERY_OPTIONS_KEY}.${account.accountId}`);
+    if (!raw) return undefined;
+    try {
+      return JSON.parse(raw) as RecoveryOptions;
+    } catch {
+      return undefined;
+    }
+  }
+
+  /** Refreshes `recoveryOptions` from the server. Call after unlocking (best effort). */
+  async refreshRecoveryOptions(): Promise<RecoveryOptions> {
+    const keyring = this.requireKeyring();
+    const [status, emergency] = await Promise.all([
+      this.api.recovery.status(),
+      this.api.emergency.list().catch(() => ({ granted: [], received: [] })),
+    ]);
+    const names = new Map(this.sharingView.orgs.map((o) => [o.id, o.name ?? undefined]));
+    const options: RecoveryOptions = {
+      accountId: keyring.accountId,
+      recoveryCode: status.recoveryCode !== null,
+      orgs: status.orgEscrows.map((e) => ({ orgId: e.orgId, name: names.get(e.orgId) })),
+      emergencyContacts: emergency.granted.length + emergency.received.length,
+      updatedAt: Date.now(),
+    };
+    this.storage.setItem(`${RECOVERY_OPTIONS_KEY}.${keyring.accountId}`, JSON.stringify(options));
+    return options;
+  }
+
+  /**
+   * Starts recovering an account with its recovery code (while signed out or
+   * locked). A wrong code throws `InvalidCredentialsError`, a malformed one
+   * `InvalidRecoveryCodeError`. When the result names `twoFactorMethods`,
+   * finish with `completeRecoveryTwoFactor`; then `finishRecovery` sets the
+   * new master password.
+   */
+  async startCodeRecovery(email: string, recoveryCode: string): Promise<CodeRecoveryStart> {
+    this.cancelRecovery();
+    const { core } = this;
+    let keys: Core.RecoveryKeys;
+    try {
+      keys = core.RecoveryKeys.fromCode(recoveryCode);
+    } catch {
+      throw new InvalidRecoveryCodeError();
+    }
+    let grant: RecoveryGrant;
+    const flow = core.LoginFlow.startRecovery(keys);
+    try {
+      const start = await this.api.recovery.loginStart({
+        email: email.trim().toLowerCase(),
+        credentialRequest: flow.request,
+      });
+      let credentialFinalization: string;
+      try {
+        credentialFinalization = flow.finish(start.credentialResponse);
+      } catch (error) {
+        throw isInvalidCredentials(error) ? new InvalidCredentialsError() : error;
+      }
+      grant = await this.api.recovery.loginFinish({
+        loginId: start.loginId,
+        credentialFinalization,
+        ...(this.device ? { deviceName: this.device.name, clientKind: this.device.kind } : {}),
+      });
+    } catch (error) {
+      keys.free();
+      throw isInvalidCredentials(error) ? new InvalidCredentialsError() : error;
+    } finally {
+      flow.free();
+    }
+    if (grant.twoFactorMethods) {
+      this.pendingCodeRecovery = { grant, keys };
+      return { accountId: grant.accountId, email: grant.email, twoFactorMethods: grant.twoFactorMethods };
+    }
+    try {
+      this.openCodeRecovery(grant, keys);
+    } finally {
+      keys.free();
+    }
+    return { accountId: grant.accountId, email: grant.email };
+  }
+
+  /** The second factor of a recovery by code (`totp` code or a two-factor recovery code). */
+  async completeRecoveryTwoFactor(method: "totp" | "recovery", code: string): Promise<void> {
+    const pending = this.pendingCodeRecovery;
+    if (!pending) throw new RecoveryExpiredError();
+    let grant: RecoveryGrant;
+    try {
+      grant = await this.api.recovery.twoFactor({
+        recoveryToken: pending.grant.recoveryToken,
+        method,
+        code: code.replace(/\s/g, ""),
+      });
+    } catch (error) {
+      throw recoveryError(twoFactorError(error));
+    }
+    this.pendingCodeRecovery = undefined;
+    try {
+      this.openCodeRecovery(grant, pending.keys);
+    } finally {
+      pending.keys.free();
+    }
+  }
+
+  private openCodeRecovery(grant: RecoveryGrant, keys: Core.RecoveryKeys) {
+    if (!grant.wrappedAccountKey) throw new RecoveryExpiredError();
+    const keyring = this.core.Keyring.unlockWithRecovery(keys, grant.accountId, grant.wrappedAccountKey);
+    this.verifyRecoveredKeyring(keyring, grant);
+    this.recovering = { grant, keyring };
+  }
+
+  /** The recovered key must open the account's own key pairs (published in the key directory). */
+  private verifyRecoveredKeyring(keyring: Core.Keyring, grant: RecoveryGrant) {
+    if (!grant.accountKeys) return;
+    try {
+      keyring.loadAccountKeys(
+        grant.accountKeys.bundle,
+        grant.accountKeys.bundleSignature,
+        grant.accountKeys.encryptedPrivate,
+      );
+    } catch {
+      keyring.free();
+      throw new RecoveryVerificationError();
+    }
+  }
+
+  /** Whether a recovery is ready for `finishRecovery`. */
+  get recoveryReady(): boolean {
+    return this.recovering !== undefined;
+  }
+
+  /**
+   * Sets a new master password for the recovered account. Creates a new
+   * Secret Key and a new recovery code (the old ones stop working), signs
+   * out every other device and unlocks this one. Show the result in a new
+   * Emergency Kit.
+   */
+  async finishRecovery(newPassword: string): Promise<RecoveryResult> {
+    const recovering = this.recovering;
+    if (!recovering) throw new RecoveryExpiredError();
+    const { core } = this;
+    const { grant, keyring } = recovering;
+    const account: DeviceAccount = {
+      email: grant.email,
+      accountId: grant.accountId,
+      secretKey: core.generateSecretKey(),
+      kdfSalt: core.generateKdfSalt(),
+      kdfParams: JSON.parse(core.defaultKdfParams()) as KdfParams,
+    };
+    const keys = this.deriveKeys(account, newPassword);
+    const recoveryCode = core.generateRecoveryCode();
+    const codeKeys = core.RecoveryKeys.fromCode(recoveryCode);
+    try {
+      const registration = core.RegistrationFlow.start(keys);
+      const codeRegistration = core.RegistrationFlow.startRecovery(codeKeys);
+      let session: Awaited<ReturnType<PassboxApi["recovery"]["completeFinish"]>>;
+      try {
+        const start = await this.api.recovery.completeStart({
+          recoveryToken: grant.recoveryToken,
+          registrationRequest: registration.request,
+          recoveryRegistrationRequest: codeRegistration.request,
+        });
+        const registrationUpload = registration.finish(start.registrationResponse);
+        const codeUpload = codeRegistration.finish(start.recoveryRegistrationResponse ?? "");
+        const encryptedAccountKey = keyring.wrapAccountKey(keys);
+        session = await this.api.recovery.completeFinish({
+          recoveryToken: grant.recoveryToken,
+          registrationUpload,
+          kdfSalt: account.kdfSalt,
+          kdfParams: account.kdfParams,
+          encryptedAccountKey,
+          recoveryCode: {
+            registrationUpload: codeUpload,
+            wrappedAccountKey: keyring.wrapAccountKeyForRecovery(codeKeys),
+          },
+        });
+        this.accountKeyCiphertextAfterRecovery = encryptedAccountKey;
+      } catch (error) {
+        throw recoveryError(error);
+      } finally {
+        registration.free();
+        codeRegistration.free();
+      }
+      this.recovering = undefined;
+      this.clearSession();
+      this.storage.setItem(ACCOUNT_KEY, JSON.stringify(account));
+      if (session.deviceToken) this.storage.setItem(DEVICE_TOKEN_KEY, session.deviceToken);
+      this.storage.removeItem(ORG_RECOVERY_KEY);
+      this.keyring = keyring;
+      this.loadTrust(keyring, account.accountId);
+      this.accountKeyCiphertext = this.accountKeyCiphertextAfterRecovery;
+      this.token = session.token;
+      this.loginAt = Date.now();
+      await this.sync();
+      await this.refreshRecoveryOptions().catch(() => undefined);
+      return { accountId: account.accountId, email: account.email, secretKey: account.secretKey, recoveryCode };
+    } finally {
+      keys.free();
+      codeKeys.free();
+    }
+  }
+
+  /** Drops a recovery in progress (keys are wiped). */
+  cancelRecovery(): void {
+    this.pendingCodeRecovery?.keys.free();
+    this.pendingCodeRecovery = undefined;
+    this.recovering?.keyring.free();
+    this.recovering = undefined;
+  }
+
+  // --- Organization recovery (C1) -------------------------------------------------------
+
+  /** The organization's recovery setup, verified against its roster. */
+  async orgRecovery(orgId: string): Promise<OrgRecoveryInfo> {
+    const keyring = this.requireKeyring();
+    const state = await this.api.recovery.orgState(orgId);
+    const base: OrgRecoveryInfo = {
+      orgId,
+      available: false,
+      admins: [],
+      canApprove: false,
+      enrolled: state.escrow !== null && state.escrow.keyVersion === state.key?.keyVersion,
+      ...(state.escrow ? { enrolledAt: state.escrow.createdAt } : {}),
+      ...(state.enrolled ? { enrolledMembers: state.enrolled } : {}),
+      ...(state.pendingRequests !== undefined ? { pendingRequests: state.pendingRequests } : {}),
+    };
+    if (!state.key) return base;
+    try {
+      const info = JSON.parse(keyring.verifyOrgRecovery(orgId, JSON.stringify(state.key))) as {
+        keyVersion: number;
+        fingerprint: string;
+        admins: string[];
+        canApprove: boolean;
+      };
+      return { ...base, available: true, ...info };
+    } catch (error) {
+      return { ...base, problem: String(error) };
+    }
+  }
+
+  /** Sets up recovery for an organization (owners and admins); seals the recovery key for this account. */
+  async setUpOrgRecovery(orgId: string): Promise<void> {
+    const keyring = this.requireKeyring();
+    const state = await this.api.recovery.orgState(orgId);
+    const version = (state.key?.keyVersion ?? 0) + 1;
+    const body = JSON.parse(keyring.createOrgRecoveryKey(orgId, version, Date.now()));
+    await this.api.recovery.createOrgKey(orgId, body);
+  }
+
+  /** Lets another verified admin approve requests (this account must hold the key). */
+  async addRecoveryAdmin(orgId: string, adminId: string): Promise<void> {
+    const keyring = this.requireKeyring();
+    const state = await this.api.recovery.orgState(orgId);
+    if (!state.key) throw new Error("the organization has not set up recovery");
+    const body = JSON.parse(keyring.grantOrgRecovery(orgId, JSON.stringify(state.key), adminId, Date.now()));
+    await this.api.recovery.addOrgGrant(orgId, body);
+  }
+
+  /** Opts in: escrows the account key with the organization's verified recovery key. */
+  async enrollOrgRecovery(orgId: string): Promise<void> {
+    const keyring = this.requireKeyring();
+    const state = await this.api.recovery.orgState(orgId);
+    if (!state.key) throw new Error("the organization has not set up recovery");
+    const body = JSON.parse(keyring.enrollOrgRecovery(orgId, JSON.stringify(state.key), Date.now()));
+    await this.api.recovery.putEscrow(orgId, body);
+    await this.refreshRecoveryOptions().catch(() => undefined);
+  }
+
+  /** Opts out: deletes the escrow. */
+  async withdrawOrgRecovery(orgId: string): Promise<void> {
+    this.requireKeyring();
+    await this.api.recovery.deleteEscrow(orgId);
+    await this.refreshRecoveryOptions().catch(() => undefined);
+  }
+
+  /** Open requests (admins who hold the key), each with the code to compare with the member. */
+  async recoveryRequests(orgId: string): Promise<RecoveryRequest[]> {
+    this.requireKeyring();
+    const requests = await this.api.recovery.orgRequests(orgId);
+    return requests.map((r) => ({ ...r, requestCode: this.core.recoveryRequestCode(r.ephemeralKey) }));
+  }
+
+  /**
+   * Approves a request after the member's identity was verified out of band
+   * and the request code compared. This device briefly holds the member's
+   * account key while it re-seals it for the requesting device.
+   */
+  async approveRecoveryRequest(orgId: string, request: RecoveryRequest): Promise<void> {
+    const keyring = this.requireKeyring();
+    const state = await this.api.recovery.orgState(orgId);
+    if (!state.key) throw new Error("the organization has not set up recovery");
+    const { requestCode: _, email: __, ...record } = request;
+    const body = JSON.parse(keyring.approveOrgRecovery(JSON.stringify(state.key), JSON.stringify(record), Date.now()));
+    await this.api.recovery.approveRequest(orgId, request.id, body);
+  }
+
+  async denyRecoveryRequest(orgId: string, requestId: string): Promise<void> {
+    this.requireKeyring();
+    await this.api.recovery.denyRequest(orgId, requestId);
+  }
+
+  /**
+   * Asks the organization to recover the account (while signed out or
+   * locked). Keeps the request on this device; show `requestCode` and ask
+   * the member to read it to the admin.
+   */
+  async requestOrgRecovery(email: string, orgId?: string): Promise<PendingOrgRecovery> {
+    const key = this.core.RecoveryRequestKey.generate();
+    try {
+      const created = await this.api.recovery.orgRequest({
+        email: email.trim().toLowerCase(),
+        ...(orgId ? { orgId } : {}),
+        ephemeralKey: key.publicKey,
+        ...(this.device ? { deviceName: this.device.name } : {}),
+      });
+      const pending: PendingOrgRecovery = {
+        requestId: created.requestId,
+        requestToken: created.requestToken,
+        seed: key.seed,
+        email: email.trim().toLowerCase(),
+        ...(orgId ? { orgId } : {}),
+        requestCode: key.requestCode,
+        createdAt: Date.now(),
+        expiresAt: created.expiresAt,
+      };
+      this.storage.setItem(ORG_RECOVERY_KEY, JSON.stringify(pending));
+      return pending;
+    } finally {
+      key.free();
+    }
+  }
+
+  /** The organization recovery request this device is waiting for, if any. */
+  get pendingOrgRecovery(): PendingOrgRecovery | undefined {
+    const raw = this.storage.getItem(ORG_RECOVERY_KEY);
+    if (!raw) return undefined;
+    try {
+      const pending = JSON.parse(raw) as PendingOrgRecovery;
+      return pending.expiresAt > Date.now() ? pending : undefined;
+    } catch {
+      return undefined;
+    }
+  }
+
+  /**
+   * Checks the pending request. Once approved, opens the account key on this
+   * device (verified against the account's key pairs); then call
+   * `finishRecovery`.
+   */
+  async checkOrgRecovery(): Promise<OrgRecoveryRequestStatus> {
+    const pending = this.pendingOrgRecovery;
+    if (!pending) return "expired";
+    const status = await this.api.recovery.orgStatus({
+      requestId: pending.requestId,
+      requestToken: pending.requestToken,
+      ...(this.device ? { clientKind: this.device.kind } : {}),
+    });
+    if (status.status !== "approved") {
+      if (status.status !== "pending") this.storage.removeItem(ORG_RECOVERY_KEY);
+      return status.status;
+    }
+    if (!status.approved || !status.recovery) return "pending";
+    const key = this.core.RecoveryRequestKey.fromSeed(pending.seed);
+    try {
+      const keyring = key.open(JSON.stringify(status.approved));
+      this.verifyRecoveredKeyring(keyring, status.recovery);
+      this.recovering?.keyring.free();
+      this.recovering = { grant: status.recovery, keyring };
+    } finally {
+      key.free();
+    }
+    return "approved";
+  }
+
+  /** Withdraws the pending request. */
+  async cancelOrgRecovery(): Promise<void> {
+    const pending = this.pendingOrgRecovery;
+    this.storage.removeItem(ORG_RECOVERY_KEY);
+    if (pending) {
+      await this.api.recovery
+        .orgCancel({ requestId: pending.requestId, requestToken: pending.requestToken })
+        .catch(() => undefined);
+    }
+  }
+
+  // --- Emergency access (C3) -------------------------------------------------------------
+
+  /** People this account trusts (`granted`) and who trust it (`received`). */
+  async emergencyContacts(): Promise<{ granted: EmergencyContact[]; received: EmergencyContact[] }> {
+    this.requireKeyring();
+    return this.api.emergency.list();
+  }
+
+  /** Adds a trusted person by email (they get a mail and must accept). */
+  async addEmergencyContact(email: string, waitDays: number): Promise<string> {
+    this.requireKeyring();
+    const { id } = await this.api.emergency.create({ granteeEmail: email.trim().toLowerCase(), waitDays });
+    return id;
+  }
+
+  /**
+   * Seals the chosen personal vaults for an emergency contact who accepted.
+   * Looks their key up in the key directory first; returns the fingerprint
+   * the grantor can compare with them. Throws `KeyChanged` errors from the
+   * core when their key changed (accept it with `acceptKeyChange` first).
+   */
+  async confirmEmergencyContact(grantId: string, vaultIds: string[]): Promise<string> {
+    const keyring = this.requireKeyring();
+    const { granted } = await this.api.emergency.list();
+    const contact = granted.find((g) => g.id === grantId);
+    if (!contact?.granteeId) throw new Error("the emergency contact has not accepted yet");
+    await this.lookupKey(contact.granteeId);
+    const body = JSON.parse(
+      keyring.sealEmergencyAccess(
+        grantId,
+        contact.granteeId,
+        contact.waitDays,
+        JSON.stringify(vaultIds),
+        contact.version + 1,
+        Date.now(),
+      ),
+    ) as { fingerprint: string };
+    await this.api.emergency.confirm(grantId, body);
+    return body.fingerprint;
+  }
+
+  /**
+   * Seals emergency access again where vault keys changed or chosen vaults
+   * were deleted. Runs after unlocking (best effort); returns how many
+   * grants were updated.
+   */
+  async resealEmergencyAccess(): Promise<number> {
+    const keyring = this.requireKeyring();
+    const { granted } = await this.api.emergency.list();
+    let updated = 0;
+    for (const contact of granted) {
+      if (contact.status !== "confirmed" || !contact.grant || !contact.grantSignature || !contact.granteeId) continue;
+      const vaultIds = contact.vaultIds.filter((id) => {
+        const vault = this.vaults.get(id);
+        return vault !== undefined && !vault.orgId;
+      });
+      if (!keyring.emergencyResealNeeded(contact.grant, contact.grantSignature, JSON.stringify(vaultIds))) continue;
+      try {
+        await this.lookupKey(contact.granteeId);
+        const body = JSON.parse(
+          keyring.sealEmergencyAccess(
+            contact.id,
+            contact.granteeId,
+            contact.waitDays,
+            JSON.stringify(vaultIds),
+            contact.version + 1,
+            Date.now(),
+          ),
+        );
+        await this.api.emergency.confirm(contact.id, body);
+        updated += 1;
+      } catch (error) {
+        console.warn("Could not update emergency access", contact.id, error);
+      }
+    }
+    return updated;
+  }
+
+  async removeEmergencyContact(grantId: string): Promise<void> {
+    this.requireKeyring();
+    await this.api.emergency.remove(grantId);
+  }
+
+  async acceptEmergencyInvitation(grantId: string): Promise<void> {
+    this.requireKeyring();
+    await this.api.emergency.accept(grantId);
+  }
+
+  /** As the trusted person: starts the waiting period. */
+  async requestEmergencyAccess(grantId: string): Promise<void> {
+    this.requireKeyring();
+    await this.api.emergency.request(grantId);
+  }
+
+  /** As the grantor: releases access before the waiting period ends. */
+  async approveEmergencyAccess(grantId: string): Promise<void> {
+    this.requireKeyring();
+    await this.api.emergency.approve(grantId);
+  }
+
+  /** As the grantor: declines the request (or ends released access). */
+  async denyEmergencyAccess(grantId: string): Promise<void> {
+    this.requireKeyring();
+    await this.api.emergency.deny(grantId);
+  }
+
+  /**
+   * As the trusted person, after the release: fetches the grantor's chosen
+   * vaults, verifies the grantor's signature (key from the key directory)
+   * and decrypts them. Nothing is stored; the keys are wiped afterwards.
+   */
+  async openEmergencyAccess(grantId: string): Promise<EmergencyVaults> {
+    const keyring = this.requireKeyring();
+    const { received } = await this.api.emergency.list();
+    const contact = received.find((g) => g.id === grantId);
+    const data = await this.api.emergency.access(grantId);
+    await this.lookupKey(data.grantorId);
+    const keys = keyring.openEmergencyAccess(data.grant, data.grantSignature, data.sealedKeys);
+    const errors: string[] = [];
+    try {
+      const vaults = data.vaults.flatMap((v) => {
+        try {
+          return [{ id: v.id, name: parseVaultMeta(keys.decryptVaultMeta(v.id, v.keyEpoch, v.encryptedMeta)).name }];
+        } catch (error) {
+          errors.push(`Vault ${v.id}: ${String(error)}`);
+          return [];
+        }
+      });
+      const items = data.items.flatMap((item): Item[] => {
+        try {
+          const json = keys.decryptItem(item.vaultId, item.keyEpoch, item.id, item.revision, item.encryptedData);
+          return [
+            {
+              id: item.id,
+              vaultId: item.vaultId,
+              revision: item.revision,
+              updatedAt: item.updatedAt,
+              keyEpoch: item.keyEpoch,
+              data: parseItemData(json),
+            },
+          ];
+        } catch (error) {
+          errors.push(`Item ${item.id}: ${String(error)}`);
+          return [];
+        }
+      });
+      return {
+        grantorId: data.grantorId,
+        grantorEmail: contact?.grantorEmail ?? "",
+        vaults,
+        items: items
+          .filter((i) => i.data.trashedAt === undefined)
+          .sort((a, b) => a.data.title.localeCompare(b.data.title)),
+        errors,
+      };
+    } finally {
+      keys.free();
+    }
+  }
+
+  // --- Adding a device by code (C4) ------------------------------------------------------
+
+  /** On a signed-in device: opens a link and returns the code to show (valid 10 minutes). */
+  async startDeviceLink(): Promise<DeviceLinkStart> {
+    this.requireKeyring();
+    const link = await this.api.deviceLinks.create();
+    const offer = new this.core.DeviceLinkOffer(link.shortId);
+    this.deviceLinkOffers.get(link.id)?.free();
+    this.deviceLinkOffers.set(link.id, offer);
+    return { id: link.id, code: offer.code, expiresAt: link.expiresAt };
+  }
+
+  /** Whether the new device entered the code, and its name. */
+  async deviceLinkStatus(linkId: string): Promise<DeviceLinkState> {
+    this.requireKeyring();
+    try {
+      const info = await this.api.deviceLinks.get(linkId);
+      return {
+        status: info.status,
+        expiresAt: info.expiresAt,
+        ...(info.deviceName ? { deviceName: info.deviceName } : {}),
+        ...(info.ip ? { ip: info.ip } : {}),
+      };
+    } catch (error) {
+      throw deviceLinkError(error);
+    }
+  }
+
+  /**
+   * Sends the email, account ID and Secret Key to the new device, sealed to
+   * its key. Throws `InvalidDeviceCodeError` when the claim did not come from
+   * a device that knows the code (for example a swapped key).
+   */
+  async approveDeviceLink(linkId: string): Promise<void> {
+    this.requireKeyring();
+    const account = this.deviceAccount;
+    const offer = this.deviceLinkOffers.get(linkId);
+    if (!account || !offer) throw new InvalidDeviceCodeError();
+    try {
+      const info = await this.api.deviceLinks.get(linkId);
+      if (info.status !== "claimed" || !info.ephemeralKey || !info.mac) throw new InvalidDeviceCodeError();
+      const payload: LinkedAccount = {
+        email: account.email,
+        accountId: account.accountId,
+        secretKey: account.secretKey,
+      };
+      let sealed: string;
+      try {
+        sealed = offer.seal(info.ephemeralKey, info.mac, JSON.stringify(payload));
+      } catch {
+        throw new InvalidDeviceCodeError();
+      }
+      await this.api.deviceLinks.approve(linkId, sealed);
+    } catch (error) {
+      throw deviceLinkError(error);
+    } finally {
+      this.deviceLinkOffers.delete(linkId);
+      offer.free();
+    }
+  }
+
+  async cancelDeviceLink(linkId: string): Promise<void> {
+    this.deviceLinkOffers.get(linkId)?.free();
+    this.deviceLinkOffers.delete(linkId);
+    await this.api.deviceLinks.cancel(linkId).catch(() => undefined);
+  }
+
+  /** Whether `input` has the shape of a device code. */
+  isDeviceCode(input: string): boolean {
+    return this.core.isDeviceCode(input);
+  }
+
+  /** On the new device: answers the code shown on the signed-in device. */
+  async claimDeviceLink(code: string): Promise<void> {
+    let request: Core.DeviceLinkRequest;
+    try {
+      request = new this.core.DeviceLinkRequest(code);
+    } catch {
+      throw new InvalidDeviceCodeError();
+    }
+    try {
+      const claim = await this.api.deviceLinks.claim({
+        shortId: request.shortId,
+        ephemeralKey: request.publicKey,
+        mac: request.mac,
+        ...(this.device ? { deviceName: this.device.name } : {}),
+      });
+      this.deviceLinkRequest?.request.free();
+      this.deviceLinkRequest = { request, claimToken: claim.claimToken };
+    } catch (error) {
+      request.free();
+      throw deviceLinkError(error);
+    }
+  }
+
+  /**
+   * Polls for the approval. Returns the account details once approved (then
+   * sign in with them and the master password), `undefined` while waiting.
+   */
+  async pollDeviceLink(): Promise<LinkedAccount | undefined> {
+    const pending = this.deviceLinkRequest;
+    if (!pending) throw new InvalidDeviceCodeError();
+    let result: { status: string; sealedPayload?: string };
+    try {
+      result = await this.api.deviceLinks.poll(pending.claimToken);
+    } catch (error) {
+      throw deviceLinkError(error);
+    }
+    if (result.status !== "approved" || !result.sealedPayload) return undefined;
+    try {
+      const payload = JSON.parse(pending.request.open(result.sealedPayload)) as LinkedAccount;
+      return { email: payload.email, accountId: payload.accountId, secretKey: payload.secretKey };
+    } finally {
+      pending.request.free();
+      this.deviceLinkRequest = undefined;
+    }
+  }
+
+  /** Drops a device code this (new) device entered. */
+  cancelDeviceLinkClaim(): void {
+    this.deviceLinkRequest?.request.free();
+    this.deviceLinkRequest = undefined;
   }
 
   private async handleWriteError(error: unknown): Promise<never> {

@@ -35,6 +35,24 @@ export {
   templateFields,
   type VaultMeta,
 } from "./items";
+export {
+  type CodeRecoveryStart,
+  type DeviceLinkStart,
+  type DeviceLinkState,
+  type EmergencyContact,
+  type EmergencyVaults,
+  InvalidDeviceCodeError,
+  InvalidRecoveryCodeError,
+  type LinkedAccount,
+  type OrgRecoveryInfo,
+  type OrgRecoveryRequestStatus,
+  type PendingOrgRecovery,
+  RecoveryExpiredError,
+  type RecoveryOptions,
+  type RecoveryRequest,
+  type RecoveryResult,
+  RecoveryVerificationError,
+} from "./recovery";
 export { looksLikeRecoveryCode, secondFactorFromInput } from "./secondFactor";
 export {
   analyzeVault,
