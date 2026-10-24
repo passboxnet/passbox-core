@@ -16,6 +16,7 @@ pub mod service_account;
 pub mod store;
 
 pub use api::{AccountEvent, SecurityKeyInfo, SessionInfo, TotpSetup, TwoFactorStatus};
+pub use client::comfort::MoveOutcome;
 pub use client::developer::{AgentGrantRecord, ServiceAccountGrant, ServiceAccountInfo};
 pub use client::item_tools::{
     BreachRange, BreachedItem, BulkFailure, HibpRange, ItemHealth, ItemProblem, ItemUsage,
@@ -31,7 +32,10 @@ pub use client::sharing::{
 };
 pub use client::{Client, Connectivity, Status};
 pub use error::{Error, Result};
-pub use model::{DeviceAccount, FieldType, Item, ItemCategory, ItemData, ItemField, Vault, field};
+pub use model::{
+    Attachment, DeviceAccount, FieldType, Item, ItemCategory, ItemData, ItemField, Vault, field,
+    format,
+};
 pub use passbox_core::sharing::state::{
     DirectoryLookup, GroupView, MemberView, OrgView, SharedVaultView, SharingView, VaultMemberView,
     Warning,

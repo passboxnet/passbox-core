@@ -15,6 +15,7 @@ use passbox_core::totp::Totp;
 uniffi::setup_scaffolding!();
 
 mod admin;
+mod comfort;
 mod recovery;
 mod sharing;
 pub use recovery::*;
@@ -170,6 +171,10 @@ pub struct ItemField {
     pub label: String,
     pub field_type: FieldType,
     pub value: String,
+    /// Display format: `date` (YYYY-MM-DD), `monthYear` (MM/YYYY), `phone`
+    /// or `multiline`; `None` for plain. Keep it when saving.
+    #[uniffi(default = None)]
+    pub format: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
@@ -183,6 +188,11 @@ pub struct ItemData {
     /// Fields unknown to this version (for example passkeys), as a JSON
     /// object. Pass it back unchanged when saving.
     pub extra_json: String,
+    /// The stored category name (`login`, `wifi`, `sshKey`, …), also for
+    /// categories `category` cannot express (those are `Other` there).
+    /// Pass it back unchanged so saving keeps the category.
+    #[uniffi(default = "")]
+    pub category_name: String,
 }
 
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
@@ -200,6 +210,13 @@ pub struct Item {
     /// Unix milliseconds when the item was created (0 if unknown).
     #[uniffi(default = 0)]
     pub created_at: i64,
+    /// Unix milliseconds when the item was archived (hidden from lists
+    /// and autofill, see `archive_item`).
+    #[uniffi(default = None)]
+    pub archived_at: Option<i64>,
+    /// Files attached to the item (see `add_attachment`).
+    #[uniffi(default = [])]
+    pub attachments: Vec<comfort::Attachment>,
 }
 
 /// An earlier version of an item ("Eintragsverlauf").
@@ -401,8 +418,8 @@ fn category_to_ffi(category: client::ItemCategory) -> ItemCategory {
         client::ItemCategory::Card => ItemCategory::Card,
         client::ItemCategory::Identity => ItemCategory::Identity,
         client::ItemCategory::Other => ItemCategory::Other,
-        // Not in the mobile apps yet; shown there as "Other".
-        client::ItemCategory::Environment => ItemCategory::Other,
+        // The others are `Other` here; `ItemData.category_name` names them.
+        _ => ItemCategory::Other,
     }
 }
 
@@ -437,7 +454,12 @@ fn field_type_from_ffi(field_type: FieldType) -> client::FieldType {
 }
 
 fn data_to_ffi(data: client::ItemData) -> ItemData {
+    let category_name = data.category_name().to_owned();
+    let mut data = data;
+    // The name of an unknown category travels in `category_name`.
+    data.extra.remove("category");
     ItemData {
+        category_name,
         category: category_to_ffi(data.category),
         title: data.title,
         fields: data
@@ -448,6 +470,7 @@ fn data_to_ffi(data: client::ItemData) -> ItemData {
                 label: f.label,
                 field_type: field_type_to_ffi(f.field_type),
                 value: f.value,
+                format: f.format,
             })
             .collect(),
         notes: data.notes,
@@ -470,9 +493,10 @@ fn data_from_ffi(data: ItemData) -> Result<client::ItemData> {
             }
         }
     };
-    Ok(client::ItemData {
+    let category = category_from_ffi(data.category);
+    let mut out = client::ItemData {
         v: 1,
-        category: category_from_ffi(data.category),
+        category,
         title: data.title,
         fields: data
             .fields
@@ -482,13 +506,22 @@ fn data_from_ffi(data: ItemData) -> Result<client::ItemData> {
                 label: f.label,
                 field_type: field_type_from_ffi(f.field_type),
                 value: f.value,
+                format: f.format.filter(|f| !f.is_empty()),
             })
             .collect(),
         notes: data.notes,
         tags: data.tags,
         favorite: data.favorite,
         extra,
-    })
+    };
+    // `Other` from an app that cannot express the category: keep the name.
+    if category == client::ItemCategory::Other {
+        let name = data.category_name.trim();
+        if !name.is_empty() {
+            out.set_category_name(name);
+        }
+    }
+    Ok(out)
 }
 
 fn item_to_ffi(item: client::Item) -> Item {
@@ -508,6 +541,13 @@ fn item_to_ffi(item: client::Item) -> Item {
             })
             .collect(),
         created_at: item.created_at,
+        archived_at: item.data.archived_at(),
+        attachments: item
+            .data
+            .attachments()
+            .into_iter()
+            .map(comfort::attachment_to_ffi)
+            .collect(),
         data: data_to_ffi(item.data),
     }
 }

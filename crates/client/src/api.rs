@@ -32,7 +32,7 @@ impl Default for HttpTransport {
     fn default() -> Self {
         let config = ureq::Agent::config_builder()
             .http_status_as_error(false)
-            .timeout_global(Some(Duration::from_secs(30)))
+            .timeout_global(Some(Duration::from_secs(120)))
             .tls_config(
                 ureq::tls::TlsConfig::builder()
                     .root_certs(ureq::tls::RootCerts::PlatformVerifier)
@@ -75,7 +75,7 @@ impl Transport for HttpTransport {
         let bytes = response
             .body_mut()
             .with_config()
-            .limit(64 * 1024 * 1024)
+            .limit(256 * 1024 * 1024)
             .read_to_vec()
             .map_err(network)?;
         Ok((status, bytes))
@@ -305,6 +305,38 @@ fn rate_limited_message(message: String, details: Option<&Value>) -> String {
     }
 }
 
+/// The error for a failed request to `path`.
+fn error_for(path: &str, status: u16, bytes: &[u8]) -> Error {
+    let parsed: Option<ErrorBody> = serde_json::from_slice(bytes).ok();
+    let (code, message) = parsed
+        .map(|b| {
+            let message = if b.error == "rate_limited" {
+                rate_limited_message(b.message, b.details.as_ref())
+            } else {
+                b.message
+            };
+            (b.error, message)
+        })
+        .unwrap_or_else(|| (String::new(), String::from_utf8_lossy(bytes).into_owned()));
+    match code.as_str() {
+        "invalid_credentials" => Error::InvalidCredentials,
+        "invalid_two_factor_code" => Error::InvalidTwoFactorCode,
+        "two_factor_expired" => Error::TwoFactorExpired,
+        "conflict"
+            if path.starts_with("/api/v1/items")
+                || path.starts_with("/api/v1/vaults/")
+                || path.starts_with("/api/v1/service-account/items") =>
+        {
+            Error::Conflict
+        }
+        _ => Error::Server {
+            status,
+            code,
+            message,
+        },
+    }
+}
+
 /// Typed wrapper around a [`Transport`] for one server.
 pub struct Api {
     base_url: String,
@@ -335,34 +367,7 @@ impl Api {
             self.transport
                 .send(method, &format!("{}{path}", self.base_url), token, body)?;
         if !(200..300).contains(&status) {
-            let parsed: Option<ErrorBody> = serde_json::from_slice(&bytes).ok();
-            let (code, message) = parsed
-                .map(|b| {
-                    let message = if b.error == "rate_limited" {
-                        rate_limited_message(b.message, b.details.as_ref())
-                    } else {
-                        b.message
-                    };
-                    (b.error, message)
-                })
-                .unwrap_or_else(|| (String::new(), String::from_utf8_lossy(&bytes).into_owned()));
-            return Err(match code.as_str() {
-                "invalid_credentials" => Error::InvalidCredentials,
-                "invalid_two_factor_code" => Error::InvalidTwoFactorCode,
-                "two_factor_expired" => Error::TwoFactorExpired,
-                "conflict"
-                    if path.starts_with("/api/v1/items")
-                        || path.starts_with("/api/v1/vaults/")
-                        || path.starts_with("/api/v1/service-account/items") =>
-                {
-                    Error::Conflict
-                }
-                _ => Error::Server {
-                    status,
-                    code,
-                    message,
-                },
-            });
+            return Err(error_for(path, status, &bytes));
         }
         let bytes = if bytes.is_empty() {
             b"null".to_vec()
@@ -705,6 +710,44 @@ impl Api {
                 code: String::new(),
                 message: String::from_utf8_lossy(&bytes).into_owned(),
             }),
+        }
+    }
+
+    /// `PUT /api/v1/attachments/{id}?itemId=…` with the encrypted blob.
+    pub fn upload_attachment(
+        &self,
+        token: &str,
+        id: &str,
+        item_id: &str,
+        blob: Vec<u8>,
+    ) -> Result<()> {
+        let path = format!("/api/v1/attachments/{id}?itemId={item_id}");
+        let (status, bytes) = self.transport.send(
+            "PUT",
+            &format!("{}{path}", self.base_url),
+            Some(token),
+            Some(blob),
+        )?;
+        if (200..300).contains(&status) {
+            Ok(())
+        } else {
+            Err(error_for(&path, status, &bytes))
+        }
+    }
+
+    /// `GET /api/v1/attachments/{id}`: the encrypted blob.
+    pub fn download_attachment(&self, token: &str, id: &str) -> Result<Vec<u8>> {
+        let path = format!("/api/v1/attachments/{id}");
+        let (status, bytes) = self.transport.send(
+            "GET",
+            &format!("{}{path}", self.base_url),
+            Some(token),
+            None,
+        )?;
+        if (200..300).contains(&status) {
+            Ok(bytes)
+        } else {
+            Err(error_for(&path, status, &bytes))
         }
     }
 

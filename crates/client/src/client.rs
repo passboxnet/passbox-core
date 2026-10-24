@@ -4,6 +4,7 @@
 //! All methods take `&self`; an internal lock serializes operations.
 
 mod agent;
+pub mod comfort;
 pub mod developer;
 pub mod item_tools;
 pub mod recovery;
@@ -225,10 +226,20 @@ impl Client {
         Ok(vaults)
     }
 
-    /// Items sorted by title.
-    /// Items sorted by title, without those in the trash.
+    /// Items sorted by title, without those in the trash or the archive.
     pub fn items(&self) -> Result<Vec<Item>> {
-        self.items_where(|item| item.data.trashed_at().is_none())
+        self.items_where(|item| {
+            item.data.trashed_at().is_none() && item.data.archived_at().is_none()
+        })
+    }
+
+    /// Archived items (not in the trash), most recently archived first.
+    pub fn archived_items(&self) -> Result<Vec<Item>> {
+        let mut items = self.items_where(|item| {
+            item.data.trashed_at().is_none() && item.data.archived_at().is_some()
+        })?;
+        items.sort_by_key(|i| std::cmp::Reverse(i.data.archived_at()));
+        Ok(items)
     }
 
     /// Items in the trash, most recently trashed first.
@@ -1364,6 +1375,16 @@ fn apply_delta(session: &mut Session, mut delta: SyncResponse) -> Vec<WrappedKey
         let data = match (&item.encrypted_data, item.deleted) {
             (Some(encrypted), false) => encrypted,
             _ => {
+                // A tombstone from a vault the item moved out of: ignore it
+                // when this device already has the item in its new vault.
+                if session
+                    .cache
+                    .items
+                    .get(&item.id)
+                    .is_some_and(|cached| cached.vault_id != item.vault_id)
+                {
+                    continue;
+                }
                 session.items.remove(&item.id);
                 session.cache.items.remove(&item.id);
                 continue;
@@ -1408,11 +1429,19 @@ fn apply_delta(session: &mut Session, mut delta: SyncResponse) -> Vec<WrappedKey
     uploads
 }
 
-/// The next version of an item: `data`, with the password history and trash
-/// state of the stored version `current` (a replaced password is added to
-/// the history).
+/// The next version of an item: `data`, with the password history, trash
+/// and archive state and attachments of the stored version `current` (a
+/// replaced password is added to the history). Those have their own calls;
+/// keeping them here means an editor working on an older copy cannot undo
+/// them. A category this version does not know is kept when `data` says
+/// "other" (for example from an app that only knows the older categories).
 pub(crate) fn next_version(current: &ItemData, data: &ItemData) -> ItemData {
     let mut data = data.clone();
+    if data.category_name() == "other" && current.category_name() != "other" {
+        data.set_category_name(current.category_name());
+    }
+    data.set_archived_at(current.archived_at());
+    data.set_attachments(&current.attachments());
     let mut history = current.password_history();
     if let Some(old) = current.field(field::PASSWORD)
         && data.field(field::PASSWORD) != Some(old)
