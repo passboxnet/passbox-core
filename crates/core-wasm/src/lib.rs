@@ -134,9 +134,12 @@ pub fn totp_code(uri_or_secret: &str, unix_time: f64) -> Result<String, JsValue>
 /// relying party ID against the requesting origin. Returns JSON with Base64url
 /// values: `{ credentialId, privateKey (PKCS#8), publicKeyCose, publicKeySpki,
 /// authenticatorData, attestationObject, algorithm }`.
+///
+/// `user_verified` sets the UV flag. Pass `true` only when the user entered
+/// the master password (or used biometrics) for this very operation.
 #[wasm_bindgen(js_name = passkeyCreate)]
-pub fn passkey_create(rp_id: &str) -> Result<String, JsValue> {
-    let created = passkey::create(rp_id, Flags::SYNCED).map_err(js_error)?;
+pub fn passkey_create(rp_id: &str, user_verified: bool) -> Result<String, JsValue> {
+    let created = passkey::create(rp_id, Flags::synced(user_verified)).map_err(js_error)?;
     Ok(serde_json::json!({
         "credentialId": encoding::encode(&created.credential_id),
         "privateKey": encoding::encode(&created.private_key_pkcs8),
@@ -152,12 +155,14 @@ pub fn passkey_create(rp_id: &str) -> Result<String, JsValue> {
 /// Signs a WebAuthn assertion with a stored passkey (`private_key`: PKCS#8,
 /// Base64url) over `authenticatorData || SHA-256(client_data_json)`. Returns
 /// JSON `{ authenticatorData, signature }` (Base64url, DER signature).
+/// `user_verified` sets the UV flag, as for `passkeyCreate`.
 #[wasm_bindgen(js_name = passkeyAssert)]
 pub fn passkey_assert(
     private_key: &str,
     rp_id: &str,
     client_data_json: &str,
     sign_count: u32,
+    user_verified: bool,
 ) -> Result<String, JsValue> {
     let der = zeroize::Zeroizing::new(encoding::decode(private_key).map_err(js_error)?);
     let assertion = passkey::assert(
@@ -165,7 +170,7 @@ pub fn passkey_assert(
         rp_id,
         client_data_json.as_bytes(),
         sign_count,
-        Flags::SYNCED,
+        Flags::synced(user_verified),
     )
     .map_err(js_error)?;
     Ok(serde_json::json!({
