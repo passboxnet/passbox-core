@@ -22,4 +22,12 @@ export {
   templateFields,
   type VaultMeta,
 } from "./items";
+export {
+  analyzeVault,
+  estimateStrength,
+  type ItemLike,
+  type Strength,
+  type StrengthScore,
+  type VaultHealth,
+} from "./security";
 export { type KeyValueStorage, memoryStorage } from "./storage";

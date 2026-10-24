@@ -55,6 +55,13 @@ describe.skipIf(!serverUrl)("PassboxClient against a server", () => {
     await expect(phone.updateItem(itemId, { ...data, title: "GitHub (phone)" })).rejects.toBeInstanceOf(ConflictError);
     expect(phone.getSnapshot().items.find((item) => item.id === itemId)?.data.title).toBe("GitHub (work)");
 
+    // Vaults can be added and renamed from any device.
+    const workId = await phone.createVault("Work");
+    await laptop.sync();
+    await laptop.renameVault(workId, "Office");
+    await phone.sync();
+    expect(phone.getSnapshot().vaults.map((v) => v.name)).toEqual(["Office", "Private"]);
+
     await phone.deleteItem(itemId);
     await laptop.sync();
     expect(laptop.getSnapshot().items).toHaveLength(0);

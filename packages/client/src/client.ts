@@ -337,6 +337,36 @@ export class PassboxClient {
 
   // --- Editing -----------------------------------------------------------------
 
+  /** Creates a new vault and returns its ID. */
+  async createVault(name: string): Promise<string> {
+    const keyring = this.requireKeyring();
+    const vault = JSON.parse(keyring.createVault(JSON.stringify({ name }))) as {
+      id: string;
+      encryptedKey: string;
+      encryptedMeta: string;
+    };
+    await this.api.createVault(vault);
+    await this.sync();
+    return vault.id;
+  }
+
+  /** Renames a vault. */
+  async renameVault(id: string, name: string): Promise<void> {
+    const keyring = this.requireKeyring();
+    const vault = this.vaults.get(id);
+    if (!vault) throw new Error("unknown vault");
+    const revision = vault.revision + 1;
+    try {
+      await this.api.updateVault(id, {
+        revision,
+        encryptedMeta: keyring.encryptVaultMeta(id, JSON.stringify({ name })),
+      });
+    } catch (error) {
+      await this.handleWriteError(error);
+    }
+    await this.sync();
+  }
+
   /** Creates an item and returns its ID. */
   async createItem(vaultId: string, data: ItemData): Promise<string> {
     const id = this.core.newId();
