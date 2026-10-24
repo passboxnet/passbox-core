@@ -147,6 +147,23 @@ describe.skipIf(!serverUrl)("PassboxClient against a server", () => {
     expect(client.getSnapshot().trash).toHaveLength(0);
   }, 30_000);
 
+  it("keeps a device token that every login replaces and sign out removes", async () => {
+    const storage = memoryStorage();
+    let client: PassboxClient | undefined;
+    const api = createClient({ baseUrl: serverUrl ?? "", getToken: () => client?.token });
+    client = new PassboxClient({ core, api, storage });
+    await client.signUp(`${core.newId()}@example.com`, "pw-123456");
+    const first = storage.getItem("passbox.deviceToken");
+    expect(first).toBeTruthy();
+    client.lock();
+    await client.unlock("pw-123456");
+    const second = storage.getItem("passbox.deviceToken");
+    expect(second).toBeTruthy();
+    expect(second).not.toBe(first);
+    client.signOut();
+    expect(storage.getItem("passbox.deviceToken")).toBeNull();
+  });
+
   it("rejects a wrong Secret Key", async () => {
     const email = `${core.newId()}@example.com`;
     await newClient().signUp(email, "pw-123456");

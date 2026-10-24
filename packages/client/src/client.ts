@@ -93,6 +93,12 @@ export class ConflictError extends Error {
 }
 
 const ACCOUNT_KEY = "passbox.account";
+/**
+ * The server's device token for this device. It exempts the device from the
+ * per-email login lockout (so failed logins by someone else cannot block
+ * unlocking) and grants no access by itself. Every login replaces it.
+ */
+const DEVICE_TOKEN_KEY = "passbox.deviceToken";
 
 function isInvalidCredentials(error: unknown): boolean {
   return (
@@ -372,6 +378,7 @@ export class PassboxClient {
   signOut(): void {
     this.lock();
     this.storage.removeItem(ACCOUNT_KEY);
+    this.storage.removeItem(DEVICE_TOKEN_KEY);
     this.emit();
   }
 
@@ -403,13 +410,21 @@ export class PassboxClient {
   private async login(account: DeviceAccount, keys: Core.MasterKeys): Promise<void> {
     const flow = this.core.LoginFlow.start(keys);
     try {
-      const start = await this.api.loginStart({ email: account.email, credentialRequest: flow.request });
+      // The server ignores a device token that belongs to another account.
+      const deviceToken = this.storage.getItem(DEVICE_TOKEN_KEY) ?? undefined;
+      const start = await this.api.loginStart({
+        email: account.email,
+        credentialRequest: flow.request,
+        ...(deviceToken ? { deviceToken } : {}),
+      });
       const credentialFinalization = flow.finish(start.credentialResponse);
-      const { token } = await this.api.loginFinish({
+      const finish = await this.api.loginFinish({
         loginId: start.loginId,
         credentialFinalization,
         ...(this.device ? { deviceName: this.device.name, clientKind: this.device.kind } : {}),
       });
+      const { token } = finish;
+      if (finish.deviceToken) this.storage.setItem(DEVICE_TOKEN_KEY, finish.deviceToken);
       this.clearSession();
       this.token = token;
       const remote = await this.api.account();

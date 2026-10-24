@@ -111,6 +111,10 @@ pub struct LoginFinishResponse {
     pub token: String,
     #[serde(default)]
     pub session_id: String,
+    /// Replaces the device token sent with `login_start`. Empty if the
+    /// server is too old to issue one.
+    #[serde(default)]
+    pub device_token: String,
 }
 
 /// A signed-in device (see `GET /api/v1/sessions`).
@@ -274,13 +278,19 @@ impl Api {
         Ok(())
     }
 
-    pub fn login_start(&self, email: &str, request: &str) -> Result<LoginStartResponse> {
-        self.call(
-            "POST",
-            "/api/v1/auth/login/start",
-            None,
-            Some(serde_json::json!({ "email": email, "credentialRequest": request })),
-        )
+    /// Starts a login. `device_token` is the token from this device's last
+    /// successful login, which exempts it from the per-email lockout.
+    pub fn login_start(
+        &self,
+        email: &str,
+        request: &str,
+        device_token: Option<&str>,
+    ) -> Result<LoginStartResponse> {
+        let mut body = serde_json::json!({ "email": email, "credentialRequest": request });
+        if let Some(device_token) = device_token {
+            body["deviceToken"] = device_token.into();
+        }
+        self.call("POST", "/api/v1/auth/login/start", None, Some(body))
     }
 
     pub fn login_finish(

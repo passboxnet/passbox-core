@@ -48,6 +48,12 @@ export interface LoginFinishResponse {
   accountId: string;
   sessionId: string;
   expiresAt: number;
+  /**
+   * Store it on the device and send it with the next `loginStart`; it
+   * replaces the token sent there. It exempts the device from the per-email
+   * login lockout and grants no access by itself.
+   */
+  deviceToken: string;
 }
 
 export type ClientKind = "web" | "extension" | "desktop" | "ios" | "android" | "cli";
@@ -158,7 +164,12 @@ export interface PassboxApi {
     registrationResponse: string;
   }>;
   registerFinish(req: RegisterFinishRequest): Promise<{ accountId: string }>;
-  loginStart(req: { email: string; credentialRequest: string }): Promise<LoginStartResponse>;
+  loginStart(req: {
+    email: string;
+    credentialRequest: string;
+    /** The device token from this device's last successful login. */
+    deviceToken?: string;
+  }): Promise<LoginStartResponse>;
   loginFinish(req: {
     loginId: string;
     credentialFinalization: string;
