@@ -122,6 +122,15 @@ Code: [`crates/core/src/passkey.rs`](../../crates/core/src/passkey.rs), [`apps/e
 
 The account key stays the same, so vaults and items are untouched. The client derives new master keys (new salt; the Secret Key stays), registers new OPAQUE credentials and uploads the account key wrapped with the new AUK (`Keyring::wrap_account_key`). The server only accepts this from a session created by a login within the last 10 minutes and signs out every other device.
 
+## Account recovery, emergency access and device codes (implemented)
+
+The master password cannot be reset. Recovery works through a second, independent way to the account key; the account key itself never changes. Details, formats and the threat model are in [recovery.md](recovery.md).
+
+- **Personal recovery code:** 256 random bits (`R1-…`, Crockford Base32 with a checksum) in the Emergency Kit. It wraps the account key with `HKDF(R, "passbox/v1/recovery-code")` and authenticates through a second OPAQUE record. A recovery sets a new master password, a **new Secret Key** and a new recovery code and signs out every device. Not to be confused with the two-factor recovery codes above, which only replace a second factor.
+- **Organization recovery:** an organization X-Wing recovery key, sealed to recovery admins; members opt in by sealing their account key to it (signed escrow). An approved request is re-sealed to an ephemeral key of the requesting device after an out-of-band identity check. The approving admin's client holds the member's account key briefly.
+- **Emergency access:** a vault-key bundle sealed to a trusted person's directory key (fingerprint checked), released by the server after a signed waiting period (1–30 days) unless the owner denies it. The server enforces the waiting period.
+- **Device codes:** the Secret Key and email move to a new device over an X-Wing seal with a code-derived MAC; the master password is never transferred.
+
 ## Known gaps
 
 - A server can still withhold changes or replay an entire older state of an item (old revision with its matching ciphertext). The signed revision chain below closes this.
@@ -149,5 +158,5 @@ Code: [`crates/core/src/aead.rs`](../../crates/core/src/aead.rs).
 | Key rotation | Account key version 2 and owner transfer; hybrid ML-DSA signatures |
 | Rollback protection | Signed revision chain per vault; clients remember the latest revision they have seen |
 | Metadata | Titles, URLs, tags and field names are encrypted; the server only sees IDs, sizes, timestamps and revisions |
-| SSO unlock | Trusted device keys (TPM, Secure Enclave or WebAuthn PRF) plus organization recovery split across administrators with Shamir secret sharing |
+| SSO unlock | Trusted device keys (TPM, Secure Enclave or WebAuthn PRF); organization recovery split across administrators with Shamir secret sharing (single-admin organization recovery is implemented, see [recovery.md](recovery.md)) |
 | Passkey unlock | WebAuthn PRF extension as an alternative to the master password |
