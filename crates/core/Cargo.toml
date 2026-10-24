@@ -1,0 +1,27 @@
+[package]
+name = "passbox-core"
+description = "Passbox cryptographic core: key derivation, encryption, TOTP and password generation."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+argon2.workspace = true
+chacha20poly1305.workspace = true
+data-encoding.workspace = true
+getrandom.workspace = true
+hkdf.workspace = true
+hmac.workspace = true
+serde.workspace = true
+sha1.workspace = true
+sha2.workspace = true
+thiserror.workspace = true
+zeroize.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true
+
+[lints]
+workspace = true

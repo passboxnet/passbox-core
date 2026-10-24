@@ -1,0 +1,46 @@
+[workspace]
+resolver = "3"
+members = ["crates/core", "crates/core-wasm", "crates/server", "crates/cli"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+repository = "https://github.com/relationsoftware/passbox"
+rust-version = "1.85"
+
+[workspace.dependencies]
+passbox-core = { path = "crates/core" }
+
+anyhow = "1"
+argon2 = { version = "0.6", default-features = false, features = ["alloc"] }
+axum = "0.8"
+chacha20poly1305 = "0.11"
+clap = { version = "4", features = ["derive", "env"] }
+data-encoding = "2"
+getrandom = "0.4"
+hkdf = "0.13"
+hmac = "0.13"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha1 = "0.11"
+sha2 = "0.11"
+thiserror = "2"
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "net", "signal"] }
+tower = "0.5"
+tower-http = { version = "0.7", features = ["fs", "trace", "cors"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+wasm-bindgen = "0.2"
+zeroize = { version = "1", features = ["derive"] }
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true

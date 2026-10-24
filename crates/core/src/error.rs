@@ -1,0 +1,26 @@
+use thiserror::Error;
+
+/// Errors returned by the Passbox core.
+#[derive(Debug, Error, PartialEq, Eq)]
+pub enum Error {
+    #[error("the operating system random number generator failed")]
+    Random,
+    #[error("key derivation failed: {0}")]
+    Kdf(String),
+    #[error("key derivation parameters are below the allowed minimum")]
+    WeakKdfParams,
+    #[error("invalid secret key")]
+    InvalidSecretKey,
+    #[error("malformed envelope")]
+    MalformedEnvelope,
+    #[error("unsupported envelope version or algorithm")]
+    UnsupportedEnvelope,
+    #[error("decryption failed")]
+    Decryption,
+    #[error("invalid one-time password configuration: {0}")]
+    InvalidOtp(&'static str),
+    #[error("invalid generator options: {0}")]
+    InvalidGeneratorOptions(&'static str),
+}
+
+pub type Result<T> = core::result::Result<T, Error>;

@@ -1,0 +1,23 @@
+[package]
+name = "passbox-core-wasm"
+description = "WebAssembly bindings for the Passbox core."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+passbox-core.workspace = true
+wasm-bindgen.workspace = true
+serde_json.workspace = true
+
+[target.'cfg(all(target_arch = "wasm32", target_os = "unknown"))'.dependencies]
+getrandom = { workspace = true, features = ["wasm_js"] }
+
+[lints]
+workspace = true
