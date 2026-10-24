@@ -8,17 +8,21 @@
 //! **The scheme is a draft and has not been reviewed or audited yet.**
 
 pub mod aead;
+pub mod canon;
+pub mod directory;
 pub mod encoding;
 pub mod error;
 pub mod export;
 pub mod generator;
 pub mod id;
+pub mod identity;
 pub mod kdf;
 pub mod keyring;
 pub mod opaque;
 pub mod passkey;
 pub mod random;
 pub mod secret_key;
+pub mod sharing;
 pub mod strength;
 pub mod totp;
 

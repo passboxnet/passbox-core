@@ -29,6 +29,10 @@ pub enum Error {
     MissingKey(String),
     #[error("invalid data: {0}")]
     InvalidData(String),
+    #[error("invalid signature")]
+    InvalidSignature,
+    #[error("the key of {0} changed; compare fingerprints and accept the change first")]
+    KeyChanged(String),
     #[error("invalid generator options: {0}")]
     InvalidGeneratorOptions(&'static str),
 }

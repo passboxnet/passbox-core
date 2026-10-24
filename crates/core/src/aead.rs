@@ -24,7 +24,7 @@ use crate::{Error, Result, random};
 
 /// Length of a symmetric key in bytes.
 pub const KEY_LEN: usize = 32;
-const NONCE_LEN: usize = 24;
+pub(crate) const NONCE_LEN: usize = 24;
 const TAG_LEN: usize = 16;
 const HEADER_LEN: usize = 2;
 
@@ -64,7 +64,7 @@ impl SymmetricKey {
         self.encrypt_with_nonce(plaintext, aad, &nonce)
     }
 
-    fn encrypt_with_nonce(
+    pub(crate) fn encrypt_with_nonce(
         &self,
         plaintext: &[u8],
         aad: &[u8],
