@@ -993,6 +993,7 @@ impl Client {
                     vault_id,
                     revision,
                     updated_at: item["updatedAt"].as_i64().unwrap_or(0),
+                    created_at: item["createdAt"].as_i64().unwrap_or(0),
                     key_epoch: epoch,
                     data,
                 }),

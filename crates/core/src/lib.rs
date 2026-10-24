@@ -8,6 +8,7 @@
 //! **The scheme is a draft and has not been reviewed or audited yet.**
 
 pub mod aead;
+pub mod breach;
 pub mod canon;
 pub mod device_link;
 pub mod directory;
