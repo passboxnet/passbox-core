@@ -30,6 +30,29 @@ describe("item data", () => {
     expect(parsed.tags).toEqual(["ok"]);
   });
 
+  it("keeps valid passkeys and drops malformed ones", () => {
+    const passkey = {
+      credentialId: "AAECAw",
+      rpId: "example.com",
+      rpName: "Example",
+      userHandle: "dXNlcg",
+      userName: "alice",
+      userDisplayName: "Alice",
+      privateKey: "MIGHAgEA",
+      algorithm: -7,
+      signCount: 3,
+      createdAt: 1700000000000,
+    };
+    const item = {
+      ...newItemData("login", "Example"),
+      passkeys: [passkey, { rpId: "x" }, { ...passkey, userHandle: "!" }],
+    };
+    const parsed = parseItemData(JSON.stringify(item));
+    expect(parsed.passkeys).toEqual([passkey]);
+    expect(parseItemData(JSON.stringify(parsed))).toEqual(parsed);
+    expect("passkeys" in parseItemData(JSON.stringify(newItemData("login")))).toBe(false);
+  });
+
   it("rejects unknown versions", () => {
     expect(() => parseItemData(JSON.stringify({ v: 2 }))).toThrow(/version/);
   });

@@ -33,6 +33,13 @@ fn item_aad(vault_id: &str, item_id: &str, revision: u64) -> Vec<u8> {
     format!("passbox/v1/item|{vault_id}|{item_id}|{revision}").into_bytes()
 }
 
+fn session_aad(account_id: &str) -> Vec<u8> {
+    format!("passbox/v1/session|{account_id}").into_bytes()
+}
+
+/// Version byte of the session export plaintext.
+const SESSION_VERSION: u8 = 1;
+
 fn key_from_plaintext(bytes: Vec<u8>) -> Result<SymmetricKey> {
     let mut bytes = zeroize::Zeroizing::new(bytes);
     let key: [u8; KEY_LEN] = bytes
@@ -197,6 +204,79 @@ impl Keyring {
     }
 }
 
+impl Keyring {
+    /// Exports the unlocked key hierarchy, encrypted under a fresh random
+    /// session key, so a short-lived process (for example a browser extension
+    /// service worker) can restore it after a restart without the master
+    /// password.
+    ///
+    /// Returns the session key and the encrypted blob (Base64url). Both must
+    /// be kept in memory-only storage and discarded when the vault locks; each
+    /// call creates a new session key. The blob is bound to the account ID.
+    pub fn export_session(&self) -> Result<(SymmetricKey, String)> {
+        let mut plaintext = zeroize::Zeroizing::new(Vec::with_capacity(
+            1 + KEY_LEN + self.vault_keys.len() * (2 + 26 + KEY_LEN),
+        ));
+        plaintext.push(SESSION_VERSION);
+        plaintext.extend_from_slice(self.account_key.as_bytes());
+        let mut vault_ids: Vec<&String> = self.vault_keys.keys().collect();
+        vault_ids.sort();
+        for vault_id in vault_ids {
+            let id = vault_id.as_bytes();
+            let len = u16::try_from(id.len())
+                .map_err(|_| Error::InvalidData("vault ID is too long".into()))?;
+            plaintext.extend_from_slice(&len.to_be_bytes());
+            plaintext.extend_from_slice(id);
+            plaintext.extend_from_slice(self.vault_keys[vault_id].as_bytes());
+        }
+        let session_key = SymmetricKey::generate()?;
+        let envelope = session_key.encrypt(&plaintext, &session_aad(&self.account_id))?;
+        Ok((session_key, encoding::encode(&envelope)))
+    }
+
+    /// Restores a keyring exported with [`Keyring::export_session`]. Fails if
+    /// the session key, the account ID or the blob do not match.
+    pub fn import_session(
+        session_key: &SymmetricKey,
+        account_id: &str,
+        blob: &str,
+    ) -> Result<Self> {
+        let envelope = encoding::decode(blob)?;
+        let plaintext =
+            zeroize::Zeroizing::new(session_key.decrypt(&envelope, &session_aad(account_id))?);
+        let malformed = || Error::InvalidData("malformed session export".into());
+        let (&version, rest) = plaintext.split_first().ok_or_else(malformed)?;
+        if version != SESSION_VERSION {
+            return Err(Error::InvalidData(
+                "unsupported session export version".into(),
+            ));
+        }
+        let (account_key, mut rest) = take_key(rest).ok_or_else(malformed)?;
+        let mut vault_keys = HashMap::new();
+        while !rest.is_empty() {
+            let (len, after_len) = rest.split_at_checked(2).ok_or_else(malformed)?;
+            let len = usize::from(u16::from_be_bytes([len[0], len[1]]));
+            let (id, after_id) = after_len.split_at_checked(len).ok_or_else(malformed)?;
+            let id = core::str::from_utf8(id)
+                .map_err(|_| malformed())?
+                .to_owned();
+            let (key, after_key) = take_key(after_id).ok_or_else(malformed)?;
+            vault_keys.insert(id, key);
+            rest = after_key;
+        }
+        Ok(Self {
+            account_id: account_id.to_owned(),
+            account_key,
+            vault_keys,
+        })
+    }
+}
+
+fn take_key(bytes: &[u8]) -> Option<(SymmetricKey, &[u8])> {
+    let (key, rest) = bytes.split_at_checked(KEY_LEN)?;
+    Some((SymmetricKey::from_bytes(key.try_into().ok()?), rest))
+}
+
 fn into_json_string(plaintext: Vec<u8>) -> Result<String> {
     ensure_json(&plaintext)?;
     String::from_utf8(plaintext).map_err(|_| Error::InvalidData("plaintext is not UTF-8".into()))
@@ -282,6 +362,81 @@ mod tests {
         let a = keyring.create_vault("{}").unwrap();
         let b = keyring.create_vault("{}").unwrap();
         assert!(keyring.add_vault(&b.id, &a.encrypted_key).is_err());
+    }
+
+    #[test]
+    fn session_export_round_trips() {
+        let (_, mut keyring, _) = setup();
+        let vault = keyring.create_vault(r#"{"name":"Private"}"#).unwrap();
+        let second = keyring.create_vault("{}").unwrap();
+        let item = keyring.encrypt_item(&vault.id, "item1", 3, "{}").unwrap();
+
+        let (session_key, blob) = keyring.export_session().unwrap();
+        let restored = Keyring::import_session(&session_key, "acc", &blob).unwrap();
+        assert_eq!(restored.account_id(), "acc");
+        assert!(restored.has_vault(&vault.id) && restored.has_vault(&second.id));
+        assert_eq!(
+            restored.decrypt_item(&vault.id, "item1", 3, &item).unwrap(),
+            "{}"
+        );
+        // The restored keyring can still unwrap vault keys from the server.
+        let mut restored = restored;
+        restored
+            .add_vault(&second.id, &second.encrypted_key)
+            .unwrap();
+    }
+
+    #[test]
+    fn session_export_uses_a_fresh_key_each_time() {
+        let (_, keyring, _) = setup();
+        let (key_a, blob_a) = keyring.export_session().unwrap();
+        let (key_b, blob_b) = keyring.export_session().unwrap();
+        assert_ne!(key_a.as_bytes(), key_b.as_bytes());
+        assert_ne!(blob_a, blob_b);
+        assert!(Keyring::import_session(&key_a, "acc", &blob_b).is_err());
+    }
+
+    #[test]
+    fn session_export_is_bound_to_key_and_account() {
+        let (_, keyring, _) = setup();
+        let (session_key, blob) = keyring.export_session().unwrap();
+        let other = SymmetricKey::generate().unwrap();
+        assert_eq!(
+            Keyring::import_session(&other, "acc", &blob).unwrap_err(),
+            Error::Decryption
+        );
+        assert_eq!(
+            Keyring::import_session(&session_key, "someone-else", &blob).unwrap_err(),
+            Error::Decryption
+        );
+        let mut tampered = encoding::decode(&blob).unwrap();
+        let last = tampered.len() - 1;
+        tampered[last] ^= 1;
+        assert!(
+            Keyring::import_session(&session_key, "acc", &encoding::encode(&tampered)).is_err()
+        );
+        assert!(Keyring::import_session(&session_key, "acc", "not base64!").is_err());
+    }
+
+    #[test]
+    fn session_import_rejects_malformed_plaintext() {
+        let session_key = SymmetricKey::generate().unwrap();
+        for plaintext in [
+            vec![],
+            vec![2; 1 + KEY_LEN],
+            vec![SESSION_VERSION; 10],
+            [vec![SESSION_VERSION], vec![0; KEY_LEN], vec![0, 5, b'a']].concat(),
+        ] {
+            let blob = encoding::encode(
+                &session_key
+                    .encrypt(&plaintext, &session_aad("acc"))
+                    .unwrap(),
+            );
+            assert!(matches!(
+                Keyring::import_session(&session_key, "acc", &blob),
+                Err(Error::InvalidData(_))
+            ));
+        }
     }
 
     #[test]

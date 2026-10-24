@@ -16,6 +16,7 @@ passbox-core.workspace = true
 wasm-bindgen.workspace = true
 js-sys = "0.3"
 serde_json.workspace = true
+zeroize.workspace = true
 
 [target.'cfg(all(target_arch = "wasm32", target_os = "unknown"))'.dependencies]
 getrandom = { workspace = true, features = ["wasm_js"] }

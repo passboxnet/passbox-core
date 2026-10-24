@@ -15,6 +15,7 @@ pub mod id;
 pub mod kdf;
 pub mod keyring;
 pub mod opaque;
+pub mod passkey;
 pub mod random;
 pub mod secret_key;
 pub mod totp;

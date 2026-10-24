@@ -377,6 +377,20 @@ impl PassboxClient {
         Ok(self.inner.unlock(&password)? == client::Connectivity::Online)
     }
 
+    /// Key for biometric unlock: the derived master keys of the unlocked
+    /// session (65 bytes). Store it only in hardware-backed storage that
+    /// requires biometric authentication; never the master password.
+    pub fn unlock_key(&self) -> Result<Vec<u8>> {
+        Ok(self.inner.unlock_key()?.to_vec())
+    }
+
+    /// Unlocks with a key from `unlock_key` without running the memory-hard
+    /// key derivation (suitable for AutoFill extensions). Returns `true` when
+    /// the server was reached.
+    pub fn unlock_with_key(&self, key: Vec<u8>) -> Result<bool> {
+        Ok(self.inner.unlock_with_key(&key)? == client::Connectivity::Online)
+    }
+
     pub fn lock(&self) {
         self.inner.lock();
     }

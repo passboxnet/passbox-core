@@ -32,6 +32,19 @@ export interface Item {
   data: ItemData;
 }
 
+/**
+ * What a short-lived process needs to resume an unlocked session without the
+ * master password: the keyring encrypted under a one-time session key, plus
+ * the server session token. Keep it in memory-only storage only (for example
+ * `chrome.storage.session`) and discard it on lock.
+ */
+export interface SessionState {
+  accountId: string;
+  sessionKey: string;
+  blob: string;
+  token: string;
+}
+
 export type ClientStatus = "signed-out" | "locked" | "unlocked";
 
 export interface ClientSnapshot {
@@ -222,6 +235,36 @@ export class PassboxClient {
       keys.free();
     }
     await this.sync();
+  }
+
+  /** Exports the unlocked session, or `undefined` when locked. */
+  exportSession(): SessionState | undefined {
+    const account = this.deviceAccount;
+    if (!this.keyring || !this.token || !account) return undefined;
+    const { sessionKey, blob } = JSON.parse(this.keyring.exportSession()) as { sessionKey: string; blob: string };
+    return { accountId: account.accountId, sessionKey, blob, token: this.token };
+  }
+
+  /**
+   * Resumes a session exported with `exportSession` and syncs. Throws (and
+   * stays locked) if the state does not belong to this device's account or
+   * the server session has ended.
+   */
+  async restoreSession(state: SessionState): Promise<void> {
+    const account = this.deviceAccount;
+    if (!account || account.accountId !== state.accountId) throw new Error("session belongs to another account");
+    this.clearSession();
+    this.keyring = this.core.Keyring.importSession(state.sessionKey, state.accountId, state.blob);
+    this.token = state.token;
+    try {
+      await this.sync();
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 401) {
+        this.clearSession();
+        this.emit();
+      }
+      throw error;
+    }
   }
 
   /** Forgets all decrypted data and keys. The account stays on this device. */
