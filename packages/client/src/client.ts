@@ -1402,12 +1402,12 @@ export class PassboxClient {
       let data: ItemData | null = null;
       try {
         data = parseItemData(
-          keyring.decryptItemAt(item.vaultId, version.keyEpoch ?? 0, id, version.revision, version.encryptedData),
+          keyring.decryptItemAt(item.vaultId, version.keyEpoch, id, version.revision, version.encryptedData),
         );
       } catch {
         data = null;
       }
-      return { revision: version.revision, updatedAt: version.updatedAt, updatedBy: version.updatedBy ?? null, data };
+      return { revision: version.revision, updatedAt: version.updatedAt, updatedBy: version.updatedBy, data };
     });
   }
 
@@ -1456,7 +1456,7 @@ export class PassboxClient {
         count = await breachCount(password, fetchImpl);
         this.breachCounts.set(password, count);
       }
-      for (const itemId of ids) if (count > 0) found.push({ itemId, count });
+      if (count > 0) found.push(...ids.map((itemId) => ({ itemId, count })));
     }
     return found.sort((a, b) => b.count - a.count || a.itemId.localeCompare(b.itemId));
   }
@@ -1494,7 +1494,9 @@ export class PassboxClient {
     const raw = this.storage.getItem(this.usageStorageKey(keyring));
     if (!raw) return {};
     try {
-      return (JSON.parse(keyring.decryptLocal(USAGE_PURPOSE, raw)) as { items?: Record<string, ItemUsage> }).items ?? {};
+      return (
+        (JSON.parse(keyring.decryptLocal(USAGE_PURPOSE, raw)) as { items?: Record<string, ItemUsage> }).items ?? {}
+      );
     } catch {
       return {};
     }
@@ -1517,7 +1519,9 @@ export class PassboxClient {
       useCount: previous.useCount + 1,
     };
     const items: Record<string, ItemUsage> = { [id]: usage };
-    for (const [other, value] of Object.entries(all)) if (other !== id && this.items.has(other)) items[other] = value;
+    for (const [other, value] of Object.entries(all)) {
+      if (other !== id && this.items.has(other)) items[other] = value;
+    }
     this.storage.setItem(this.usageStorageKey(keyring), keyring.encryptLocal(USAGE_PURPOSE, JSON.stringify({ items })));
     return usage;
   }
@@ -1543,10 +1547,7 @@ export class PassboxClient {
     return this.bulk(ids, (data) => (data.favorite === favorite ? undefined : { ...data, favorite }));
   }
 
-  private async bulk(
-    ids: readonly string[],
-    change: (data: ItemData) => ItemData | undefined,
-  ): Promise<BulkFailure[]> {
+  private async bulk(ids: readonly string[], change: (data: ItemData) => ItemData | undefined): Promise<BulkFailure[]> {
     const keyring = this.requireKeyring();
     const failed: BulkFailure[] = [];
     let changed = false;
