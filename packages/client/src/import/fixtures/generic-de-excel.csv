@@ -1,0 +1,4 @@
+Bezeichnung;Benutzername;Kennwort;Webseite;Bemerkung;Ordner;Kostenstelle
+CRM;m.mueller@firma.example;Grüße-2024!;crm.example.com;Vertrieb Süd;Vertrieb;4711
+Reisekosten;m.mueller;"Pass;wort";https://reise.example.com/;;Verwaltung;
+Notiz ohne Login;;;;Schlüssel liegt im Büro;;

@@ -1,0 +1,136 @@
+{
+  "version": "1.21.0",
+  "userId": "synthetic-user-id",
+  "encrypted": false,
+  "vaults": {
+    "share-1": {
+      "name": "Personal",
+      "description": "Personal vault",
+      "display": { "color": 0, "icon": 0 },
+      "items": [
+        {
+          "itemId": "item-1",
+          "shareId": "share-1",
+          "data": {
+            "metadata": { "name": "Example Mail", "note": "Main account", "itemUuid": "uuid-1" },
+            "extraFields": [
+              { "fieldName": "Backup code", "type": "hidden", "data": { "content": "1111-2222" } },
+              {
+                "fieldName": "Second factor",
+                "type": "totp",
+                "data": { "totpUri": "otpauth://totp/Second:noah?secret=GEZDGNBVGY3TQOJQ" }
+              }
+            ],
+            "type": "login",
+            "content": {
+              "itemEmail": "noah@example.com",
+              "itemUsername": "noah",
+              "password": "Proton-Pass-1",
+              "urls": ["https://mail.example.com/", "https://calendar.example.com/"],
+              "totpUri": "otpauth://totp/Mail:noah?secret=JBSWY3DPEHPK3PXP&issuer=Mail",
+              "passkeys": [
+                {
+                  "keyId": "k1",
+                  "content": "c3ludGhldGlj",
+                  "domain": "mail.example.com",
+                  "rpId": "mail.example.com",
+                  "rpName": "Mail",
+                  "userName": "noah",
+                  "userDisplayName": "Noah",
+                  "userId": "dTE",
+                  "createTime": 1700000000,
+                  "note": "",
+                  "credentialId": "Y3JlZA",
+                  "userHandle": "dTE"
+                }
+              ]
+            }
+          },
+          "state": 1,
+          "aliasEmail": null,
+          "contentFormatVersion": 6,
+          "createTime": 1700000000,
+          "modifyTime": 1710000000,
+          "pinned": true
+        },
+        {
+          "itemId": "item-2",
+          "shareId": "share-1",
+          "data": {
+            "metadata": { "name": "Travel card", "note": "", "itemUuid": "uuid-2" },
+            "extraFields": [],
+            "type": "creditCard",
+            "content": {
+              "cardholderName": "Noah Example",
+              "cardType": 0,
+              "number": "4000056655665556",
+              "verificationNumber": "999",
+              "expirationDate": "2030-01",
+              "pin": "1357"
+            }
+          },
+          "state": 1,
+          "aliasEmail": null,
+          "contentFormatVersion": 6,
+          "createTime": 1700000000,
+          "modifyTime": 1710000000,
+          "pinned": false
+        },
+        {
+          "itemId": "item-3",
+          "shareId": "share-1",
+          "data": {
+            "metadata": { "name": "Trashed note", "note": "bye", "itemUuid": "uuid-3" },
+            "extraFields": [],
+            "type": "note",
+            "content": {}
+          },
+          "state": 2,
+          "aliasEmail": null,
+          "contentFormatVersion": 6,
+          "createTime": 1700000000,
+          "modifyTime": 1710000000,
+          "pinned": false
+        }
+      ]
+    },
+    "share-2": {
+      "name": "Work",
+      "description": "",
+      "display": { "color": 1, "icon": 1 },
+      "items": [
+        {
+          "itemId": "item-4",
+          "shareId": "share-2",
+          "data": {
+            "metadata": { "name": "Noah at work", "note": "", "itemUuid": "uuid-4" },
+            "extraFields": [],
+            "type": "identity",
+            "content": {
+              "fullName": "Noah Example",
+              "email": "noah@work.example.com",
+              "phoneNumber": "+49 30 987654",
+              "firstName": "Noah",
+              "lastName": "Example",
+              "company": "Example AG",
+              "jobTitle": "Sales Manager",
+              "city": "Berlin",
+              "workPhoneNumber": "+49 30 111",
+              "extraPersonalDetails": [],
+              "extraAddressDetails": [],
+              "extraContactDetails": [],
+              "extraWorkDetails": [],
+              "extraSections": []
+            }
+          },
+          "state": 1,
+          "aliasEmail": null,
+          "contentFormatVersion": 6,
+          "createTime": 1700000000,
+          "modifyTime": 1710000000,
+          "pinned": false
+        }
+      ]
+    }
+  }
+}

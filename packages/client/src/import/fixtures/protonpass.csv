@@ -1,0 +1,4 @@
+type,name,url,email,username,password,note,totp,createTime,modifyTime,vault
+login,Example VPN,https://vpn.example.com,ivy@example.com,ivy,Pp-Pass-1,,otpauth://totp/VPN:ivy?secret=JBSWY3DPEHPK3PXP,1700000000,1700000000,Work
+note,Server notes,,,,,Rack 4 is ours,,1700000000,1700000000,Personal
+alias,Newsletter alias,,news.ivy@alias.example,,,,,1700000000,1700000000,Personal

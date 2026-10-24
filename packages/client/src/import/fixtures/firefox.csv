@@ -1,0 +1,4 @@
+"url","username","password","httpRealm","formActionOrigin","guid","timeCreated","timeLastUsed","timePasswordChanged"
+"https://accounts.example.com","bob@example.com","Fx-Secret-1",,"https://accounts.example.com","{0f6c1d4e-1111-4c2a-9a1b-000000000001}","1700000000000","1700000000000","1700000000000"
+"https://router.example.lan","admin","r0uter","Router Login",,"{0f6c1d4e-1111-4c2a-9a1b-000000000002}","1700000000000","1700000000000","1700000000000"
+"chrome://FirefoxAccounts","sync","ignored",,,"{0f6c1d4e-1111-4c2a-9a1b-000000000003}","1","1","1"

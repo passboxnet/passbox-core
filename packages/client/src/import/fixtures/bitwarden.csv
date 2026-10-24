@@ -1,0 +1,6 @@
+folder,favorite,type,name,notes,fields,reprompt,login_uri,login_username,login_password,login_totp
+Work,1,login,GitLab,Team account,"Recovery email: ops@example.com
+PIN: 1234",0,"https://gitlab.example.com,https://git.example.com",ops,GitL4b-Secret,JBSWY3DPEHPK3PXP
+,,login,Forum,,,0,forum.example.org,carol,Forum-Pass,
+Personal,,note,Wi-Fi at home,"SSID: Example
+Key: 0123456789",,0,,,,

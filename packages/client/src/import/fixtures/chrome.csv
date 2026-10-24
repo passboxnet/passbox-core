@@ -1,0 +1,6 @@
+name,url,username,password,note
+example.com,https://www.example.com/login,alice@example.com,Correct-Horse-7,
+Intranet,https://intranet.example.org/,a.schmidt,"pa,ss""word",VPN required
+shop.example.net,https://shop.example.net/account,alice,Sh0p!2024,"Line one
+Line two"
+,,,,

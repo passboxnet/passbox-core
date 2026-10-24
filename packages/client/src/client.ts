@@ -64,6 +64,29 @@ export interface SessionState {
 
 export type ClientStatus = "signed-out" | "locked" | "unlocked";
 
+/** One item for `PassboxClient.importItems`. */
+export interface ImportEntry {
+  data: ItemData;
+  /** Update this existing item instead of creating a new one. */
+  updateId?: string;
+}
+
+export interface ImportItemsOptions {
+  /** Called after each item with the number processed so far. */
+  onProgress?: (done: number, total: number) => void;
+  signal?: AbortSignal;
+  /** Requests in flight at once (default 6). */
+  concurrency?: number;
+  /** Items between snapshot updates (default 200). */
+  batchSize?: number;
+}
+
+export interface ImportItemsResult {
+  created: number;
+  updated: number;
+  failed: { title: string; error: string }[];
+}
+
 export interface ClientSnapshot {
   status: ClientStatus;
   email: string | undefined;
@@ -535,6 +558,10 @@ export class PassboxClient {
   async updateItem(id: string, data: ItemData): Promise<void> {
     const item = this.items.get(id);
     if (!item) throw new Error("unknown item");
+    await this.writeItem(item.vaultId, id, item.revision + 1, this.nextVersion(item, data));
+  }
+
+  private nextVersion(item: Item, data: ItemData): ItemData {
     const { passwordHistory: _ignored, trashedAt: _trashed, ...rest } = data;
     const next: ItemData = rest;
     const oldPassword = fieldValue(item.data, FIELD.password);
@@ -544,7 +571,67 @@ export class PassboxClient {
     }
     if (history.length > 0) next.passwordHistory = history;
     if (item.data.trashedAt !== undefined) next.trashedAt = item.data.trashedAt;
-    await this.writeItem(item.vaultId, id, item.revision + 1, next);
+    return next;
+  }
+
+  /**
+   * Creates many items (and, with `updateId`, updates existing ones as
+   * `updateItem` does) with several requests in flight and a single sync at
+   * the end, for imports of tens of thousands of items. Progress is reported
+   * after each item; the snapshot is refreshed every `batchSize` items.
+   * Items that fail are reported and do not stop the import. Stops early
+   * when `signal` is aborted.
+   */
+  async importItems(
+    vaultId: string,
+    entries: readonly ImportEntry[],
+    options: ImportItemsOptions = {},
+  ): Promise<ImportItemsResult> {
+    const keyring = this.requireKeyring();
+    if (!this.vaults.has(vaultId)) throw new Error("unknown vault");
+    const concurrency = Math.max(1, options.concurrency ?? 6);
+    const batchSize = Math.max(1, options.batchSize ?? 200);
+    const result: ImportItemsResult = { created: 0, updated: 0, failed: [] };
+    let next = 0;
+    let done = 0;
+    let sinceEmit = 0;
+    const worker = async () => {
+      while (next < entries.length && !options.signal?.aborted && this.keyring === keyring) {
+        const entry = entries[next++] as ImportEntry;
+        try {
+          const existing = entry.updateId ? this.items.get(entry.updateId) : undefined;
+          if (existing) {
+            await this.putItem(
+              existing.vaultId,
+              existing.id,
+              existing.revision + 1,
+              this.nextVersion(existing, entry.data),
+            );
+            result.updated++;
+          } else {
+            await this.putItem(vaultId, this.core.newId(), 1, entry.data);
+            result.created++;
+          }
+        } catch (error) {
+          result.failed.push({
+            title: entry.data.title,
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
+        done++;
+        options.onProgress?.(done, entries.length);
+        if (++sinceEmit >= batchSize) {
+          sinceEmit = 0;
+          this.emit();
+          // Let the UI paint between batches.
+          await new Promise((resolve) => setTimeout(resolve, 0));
+        }
+      }
+    };
+    await Promise.all(Array.from({ length: Math.min(concurrency, entries.length) }, worker));
+    this.emit();
+    if (this.keyring === keyring) await this.sync();
+    return result;
   }
 
   /** Moves an item to the trash. It can be restored for 30 days. */
@@ -617,16 +704,23 @@ export class PassboxClient {
   }
 
   private async writeItem(vaultId: string, id: string, revision: number, data: ItemData) {
-    const keyring = this.requireKeyring();
-    const encryptedData = keyring.encryptItem(vaultId, id, revision, JSON.stringify(data));
     try {
-      const result = await this.api.putItem(id, { vaultId, revision, encryptedData });
-      this.items.set(id, { id, vaultId, revision: result.revision, updatedAt: Date.now(), data });
+      await this.putItem(vaultId, id, revision, data);
       this.emit();
     } catch (error) {
       await this.handleWriteError(error);
     }
     await this.sync();
+  }
+
+  /** Encrypts and uploads one item version without syncing. */
+  private async putItem(vaultId: string, id: string, revision: number, data: ItemData) {
+    const keyring = this.requireKeyring();
+    const encryptedData = keyring.encryptItem(vaultId, id, revision, JSON.stringify(data));
+    const result = await this.api.putItem(id, { vaultId, revision, encryptedData });
+    if (this.keyring === keyring) {
+      this.items.set(id, { id, vaultId, revision: result.revision, updatedAt: Date.now(), data });
+    }
   }
 
   private async handleWriteError(error: unknown): Promise<never> {
