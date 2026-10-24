@@ -3,7 +3,8 @@
  * shape; the server never sees it.
  */
 
-export type ItemCategory = "login" | "note" | "card" | "identity" | "other";
+/** `environment`: key/value sets for applications (`.env`), one field per variable. */
+export type ItemCategory = "login" | "note" | "card" | "identity" | "environment" | "other";
 
 export type FieldType = "text" | "concealed" | "url" | "email" | "totp";
 
@@ -122,12 +123,33 @@ export function newItemData(category: ItemCategory, title = ""): ItemData {
   return { v: 1, category, title, fields: templateFields(category), notes: "", tags: [], favorite: false };
 }
 
+/** Whether `name` can be an environment variable (letters, digits, `_`, not starting with a digit). */
+export function isEnvName(name: string): boolean {
+  return name.length <= 256 && /^[A-Za-z_][A-Za-z0-9_]*$/.test(name);
+}
+
+/**
+ * The variables of an environment item: fields whose label is a valid
+ * variable name, in order; a later field wins over an earlier one with the
+ * same name. Mirrors `ItemData::environment_variables` in Rust.
+ */
+export function environmentVariables(item: ItemData): [string, string][] {
+  const out = new Map<string, string>();
+  for (const field of item.fields) {
+    const name = field.label.trim();
+    if (!isEnvName(name)) continue;
+    out.delete(name);
+    out.set(name, field.value);
+  }
+  return [...out.entries()];
+}
+
 export function fieldValue(item: ItemData, id: string): string | undefined {
   const value = item.fields.find((field) => field.id === id)?.value;
   return value ? value : undefined;
 }
 
-const CATEGORIES: readonly ItemCategory[] = ["login", "note", "card", "identity", "other"];
+const CATEGORIES: readonly ItemCategory[] = ["login", "note", "card", "identity", "environment", "other"];
 const FIELD_TYPES: readonly FieldType[] = ["text", "concealed", "url", "email", "totp"];
 
 const BASE64URL = /^[A-Za-z0-9_-]*$/;

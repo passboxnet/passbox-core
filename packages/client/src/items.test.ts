@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { FIELD, fieldValue, newItemData, parseItemData, parseVaultMeta } from "./items";
+import {
+  environmentVariables,
+  FIELD,
+  fieldValue,
+  isEnvName,
+  newItemData,
+  parseItemData,
+  parseVaultMeta,
+} from "./items";
 
 describe("item data", () => {
   it("creates login templates with well-known fields", () => {
@@ -60,5 +68,30 @@ describe("item data", () => {
   it("defaults vault names", () => {
     expect(parseVaultMeta("{}").name).toBe("Vault");
     expect(parseVaultMeta('{"name":"Work"}').name).toBe("Work");
+  });
+});
+
+describe("environment items", () => {
+  it("reads variables like the Rust client", () => {
+    const data = parseItemData(
+      JSON.stringify({
+        v: 1,
+        category: "environment",
+        title: "API",
+        fields: [
+          { id: "a", label: "API_KEY", type: "concealed", value: "k1" },
+          { id: "b", label: "not valid", type: "text", value: "x" },
+          { id: "c", label: "API_KEY", type: "concealed", value: "k2" },
+          { id: "d", label: "PORT", type: "text", value: "8080" },
+        ],
+      }),
+    );
+    expect(data.category).toBe("environment");
+    expect(environmentVariables(data)).toEqual([
+      ["API_KEY", "k2"],
+      ["PORT", "8080"],
+    ]);
+    expect(isEnvName("_A1")).toBe(true);
+    expect(isEnvName("1A")).toBe(false);
   });
 });

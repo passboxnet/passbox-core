@@ -402,6 +402,8 @@ fn category_to_ffi(category: client::ItemCategory) -> ItemCategory {
         client::ItemCategory::Card => ItemCategory::Card,
         client::ItemCategory::Identity => ItemCategory::Identity,
         client::ItemCategory::Other => ItemCategory::Other,
+        // Not in the mobile apps yet; shown there as "Other".
+        client::ItemCategory::Environment => ItemCategory::Other,
     }
 }
 

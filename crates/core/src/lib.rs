@@ -8,6 +8,7 @@
 //! **The scheme is a draft and has not been reviewed or audited yet.**
 
 pub mod aead;
+pub mod agent_grant;
 pub mod analysis;
 pub mod audit;
 pub mod breach;
@@ -31,6 +32,7 @@ pub mod policy;
 pub mod random;
 pub mod recovery;
 pub mod secret_key;
+pub mod service_account;
 pub mod sharing;
 pub mod strength;
 pub mod totp;

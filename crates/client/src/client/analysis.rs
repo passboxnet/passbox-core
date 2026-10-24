@@ -643,8 +643,13 @@ mod tests {
 
     use super::*;
 
+    /// Method, URL, headers and body of a request.
+    type Call = (String, String, Vec<(String, String)>, Option<Value>);
+    /// Provider, answers, expected alias, expected first URL.
+    type Case<'a> = (AliasProvider, Vec<(u16, Value)>, &'a str, &'a str);
+
     struct Recorder {
-        calls: Mutex<Vec<(String, String, Vec<(String, String)>, Option<Value>)>>,
+        calls: Mutex<Vec<Call>>,
         answers: Mutex<Vec<(u16, Value)>>,
     }
 
@@ -680,7 +685,7 @@ mod tests {
 
     #[test]
     fn creates_aliases_with_each_provider() {
-        let cases: Vec<(AliasProvider, Vec<(u16, Value)>, &str, &str)> = vec![
+        let cases: Vec<Case> = vec![
             (
                 AliasProvider::SimpleLogin,
                 vec![(201, json!({ "alias": "x.y@simplelogin.com" }))],

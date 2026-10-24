@@ -240,5 +240,6 @@
   "menu.lookalikeSaved": "Die Adresse sieht nur aus wie eine Website, für die Sie eine Anmeldung haben. Passbox füllt hier nichts aus. Geben Sie Ihr Passwort nicht ein, sondern öffnen Sie die echte Website selbst.",
   "menu.lookalikeKnown": "Die Adresse ahmt mit ähnlich aussehenden Zeichen eine bekannte Website nach. Das ist ein üblicher Phishing-Trick.",
   "save.lookalikeTitle": "Diese Website sieht nur aus wie {site}.",
-  "save.lookalikeText": "Haben Sie gerade das Passwort Ihres echten Kontos auf {host} eingegeben, ändern Sie es jetzt auf der echten Website."
+  "save.lookalikeText": "Haben Sie gerade das Passwort Ihres echten Kontos auf {host} eingegeben, ändern Sie es jetzt auf der echten Website.",
+  "category.environment": "Umgebung"
 }

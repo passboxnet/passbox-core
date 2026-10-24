@@ -1,4 +1,5 @@
 import { type BreachApi, breachApi } from "./breach";
+import { type DeveloperApi, developerApi } from "./developer";
 import { type OrgAdminApi, orgAdminApi } from "./orgAdmin";
 import {
   type DeviceLinkApi,
@@ -11,6 +12,7 @@ import {
 import { type SsoApi, ssoApi } from "./sso";
 
 export * from "./breach";
+export * from "./developer";
 export * from "./orgAdmin";
 export * from "./recovery";
 export * from "./sso";
@@ -268,7 +270,19 @@ export type AccountEventKind =
   | "emergency_access_denied"
   | "emergency_access_used"
   | "device_link_created"
-  | "device_link_approved";
+  | "device_link_approved"
+  | "service_account_created"
+  | "service_account_access_changed"
+  | "service_account_revoked"
+  | "service_account_deleted"
+  | "agent_grant_requested"
+  | "agent_grant_approved"
+  | "agent_grant_denied"
+  | "agent_grant_revoked"
+  | "agent_request_access"
+  | "agent_run"
+  | "agent_inject"
+  | "agent_create";
 
 export interface AccountEvent {
   id: string;
@@ -658,6 +672,8 @@ export interface PassboxApi extends AdminApi {
   /** Organization administration: policies, audit log, reports (wave D). */
   orgAdmin: OrgAdminApi;
   breach: BreachApi;
+  /** Service accounts and AI agent grants (wave F). */
+  developer: DeveloperApi;
   deleteItem(id: string, revision: number): Promise<WriteResponse>;
   /** Earlier versions of an item, newest first (up to 20). */
   itemVersions(id: string): Promise<{ versions: ItemVersionRecord[] }>;
@@ -784,6 +800,7 @@ export function createClient(options: ClientOptions = {}): PassboxApi {
       }
       return response.text();
     }),
+    developer: developerApi(call),
   };
 }
 
