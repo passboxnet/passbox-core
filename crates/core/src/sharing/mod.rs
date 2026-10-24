@@ -17,4 +17,4 @@ pub mod state;
 pub mod verify;
 
 #[cfg(test)]
-mod tests;
+pub(crate) mod tests;

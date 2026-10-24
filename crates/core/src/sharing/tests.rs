@@ -18,7 +18,7 @@ use crate::{encoding, id};
 /// A minimal honest server: stores what clients upload and hands every
 /// account the rows it may see.
 #[derive(Default)]
-struct Server {
+pub(crate) struct Server {
     bundles: BTreeMap<String, SignedBundle>,
     log: Vec<crate::directory::LogEntry>,
     orgs: BTreeMap<String, OrgRecord>,
@@ -37,7 +37,7 @@ fn signer() -> LogSigner {
 }
 
 impl Server {
-    fn publish(&mut self, keyring: &mut Keyring) {
+    pub(crate) fn publish(&mut self, keyring: &mut Keyring) {
         let upload = keyring.create_account_keys(1).unwrap();
         let bundle = SignedBundle::parse(&upload.bundle, &upload.bundle_signature).unwrap();
         let prev = self.log.last().map_or([0; 32], |e| e.hash().unwrap());
@@ -51,7 +51,7 @@ impl Server {
         self.bundles.insert(keyring.account_id().to_owned(), bundle);
     }
 
-    fn lookup(&self, account_id: &str, since: u64) -> LookupResponse {
+    pub(crate) fn lookup(&self, account_id: &str, since: u64) -> LookupResponse {
         let index = self
             .log
             .iter()
@@ -163,12 +163,17 @@ impl Server {
         });
     }
 
-    fn accept(&mut self, org_id: &str, account_id: &str, role: &str) {
+    pub(crate) fn accept(&mut self, org_id: &str, account_id: &str, role: &str) {
         let member = self.roster_member(account_id, role, "accepted");
         self.members.get_mut(org_id).unwrap().push(member);
     }
 
-    fn confirm(&mut self, org_id: &str, account_id: &str, c: &super::build::ConfirmMember) {
+    pub(crate) fn confirm(
+        &mut self,
+        org_id: &str,
+        account_id: &str,
+        c: &super::build::ConfirmMember,
+    ) {
         let member = self
             .members
             .get_mut(org_id)
@@ -204,7 +209,7 @@ impl Server {
             .collect()
     }
 
-    fn delta(&self, account_id: &str) -> SharingDelta {
+    pub(crate) fn delta(&self, account_id: &str) -> SharingDelta {
         let orgs: Vec<OrgRecord> = self
             .orgs
             .values()
@@ -296,7 +301,7 @@ impl Server {
     }
 }
 
-fn account() -> Keyring {
+pub(crate) fn account() -> Keyring {
     let auk = SymmetricKey::generate().unwrap();
     Keyring::create(&auk, &id::new_id().unwrap()).unwrap().0
 }
@@ -312,7 +317,7 @@ fn warnings(report: &super::state::SharingReport, kind: &str) -> usize {
 
 /// Alice creates a family with its vault, invites and confirms Bob, and
 /// shares the vault with him.
-fn family() -> (Server, Keyring, Keyring, String, String) {
+pub(crate) fn family() -> (Server, Keyring, Keyring, String, String) {
     let mut server = Server::default();
     let mut alice = account();
     let mut bob = account();

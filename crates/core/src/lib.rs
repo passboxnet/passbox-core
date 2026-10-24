@@ -9,7 +9,9 @@
 
 pub mod aead;
 pub mod canon;
+pub mod device_link;
 pub mod directory;
+pub mod emergency;
 pub mod encoding;
 pub mod error;
 pub mod export;
@@ -21,6 +23,7 @@ pub mod keyring;
 pub mod opaque;
 pub mod passkey;
 pub mod random;
+pub mod recovery;
 pub mod secret_key;
 pub mod sharing;
 pub mod strength;

@@ -22,7 +22,7 @@ const VERSION_PREFIX: &str = "P1";
 const ENCODED_LEN: usize = 26;
 const GROUPS: [usize; 5] = [5, 5, 5, 5, 6];
 
-fn crockford() -> Encoding {
+pub(crate) fn crockford() -> Encoding {
     let mut spec = Specification::new();
     spec.symbols.push_str("0123456789ABCDEFGHJKMNPQRSTVWXYZ");
     spec.translate.from.push_str("abcdefghjkmnpqrstvwxyzIiLlOo");

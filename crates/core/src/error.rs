@@ -11,6 +11,10 @@ pub enum Error {
     WeakKdfParams,
     #[error("invalid secret key")]
     InvalidSecretKey,
+    #[error("invalid recovery code")]
+    InvalidRecoveryCode,
+    #[error("invalid device code")]
+    InvalidDeviceCode,
     #[error("malformed envelope")]
     MalformedEnvelope,
     #[error("unsupported envelope version or algorithm")]

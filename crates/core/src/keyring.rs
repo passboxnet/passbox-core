@@ -46,7 +46,7 @@ fn vault_key_aad(account_id: &str, vault_id: &str, epoch: u32) -> Vec<u8> {
     }
 }
 
-fn vault_meta_aad(vault_id: &str, epoch: u32) -> Vec<u8> {
+pub(crate) fn vault_meta_aad(vault_id: &str, epoch: u32) -> Vec<u8> {
     if epoch == 0 {
         format!("passbox/v1/vault-meta|{vault_id}").into_bytes()
     } else {
@@ -56,7 +56,7 @@ fn vault_meta_aad(vault_id: &str, epoch: u32) -> Vec<u8> {
 
 /// Items of personal vaults (epoch 0) use the version-1 associated data;
 /// items of shared vaults use version 2, which adds the key epoch.
-fn item_aad(vault_id: &str, item_id: &str, revision: u64, epoch: u32) -> Vec<u8> {
+pub(crate) fn item_aad(vault_id: &str, item_id: &str, revision: u64, epoch: u32) -> Vec<u8> {
     if epoch == 0 {
         format!("passbox/v1/item|{vault_id}|{item_id}|{revision}").into_bytes()
     } else {
@@ -167,7 +167,7 @@ impl core::fmt::Debug for Keyring {
 }
 
 impl Keyring {
-    fn from_account_key(account_id: &str, account_key: SymmetricKey) -> Self {
+    pub(crate) fn from_account_key(account_id: &str, account_key: SymmetricKey) -> Self {
         Self {
             account_id: account_id.to_owned(),
             account_key,
@@ -209,6 +209,38 @@ impl Keyring {
 
     pub fn account_id(&self) -> &str {
         &self.account_id
+    }
+
+    pub(crate) fn account_key(&self) -> &SymmetricKey {
+        &self.account_key
+    }
+
+    /// Encrypts the account key with the wrapping key of a recovery code
+    /// (see [`crate::recovery::code`]), as the second copy the server keeps
+    /// for account recovery.
+    pub fn wrap_account_key_for_recovery(&self, wrap_key: &SymmetricKey) -> Result<String> {
+        let encrypted = wrap_key.encrypt(
+            self.account_key.as_bytes(),
+            &crate::recovery::code::wrap_aad(&self.account_id),
+        )?;
+        Ok(encoding::encode(&encrypted))
+    }
+
+    /// Opens the recovery copy of the account key. Fails with
+    /// [`Error::InvalidCredentials`] for a wrong code.
+    pub fn unlock_with_recovery(
+        wrap_key: &SymmetricKey,
+        account_id: &str,
+        wrapped_account_key: &str,
+    ) -> Result<Self> {
+        let envelope = encoding::decode(wrapped_account_key)?;
+        let plaintext = wrap_key
+            .decrypt(&envelope, &crate::recovery::code::wrap_aad(account_id))
+            .map_err(|_| Error::InvalidCredentials)?;
+        Ok(Self::from_account_key(
+            account_id,
+            key_from_plaintext(plaintext)?,
+        ))
     }
 
     /// Encrypts the account key with a new Account Unlock Key, for changing
