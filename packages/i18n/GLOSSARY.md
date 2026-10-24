@@ -34,6 +34,13 @@ client (web, desktop, extension, iOS, Android) and on the website.
 | Authenticator app | Authenticator-App |
 | Security key | Sicherheitsschlüssel |
 | Recovery code | Wiederherstellungscode |
+| Account recovery code (Emergency Kit, `R1-…`) | Wiederherstellungscode für das Konto; where it could be mixed up with the two-factor codes: Zwei-Faktor-Wiederherstellungscode |
+| Recovery through the organization | Wiederherstellung über die Organisation |
+| Request code (compared by phone) | Anfragecode |
+| Emergency access / Emergency contact | Notfallzugang / Notfallkontakt |
+| Waiting period | Wartezeit |
+| Add a device / Sign in with another device | Gerät hinzufügen / Mit einem anderen Gerät anmelden |
+| Device code | Gerätecode |
 | Remember this device | Dieses Gerät merken |
 
 Plain language first: no "OPAQUE", "ciphertext", "revision", "account ID"
