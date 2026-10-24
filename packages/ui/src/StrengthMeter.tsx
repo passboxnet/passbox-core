@@ -8,7 +8,7 @@ export interface StrengthMeterProps {
 }
 
 const colors = ["bg-danger", "bg-danger", "bg-warning", "bg-success", "bg-success"];
-const text = ["text-danger", "text-danger", "text-warning", "text-success", "text-success"];
+const text = ["text-danger", "text-danger", "text-warning-text", "text-success-text", "text-success-text"];
 
 export function StrengthMeter({ score, label, className }: StrengthMeterProps) {
   return (
@@ -21,7 +21,7 @@ export function StrengthMeter({ score, label, className }: StrengthMeterProps) {
           />
         ))}
       </div>
-      <span className={cn("text-xs font-medium", text[score])}>{label}</span>
+      <span className={cn("text-xs font-medium whitespace-nowrap", text[score])}>{label}</span>
     </div>
   );
 }

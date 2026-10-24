@@ -20,12 +20,13 @@ const variants: Record<ButtonVariant, string> = {
 };
 
 const sizes: Record<ButtonSize, string> = {
-  xs: "h-7 gap-1.5 rounded-md px-2 text-xs",
-  sm: "h-8 gap-1.5 rounded-md px-3 text-[13px]",
-  md: "h-9 gap-2 rounded-lg px-3.5 text-sm",
-  lg: "h-11 gap-2 rounded-lg px-5 text-[15px]",
-  icon: "size-9 rounded-lg",
-  "icon-sm": "size-7 rounded-md",
+  // Touch screens (coarse pointers) get targets of at least 44 px.
+  xs: "h-7 gap-1.5 rounded-md px-2 text-xs coarse:h-11",
+  sm: "h-8 gap-1.5 rounded-md px-3 text-[0.8125rem] coarse:h-11",
+  md: "h-9 gap-2 rounded-lg px-3.5 text-sm coarse:h-11",
+  lg: "h-11 gap-2 rounded-lg px-5 text-[0.9375rem] coarse:h-12",
+  icon: "size-9 rounded-lg coarse:size-11",
+  "icon-sm": "size-7 rounded-md coarse:size-11",
 };
 
 /** Button styles, for links that should look like buttons. */

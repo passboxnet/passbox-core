@@ -33,7 +33,7 @@ export function MenuItem({ icon, shortcut, tone = "default", className, children
   return (
     <Dropdown.Item
       className={cn(
-        "flex h-8 cursor-default select-none items-center gap-2.5 rounded-md px-2 text-[13px] outline-none",
+        "flex h-8 cursor-default select-none items-center gap-2.5 rounded-md px-2 text-[0.8125rem] outline-none coarse:h-11",
         "data-[highlighted]:bg-surface-sunken data-[disabled]:opacity-50 [&_svg]:size-4",
         tone === "danger" ? "text-danger" : "text-text",
         className,

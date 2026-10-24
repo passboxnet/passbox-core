@@ -151,6 +151,8 @@ export class PassboxClient {
   private readonly storage: KeyValueStorage;
   private readonly device: { name: string; kind: ClientKind } | undefined;
   private keyring: Core.Keyring | undefined;
+  /** The account key encrypted with the master keys, kept to verify the master password offline. */
+  private accountKeyCiphertext: string | undefined;
   private cursor = 0;
   private vaults = new Map<string, Vault>();
   private items = new Map<string, Item>();
@@ -345,38 +347,47 @@ export class PassboxClient {
       });
       const registrationUpload = registration.finish(registrationResponse);
       registration.free();
+      const encryptedAccountKey = keyring.wrapAccountKey(newKeys);
       await this.api.passwordChangeFinish({
         registrationUpload,
         kdfSalt: next.kdfSalt,
         kdfParams: next.kdfParams,
-        encryptedAccountKey: keyring.wrapAccountKey(newKeys),
+        encryptedAccountKey,
       });
       this.storage.setItem(ACCOUNT_KEY, JSON.stringify(next));
+      this.accountKeyCiphertext = encryptedAccountKey;
     } finally {
       newKeys.free();
     }
   }
 
   /**
-   * Checks the master password before a sensitive action (such as an
-   * export) without signing in again: the derived key must decrypt the
-   * account key. Returns `false` for a wrong password.
+   * Checks the master password without contacting the server: derives the
+   * keys locally and tries to open the account key with them. Use it to
+   * confirm the user before showing the Emergency Kit or other sensitive
+   * screens. Requires an unlocked vault.
    */
   async verifyMasterPassword(password: string): Promise<boolean> {
-    this.requireKeyring();
+    const keyring = this.requireKeyring();
     const account = this.deviceAccount;
     if (!account) return false;
-    const remote = await this.api.account();
-    let keys: Core.MasterKeys | undefined;
+    // A resumed session (`restoreSession`) has no ciphertext yet; fetch it once.
+    this.accountKeyCiphertext ??= keyring.encryptedAccountKey ?? (await this.api.account()).encryptedAccountKey;
+    let keys: Core.MasterKeys;
     try {
       keys = this.deriveKeys(account, password);
-      this.core.Keyring.unlock(keys, remote.accountId, remote.encryptedAccountKey).free();
+    } catch (error) {
+      if (error instanceof InvalidCredentialsError) return false;
+      throw error;
+    }
+    try {
+      this.core.Keyring.unlock(keys, account.accountId, this.accountKeyCiphertext).free();
       return true;
     } catch (error) {
-      if (error instanceof InvalidCredentialsError || isInvalidCredentials(error)) return false;
+      if (isInvalidCredentials(error)) return false;
       throw error;
     } finally {
-      keys?.free();
+      keys.free();
     }
   }
 
@@ -431,6 +442,7 @@ export class PassboxClient {
   private clearSession() {
     this.keyring?.free();
     this.keyring = undefined;
+    this.accountKeyCiphertext = undefined;
     this.token = undefined;
     this.cursor = 0;
     this.vaults.clear();
@@ -475,6 +487,7 @@ export class PassboxClient {
       this.token = token;
       const remote = await this.api.account();
       this.keyring = this.core.Keyring.unlock(keys, remote.accountId, remote.encryptedAccountKey);
+      this.accountKeyCiphertext = remote.encryptedAccountKey;
     } catch (error) {
       this.clearSession();
       throw isInvalidCredentials(error) ? new InvalidCredentialsError() : error;

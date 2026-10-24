@@ -5,6 +5,7 @@ import { X } from "lucide-react";
 import type { ReactNode } from "react";
 import { Button } from "./Button";
 import { cn } from "./cn";
+import { useUiStrings } from "./UiStrings";
 
 export interface DialogProps {
   open: boolean;
@@ -19,13 +20,14 @@ export interface DialogProps {
 const widths = { sm: "max-w-sm", md: "max-w-lg", lg: "max-w-2xl" };
 
 export function Dialog({ open, onOpenChange, title, description, children, footer, size = "md" }: DialogProps) {
+  const strings = useUiStrings();
   return (
     <RadixDialog.Root open={open} onOpenChange={onOpenChange}>
       <RadixDialog.Portal>
         <RadixDialog.Overlay className="fixed inset-0 z-40 animate-fade-in bg-black/40 backdrop-blur-[2px]" />
         <RadixDialog.Content
           className={cn(
-            "fixed top-1/2 left-1/2 z-50 w-[calc(100vw-2rem)] -translate-x-1/2 -translate-y-1/2",
+            "fixed top-1/2 left-1/2 z-50 max-h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto",
             "animate-scale-in rounded-card border border-border bg-surface shadow-overlay focus:outline-none",
             widths[size],
           )}
@@ -42,14 +44,14 @@ export function Dialog({ open, onOpenChange, title, description, children, foote
               )}
             </div>
             <RadixDialog.Close asChild>
-              <Button variant="ghost" size="icon-sm" aria-label="Close">
+              <Button variant="ghost" size="icon-sm" aria-label={strings.close}>
                 <X />
               </Button>
             </RadixDialog.Close>
           </div>
           {children && <div className="px-6 py-4">{children}</div>}
           {footer && (
-            <div className="flex justify-end gap-2 rounded-b-card border-t border-border bg-surface-raised px-6 py-3">
+            <div className="flex flex-wrap justify-end gap-2 rounded-b-card border-t border-border bg-surface-raised px-6 py-3">
               {footer}
             </div>
           )}
@@ -65,8 +67,13 @@ export interface ConfirmDialogProps {
   title: string;
   description: ReactNode;
   confirmLabel: string;
+  /** Defaults to the localized "Cancel". */
+  cancelLabel?: string;
   tone?: "default" | "danger";
   onConfirm: () => void;
+  /** Extra buttons left of Cancel, for example "Show Emergency Kit". */
+  extraActions?: ReactNode;
+  size?: DialogProps["size"];
 }
 
 export function ConfirmDialog({
@@ -75,20 +82,25 @@ export function ConfirmDialog({
   title,
   description,
   confirmLabel,
+  cancelLabel,
   tone = "default",
   onConfirm,
+  extraActions,
+  size = "sm",
 }: ConfirmDialogProps) {
+  const strings = useUiStrings();
   return (
     <Dialog
       open={open}
       onOpenChange={onOpenChange}
       title={title}
       description={description}
-      size="sm"
+      size={size}
       footer={
         <>
+          {extraActions}
           <Button variant="secondary" onClick={() => onOpenChange(false)}>
-            Cancel
+            {cancelLabel ?? strings.cancel}
           </Button>
           <Button
             variant={tone === "danger" ? "danger" : "primary"}

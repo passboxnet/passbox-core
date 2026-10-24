@@ -11,6 +11,7 @@ import {
   useState,
 } from "react";
 import { cn } from "./cn";
+import { useUiStrings } from "./UiStrings";
 
 export const fieldClassName = cn(
   "w-full rounded-lg border border-border-strong bg-surface text-sm text-text shadow-xs transition",
@@ -35,7 +36,7 @@ function FieldWrapper({ id, label, hint, error, hideLabel, labelAction, children
     <div className="flex flex-col gap-1.5">
       {label && (
         <div className={cn("flex items-center justify-between", hideLabel && "sr-only")}>
-          <label htmlFor={id} className="text-[13px] font-medium text-text">
+          <label htmlFor={id} className="text-[0.8125rem] font-medium text-text">
             {label}
           </label>
           {labelAction}
@@ -89,7 +90,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           aria-invalid={error ? true : undefined}
           className={cn(
             fieldClassName,
-            "h-10 px-3",
+            "h-10 px-3 coarse:h-12",
             leading ? "pl-9" : undefined,
             trailing ? "pr-20" : undefined,
             className,
@@ -112,6 +113,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(fu
   { actions, hint, onKeyUp, className, ...props },
   ref,
 ) {
+  const strings = useUiStrings();
   const [revealed, setRevealed] = useState(false);
   const [capsLock, setCapsLock] = useState(false);
   const handleKeyUp = (event: KeyboardEvent<HTMLInputElement>) => {
@@ -126,16 +128,24 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(fu
       spellCheck={false}
       autoCapitalize="off"
       className={cn("font-mono tracking-tight", className)}
-      hint={capsLock ? <span className="text-warning">Caps Lock is on</span> : hint}
+      hint={
+        capsLock ? (
+          <span className="font-medium text-warning-text" role="status">
+            {strings.capsLockOn}
+          </span>
+        ) : (
+          hint
+        )
+      }
       trailing={
         <>
           {actions}
           <button
             type="button"
             onClick={() => setRevealed((r) => !r)}
-            aria-label={revealed ? "Hide password" : "Show password"}
+            aria-label={revealed ? strings.hidePassword : strings.showPassword}
             aria-pressed={revealed}
-            className="flex size-7 items-center justify-center rounded-md text-text-subtle hover:bg-surface-sunken hover:text-text [&_svg]:size-4"
+            className="flex size-7 items-center justify-center rounded-md text-text-muted hover:bg-surface-sunken hover:text-text coarse:size-10 [&_svg]:size-4"
           >
             {revealed ? <EyeOff /> : <Eye />}
           </button>
