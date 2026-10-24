@@ -8,6 +8,7 @@
 //! **The scheme is a draft and has not been reviewed or audited yet.**
 
 pub mod aead;
+pub mod analysis;
 pub mod audit;
 pub mod breach;
 pub mod canon;

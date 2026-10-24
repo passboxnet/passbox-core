@@ -89,6 +89,40 @@ pub fn estimate_strength(password: &str, user_inputs_json: &str) -> Result<Strin
     .to_string())
 }
 
+/// The vault security analysis (`passbox_core::analysis::analyze`).
+/// `items_json` is an array of `{ id, createdAt, data }` with `data` in the
+/// item format; `options_json` an `AnalysisOptions` object. Returns the
+/// `SecurityReport` as JSON. Everything runs locally.
+#[wasm_bindgen(js_name = analyzeSecurity)]
+pub fn analyze_security(items_json: &str, options_json: &str) -> Result<String, JsValue> {
+    use passbox_core::analysis;
+    let items: Vec<analysis::AnalysisItem> =
+        serde_json::from_str(items_json).map_err(json_error)?;
+    let options: analysis::AnalysisOptions =
+        serde_json::from_str(options_json).map_err(json_error)?;
+    serde_json::to_string(&analysis::analyze(&items, &options)).map_err(json_error)
+}
+
+/// Checks a page host against the user's saved login hosts (JSON array)
+/// and well-known sites before filling or saving. Returns a `Lookalike`
+/// as JSON (`{ domain, looksLike, reason, saved }`) or `undefined`.
+#[wasm_bindgen(js_name = checkLookalike)]
+pub fn check_lookalike(host: &str, saved_json: &str) -> Result<Option<String>, JsValue> {
+    let saved: Vec<String> = serde_json::from_str(saved_json).map_err(json_error)?;
+    passbox_core::analysis::lookalike::check_host(host, saved.iter().map(String::as_str), true)
+        .map(|found| serde_json::to_string(&found).map_err(json_error))
+        .transpose()
+}
+
+/// What the bundled 2FA and passkey directories know about a host, as
+/// JSON (`SiteSupport`), or `undefined`.
+#[wasm_bindgen(js_name = siteSupport)]
+pub fn site_support(host: &str) -> Result<Option<String>, JsValue> {
+    passbox_core::analysis::sites::lookup(host)
+        .map(|site| serde_json::to_string(&site).map_err(json_error))
+        .transpose()
+}
+
 /// Checks a one-time password field: `undefined` when fine or empty,
 /// `"one_time_code"` for a single code instead of the setup key, or
 /// `"invalid"`.
