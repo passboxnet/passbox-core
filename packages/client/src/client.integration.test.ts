@@ -76,6 +76,22 @@ describe.skipIf(!serverUrl)("PassboxClient against a server", () => {
     await expect(laptop.unlock("wrong password")).rejects.toBeInstanceOf(InvalidCredentialsError);
     await laptop.unlock("correct horse battery staple");
     expect(laptop.getSnapshot().status).toBe("unlocked");
+
+    // A restarted process resumes the session from the exported state.
+    const state = laptop.exportSession();
+    expect(state).toBeDefined();
+    if (!state) return;
+    const storage = memoryStorage();
+    storage.setItem("passbox.account", JSON.stringify(laptop.deviceAccount));
+    let resumed: PassboxClient | undefined;
+    resumed = new PassboxClient({
+      core,
+      api: createClient({ baseUrl: serverUrl ?? "", getToken: () => resumed?.token }),
+      storage,
+    });
+    await resumed.restoreSession(state);
+    expect(resumed.getSnapshot()).toMatchObject({ status: "unlocked", vaults: laptop.getSnapshot().vaults });
+    await expect(resumed.restoreSession({ ...state, accountId: "other" })).rejects.toThrow(/another account/);
   });
 
   it("rejects a wrong Secret Key", async () => {

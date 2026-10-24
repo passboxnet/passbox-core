@@ -7,6 +7,7 @@ export {
   type Item,
   PassboxClient,
   type PassboxClientOptions,
+  type SessionState,
   type Vault,
 } from "./client";
 export {
@@ -17,6 +18,7 @@ export {
   type ItemData,
   type ItemField,
   newItemData,
+  type Passkey,
   parseItemData,
   parseVaultMeta,
   templateFields,
