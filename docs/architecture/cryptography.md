@@ -80,12 +80,15 @@ Passbox acts as a WebAuthn authenticator for ES256 (ECDSA P-256 with SHA-256, CO
 
 Code: [`crates/core/src/passkey.rs`](../../crates/core/src/passkey.rs), [`apps/extension/src/background/passkeys.ts`](../../apps/extension/src/background/passkeys.ts).
 
+## Changing the master password (implemented)
+
+The account key stays the same, so vaults and items are untouched. The client derives new master keys (new salt; the Secret Key stays), registers new OPAQUE credentials and uploads the account key wrapped with the new AUK (`Keyring::wrap_account_key`). The server only accepts this from a session created by a login within the last 10 minutes and signs out every other device.
+
 ## Known gaps
 
 - A server can still withhold changes or replay an entire older state of an item (old revision with its matching ciphertext). The signed revision chain below closes this.
 - Vault metadata is not bound to a revision yet.
 - Server secrets (OPAQUE server keys, prelogin key) are stored unencrypted in the database. They protect against account enumeration and server impersonation, not vault confidentiality.
-- No rate limiting on authentication endpoints yet. Online guessing is impractical because the Secret Key is part of every login, but rate limits are still planned.
 
 ## Encryption envelope (implemented)
 

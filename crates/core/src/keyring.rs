@@ -117,6 +117,16 @@ impl Keyring {
         &self.account_id
     }
 
+    /// Encrypts the account key with a new Account Unlock Key, for changing
+    /// the master password. Vault keys and items stay as they are.
+    pub fn wrap_account_key(&self, auk: &SymmetricKey) -> Result<String> {
+        let encrypted = auk.encrypt(
+            self.account_key.as_bytes(),
+            &account_key_aad(&self.account_id),
+        )?;
+        Ok(encoding::encode(&encrypted))
+    }
+
     /// Creates a new vault with the given metadata (JSON) and adds its key.
     pub fn create_vault(&mut self, meta_json: &str) -> Result<NewVault> {
         ensure_json(meta_json.as_bytes())?;
@@ -301,6 +311,17 @@ mod tests {
                 .account_id(),
             "acc"
         );
+    }
+
+    #[test]
+    fn rewrapped_account_key_unlocks_with_the_new_auk_only() {
+        let (old_auk, mut keyring, _) = setup();
+        let vault = keyring.create_vault("{}").unwrap();
+        let new_auk = SymmetricKey::generate().unwrap();
+        let rewrapped = keyring.wrap_account_key(&new_auk).unwrap();
+        assert!(Keyring::unlock(&old_auk, "acc", &rewrapped).is_err());
+        let mut unlocked = Keyring::unlock(&new_auk, "acc", &rewrapped).unwrap();
+        unlocked.add_vault(&vault.id, &vault.encrypted_key).unwrap();
     }
 
     #[test]
