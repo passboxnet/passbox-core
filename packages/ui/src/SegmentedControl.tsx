@@ -32,7 +32,7 @@ export function SegmentedControl<T extends string>({
         <label
           key={option.value}
           className={cn(
-            "flex h-8 cursor-pointer items-center justify-center rounded-md px-3 text-[13px] font-medium transition",
+            "flex h-8 cursor-pointer items-center justify-center rounded-md px-3 text-center text-[0.8125rem] font-medium transition coarse:h-11",
             "has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-accent",
             value === option.value
               ? "bg-surface text-text shadow-card ring-1 ring-border"

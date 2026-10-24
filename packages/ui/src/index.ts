@@ -19,5 +19,6 @@ export { SegmentedControl, type SegmentedControlProps } from "./SegmentedControl
 export { Spinner } from "./Spinner";
 export { StrengthMeter, type StrengthMeterProps } from "./StrengthMeter";
 export { Switch, type SwitchProps } from "./Switch";
-export { Toaster, toast } from "./Toaster";
+export { Toaster, type ToasterProps, toast } from "./Toaster";
 export { Tooltip, type TooltipProps, TooltipProvider } from "./Tooltip";
+export { DEFAULT_UI_STRINGS, type UiStrings, UiStringsProvider, useUiStrings } from "./UiStrings";

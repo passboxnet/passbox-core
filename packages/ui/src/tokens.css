@@ -11,11 +11,14 @@
  * data-theme="light" or data-theme="dark" on <html>.
  */
 
+/* Touch screens: `coarse:size-11` and friends enlarge targets to 44 px or more. */
+@custom-variant coarse (@media (pointer: coarse));
+
 @theme {
   --font-sans: "Inter Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "JetBrains Mono Variable", ui-monospace, "SFMono-Regular", Menlo, monospace;
 
-  --text-2xs: 0.6875rem;
+  --text-2xs: 0.75rem;
   --text-2xs--line-height: 1rem;
 
   --color-brand-50: oklch(0.97 0.017 262);
@@ -49,6 +52,9 @@
   --color-success-soft: var(--pb-success-soft);
   --color-warning: var(--pb-warning);
   --color-warning-soft: var(--pb-warning-soft);
+  /* Text on light backgrounds; --color-warning and --color-success are for icons and bars. */
+  --color-warning-text: var(--pb-warning-text);
+  --color-success-text: var(--pb-success-text);
 
   --radius-card: 0.75rem;
 
@@ -90,7 +96,7 @@
     --pb-border-strong: oklch(0.86 0.008 260);
     --pb-text: oklch(0.21 0.015 262);
     --pb-text-muted: oklch(0.47 0.015 262);
-    --pb-text-subtle: oklch(0.6 0.012 262);
+    --pb-text-subtle: oklch(0.5 0.012 262);
     --pb-accent: var(--color-brand-600);
     --pb-accent-hover: var(--color-brand-700);
     --pb-accent-soft: oklch(0.95 0.03 262);
@@ -101,6 +107,8 @@
     --pb-success-soft: oklch(0.96 0.03 155);
     --pb-warning: oklch(0.68 0.15 70);
     --pb-warning-soft: oklch(0.97 0.04 85);
+    --pb-warning-text: oklch(0.45 0.12 70);
+    --pb-success-text: oklch(0.45 0.12 155);
     --pb-monogram-bg-l: 0.93;
     --pb-monogram-fg-l: 0.42;
   }
@@ -116,7 +124,7 @@
       --pb-border-strong: oklch(0.34 0.012 262);
       --pb-text: oklch(0.96 0.004 262);
       --pb-text-muted: oklch(0.72 0.01 262);
-      --pb-text-subtle: oklch(0.58 0.01 262);
+      --pb-text-subtle: oklch(0.68 0.01 262);
       --pb-accent: var(--color-brand-400);
       --pb-accent-hover: var(--color-brand-300);
       --pb-accent-soft: oklch(0.27 0.05 262);
@@ -127,6 +135,8 @@
       --pb-success-soft: oklch(0.25 0.05 155);
       --pb-warning: oklch(0.78 0.14 75);
       --pb-warning-soft: oklch(0.27 0.05 75);
+      --pb-warning-text: oklch(0.82 0.13 75);
+      --pb-success-text: oklch(0.76 0.13 155);
       --pb-monogram-bg-l: 0.3;
       --pb-monogram-fg-l: 0.86;
     }
@@ -142,7 +152,7 @@
     --pb-border-strong: oklch(0.34 0.012 262);
     --pb-text: oklch(0.96 0.004 262);
     --pb-text-muted: oklch(0.72 0.01 262);
-    --pb-text-subtle: oklch(0.58 0.01 262);
+    --pb-text-subtle: oklch(0.68 0.01 262);
     --pb-accent: var(--color-brand-400);
     --pb-accent-hover: var(--color-brand-300);
     --pb-accent-soft: oklch(0.27 0.05 262);
@@ -153,6 +163,8 @@
     --pb-success-soft: oklch(0.25 0.05 155);
     --pb-warning: oklch(0.78 0.14 75);
     --pb-warning-soft: oklch(0.27 0.05 75);
+    --pb-warning-text: oklch(0.82 0.13 75);
+    --pb-success-text: oklch(0.76 0.13 155);
     --pb-monogram-bg-l: 0.3;
     --pb-monogram-fg-l: 0.86;
   }
