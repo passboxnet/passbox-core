@@ -1,15 +1,19 @@
-//! Derivation of the Account Unlock Key (AUK) from the master password and the
-//! Secret Key ("two-secret key derivation").
+//! Derivation of the master keys from the master password and the Secret Key
+//! ("two-secret key derivation").
 //!
 //! ```text
-//! k_password = Argon2id(password, salt, params)            (32 bytes)
-//! k_secret   = HKDF-SHA256(ikm = secret_key,
-//!                          salt = account_id,
-//!                          info = "passbox/v1/auk/secret-key")  (32 bytes)
-//! AUK        = k_password XOR k_secret
+//! k_password  = Argon2id(password, salt, params)                    (32 bytes)
+//! k_secret    = HKDF-SHA256(ikm = secret_key, salt = account_id,
+//!                           info = "passbox/v1/auk/secret-key")       (32 bytes)
+//! master      = k_password XOR k_secret
+//! AUK         = HKDF-SHA256(ikm = master, info = "passbox/v1/auk")
+//! auth_secret = HKDF-SHA256(ikm = master, info = "passbox/v1/opaque-password")
 //! ```
 //!
-//! Both halves are needed to recover the AUK. The Argon2 parameters travel with
+//! The Account Unlock Key (AUK) decrypts the account key. The auth secret is
+//! the "password" for the OPAQUE login, so the server never learns anything
+//! derived from the master password alone. Both secrets are needed for either
+//! output. The Argon2 parameters travel with
 //! the account, so the client enforces [`KdfParams::MINIMUM`] itself and never
 //! trusts the server to choose safe values.
 
@@ -26,6 +30,8 @@ use crate::{Error, Result, random};
 /// Length of the per-account KDF salt in bytes.
 pub const SALT_LEN: usize = 16;
 const SECRET_KEY_INFO: &[u8] = b"passbox/v1/auk/secret-key";
+const AUK_INFO: &[u8] = b"passbox/v1/auk";
+const AUTH_INFO: &[u8] = b"passbox/v1/opaque-password";
 
 /// Argon2id cost parameters.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -78,14 +84,22 @@ pub fn generate_salt() -> Result<[u8; SALT_LEN]> {
     random::bytes()
 }
 
-/// Derives the Account Unlock Key, enforcing the minimum KDF parameters.
-pub fn derive_account_unlock_key(
+/// Keys derived from the master password and the Secret Key.
+pub struct MasterKeys {
+    /// Account Unlock Key: decrypts the account key.
+    pub auk: SymmetricKey,
+    /// Input to the OPAQUE login.
+    pub auth_secret: Zeroizing<[u8; 32]>,
+}
+
+/// Derives the master keys, enforcing the minimum KDF parameters.
+pub fn derive_master_keys(
     password: &str,
     secret_key: &SecretKey,
     account_id: &str,
     salt: &[u8; SALT_LEN],
     params: KdfParams,
-) -> Result<SymmetricKey> {
+) -> Result<MasterKeys> {
     params.ensure_minimum()?;
     derive_unchecked(password, secret_key, account_id, salt, params)
 }
@@ -96,7 +110,7 @@ fn derive_unchecked(
     account_id: &str,
     salt: &[u8; SALT_LEN],
     params: KdfParams,
-) -> Result<SymmetricKey> {
+) -> Result<MasterKeys> {
     let argon_params = Params::new(
         params.memory_kib,
         params.iterations,
@@ -119,7 +133,18 @@ fn derive_unchecked(
     for (k, s) in key.iter_mut().zip(k_secret.iter()) {
         *k ^= s;
     }
-    Ok(SymmetricKey::from_bytes(*key))
+
+    let master = Hkdf::<Sha256>::new(None, key.as_ref());
+    let mut auk = Zeroizing::new([0u8; 32]);
+    let mut auth_secret = Zeroizing::new([0u8; 32]);
+    master
+        .expand(AUK_INFO, auk.as_mut())
+        .and_then(|()| master.expand(AUTH_INFO, auth_secret.as_mut()))
+        .map_err(|e| Error::Kdf(e.to_string()))?;
+    Ok(MasterKeys {
+        auk: SymmetricKey::from_bytes(*auk),
+        auth_secret,
+    })
 }
 
 #[cfg(test)]
@@ -127,7 +152,7 @@ mod tests {
     use super::*;
 
     // Cheap parameters keep unit tests fast; production code goes through
-    // `derive_account_unlock_key`, which rejects them.
+    // `derive_master_keys`, which rejects them.
     const TEST_PARAMS: KdfParams = KdfParams {
         memory_kib: 256,
         iterations: 1,
@@ -143,6 +168,7 @@ mod tests {
             TEST_PARAMS,
         )
         .unwrap()
+        .auk
     }
 
     #[test]
@@ -175,9 +201,15 @@ mod tests {
     #[test]
     fn weak_params_are_rejected() {
         let sk = SecretKey::from_bytes([1; 16]);
-        let err =
-            derive_account_unlock_key("pw", &sk, "acc", &[0; SALT_LEN], TEST_PARAMS).unwrap_err();
-        assert_eq!(err, Error::WeakKdfParams);
+        let result = derive_master_keys("pw", &sk, "acc", &[0; SALT_LEN], TEST_PARAMS);
+        assert_eq!(result.err(), Some(Error::WeakKdfParams));
+    }
+
+    #[test]
+    fn auk_and_auth_secret_differ() {
+        let sk = SecretKey::from_bytes([1; 16]);
+        let keys = derive_unchecked("pw", &sk, "acc", &[0; SALT_LEN], TEST_PARAMS).unwrap();
+        assert_ne!(keys.auk.as_bytes(), &*keys.auth_secret);
     }
 
     #[test]

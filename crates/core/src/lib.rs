@@ -8,9 +8,13 @@
 //! **The scheme is a draft and has not been reviewed or audited yet.**
 
 pub mod aead;
+pub mod encoding;
 pub mod error;
 pub mod generator;
+pub mod id;
 pub mod kdf;
+pub mod keyring;
+pub mod opaque;
 pub mod random;
 pub mod secret_key;
 pub mod totp;

@@ -21,8 +21,13 @@ data-encoding = "2"
 getrandom = "0.4"
 hkdf = "0.13"
 hmac = "0.13"
+opaque-ke = { version = "4.0.1", default-features = false, features = ["ristretto255"] }
+# opaque-ke 4 is built on the previous RustCrypto and rand generations.
+opaque-rand-core = { package = "rand_core", version = "0.6", features = ["getrandom"] }
+opaque-sha2 = { package = "sha2", version = "0.10" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+sqlx = { version = "0.9", default-features = false, features = ["runtime-tokio", "any", "sqlite", "postgres", "migrate", "macros"] }
 sha1 = "0.11"
 sha2 = "0.11"
 thiserror = "2"

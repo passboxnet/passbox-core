@@ -3,7 +3,8 @@ import { ApiError, createClient } from "./index";
 
 function fakeFetch(status: number, body: unknown) {
   return vi.fn(
-    async (_input: RequestInfo | URL, _init?: RequestInit) => new Response(JSON.stringify(body), { status }),
+    async (_input: RequestInfo | URL, _init?: RequestInit) =>
+      new Response(status === 204 ? null : JSON.stringify(body), { status }),
   );
 }
 
@@ -18,10 +19,32 @@ describe("createClient", () => {
     expect(fetch).toHaveBeenCalledWith("https://vault.example.com/api/v1/meta", expect.anything());
   });
 
-  it("throws ApiError on non-2xx responses", async () => {
-    const client = createClient({ fetch: fakeFetch(503, { error: "down" }) });
+  it("sends the session token and JSON bodies", async () => {
+    const fetch = fakeFetch(200, { revision: 1, seq: 7 });
+    const client = createClient({ fetch, getToken: () => "tok" });
 
-    await expect(client.health()).rejects.toBeInstanceOf(ApiError);
-    await expect(client.health()).rejects.toMatchObject({ status: 503, path: "/health" });
+    await client.putItem("item1", { vaultId: "v", revision: 1, encryptedData: "abc" });
+
+    const [url, init] = fetch.mock.calls[0] ?? [];
+    expect(url).toBe("/api/v1/items/item1");
+    expect(init?.method).toBe("PUT");
+    expect((init?.headers as Record<string, string> | undefined)?.authorization).toBe("Bearer tok");
+    expect(JSON.parse(init?.body as string)).toEqual({ vaultId: "v", revision: 1, encryptedData: "abc" });
+  });
+
+  it("handles empty 204 responses", async () => {
+    const client = createClient({ fetch: fakeFetch(204, null) });
+    await expect(client.logout()).resolves.toBeUndefined();
+  });
+
+  it("throws ApiError with the server's error code", async () => {
+    const client = createClient({
+      fetch: fakeFetch(409, { error: "conflict", message: "changed", details: { currentRevision: 3 } }),
+    });
+
+    const error = await client.deleteItem("x", 2).catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(ApiError);
+    expect(error).toMatchObject({ status: 409, code: "conflict", message: "changed" });
+    expect((error as ApiError).body?.details?.currentRevision).toBe(3);
   });
 });

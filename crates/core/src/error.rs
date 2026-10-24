@@ -19,6 +19,16 @@ pub enum Error {
     Decryption,
     #[error("invalid one-time password configuration: {0}")]
     InvalidOtp(&'static str),
+    #[error("invalid Base64url encoding")]
+    InvalidEncoding,
+    #[error("authentication protocol error")]
+    Protocol,
+    #[error("invalid email, password or Secret Key")]
+    InvalidCredentials,
+    #[error("key not found: {0}")]
+    MissingKey(String),
+    #[error("invalid data: {0}")]
+    InvalidData(String),
     #[error("invalid generator options: {0}")]
     InvalidGeneratorOptions(&'static str),
 }

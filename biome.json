@@ -6,7 +6,17 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": ["**", "!**/dist", "!**/.next", "!**/out", "!**/pkg", "!**/target", "!**/next-env.d.ts", "!**/*.md"]
+    "includes": [
+      "**",
+      "!**/dist",
+      "!**/.next",
+      "!**/out",
+      "!**/pkg",
+      "!**/target",
+      "!**/next-env.d.ts",
+      "!**/*.md",
+      "!**/pnpm-lock.yaml"
+    ]
   },
   "formatter": {
     "enabled": true,

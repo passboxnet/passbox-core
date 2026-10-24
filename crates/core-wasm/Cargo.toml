@@ -14,10 +14,13 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 passbox-core.workspace = true
 wasm-bindgen.workspace = true
+js-sys = "0.3"
 serde_json.workspace = true
 
 [target.'cfg(all(target_arch = "wasm32", target_os = "unknown"))'.dependencies]
 getrandom = { workspace = true, features = ["wasm_js"] }
+# Used by opaque-ke through rand_core 0.6.
+getrandom-02 = { package = "getrandom", version = "0.2", features = ["js"] }
 
 [lints]
 workspace = true

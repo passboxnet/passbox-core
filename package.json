@@ -15,7 +15,8 @@
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
     "lint": "biome check .",
-    "format": "biome format --write ."
+    "format": "biome format --write .",
+    "e2e": "pnpm --filter @passbox/e2e e2e"
   },
   "devDependencies": {
     "@biomejs/biome": "2.6.2",

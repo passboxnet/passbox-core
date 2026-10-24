@@ -40,8 +40,23 @@
 | Website | Next.js, static export | Shares the design tokens of `packages/ui` |
 | CLI | Rust, clap | Binary name `pbx` |
 
+## Server
+
+- **Database:** SQLite (default, single file) or PostgreSQL, selected by `PASSBOX_DATABASE_URL`. One code path serves both through the sqlx `Any` driver and portable SQL migrations in [`crates/server/migrations`](../../crates/server/migrations). Binary values are stored as Base64url text and timestamps as Unix milliseconds.
+- **Sync:** a global change counter. Every write takes the next value inside its transaction; `GET /api/v1/sync?since=<cursor>` returns everything with a higher value. Deleted items remain as tombstones without data.
+- **Concurrency:** optimistic. A write names the revision it creates, which must be exactly one higher than the stored revision, otherwise the server answers `409 Conflict` with the current revision.
+
+## Client
+
+[`packages/client`](../../packages/client) contains the platform-neutral client logic used by the web app (and later the extension): sign-up, sign-in, unlock, sync, conflict handling and the item schema. It calls the Rust core through WebAssembly and keeps all keys inside WebAssembly memory.
+
 ## Current state
 
-Implemented: core primitives (Argon2id + Secret Key derivation, XChaCha20-Poly1305 envelopes, Secret Key format, TOTP/HOTP, password and PIN generator), server skeleton (`/health`, `/api/v1/meta`, static web client), web client UI preview with sample data, extension popup with generator, website, CI, Dockerfile.
+Implemented:
 
-Next: accounts and login (OPAQUE), vault and item storage with sync, sharing keys, autofill and passkeys in the extension.
+- Core: Argon2id + Secret Key derivation, OPAQUE login, key hierarchy with context-bound XChaCha20-Poly1305 encryption, TOTP/HOTP, password and PIN generator
+- Server: registration, login, sessions, vaults, items, incremental sync on SQLite and PostgreSQL
+- Web client: sign-up with Emergency Kit, sign-in on new devices, unlock, logins/notes/cards with TOTP, favorites, tags, search, generator, auto-lock after 15 minutes, periodic sync
+- Extension popup with generator, website, CLI tools, CI, Dockerfile
+
+Next: offline cache in the clients, sharing (account key pairs and vault membership), autofill and passkeys in the extension, Watchtower, import from other password managers, rate limiting.

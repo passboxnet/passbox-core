@@ -3,7 +3,7 @@ import { cn } from "./cn";
 
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
-  hint?: string;
+  hint?: string | undefined;
 }
 
 export function Input({ label, hint, className, id, ...props }: InputProps) {

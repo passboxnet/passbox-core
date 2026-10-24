@@ -16,15 +16,96 @@ export interface ServerMeta {
   minKdfParams: KdfParams;
 }
 
+export interface PreloginResponse {
+  accountId: string;
+  kdfSalt: string;
+  kdfParams: KdfParams;
+}
+
+export interface NewVault {
+  id: string;
+  encryptedKey: string;
+  encryptedMeta: string;
+}
+
+export interface RegisterFinishRequest {
+  accountId: string;
+  email: string;
+  registrationUpload: string;
+  kdfSalt: string;
+  kdfParams: KdfParams;
+  encryptedAccountKey: string;
+  vault: NewVault;
+}
+
+export interface LoginStartResponse {
+  loginId: string;
+  credentialResponse: string;
+}
+
+export interface LoginFinishResponse {
+  token: string;
+  accountId: string;
+  expiresAt: number;
+}
+
+export interface Account {
+  accountId: string;
+  email: string;
+  kdfSalt: string;
+  kdfParams: KdfParams;
+  encryptedAccountKey: string;
+}
+
+export interface SyncVault {
+  id: string;
+  encryptedKey: string;
+  encryptedMeta: string;
+  revision: number;
+  updatedAt: number;
+}
+
+export interface SyncItem {
+  id: string;
+  vaultId: string;
+  revision: number;
+  /** `null` for deleted items. */
+  encryptedData: string | null;
+  deleted: boolean;
+  updatedAt: number;
+}
+
+export interface SyncResponse {
+  cursor: number;
+  vaults: SyncVault[];
+  items: SyncItem[];
+}
+
+export interface WriteResponse {
+  revision: number;
+  seq: number;
+}
+
+export interface ErrorBody {
+  error: string;
+  message: string;
+  details?: { currentRevision?: number } & Record<string, unknown>;
+}
+
 /** Thrown when the server answers with a non-2xx status. */
 export class ApiError extends Error {
   constructor(
     readonly status: number,
     readonly path: string,
-    readonly body: string,
+    readonly body: ErrorBody | undefined,
   ) {
-    super(`Passbox API request to ${path} failed with status ${status}`);
+    super(body?.message ?? `Passbox API request to ${path} failed with status ${status}`);
     this.name = "ApiError";
+  }
+
+  /** Machine-readable error code, for example `conflict` or `invalid_credentials`. */
+  get code(): string | undefined {
+    return this.body?.error;
   }
 }
 
@@ -32,29 +113,70 @@ export interface ClientOptions {
   /** Server origin, for example `https://passbox.example.com`. Defaults to the current origin. */
   baseUrl?: string;
   fetch?: typeof globalThis.fetch;
+  /** Returns the session token sent as bearer token, if any. */
+  getToken?: () => string | undefined;
 }
 
-export interface PassboxClient {
+export interface PassboxApi {
   health(): Promise<Health>;
   meta(): Promise<ServerMeta>;
+  prelogin(email: string): Promise<PreloginResponse>;
+  registerStart(req: { accountId: string; email: string; registrationRequest: string }): Promise<{
+    registrationResponse: string;
+  }>;
+  registerFinish(req: RegisterFinishRequest): Promise<{ accountId: string }>;
+  loginStart(req: { email: string; credentialRequest: string }): Promise<LoginStartResponse>;
+  loginFinish(req: { loginId: string; credentialFinalization: string }): Promise<LoginFinishResponse>;
+  logout(): Promise<void>;
+  account(): Promise<Account>;
+  sync(since: number): Promise<SyncResponse>;
+  createVault(vault: NewVault): Promise<WriteResponse>;
+  updateVault(id: string, req: { revision: number; encryptedMeta: string }): Promise<WriteResponse>;
+  putItem(id: string, req: { vaultId: string; revision: number; encryptedData: string }): Promise<WriteResponse>;
+  deleteItem(id: string, revision: number): Promise<WriteResponse>;
 }
 
-export function createClient(options: ClientOptions = {}): PassboxClient {
+export function createClient(options: ClientOptions = {}): PassboxApi {
   const baseUrl = (options.baseUrl ?? "").replace(/\/+$/, "");
   const doFetch = options.fetch ?? globalThis.fetch.bind(globalThis);
 
-  async function getJson<T>(path: string): Promise<T> {
-    const response = await doFetch(`${baseUrl}${path}`, {
-      headers: { accept: "application/json" },
-    });
+  async function call<T>(method: string, path: string, body?: unknown): Promise<T> {
+    const headers: Record<string, string> = { accept: "application/json" };
+    const token = options.getToken?.();
+    if (token) headers.authorization = `Bearer ${token}`;
+    if (body !== undefined) headers["content-type"] = "application/json";
+    const init: RequestInit = { method, headers };
+    if (body !== undefined) init.body = JSON.stringify(body);
+
+    const response = await doFetch(`${baseUrl}${path}`, init);
     if (!response.ok) {
-      throw new ApiError(response.status, path, await response.text());
+      let errorBody: ErrorBody | undefined;
+      try {
+        errorBody = (await response.json()) as ErrorBody;
+      } catch {
+        errorBody = undefined;
+      }
+      throw new ApiError(response.status, path, errorBody);
     }
+    if (response.status === 204) return undefined as T;
     return (await response.json()) as T;
   }
 
   return {
-    health: () => getJson<Health>("/health"),
-    meta: () => getJson<ServerMeta>("/api/v1/meta"),
+    health: () => call("GET", "/health"),
+    meta: () => call("GET", "/api/v1/meta"),
+    prelogin: (email) => call("POST", "/api/v1/auth/prelogin", { email }),
+    registerStart: (req) => call("POST", "/api/v1/auth/register/start", req),
+    registerFinish: (req) => call("POST", "/api/v1/auth/register/finish", req),
+    loginStart: (req) => call("POST", "/api/v1/auth/login/start", req),
+    loginFinish: (req) => call("POST", "/api/v1/auth/login/finish", req),
+    logout: () => call("POST", "/api/v1/auth/logout", {}),
+    account: () => call("GET", "/api/v1/account"),
+    sync: (since) => call("GET", `/api/v1/sync?since=${encodeURIComponent(since)}`),
+    createVault: (vault) => call("POST", "/api/v1/vaults", vault),
+    updateVault: (id, req) => call("PUT", `/api/v1/vaults/${encodeURIComponent(id)}`, req),
+    putItem: (id, req) => call("PUT", `/api/v1/items/${encodeURIComponent(id)}`, req),
+    deleteItem: (id, revision) =>
+      call("DELETE", `/api/v1/items/${encodeURIComponent(id)}?revision=${encodeURIComponent(revision)}`),
   };
 }
