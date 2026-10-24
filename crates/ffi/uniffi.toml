@@ -1,0 +1,11 @@
+# Binding generator settings, read by uniffi-bindgen in library mode.
+
+# Kotlin errors are exceptions, and an exception field named `message`
+# clashes with `Throwable.message`: the generated code does not compile.
+# Rename the field for Kotlin only; Swift keeps `message`.
+[bindings.kotlin.rename]
+"PassboxError.NotFound.message" = "detail"
+"PassboxError.Network.message" = "detail"
+"PassboxError.Server.message" = "detail"
+"PassboxError.Storage.message" = "detail"
+"PassboxError.InvalidData.message" = "detail"
