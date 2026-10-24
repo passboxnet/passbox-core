@@ -210,6 +210,35 @@ pub struct TotpCode {
     pub period: u64,
 }
 
+/// A device signed in to the account.
+#[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
+pub struct DeviceSession {
+    pub id: String,
+    pub device_name: String,
+    /// `web`, `extension`, `desktop`, `ios`, `android`, `cli` or empty.
+    pub client_kind: String,
+    pub ip: String,
+    /// Milliseconds since the Unix epoch.
+    pub created_at: i64,
+    pub last_used_at: i64,
+    /// True for this device.
+    pub current: bool,
+}
+
+/// An entry of the account activity log.
+#[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
+pub struct AccountEvent {
+    pub id: String,
+    /// For example `login`, `login_failed`, `session_revoked` or
+    /// `password_changed`.
+    pub kind: String,
+    pub device_name: String,
+    pub client_kind: String,
+    pub ip: String,
+    /// Milliseconds since the Unix epoch.
+    pub created_at: i64,
+}
+
 // Conversions between the binding records and the client model.
 
 fn category_to_ffi(category: client::ItemCategory) -> ItemCategory {
@@ -346,6 +375,13 @@ impl PassboxClient {
         }))
     }
 
+    /// Sets how this device appears in the account's device list, for
+    /// example `("Anna's iPhone", "ios")`. Call before signing in or
+    /// unlocking.
+    pub fn set_device(&self, name: String, kind: String) {
+        self.inner.set_device(&name, &kind);
+    }
+
     pub fn status(&self) -> Result<ClientStatus> {
         Ok(match self.inner.status()? {
             client::Status::SignedOut => ClientStatus::SignedOut,
@@ -445,6 +481,64 @@ impl PassboxClient {
 
     pub fn rename_vault(&self, id: String, name: String) -> Result<()> {
         Ok(self.inner.rename_vault(&id, &name)?)
+    }
+
+    /// Devices signed in to the account, most recently used first.
+    pub fn sessions(&self) -> Result<Vec<DeviceSession>> {
+        Ok(self
+            .inner
+            .sessions()?
+            .into_iter()
+            .map(|s| DeviceSession {
+                id: s.id,
+                device_name: s.device_name,
+                client_kind: s.client_kind,
+                ip: s.ip,
+                created_at: s.created_at,
+                last_used_at: s.last_used_at,
+                current: s.current,
+            })
+            .collect())
+    }
+
+    /// Signs out another device.
+    pub fn revoke_session(&self, id: String) -> Result<()> {
+        Ok(self.inner.revoke_session(&id)?)
+    }
+
+    /// Signs out every device except this one.
+    pub fn revoke_other_sessions(&self) -> Result<()> {
+        Ok(self.inner.revoke_other_sessions()?)
+    }
+
+    /// Recent account activity, newest first.
+    pub fn activity(&self, limit: u32) -> Result<Vec<AccountEvent>> {
+        Ok(self
+            .inner
+            .activity(limit)?
+            .into_iter()
+            .map(|e| AccountEvent {
+                id: e.id,
+                kind: e.kind,
+                device_name: e.device_name,
+                client_kind: e.client_kind,
+                ip: e.ip,
+                created_at: e.created_at,
+            })
+            .collect())
+    }
+
+    /// Changes the master password. Other devices are signed out. A stored
+    /// biometric unlock key stops working; store a new `unlock_key` after
+    /// this succeeds.
+    pub fn change_master_password(
+        &self,
+        current_password: String,
+        new_password: String,
+    ) -> Result<()> {
+        Ok(self
+            .inner
+            .change_master_password(&current_password, &new_password)?)
     }
 
     pub fn health(&self) -> Result<VaultHealth> {

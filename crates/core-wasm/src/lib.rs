@@ -316,6 +316,13 @@ impl Keyring {
         .to_string())
     }
 
+    /// Encrypts the account key with new master keys, for changing the master
+    /// password. Returns Base64url.
+    #[wasm_bindgen(js_name = wrapAccountKey)]
+    pub fn wrap_account_key(&self, keys: &MasterKeys) -> Result<String, JsValue> {
+        self.inner.wrap_account_key(&keys.0.auk).map_err(js_error)
+    }
+
     /// The account key encrypted with the Account Unlock Key (Base64url).
     #[wasm_bindgen(getter, js_name = encryptedAccountKey)]
     pub fn encrypted_account_key(&self) -> Option<String> {

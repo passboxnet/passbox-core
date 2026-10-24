@@ -1,4 +1,12 @@
-import { ApiError, type KdfParams, type PassboxApi, type SyncResponse } from "@passbox/api-client";
+import {
+  type AccountEvent,
+  ApiError,
+  type ClientKind,
+  type KdfParams,
+  type PassboxApi,
+  type SessionInfo,
+  type SyncResponse,
+} from "@passbox/api-client";
 import type * as Core from "@passbox/core-wasm";
 import { type ItemData, parseItemData, parseVaultMeta } from "./items";
 import type { KeyValueStorage } from "./storage";
@@ -86,6 +94,8 @@ export interface PassboxClientOptions {
   /** API client whose `getToken` returns `client.token`. Use `createApi`. */
   api: PassboxApi;
   storage: KeyValueStorage;
+  /** Identifies this device in the user's device list. */
+  device?: { name: string; kind: ClientKind };
 }
 
 /**
@@ -98,6 +108,7 @@ export class PassboxClient {
   private readonly core: CoreModule;
   private readonly api: PassboxApi;
   private readonly storage: KeyValueStorage;
+  private readonly device: { name: string; kind: ClientKind } | undefined;
   private keyring: Core.Keyring | undefined;
   private cursor = 0;
   private vaults = new Map<string, Vault>();
@@ -112,6 +123,7 @@ export class PassboxClient {
     this.core = options.core;
     this.api = options.api;
     this.storage = options.storage;
+    this.device = options.device;
     this.snapshot = this.buildSnapshot();
   }
 
@@ -237,6 +249,68 @@ export class PassboxClient {
     await this.sync();
   }
 
+  // --- Account security ----------------------------------------------------------
+
+  /** Devices signed in to this account. */
+  async sessions(): Promise<SessionInfo[]> {
+    this.requireKeyring();
+    return this.api.sessions();
+  }
+
+  /** Signs out one device. */
+  async revokeSession(id: string): Promise<void> {
+    this.requireKeyring();
+    await this.api.revokeSession(id);
+  }
+
+  /** Signs out every device except this one. */
+  async revokeOtherSessions(): Promise<void> {
+    this.requireKeyring();
+    await this.api.revokeOtherSessions();
+  }
+
+  /** Recent sign-ins, failed attempts and other security events. */
+  async activity(limit = 50): Promise<AccountEvent[]> {
+    this.requireKeyring();
+    return this.api.accountEvents(limit);
+  }
+
+  /**
+   * Changes the master password. The current password is verified with a
+   * fresh login (the server only accepts the change from a recent login).
+   * Vaults and items stay as they are; every other device is signed out.
+   */
+  async changeMasterPassword(currentPassword: string, newPassword: string): Promise<void> {
+    const account = this.deviceAccount;
+    if (!account) throw new Error("no account on this device");
+    const currentKeys = this.deriveKeys(account, currentPassword);
+    try {
+      await this.login(account, currentKeys);
+    } finally {
+      currentKeys.free();
+    }
+    const keyring = this.requireKeyring();
+    const next: DeviceAccount = { ...account, kdfSalt: this.core.generateKdfSalt() };
+    const newKeys = this.deriveKeys(next, newPassword);
+    try {
+      const registration = this.core.RegistrationFlow.start(newKeys);
+      const { registrationResponse } = await this.api.passwordChangeStart({
+        registrationRequest: registration.request,
+      });
+      const registrationUpload = registration.finish(registrationResponse);
+      registration.free();
+      await this.api.passwordChangeFinish({
+        registrationUpload,
+        kdfSalt: next.kdfSalt,
+        kdfParams: next.kdfParams,
+        encryptedAccountKey: keyring.wrapAccountKey(newKeys),
+      });
+      this.storage.setItem(ACCOUNT_KEY, JSON.stringify(next));
+    } finally {
+      newKeys.free();
+    }
+  }
+
   /** Exports the unlocked session, or `undefined` when locked. */
   exportSession(): SessionState | undefined {
     const account = this.deviceAccount;
@@ -314,7 +388,11 @@ export class PassboxClient {
     try {
       const start = await this.api.loginStart({ email: account.email, credentialRequest: flow.request });
       const credentialFinalization = flow.finish(start.credentialResponse);
-      const { token } = await this.api.loginFinish({ loginId: start.loginId, credentialFinalization });
+      const { token } = await this.api.loginFinish({
+        loginId: start.loginId,
+        credentialFinalization,
+        ...(this.device ? { deviceName: this.device.name, clientKind: this.device.kind } : {}),
+      });
       this.clearSession();
       this.token = token;
       const remote = await this.api.account();

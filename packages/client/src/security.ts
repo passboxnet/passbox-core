@@ -147,3 +147,31 @@ export function analyzeVault(items: readonly ItemLike[]): VaultHealth {
   const score = analyzed === 0 ? 100 : Math.round(100 * (1 - problems / Math.max(analyzed, problems)));
   return { weak, reused, insecureUrls, withoutTotp, score, analyzed };
 }
+
+/**
+ * Checks a password against Have I Been Pwned with k-anonymity: only the
+ * first 5 hex characters of its SHA-1 hash leave the device. Returns how
+ * often the password appears in known breaches (0 = not found).
+ */
+export async function breachCount(
+  password: string,
+  fetchImpl: typeof globalThis.fetch = globalThis.fetch.bind(globalThis),
+): Promise<number> {
+  if (!password) return 0;
+  const digest = await crypto.subtle.digest("SHA-1", new TextEncoder().encode(password));
+  const hex = Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0"))
+    .join("")
+    .toUpperCase();
+  const prefix = hex.slice(0, 5);
+  const suffix = hex.slice(5);
+  const response = await fetchImpl(`https://api.pwnedpasswords.com/range/${prefix}`, {
+    // Padding hides the number of real matches from observers.
+    headers: { "Add-Padding": "true" },
+  });
+  if (!response.ok) throw new Error(`breach check failed with status ${response.status}`);
+  for (const line of (await response.text()).split("\n")) {
+    const [candidate, count] = line.trim().split(":");
+    if (candidate === suffix) return Number(count) || 0;
+  }
+  return 0;
+}

@@ -66,6 +66,23 @@ describe.skipIf(!serverUrl)("PassboxClient against a server", () => {
     await laptop.sync();
     expect(laptop.getSnapshot().items).toHaveLength(0);
 
+    // Devices, activity and master password change.
+    const sessions = await laptop.sessions();
+    expect(sessions.some((session) => session.current)).toBe(true);
+    const phoneSession = (await phone.sessions()).find((session) => session.current);
+    expect(phoneSession).toBeDefined();
+    await laptop.revokeSession(phoneSession?.id ?? "");
+    await expect(phone.sync()).rejects.toMatchObject({ status: 401 });
+    expect((await laptop.activity()).map((event) => event.kind)).toContain("session_revoked");
+    await expect(laptop.changeMasterPassword("wrong password", "new horse battery staple")).rejects.toBeInstanceOf(
+      InvalidCredentialsError,
+    );
+    await laptop.changeMasterPassword("correct horse battery staple", "new horse battery staple");
+    laptop.lock();
+    await expect(laptop.unlock("correct horse battery staple")).rejects.toBeInstanceOf(InvalidCredentialsError);
+    await laptop.unlock("new horse battery staple");
+    await laptop.changeMasterPassword("new horse battery staple", "correct horse battery staple");
+
     // Lock and unlock with the remembered account. Locking ends the server session.
     const oldToken = laptop.token;
     laptop.lock();
@@ -92,7 +109,7 @@ describe.skipIf(!serverUrl)("PassboxClient against a server", () => {
     await resumed.restoreSession(state);
     expect(resumed.getSnapshot()).toMatchObject({ status: "unlocked", vaults: laptop.getSnapshot().vaults });
     await expect(resumed.restoreSession({ ...state, accountId: "other" })).rejects.toThrow(/another account/);
-  });
+  }, 60_000);
 
   it("rejects a wrong Secret Key", async () => {
     const email = `${core.newId()}@example.com`;

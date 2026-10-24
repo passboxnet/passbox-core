@@ -26,6 +26,7 @@ export {
 } from "./items";
 export {
   analyzeVault,
+  breachCount,
   estimateStrength,
   type ItemLike,
   type Strength,

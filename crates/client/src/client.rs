@@ -15,7 +15,10 @@ use passbox_core::{encoding, id};
 use serde::{Deserialize, Serialize};
 use zeroize::Zeroizing;
 
-use crate::api::{Api, HttpTransport, NewVault, SyncItem, SyncResponse, SyncVault, Transport};
+use crate::api::{
+    AccountEvent, Api, HttpTransport, NewVault, SessionInfo, SyncItem, SyncResponse, SyncVault,
+    Transport,
+};
 use crate::model::{DeviceAccount, Item, ItemData, Vault};
 use crate::security::{VaultHealth, analyze_vault};
 use crate::store::{ACCOUNT_KEY, CACHE_KEY, Store};
@@ -70,6 +73,8 @@ pub struct Client {
     api: Api,
     store: Arc<dyn Store>,
     session: Mutex<Option<Session>>,
+    /// Device name and client kind shown in the account's device list.
+    device: Mutex<(String, String)>,
 }
 
 fn is_network(error: &Error) -> bool {
@@ -91,7 +96,19 @@ impl Client {
             api: Api::new(server_url, transport),
             store,
             session: Mutex::new(None),
+            device: Mutex::new((String::new(), String::new())),
         }
+    }
+
+    /// Sets how this device appears in the account's device list, for
+    /// example `("Anna's iPhone", "ios")`. Kinds are `web`, `extension`,
+    /// `desktop`, `ios`, `android` and `cli`. Applies to the next login.
+    pub fn set_device(&self, name: &str, kind: &str) {
+        *self
+            .device
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner) =
+            (name.to_owned(), kind.to_owned());
     }
 
     fn lock_session(&self) -> MutexGuard<'_, Option<Session>> {
@@ -331,6 +348,85 @@ impl Client {
         }
     }
 
+    // --- Devices, activity and master password -----------------------------------
+
+    /// Devices currently signed in to the account, most recently used first.
+    pub fn sessions(&self) -> Result<Vec<SessionInfo>> {
+        self.with_token(|token| self.api.sessions(token))
+    }
+
+    /// Signs out another device. Its app locks on its next request.
+    pub fn revoke_session(&self, id: &str) -> Result<()> {
+        self.with_token(|token| self.api.revoke_session(token, id))
+    }
+
+    /// Signs out every device except this one.
+    pub fn revoke_other_sessions(&self) -> Result<()> {
+        self.with_token(|token| self.api.revoke_other_sessions(token))
+    }
+
+    /// The account's recent activity (sign-ins, failed attempts, password
+    /// changes), newest first.
+    pub fn activity(&self, limit: u32) -> Result<Vec<AccountEvent>> {
+        self.with_token(|token| self.api.account_events(token, limit))
+    }
+
+    /// Changes the master password. The Secret Key, the account key and all
+    /// vault keys stay the same; only the account key's wrapping and the
+    /// server's OPAQUE record change. Other devices are signed out and need
+    /// the new password. Fails with [`Error::InvalidCredentials`] if
+    /// `current_password` is wrong.
+    pub fn change_master_password(&self, current_password: &str, new_password: &str) -> Result<()> {
+        let account = self.device_account()?.ok_or(Error::NoAccount)?;
+        if self.lock_session().is_none() {
+            return Err(Error::Locked);
+        }
+        let current = derive(&account, current_password)?;
+        // A fresh login proves the current password and satisfies the
+        // server's recent-login requirement.
+        let token = self.opaque_login(&account.email, &current.auth_secret)?;
+
+        let next = DeviceAccount {
+            kdf_salt: encoding::encode(&kdf::generate_salt()?),
+            ..account.clone()
+        };
+        let keys = derive(&next, new_password)?;
+        let (flow, request) = ClientRegistrationFlow::start(&*keys.auth_secret)?;
+        let response = self
+            .api
+            .password_change_start(&token, &encoding::encode(&request))?;
+        let upload = flow.finish(&encoding::decode(&response)?)?;
+        let encrypted_account_key = {
+            let guard = self.lock_session();
+            guard
+                .as_ref()
+                .ok_or(Error::Locked)?
+                .keyring
+                .wrap_account_key(&keys.auk)?
+        };
+        self.api.password_change_finish(
+            &token,
+            serde_json::json!({
+                "registrationUpload": encoding::encode(&upload),
+                "kdfSalt": next.kdf_salt,
+                "kdfParams": next.kdf_params,
+                "encryptedAccountKey": encrypted_account_key,
+            }),
+        )?;
+        self.store.put(ACCOUNT_KEY, &serde_json::to_vec(&next)?)?;
+
+        let mut guard = self.lock_session();
+        if let Some(session) = guard.as_mut() {
+            session.auk = keys.auk.clone();
+            session.auth_secret = Zeroizing::new(*keys.auth_secret);
+            session.token = Some(token);
+            session.cache.encrypted_account_key = encrypted_account_key;
+            self.store
+                .put(CACHE_KEY, &serde_json::to_vec(&session.cache)?)?;
+        }
+        Ok(())
+    }
+
     /// Locks and removes the account and its cache from this device.
     pub fn sign_out(&self) -> Result<()> {
         self.lock();
@@ -368,9 +464,19 @@ impl Client {
         let finish = flow
             .finish(&encoding::decode(&start.credential_response)?)
             .map_err(|_| Error::InvalidCredentials)?;
+        let (device_name, client_kind) = self
+            .device
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+            .clone();
         Ok(self
             .api
-            .login_finish(&start.login_id, &encoding::encode(&finish.finalization))?
+            .login_finish(
+                &start.login_id,
+                &encoding::encode(&finish.finalization),
+                &device_name,
+                &client_kind,
+            )?
             .token)
     }
 
@@ -388,8 +494,10 @@ impl Client {
         Ok(())
     }
 
-    /// Runs `call` with a session token, connecting first if needed and
-    /// reconnecting once if the token was rejected.
+    /// Runs `call` with a session token, connecting first if needed. A
+    /// rejected token means the session expired or this device was signed
+    /// out from another one: the client locks and the user has to unlock
+    /// again.
     fn with_token<T>(&self, call: impl Fn(&str) -> Result<T>) -> Result<T> {
         let token = self
             .lock_session()
@@ -407,8 +515,8 @@ impl Client {
         };
         match call(&token) {
             Err(Error::Server { status: 401, .. }) => {
-                self.reconnect()?;
-                call(&self.current_token()?)
+                *self.lock_session() = None;
+                Err(Error::Locked)
             }
             Err(e) if is_network(&e) => {
                 if let Some(session) = self.lock_session().as_mut() {

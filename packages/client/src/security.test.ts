@@ -1,6 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { FIELD, newItemData } from "./items";
-import { analyzeVault, estimateStrength } from "./security";
+import { analyzeVault, breachCount, estimateStrength } from "./security";
 
 describe("estimateStrength", () => {
   it.each([
@@ -50,5 +50,22 @@ describe("analyzeVault", () => {
 
   it("scores an empty vault as healthy", () => {
     expect(analyzeVault([]).score).toBe(100);
+  });
+});
+
+describe("breachCount", () => {
+  it("sends only the hash prefix and reads the matching suffix", async () => {
+    // SHA-1("password") = 5BAA61E4C9B93F3F0682250B6CF8331B7EE68FD8
+    const fetch = vi.fn(async (url: RequestInfo | URL) => {
+      expect(String(url)).toBe("https://api.pwnedpasswords.com/range/5BAA6");
+      return new Response("0018A45C4D1DEF81644B54AB7F969B88D65:1\r\n1E4C9B93F3F0682250B6CF8331B7EE68FD8:9545824\r\n");
+    });
+    expect(await breachCount("password", fetch)).toBe(9545824);
+    expect(await breachCount("", fetch)).toBe(0);
+  });
+
+  it("returns 0 when the suffix is not listed", async () => {
+    const fetch = vi.fn(async () => new Response("0018A45C4D1DEF81644B54AB7F969B88D65:1\n"));
+    expect(await breachCount("unlikely-to-be-breached-9x$Lq", fetch)).toBe(0);
   });
 });

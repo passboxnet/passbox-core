@@ -12,6 +12,7 @@ pub mod model;
 pub mod security;
 pub mod store;
 
+pub use api::{AccountEvent, SessionInfo};
 pub use client::{Client, Connectivity, Status};
 pub use error::{Error, Result};
 pub use model::{DeviceAccount, FieldType, Item, ItemCategory, ItemData, ItemField, Vault, field};

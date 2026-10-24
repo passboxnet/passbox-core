@@ -46,7 +46,40 @@ export interface LoginStartResponse {
 export interface LoginFinishResponse {
   token: string;
   accountId: string;
+  sessionId: string;
   expiresAt: number;
+}
+
+export type ClientKind = "web" | "extension" | "desktop" | "ios" | "android" | "cli";
+
+export interface SessionInfo {
+  id: string;
+  deviceName: string;
+  clientKind: ClientKind | "";
+  ip: string;
+  createdAt: number;
+  lastUsedAt: number;
+  expiresAt: number;
+  /** True for the session making the request. */
+  current: boolean;
+}
+
+export type AccountEventKind =
+  | "account_created"
+  | "login"
+  | "login_failed"
+  | "logout"
+  | "session_revoked"
+  | "other_sessions_revoked"
+  | "password_changed";
+
+export interface AccountEvent {
+  id: string;
+  kind: AccountEventKind | string;
+  deviceName: string;
+  clientKind: ClientKind | "";
+  ip: string;
+  createdAt: number;
 }
 
 export interface Account {
@@ -126,9 +159,25 @@ export interface PassboxApi {
   }>;
   registerFinish(req: RegisterFinishRequest): Promise<{ accountId: string }>;
   loginStart(req: { email: string; credentialRequest: string }): Promise<LoginStartResponse>;
-  loginFinish(req: { loginId: string; credentialFinalization: string }): Promise<LoginFinishResponse>;
+  loginFinish(req: {
+    loginId: string;
+    credentialFinalization: string;
+    deviceName?: string;
+    clientKind?: ClientKind;
+  }): Promise<LoginFinishResponse>;
   logout(): Promise<void>;
   account(): Promise<Account>;
+  accountEvents(limit?: number): Promise<AccountEvent[]>;
+  passwordChangeStart(req: { registrationRequest: string }): Promise<{ registrationResponse: string }>;
+  passwordChangeFinish(req: {
+    registrationUpload: string;
+    kdfSalt: string;
+    kdfParams: KdfParams;
+    encryptedAccountKey: string;
+  }): Promise<void>;
+  sessions(): Promise<SessionInfo[]>;
+  revokeSession(id: string): Promise<void>;
+  revokeOtherSessions(): Promise<void>;
   sync(since: number): Promise<SyncResponse>;
   createVault(vault: NewVault): Promise<WriteResponse>;
   updateVault(id: string, req: { revision: number; encryptedMeta: string }): Promise<WriteResponse>;
@@ -172,6 +221,12 @@ export function createClient(options: ClientOptions = {}): PassboxApi {
     loginFinish: (req) => call("POST", "/api/v1/auth/login/finish", req),
     logout: () => call("POST", "/api/v1/auth/logout", {}),
     account: () => call("GET", "/api/v1/account"),
+    accountEvents: (limit = 50) => call("GET", `/api/v1/account/events?limit=${encodeURIComponent(limit)}`),
+    passwordChangeStart: (req) => call("POST", "/api/v1/account/password/start", req),
+    passwordChangeFinish: (req) => call("POST", "/api/v1/account/password/finish", req),
+    sessions: () => call("GET", "/api/v1/sessions"),
+    revokeSession: (id) => call("DELETE", `/api/v1/sessions/${encodeURIComponent(id)}`),
+    revokeOtherSessions: () => call("POST", "/api/v1/sessions/revoke-others", {}),
     sync: (since) => call("GET", `/api/v1/sync?since=${encodeURIComponent(since)}`),
     createVault: (vault) => call("POST", "/api/v1/vaults", vault),
     updateVault: (id, req) => call("PUT", `/api/v1/vaults/${encodeURIComponent(id)}`, req),

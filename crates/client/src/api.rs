@@ -109,6 +109,35 @@ pub struct LoginStartResponse {
 #[serde(rename_all = "camelCase")]
 pub struct LoginFinishResponse {
     pub token: String,
+    #[serde(default)]
+    pub session_id: String,
+}
+
+/// A signed-in device (see `GET /api/v1/sessions`).
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SessionInfo {
+    pub id: String,
+    pub device_name: String,
+    pub client_kind: String,
+    pub ip: String,
+    pub created_at: i64,
+    pub last_used_at: i64,
+    pub expires_at: i64,
+    /// True for the session making the request.
+    pub current: bool,
+}
+
+/// An entry of the account activity log.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AccountEvent {
+    pub id: String,
+    pub kind: String,
+    pub device_name: String,
+    pub client_kind: String,
+    pub ip: String,
+    pub created_at: i64,
 }
 
 #[derive(Debug, Deserialize)]
@@ -254,15 +283,80 @@ impl Api {
         )
     }
 
-    pub fn login_finish(&self, login_id: &str, finalization: &str) -> Result<LoginFinishResponse> {
+    pub fn login_finish(
+        &self,
+        login_id: &str,
+        finalization: &str,
+        device_name: &str,
+        client_kind: &str,
+    ) -> Result<LoginFinishResponse> {
         self.call(
             "POST",
             "/api/v1/auth/login/finish",
             None,
-            Some(
-                serde_json::json!({ "loginId": login_id, "credentialFinalization": finalization }),
-            ),
+            Some(serde_json::json!({
+                "loginId": login_id,
+                "credentialFinalization": finalization,
+                "deviceName": device_name,
+                "clientKind": client_kind,
+            })),
         )
+    }
+
+    pub fn account_events(&self, token: &str, limit: u32) -> Result<Vec<AccountEvent>> {
+        self.call(
+            "GET",
+            &format!("/api/v1/account/events?limit={limit}"),
+            Some(token),
+            None,
+        )
+    }
+
+    pub fn password_change_start(&self, token: &str, request: &str) -> Result<String> {
+        let response: Value = self.call(
+            "POST",
+            "/api/v1/account/password/start",
+            Some(token),
+            Some(serde_json::json!({ "registrationRequest": request })),
+        )?;
+        response["registrationResponse"]
+            .as_str()
+            .map(str::to_owned)
+            .ok_or_else(|| Error::InvalidData("missing registrationResponse".into()))
+    }
+
+    pub fn password_change_finish(&self, token: &str, body: Value) -> Result<()> {
+        let _: Value = self.call(
+            "POST",
+            "/api/v1/account/password/finish",
+            Some(token),
+            Some(body),
+        )?;
+        Ok(())
+    }
+
+    pub fn sessions(&self, token: &str) -> Result<Vec<SessionInfo>> {
+        self.call("GET", "/api/v1/sessions", Some(token), None)
+    }
+
+    pub fn revoke_session(&self, token: &str, id: &str) -> Result<()> {
+        let _: Value = self.call(
+            "DELETE",
+            &format!("/api/v1/sessions/{id}"),
+            Some(token),
+            None,
+        )?;
+        Ok(())
+    }
+
+    pub fn revoke_other_sessions(&self, token: &str) -> Result<()> {
+        let _: Value = self.call(
+            "POST",
+            "/api/v1/sessions/revoke-others",
+            Some(token),
+            Some(serde_json::json!({})),
+        )?;
+        Ok(())
     }
 
     pub fn logout(&self, token: &str) -> Result<()> {
