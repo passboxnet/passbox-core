@@ -30,6 +30,11 @@ client (web, desktop, extension, iOS, Android) and on the website.
 | Favorites | Favoriten |
 | Fill / Save to Passbox? / Not now | Ausfüllen / In Passbox speichern? / Jetzt nicht |
 | Passkey | Passkey |
+| Two-factor sign-in | Zwei-Faktor-Anmeldung |
+| Authenticator app | Authenticator-App |
+| Security key | Sicherheitsschlüssel |
+| Recovery code | Wiederherstellungscode |
+| Remember this device | Dieses Gerät merken |
 
 Plain language first: no "OPAQUE", "ciphertext", "revision", "account ID"
 or "otpauth://" in default screens. Technical details go behind a
