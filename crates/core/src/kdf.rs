@@ -84,6 +84,28 @@ pub fn generate_salt() -> Result<[u8; SALT_LEN]> {
     random::bytes()
 }
 
+/// Plain Argon2id (version 0x13) with a 32-byte output. Does not check the
+/// parameters against [`KdfParams::MINIMUM`]; callers do.
+pub(crate) fn argon2id(
+    password: &str,
+    salt: &[u8],
+    params: KdfParams,
+) -> Result<Zeroizing<[u8; 32]>> {
+    let argon_params = Params::new(
+        params.memory_kib,
+        params.iterations,
+        params.parallelism,
+        Some(32),
+    )
+    .map_err(|e| Error::Kdf(e.to_string()))?;
+    let argon = Argon2::new(Algorithm::Argon2id, Version::V0x13, argon_params);
+    let mut key = Zeroizing::new([0u8; 32]);
+    argon
+        .hash_password_into(password.as_bytes(), salt, key.as_mut())
+        .map_err(|e| Error::Kdf(e.to_string()))?;
+    Ok(key)
+}
+
 /// Keys derived from the master password and the Secret Key.
 pub struct MasterKeys {
     /// Account Unlock Key: decrypts the account key.
@@ -111,19 +133,7 @@ fn derive_unchecked(
     salt: &[u8; SALT_LEN],
     params: KdfParams,
 ) -> Result<MasterKeys> {
-    let argon_params = Params::new(
-        params.memory_kib,
-        params.iterations,
-        params.parallelism,
-        Some(32),
-    )
-    .map_err(|e| Error::Kdf(e.to_string()))?;
-    let argon = Argon2::new(Algorithm::Argon2id, Version::V0x13, argon_params);
-
-    let mut key = Zeroizing::new([0u8; 32]);
-    argon
-        .hash_password_into(password.as_bytes(), salt, key.as_mut())
-        .map_err(|e| Error::Kdf(e.to_string()))?;
+    let mut key = argon2id(password, salt, params)?;
 
     let mut k_secret = Zeroizing::new([0u8; 32]);
     Hkdf::<Sha256>::new(Some(account_id.as_bytes()), secret_key.as_bytes())

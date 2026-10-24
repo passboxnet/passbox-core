@@ -18,7 +18,7 @@ use passbox_core::passkey::{self, Flags};
 use passbox_core::secret_key::SecretKey;
 use passbox_core::strength;
 use passbox_core::totp::Totp;
-use passbox_core::{Error, encoding, id};
+use passbox_core::{Error, encoding, export, id};
 use wasm_bindgen::prelude::*;
 
 /// Converts a core error into a JavaScript `Error`. Wrong credentials get the
@@ -126,6 +126,38 @@ pub fn totp_code(uri_or_secret: &str, unix_time: f64) -> Result<String, JsValue>
     let totp = Totp::parse(uri_or_secret).map_err(js_error)?;
     // Time values from JavaScript are non-negative and well within u64 range.
     Ok(totp.generate(unix_time.max(0.0) as u64))
+}
+
+// --- Export files ---------------------------------------------------------------
+
+/// Encrypts an export payload (UTF-8 text, usually JSON) with a password the
+/// user chose for this file. Uses the default KDF parameters and returns the
+/// `.pbx-export` JSON envelope.
+#[wasm_bindgen(js_name = encryptExport)]
+pub fn encrypt_export(password: &str, plaintext: &str) -> Result<String, JsValue> {
+    export::encrypt(password, plaintext.as_bytes(), KdfParams::DEFAULT).map_err(js_error)
+}
+
+/// Decrypts a `.pbx-export` envelope. A wrong password or a modified file
+/// throws an error named `ExportDecryptionError`.
+#[wasm_bindgen(js_name = decryptExport)]
+pub fn decrypt_export(password: &str, envelope_json: &str) -> Result<String, JsValue> {
+    let plaintext = export::decrypt(password, envelope_json).map_err(|err| {
+        let wrong_password = err == Error::Decryption;
+        let value = js_error(err);
+        if wrong_password {
+            js_sys::Reflect::set(&value, &"name".into(), &"ExportDecryptionError".into()).ok();
+        }
+        value
+    })?;
+    String::from_utf8(plaintext.to_vec())
+        .map_err(|_| js_sys::Error::new("the export payload is not UTF-8 text").into())
+}
+
+/// Whether `input` is a `.pbx-export` envelope (checked without decrypting).
+#[wasm_bindgen(js_name = isExport)]
+pub fn is_export(input: &str) -> bool {
+    export::is_export(input)
 }
 
 // --- Passkeys ----------------------------------------------------------------
