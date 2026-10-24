@@ -13,7 +13,14 @@ pub mod security;
 pub mod store;
 
 pub use api::{AccountEvent, SessionInfo};
+pub use client::sharing::{
+    Invitation, InvitationInfo, InvitationPreview, VaultAccess, parse_invitation_link,
+};
 pub use client::{Client, Connectivity, Status};
 pub use error::{Error, Result};
 pub use model::{DeviceAccount, FieldType, Item, ItemCategory, ItemData, ItemField, Vault, field};
+pub use passbox_core::sharing::state::{
+    DirectoryLookup, GroupView, MemberView, OrgView, SharedVaultView, SharingView, VaultMemberView,
+    Warning,
+};
 pub use store::{FileStore, MemoryStore, Store};

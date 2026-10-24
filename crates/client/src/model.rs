@@ -217,6 +217,10 @@ pub struct Vault {
     pub id: String,
     pub name: String,
     pub revision: u64,
+    /// The organization a shared vault belongs to; `None` for personal vaults.
+    pub org_id: Option<String>,
+    /// Current key epoch (0 for personal vaults).
+    pub key_epoch: u32,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -225,6 +229,8 @@ pub struct Item {
     pub vault_id: String,
     pub revision: u64,
     pub updated_at: i64,
+    /// The vault key epoch the item is encrypted with.
+    pub key_epoch: u32,
     pub data: ItemData,
 }
 
