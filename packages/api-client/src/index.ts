@@ -675,8 +675,8 @@ export function createClient(options: ClientOptions = {}): PassboxApi {
       throw new ApiError(response.status, path, errorBody);
     }
     if (response.status === 204) return undefined as T;
-    // CSV exports and other text answers.
-    if (response.headers?.get("content-type")?.startsWith("text/")) return (await response.text()) as T;
+    // CSV exports (the audit log).
+    if (response.headers?.get("content-type")?.startsWith("text/csv")) return (await response.text()) as T;
     return (await response.json()) as T;
   }
 
