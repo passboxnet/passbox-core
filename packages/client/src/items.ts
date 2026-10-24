@@ -15,6 +15,30 @@ export interface ItemField {
   value: string;
 }
 
+/**
+ * A WebAuthn credential (ES256) stored on a login. The private key is
+ * encrypted with the rest of the item; UIs must never display it.
+ */
+export interface Passkey {
+  /** Base64url credential ID. */
+  credentialId: string;
+  /** Relying party ID, for example `github.com`. */
+  rpId: string;
+  /** Relying party display name at creation time. */
+  rpName: string;
+  /** Base64url user handle chosen by the relying party. */
+  userHandle: string;
+  userName: string;
+  userDisplayName: string;
+  /** PKCS#8 DER private key, Base64url. */
+  privateKey: string;
+  /** COSE algorithm, always -7 (ES256) for now. */
+  algorithm: number;
+  signCount: number;
+  /** Unix milliseconds. */
+  createdAt: number;
+}
+
 export interface ItemData {
   v: 1;
   category: ItemCategory;
@@ -23,6 +47,8 @@ export interface ItemData {
   notes: string;
   tags: string[];
   favorite: boolean;
+  /** Passkeys of a login. Absent when there are none. */
+  passkeys?: Passkey[];
 }
 
 /** Well-known field IDs used for autofill and display. */
@@ -71,12 +97,42 @@ export function fieldValue(item: ItemData, id: string): string | undefined {
 const CATEGORIES: readonly ItemCategory[] = ["login", "note", "card", "identity", "other"];
 const FIELD_TYPES: readonly FieldType[] = ["text", "concealed", "url", "email", "totp"];
 
+const BASE64URL = /^[A-Za-z0-9_-]*$/;
+
+function parsePasskey(raw: unknown): Passkey | undefined {
+  if (typeof raw !== "object" || raw === null) return undefined;
+  const p = raw as Record<string, unknown>;
+  const str = (key: string) => (typeof p[key] === "string" ? (p[key] as string) : "");
+  const credentialId = str("credentialId");
+  const privateKey = str("privateKey");
+  const rpId = str("rpId");
+  const userHandle = str("userHandle");
+  if (!credentialId || !privateKey || !rpId) return undefined;
+  if (![credentialId, privateKey, userHandle].every((value) => BASE64URL.test(value))) return undefined;
+  const count = typeof p.signCount === "number" && Number.isSafeInteger(p.signCount) ? p.signCount : 0;
+  return {
+    credentialId,
+    rpId,
+    rpName: str("rpName") || rpId,
+    userHandle,
+    userName: str("userName"),
+    userDisplayName: str("userDisplayName"),
+    privateKey,
+    algorithm: typeof p.algorithm === "number" ? p.algorithm : -7,
+    signCount: Math.max(0, count),
+    createdAt: typeof p.createdAt === "number" ? p.createdAt : 0,
+  };
+}
+
 /** Validates decrypted JSON and fills defaults. Throws on unknown versions. */
 export function parseItemData(json: string): ItemData {
   const raw = JSON.parse(json) as Partial<ItemData> & { v?: unknown };
   if (raw.v !== 1) throw new Error(`unsupported item version ${String(raw.v)}`);
   const fields = Array.isArray(raw.fields) ? raw.fields : [];
-  return {
+  const passkeys = Array.isArray(raw.passkeys)
+    ? (raw.passkeys as unknown[]).map(parsePasskey).filter((p): p is Passkey => p !== undefined)
+    : [];
+  const data: ItemData = {
     v: 1,
     category: CATEGORIES.includes(raw.category as ItemCategory) ? (raw.category as ItemCategory) : "other",
     title: typeof raw.title === "string" ? raw.title : "",
@@ -92,6 +148,8 @@ export function parseItemData(json: string): ItemData {
     tags: Array.isArray(raw.tags) ? raw.tags.filter((t): t is string => typeof t === "string") : [],
     favorite: raw.favorite === true,
   };
+  if (passkeys.length > 0) data.passkeys = passkeys;
+  return data;
 }
 
 export interface VaultMeta {

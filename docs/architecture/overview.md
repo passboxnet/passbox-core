@@ -36,7 +36,7 @@
 | Server | Rust, axum, tokio | Configured with flags or `PASSBOX_*` environment variables |
 | Core | Rust, RustCrypto crates | `#![forbid(unsafe_code)]` workspace-wide |
 | Web client | React 19, Vite, Tailwind CSS 4 | Loads the core as WebAssembly |
-| Extension | Manifest V3, React | Keys only in `chrome.storage.session`; server URL can be preset through enterprise policy (`managed_schema.json`) |
+| Extension | Manifest V3, React | Vault in the service worker, unlocked keys only in `chrome.storage.session`; server URL can be preset through enterprise policy (`managed_schema.json`). See [extension.md](extension.md) |
 | Desktop | Tauri 2 | Wraps the built web client; tray, global shortcut, lock on sleep. See [desktop.md](../desktop.md) |
 | Website | Next.js, static export | Shares the design tokens of `packages/ui` |
 | CLI | Rust, clap | Binary name `pbx` |
@@ -58,6 +58,7 @@ Implemented:
 - Core: Argon2id + Secret Key derivation, OPAQUE login, key hierarchy with context-bound XChaCha20-Poly1305 encryption, TOTP/HOTP, password and PIN generator
 - Server: registration, login, sessions, vaults, items, incremental sync on SQLite and PostgreSQL
 - Web client: sign-up with Emergency Kit, sign-in on new devices, unlock, logins/notes/cards with TOTP, favorites, tags, search, generator, auto-lock after 15 minutes, periodic sync
-- Extension popup with generator, website, CLI tools, CI, Dockerfile
+- Extension: sign-in and unlock, sessions that survive service worker restarts, auto-lock, popup vault with suggestions for the current site, inline autofill menu (logins, multi-step forms, one-time codes, password suggestions), save and update prompts, passkeys (ES256) with fallback to the browser
+- Website, CLI tools, CI, Dockerfile
 
-Next: offline cache in the clients, sharing (account key pairs and vault membership), autofill and passkeys in the extension, Watchtower, import from other password managers, rate limiting.
+Next: offline cache in the clients, sharing (account key pairs and vault membership), Watchtower, import from other password managers, rate limiting.
