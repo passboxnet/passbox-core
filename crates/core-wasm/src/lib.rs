@@ -1368,3 +1368,90 @@ impl DeviceLinkRequest {
         self.0.open(sealed).map_err(js_error)
     }
 }
+
+// --- Trusted devices (SSO unlock, wave E2) ---------------------------------------
+
+/// The approval code (4 groups of five digits) of a device public key
+/// (Base64url), to compare with the new device before approving it.
+#[wasm_bindgen(js_name = trustedDeviceApprovalCode)]
+pub fn trusted_device_approval_code(public_key: &str) -> Result<String, JsValue> {
+    Ok(passbox_core::trusted_device::approval_code(
+        &encoding::decode(public_key).map_err(js_error)?,
+    ))
+}
+
+#[wasm_bindgen]
+impl Keyring {
+    /// Seals the account key to a device's public key (Base64url) and signs
+    /// the grant. `approvedBy` is this device's trusted device ID, or empty
+    /// when a device trusts itself. Returns JSON `{ deviceId, publicKey,
+    /// sealedKey, grant, grantSignature }`.
+    #[wasm_bindgen(js_name = trustDevice)]
+    pub fn trust_device(
+        &self,
+        device_id: &str,
+        public_key: &str,
+        approved_by: &str,
+        now_ms: f64,
+    ) -> Result<String, JsValue> {
+        to_json(
+            &self
+                .inner
+                .trust_device(
+                    device_id,
+                    &encoding::decode(public_key).map_err(js_error)?,
+                    approved_by,
+                    now_ms as i64,
+                )
+                .map_err(js_error)?,
+        )
+    }
+}
+
+/// A trusted device's key pair. Keep its `seed` only in protected storage.
+#[wasm_bindgen]
+pub struct TrustedDeviceKey(passbox_core::trusted_device::TrustedDeviceKey);
+
+#[wasm_bindgen]
+impl TrustedDeviceKey {
+    pub fn generate() -> Result<TrustedDeviceKey, JsValue> {
+        Ok(Self(
+            passbox_core::trusted_device::TrustedDeviceKey::generate().map_err(js_error)?,
+        ))
+    }
+
+    /// Restores a key from its seed (Base64url).
+    #[wasm_bindgen(js_name = fromSeed)]
+    pub fn from_seed(seed: &str) -> Result<TrustedDeviceKey, JsValue> {
+        Ok(Self(
+            passbox_core::trusted_device::TrustedDeviceKey::from_seed(&*seed_from(seed)?),
+        ))
+    }
+
+    /// The private seed (Base64url), to store wrapped on this device.
+    #[wasm_bindgen(getter)]
+    pub fn seed(&self) -> String {
+        encoding::encode(self.0.seed())
+    }
+
+    #[wasm_bindgen(getter, js_name = publicKey)]
+    pub fn public_key(&self) -> String {
+        encoding::encode(&self.0.public_key())
+    }
+
+    /// The code to compare with the approving device.
+    #[wasm_bindgen(getter, js_name = approvalCode)]
+    pub fn approval_code(&self) -> String {
+        self.0.approval_code()
+    }
+
+    /// Opens and verifies the account key from the `unlock` object of
+    /// `POST /api/v1/sso/unlock`. The keyring has the account's key pairs.
+    pub fn unlock(&self, unlock_json: &str) -> Result<Keyring, JsValue> {
+        let unlock = from_json(unlock_json)?;
+        Ok(Keyring {
+            inner: self.0.unlock(&unlock).map_err(js_error)?,
+            encrypted_account_key: None,
+        })
+    }
+}

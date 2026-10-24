@@ -82,6 +82,14 @@ export {
   type VaultAccess,
   type VaultRole,
 } from "./sharing";
+export {
+  type PendingDeviceApproval,
+  parseSsoCallback,
+  SSO_FLOW_KEY,
+  type SsoFlowState,
+  ssoErrorCode,
+  type TrustedDeviceSecret,
+} from "./sso";
 export { type KeyValueStorage, memoryStorage } from "./storage";
 export {
   assertionJson,

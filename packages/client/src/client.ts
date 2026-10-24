@@ -17,7 +17,14 @@ import {
   type RecoveryStatus,
   type SecondFactor,
   type SessionInfo,
+  type SsoApi,
+  type SsoOption,
+  type SsoRedeemed,
+  type SsoStart,
+  type SsoUnlockResponse,
   type SyncResponse,
+  type TrustedDevicesResponse,
+  type TrustedDeviceUpload,
   type TwoFactorChallenge,
   type TwoFactorMethod,
   type TwoFactorStatus,
@@ -69,6 +76,7 @@ import {
   type VaultAccess,
   type VaultRole,
 } from "./sharing";
+import type { PendingDeviceApproval, TrustedDeviceSecret } from "./sso";
 import type { KeyValueStorage } from "./storage";
 import { type CredentialsContainerLike, createCredential, getAssertion } from "./webauthn";
 
@@ -346,6 +354,8 @@ export class PassboxClient {
   private deviceLinkOffers = new Map<string, Core.DeviceLinkOffer>();
   /** The device code this (new) device entered. */
   private deviceLinkRequest: { request: Core.DeviceLinkRequest; claimToken: string } | undefined;
+  /** Proof of an SSO sign-in for the next login (organizations that require SSO). */
+  private ssoProof: string | undefined;
   /** Session token of the current unlock. */
   token: string | undefined;
 
@@ -467,7 +477,7 @@ export class PassboxClient {
    * Signs in on a new device with email, master password and Secret Key.
    * Throws `TwoFactorRequiredError` when the account needs a second factor.
    */
-  async signIn(email: string, password: string, secretKey: string): Promise<void> {
+  async signIn(email: string, password: string, secretKey: string, options: { ssoProof?: string } = {}): Promise<void> {
     const normalizedEmail = email.trim().toLowerCase();
     let normalizedKey: string;
     try {
@@ -484,10 +494,12 @@ export class PassboxClient {
       kdfParams: prelogin.kdfParams,
     };
     const keys = this.deriveKeys(account, password);
+    this.ssoProof = options.ssoProof;
     try {
       await this.login(account, keys, "signIn");
       this.storage.setItem(ACCOUNT_KEY, JSON.stringify(account));
     } finally {
+      this.ssoProof = undefined;
       this.releaseKeys(keys);
     }
     await this.sync();
@@ -498,13 +510,15 @@ export class PassboxClient {
    * `TwoFactorRequiredError` when the account needs a second factor and
    * this device is not remembered.
    */
-  async unlock(password: string): Promise<void> {
+  async unlock(password: string, options: { ssoProof?: string } = {}): Promise<void> {
     const account = this.deviceAccount;
     if (!account) throw new Error("no account on this device");
     const keys = this.deriveKeys(account, password);
+    this.ssoProof = options.ssoProof;
     try {
       await this.login(account, keys, "unlock");
     } finally {
+      this.ssoProof = undefined;
       this.releaseKeys(keys);
     }
     await this.sync();
@@ -929,7 +943,10 @@ export class PassboxClient {
         credentialFinalization,
         ...(this.device ? { deviceName: this.device.name, clientKind: this.device.kind } : {}),
         ...(this.origin ? { origin: this.origin } : {}),
+        ...(this.ssoProof ? { ssoProof: this.ssoProof } : {}),
       });
+      // A proof is single use, also when the login failed.
+      this.ssoProof = undefined;
       if (!isTwoFactorChallenge(finish) && finish.deviceToken) {
         this.storage.setItem(DEVICE_TOKEN_KEY, finish.deviceToken);
       }
@@ -2477,6 +2494,177 @@ export class PassboxClient {
   cancelDeviceLinkClaim(): void {
     this.deviceLinkRequest?.request.free();
     this.deviceLinkRequest = undefined;
+  }
+
+  // --- Single sign-on and trusted devices (wave E) --------------------------------
+
+  /** SSO configuration, trusted devices and SCIM endpoints (organization settings). */
+  get sso(): SsoApi {
+    return this.api.sso;
+  }
+
+  /** The organization whose identity provider signs in this email's domain, if any. */
+  async ssoFor(email: string): Promise<SsoOption | undefined> {
+    const { sso } = await this.api.sso.discover(email.trim().toLowerCase());
+    return sso ?? undefined;
+  }
+
+  /** Starts an SSO sign-in; send the browser to `authorizationUrl` and keep `flowSecret`. */
+  startSso(orgId: string, email?: string): Promise<SsoStart> {
+    return this.api.sso.start({ orgId, ...(email ? { email: email.trim().toLowerCase() } : {}) });
+  }
+
+  /** Turns the ticket from the callback into a proof (`status: "no_account"` without an account). */
+  redeemSso(ticket: string, flowSecret: string, deviceId?: string): Promise<SsoRedeemed> {
+    return this.api.sso.redeem({ ticket, flowSecret, ...(deviceId ? { deviceId } : {}) });
+  }
+
+  /**
+   * Unlocks a trusted device with an SSO proof instead of the master password:
+   * the server returns the account key sealed to this device, and the core
+   * opens it and checks it against the account's own keys.
+   */
+  async unlockWithSso(proof: string, device: TrustedDeviceSecret): Promise<void> {
+    const response = await this.api.sso.unlock({
+      proof,
+      deviceId: device.deviceId,
+      ...(this.device ? { deviceName: this.device.name, clientKind: this.device.kind } : {}),
+    });
+    await this.adoptSsoSession(response, device.seed);
+  }
+
+  private async adoptSsoSession(response: SsoUnlockResponse, seed: string): Promise<void> {
+    const key = this.core.TrustedDeviceKey.fromSeed(seed);
+    let keyring: Core.Keyring;
+    try {
+      keyring = key.unlock(JSON.stringify(response.unlock));
+    } finally {
+      key.free();
+    }
+    this.cancelTwoFactor();
+    this.clearSession();
+    this.keyring = keyring;
+    this.token = response.session.token;
+    this.loginAt = Date.now();
+    this.storage.setItem(DEVICE_TOKEN_KEY, response.session.deviceToken);
+    this.loadTrust(keyring, response.unlock.accountId);
+    const existing = this.deviceAccount;
+    if (existing?.accountId !== response.unlock.accountId) {
+      // A device approved by another device does not know the Secret Key;
+      // it unlocks with SSO, and with the Emergency Kit after signing in again.
+      const remote = await this.api.account();
+      const account: DeviceAccount = {
+        email: remote.email,
+        accountId: remote.accountId,
+        secretKey: "",
+        kdfSalt: remote.kdfSalt,
+        kdfParams: remote.kdfParams,
+      };
+      this.storage.setItem(ACCOUNT_KEY, JSON.stringify(account));
+    }
+    await this.sync();
+  }
+
+  /** Trusted devices of the account and new devices waiting for approval. */
+  trustedDevices(): Promise<TrustedDevicesResponse> {
+    return this.api.sso.trustedDevices();
+  }
+
+  /**
+   * Makes this unlocked device a trusted device (needs a recent login; the
+   * organization must allow SSO unlock). Store the returned secret in
+   * protected storage; without it, the device unlocks with the master password.
+   */
+  async trustThisDevice(name?: string): Promise<TrustedDeviceSecret> {
+    const keyring = this.requireKeyring();
+    const key = this.core.TrustedDeviceKey.generate();
+    try {
+      const deviceId = this.core.newId();
+      const upload = JSON.parse(keyring.trustDevice(deviceId, key.publicKey, "", Date.now())) as TrustedDeviceUpload;
+      try {
+        await this.api.sso.trustDevice({ ...upload, ...(name ? { name } : {}) });
+      } catch (error) {
+        if (error instanceof ApiError && error.code === "reauthentication_required") {
+          throw new ReauthenticationRequiredError();
+        }
+        throw error;
+      }
+      return { accountId: keyring.accountId, deviceId, seed: key.seed };
+    } finally {
+      key.free();
+    }
+  }
+
+  /** The code to compare with a new device before approving it. */
+  approvalCode(publicKey: string): string {
+    return this.core.trustedDeviceApprovalCode(publicKey);
+  }
+
+  /**
+   * Approves a new device after the user compared `approvalCode` with the
+   * code it shows: seals the account key to its public key. `ownDeviceId` is
+   * this device's trusted device ID, if it has one.
+   */
+  async approveDevice(request: { id: string; publicKey: string }, ownDeviceId?: string): Promise<void> {
+    const keyring = this.requireKeyring();
+    const upload = JSON.parse(
+      keyring.trustDevice(request.id, request.publicKey, ownDeviceId ?? "", Date.now()),
+    ) as TrustedDeviceUpload;
+    try {
+      await this.api.sso.approveDevice(request.id, upload);
+    } catch (error) {
+      if (error instanceof ApiError && error.code === "reauthentication_required") {
+        throw new ReauthenticationRequiredError();
+      }
+      throw error;
+    }
+  }
+
+  denyDevice(requestId: string): Promise<void> {
+    return this.api.sso.denyDevice(requestId);
+  }
+
+  removeTrustedDevice(id: string): Promise<void> {
+    return this.api.sso.removeTrustedDevice(id);
+  }
+
+  /** On a new device after SSO: asks a trusted device of the account for approval. */
+  async requestDeviceApproval(proof: string): Promise<PendingDeviceApproval> {
+    const key = this.core.TrustedDeviceKey.generate();
+    try {
+      const created = await this.api.sso.requestDevice({
+        proof,
+        publicKey: key.publicKey,
+        ...(this.device ? { deviceName: this.device.name, clientKind: this.device.kind } : {}),
+      });
+      return {
+        requestId: created.requestId,
+        requestToken: created.requestToken,
+        approvalCode: key.approvalCode,
+        expiresAt: created.expiresAt,
+        seed: key.seed,
+      };
+    } finally {
+      key.free();
+    }
+  }
+
+  /**
+   * Polls a pending approval. Once approved, unlocks (the device is now
+   * trusted: store the returned secret) and returns it.
+   */
+  async checkDeviceApproval(
+    pending: PendingDeviceApproval,
+  ): Promise<{ status: "pending" | "denied" } | { status: "approved"; device: TrustedDeviceSecret }> {
+    const result = await this.api.sso.deviceRequestStatus(pending.requestToken);
+    if (result.status !== "approved" || !result.result) {
+      return { status: result.status === "denied" ? "denied" : "pending" };
+    }
+    await this.adoptSsoSession(result.result, pending.seed);
+    return {
+      status: "approved",
+      device: { accountId: result.result.unlock.accountId, deviceId: pending.requestId, seed: pending.seed },
+    };
   }
 
   private async handleWriteError(error: unknown): Promise<never> {

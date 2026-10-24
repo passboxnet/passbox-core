@@ -6,8 +6,10 @@ import {
   type RecoveryApi,
   recoveryApi,
 } from "./recovery";
+import { type SsoApi, ssoApi } from "./sso";
 
 export * from "./recovery";
+export * from "./sso";
 
 /** Argon2id cost parameters. Mirrors `passbox_core::kdf::KdfParams`. */
 export interface KdfParams {
@@ -565,6 +567,8 @@ export interface PassboxApi extends AdminApi {
     clientKind?: ClientKind;
     /** `location.origin` of a web client, to be offered its security keys. */
     origin?: string;
+    /** Proof of an SSO sign-in (`sso.redeem`), when the organization requires SSO. */
+    ssoProof?: string;
   }): Promise<LoginFinishResult>;
   loginTwoFactor(
     req: SecondFactor & { challengeToken: string; rememberDevice?: boolean },
@@ -616,6 +620,8 @@ export interface PassboxApi extends AdminApi {
   emergency: EmergencyApi;
   /** Adding a device by code (wave C4). */
   deviceLinks: DeviceLinkApi;
+  /** Single sign-on, trusted devices and SCIM (wave E). */
+  sso: SsoApi;
   deleteItem(id: string, revision: number): Promise<WriteResponse>;
 }
 
@@ -695,6 +701,7 @@ export function createClient(options: ClientOptions = {}): PassboxApi {
     recovery: recoveryApi(call),
     emergency: emergencyApi(call),
     deviceLinks: deviceLinkApi(call),
+    sso: ssoApi(call),
   };
 }
 
