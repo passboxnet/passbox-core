@@ -1,3 +1,4 @@
+import { type DeveloperApi, developerApi } from "./developer";
 import {
   type DeviceLinkApi,
   deviceLinkApi,
@@ -7,6 +8,7 @@ import {
   recoveryApi,
 } from "./recovery";
 
+export * from "./developer";
 export * from "./recovery";
 
 /** Argon2id cost parameters. Mirrors `passbox_core::kdf::KdfParams`. */
@@ -256,7 +258,19 @@ export type AccountEventKind =
   | "emergency_access_denied"
   | "emergency_access_used"
   | "device_link_created"
-  | "device_link_approved";
+  | "device_link_approved"
+  | "service_account_created"
+  | "service_account_access_changed"
+  | "service_account_revoked"
+  | "service_account_deleted"
+  | "agent_grant_requested"
+  | "agent_grant_approved"
+  | "agent_grant_denied"
+  | "agent_grant_revoked"
+  | "agent_request_access"
+  | "agent_run"
+  | "agent_inject"
+  | "agent_create";
 
 export interface AccountEvent {
   id: string;
@@ -616,6 +630,8 @@ export interface PassboxApi extends AdminApi {
   emergency: EmergencyApi;
   /** Adding a device by code (wave C4). */
   deviceLinks: DeviceLinkApi;
+  /** Service accounts and AI agent grants (wave F). */
+  developer: DeveloperApi;
   deleteItem(id: string, revision: number): Promise<WriteResponse>;
 }
 
@@ -695,6 +711,7 @@ export function createClient(options: ClientOptions = {}): PassboxApi {
     recovery: recoveryApi(call),
     emergency: emergencyApi(call),
     deviceLinks: deviceLinkApi(call),
+    developer: developerApi(call),
   };
 }
 

@@ -1368,3 +1368,122 @@ impl DeviceLinkRequest {
         self.0.open(sealed).map_err(js_error)
     }
 }
+
+// --- Service accounts and agent grants (wave F) --------------------------------------
+//
+// See `docs/architecture/service-accounts.md` and `docs/architecture/ai-agents.md`.
+
+fn permission(value: &str) -> Result<passbox_core::service_account::Permission, JsValue> {
+    passbox_core::service_account::Permission::parse(value).map_err(js_error)
+}
+
+#[wasm_bindgen]
+impl Keyring {
+    /// Creates a service account owned by this account. Returns JSON `{ id,
+    /// token, publicKey, publicKeySignature, encryptedPrivate, authHash }`.
+    /// Show `token` once and do not store it; everything else is for
+    /// `POST /api/v1/service-accounts`.
+    #[wasm_bindgen(js_name = createServiceAccount)]
+    pub fn create_service_account(&self, now_ms: f64) -> Result<String, JsValue> {
+        let created = self
+            .inner
+            .create_service_account(now(now_ms))
+            .map_err(js_error)?;
+        Ok(serde_json::json!({
+            "id": created.id,
+            "token": created.token.as_str(),
+            "publicKey": created.public_key,
+            "publicKeySignature": created.public_key_signature,
+            "encryptedPrivate": created.encrypted_private,
+            "authHash": created.auth_hash,
+        })
+        .to_string())
+    }
+
+    /// Seals a vault key for a service account this account owns, after
+    /// checking the owner's signature on its public key. `permission` is
+    /// `read` or `write`. Returns the grant JSON for the server.
+    #[wasm_bindgen(js_name = grantServiceAccount)]
+    pub fn grant_service_account(
+        &self,
+        public_key: &str,
+        public_key_signature: &str,
+        vault_id: &str,
+        key_epoch: f64,
+        permission_name: &str,
+        now_ms: f64,
+    ) -> Result<String, JsValue> {
+        let upload = self
+            .inner
+            .grant_service_account(
+                public_key,
+                public_key_signature,
+                vault_id,
+                epoch(key_epoch)?,
+                permission(permission_name)?,
+                now(now_ms),
+            )
+            .map_err(js_error)?;
+        Ok(serde_json::json!({
+            "vaultId": upload.vault_id,
+            "keyEpoch": upload.key_epoch,
+            "permission": upload.permission.as_str(),
+            "sealedKey": upload.sealed_key,
+            "grant": upload.grant,
+            "grantSignature": upload.grant_signature,
+        })
+        .to_string())
+    }
+
+    /// Signs the decision on an agent grant request (Base64url bytes as
+    /// relayed by the server). Show the person `parseAgentRequest(request)`
+    /// first. Returns JSON `{ decision, decisionSignature }`.
+    #[wasm_bindgen(js_name = decideAgentGrant)]
+    pub fn decide_agent_grant(
+        &self,
+        request: &str,
+        approved: bool,
+        max_uses: f64,
+        now_ms: f64,
+    ) -> Result<String, JsValue> {
+        if max_uses.fract() != 0.0 || !(0.0..=1e9).contains(&max_uses) {
+            return Err(js_sys::Error::new("maxUses must be a non-negative integer").into());
+        }
+        let (decision, signature) = self
+            .inner
+            .decide_agent_grant(request, approved, max_uses as u64, now(now_ms))
+            .map_err(js_error)?;
+        Ok(serde_json::json!({ "decision": decision, "decisionSignature": signature }).to_string())
+    }
+}
+
+/// Parses an agent grant request for display. Returns JSON `{ id, code,
+/// principalKind, principalId, clientName, onBehalfOf, items: [{itemId,
+/// vaultId}], actions, commands, paths, reason, ttlMs, maxUses, createdAt }`.
+/// `reason` and `clientName` come from the agent and are untrusted.
+#[wasm_bindgen(js_name = parseAgentRequest)]
+pub fn parse_agent_request(request: &str) -> Result<String, JsValue> {
+    let r = passbox_core::agent_grant::GrantRequest::decode(request).map_err(js_error)?;
+    let items: Vec<serde_json::Value> = r
+        .items
+        .iter()
+        .map(|i| serde_json::json!({ "itemId": i.item_id, "vaultId": i.vault_id }))
+        .collect();
+    Ok(serde_json::json!({
+        "id": r.id,
+        "code": r.code(),
+        "principalKind": r.principal_kind.as_str(),
+        "principalId": r.principal_id,
+        "clientName": r.client_name,
+        "onBehalfOf": r.on_behalf_of,
+        "items": items,
+        "actions": r.actions,
+        "commands": r.commands,
+        "paths": r.paths,
+        "reason": r.reason,
+        "ttlMs": r.ttl_ms,
+        "maxUses": r.max_uses,
+        "createdAt": r.created_at,
+    })
+    .to_string())
+}

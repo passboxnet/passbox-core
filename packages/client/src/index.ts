@@ -19,9 +19,21 @@ export {
   type Vault,
 } from "./client";
 export {
+  type AgentEventRecord,
+  type AgentRequest,
+  type CreatedServiceAccount,
+  type ServiceAccount,
+  type ServiceAccountEventRecord,
+  type ServiceAccountPermission,
+  type ServiceAccountVaultChoice,
+  serviceAccountState,
+} from "./developer";
+export {
+  environmentVariables,
   FIELD,
   type FieldType,
   fieldValue,
+  isEnvName,
   type ItemCategory,
   type ItemData,
   type ItemField,

@@ -55,6 +55,12 @@ client (web, desktop, extension, iOS, Android) and on the website.
 | Security code (fingerprint) | Sicherheitscode |
 | Confirm (a member) | Bestätigen |
 | Pause access / Lift pause | Zugriff pausieren / Pause aufheben |
+| Developer (navigation) | Entwickler |
+| Service account / Token | Dienstkonto / Token |
+| Environment (item category, `.env` variables) | Umgebung |
+| AI agent | KI-Agent |
+| Approve / Deny (agent request) | Freigeben / Ablehnen |
+| Revoke | Widerrufen |
 
 Plain language first: no "OPAQUE", "ciphertext", "revision", "account ID"
 or "otpauth://" in default screens. Technical details go behind a

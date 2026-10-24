@@ -25,6 +25,16 @@ import {
 } from "@passbox/api-client";
 import type * as Core from "@passbox/core-wasm";
 import {
+  type AgentEventRecord,
+  type AgentRequest,
+  type CreatedServiceAccount,
+  type ServiceAccount,
+  type ServiceAccountEventRecord,
+  type ServiceAccountPermission,
+  type ServiceAccountVaultChoice,
+  serviceAccountState,
+} from "./developer";
+import {
   FIELD,
   fieldValue,
   type ItemData,
@@ -2477,6 +2487,161 @@ export class PassboxClient {
   cancelDeviceLinkClaim(): void {
     this.deviceLinkRequest?.request.free();
     this.deviceLinkRequest = undefined;
+  }
+
+  // --- Service accounts (F2) and agent grants (F7) --------------------------------
+
+  private vaultEpoch(vaultId: string): number {
+    const vault = this.snapshot.vaults.find((v) => v.id === vaultId);
+    if (!vault) throw new Error(`vault ${vaultId} not found`);
+    return vault.keyEpoch ?? 0;
+  }
+
+  /** Service accounts of this account, newest first. */
+  async serviceAccounts(): Promise<ServiceAccount[]> {
+    const records = await this.api.developer.serviceAccounts();
+    return records.map((r) => ({ ...r, state: serviceAccountState(r) }));
+  }
+
+  /**
+   * Creates a service account with access to `vaults`. `expiresAt` is Unix
+   * ms, or 0 for no expiry. The returned token is shown once and is not
+   * stored anywhere.
+   */
+  async createServiceAccount(
+    name: string,
+    vaults: ServiceAccountVaultChoice[],
+    expiresAt: number,
+  ): Promise<CreatedServiceAccount> {
+    const keyring = this.requireKeyring();
+    const created = JSON.parse(keyring.createServiceAccount(Date.now())) as {
+      id: string;
+      token: string;
+      publicKey: string;
+      publicKeySignature: string;
+      encryptedPrivate: string;
+      authHash: string;
+    };
+    const grants = vaults.map((v) =>
+      JSON.parse(
+        keyring.grantServiceAccount(
+          created.publicKey,
+          created.publicKeySignature,
+          v.vaultId,
+          this.vaultEpoch(v.vaultId),
+          v.permission,
+          Date.now(),
+        ),
+      ),
+    );
+    const record = await this.api.developer.createServiceAccount({
+      id: created.id,
+      name,
+      publicKey: created.publicKey,
+      publicKeySignature: created.publicKeySignature,
+      encryptedPrivate: created.encryptedPrivate,
+      authHash: created.authHash,
+      expiresAt,
+      grants,
+    });
+    return { account: { ...record, state: serviceAccountState(record) }, token: created.token };
+  }
+
+  /** Gives a service account access to a vault, changes the permission, or renews it after a key rotation. */
+  async grantServiceAccount(
+    account: Pick<ServiceAccount, "id" | "publicKey" | "publicKeySignature">,
+    vaultId: string,
+    permission: ServiceAccountPermission,
+  ): Promise<ServiceAccount> {
+    const grant = JSON.parse(
+      this.requireKeyring().grantServiceAccount(
+        account.publicKey,
+        account.publicKeySignature,
+        vaultId,
+        this.vaultEpoch(vaultId),
+        permission,
+        Date.now(),
+      ),
+    );
+    const record = await this.api.developer.putServiceAccountGrants(account.id, [grant]);
+    return { ...record, state: serviceAccountState(record) };
+  }
+
+  async removeServiceAccountVault(serviceAccountId: string, vaultId: string): Promise<void> {
+    await this.api.developer.deleteServiceAccountGrant(serviceAccountId, vaultId);
+  }
+
+  async updateServiceAccount(id: string, changes: { name?: string; expiresAt?: number }): Promise<ServiceAccount> {
+    const record = await this.api.developer.updateServiceAccount(id, changes);
+    return { ...record, state: serviceAccountState(record) };
+  }
+
+  /** The token stops working at once; the service account stays listed. */
+  async revokeServiceAccount(id: string): Promise<void> {
+    await this.api.developer.revokeServiceAccount(id);
+  }
+
+  async deleteServiceAccount(id: string): Promise<void> {
+    await this.api.developer.deleteServiceAccount(id);
+  }
+
+  async serviceAccountEvents(id: string): Promise<ServiceAccountEventRecord[]> {
+    return this.api.developer.serviceAccountEvents(id);
+  }
+
+  /**
+   * Agent grant requests, parsed from the exact bytes a decision signs
+   * (`pending` by default, or the last 30 days). Requests that do not parse
+   * or are not for this account are left out.
+   */
+  async agentRequests(status: "pending" | "all" = "pending"): Promise<AgentRequest[]> {
+    const records = await this.api.developer.agentGrants(status);
+    const accountId = this.deviceAccount?.accountId;
+    const out: AgentRequest[] = [];
+    for (const record of records) {
+      try {
+        const parsed = JSON.parse(this.core.parseAgentRequest(record.request)) as Omit<
+          AgentRequest,
+          "raw" | "status" | "expiresAt" | "notAfter" | "decidedDevice" | "decidedAt" | "principalName"
+        > & { onBehalfOf: string };
+        if (parsed.onBehalfOf !== accountId || parsed.id !== record.id) continue;
+        const { onBehalfOf: _, ...rest } = parsed;
+        out.push({
+          ...rest,
+          ...(record.principalName ? { principalName: record.principalName } : {}),
+          raw: record.request,
+          status: record.status,
+          expiresAt: record.expiresAt,
+          notAfter: record.notAfter,
+          decidedDevice: record.decidedDevice,
+          decidedAt: record.decidedAt,
+        });
+      } catch (error) {
+        console.warn("Ignoring an agent request that could not be parsed", error);
+      }
+    }
+    return out;
+  }
+
+  /**
+   * Approves or denies an agent request, signed with this account's key.
+   * `maxUses` 0 keeps the request's limit.
+   */
+  async decideAgentRequest(request: AgentRequest, approved: boolean, maxUses = 0): Promise<void> {
+    const signed = JSON.parse(this.requireKeyring().decideAgentGrant(request.raw, approved, maxUses, Date.now())) as {
+      decision: string;
+      decisionSignature: string;
+    };
+    await this.api.developer.decideAgentGrant(request.id, signed);
+  }
+
+  /** Ends an approved agent grant early. */
+  async revokeAgentGrant(id: string): Promise<void> {
+    await this.api.developer.revokeAgentGrant(id);
+  }
+
+  async agentEvents(limit = 100): Promise<AgentEventRecord[]> {
+    return this.api.developer.agentEvents(limit);
   }
 
   private async handleWriteError(error: unknown): Promise<never> {
