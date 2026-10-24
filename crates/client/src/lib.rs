@@ -5,14 +5,18 @@
 //! The browser clients use the equivalent TypeScript implementation in
 //! `packages/client`; both talk to the same API and share the item format.
 
+pub mod agent;
 pub mod api;
 pub mod client;
 pub mod error;
 pub mod model;
+pub mod reference;
 pub mod security;
+pub mod service_account;
 pub mod store;
 
 pub use api::{AccountEvent, SecurityKeyInfo, SessionInfo, TotpSetup, TwoFactorStatus};
+pub use client::developer::{AgentGrantRecord, ServiceAccountGrant, ServiceAccountInfo};
 pub use client::item_tools::{
     BreachRange, BreachedItem, BulkFailure, HibpRange, ItemHealth, ItemProblem, ItemUsage,
     ItemVersion, UsageKind,
@@ -32,4 +36,5 @@ pub use passbox_core::sharing::state::{
     DirectoryLookup, GroupView, MemberView, OrgView, SharedVaultView, SharingView, VaultMemberView,
     Warning,
 };
+pub use service_account::{ServiceAccountClient, ServiceVault};
 pub use store::{FileStore, MemoryStore, Store};

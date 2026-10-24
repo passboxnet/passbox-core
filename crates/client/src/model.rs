@@ -27,6 +27,10 @@ pub enum ItemCategory {
     Note,
     Card,
     Identity,
+    /// Key/value sets for applications (`.env`), one field per variable.
+    Environment,
+    /// Also used for categories this version does not know.
+    #[serde(other)]
     Other,
 }
 
@@ -200,6 +204,22 @@ impl ItemData {
         }
     }
 
+    /// The variables of an environment item: fields whose label is a valid
+    /// variable name, in order. Later fields win over earlier ones with the
+    /// same name.
+    pub fn environment_variables(&self) -> Vec<(String, String)> {
+        let mut out: Vec<(String, String)> = Vec::new();
+        for field in &self.fields {
+            let name = field.label.trim();
+            if !is_env_name(name) {
+                continue;
+            }
+            out.retain(|(n, _)| n != name);
+            out.push((name.to_owned(), field.value.clone()));
+        }
+        out
+    }
+
     pub fn from_json(json: &str) -> crate::Result<Self> {
         let data: Self = serde_json::from_str(json)?;
         if data.v != 1 {
@@ -210,6 +230,17 @@ impl ItemData {
         }
         Ok(data)
     }
+}
+
+/// Whether `name` can be an environment variable: letters, digits and
+/// underscores, not starting with a digit.
+pub fn is_env_name(name: &str) -> bool {
+    let mut chars = name.chars();
+    chars
+        .next()
+        .is_some_and(|c| c.is_ascii_alphabetic() || c == '_')
+        && chars.all(|c| c.is_ascii_alphanumeric() || c == '_')
+        && name.len() <= 256
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -263,6 +294,27 @@ mod tests {
         assert_eq!(data.category, ItemCategory::Card);
         assert_eq!(data.field(field::CARD_NUMBER), Some("4111"));
         assert!(data.favorite);
+    }
+
+    #[test]
+    fn environments_and_unknown_categories() {
+        let json = r#"{"v":1,"category":"environment","title":"API","fields":[
+            {"id":"a","label":"API_KEY","type":"concealed","value":"k1"},
+            {"id":"b","label":"not valid","type":"text","value":"x"},
+            {"id":"c","label":"API_KEY","type":"concealed","value":"k2"},
+            {"id":"d","label":"PORT","type":"text","value":"8080"}]}"#;
+        let data = ItemData::from_json(json).unwrap();
+        assert_eq!(data.category, ItemCategory::Environment);
+        assert_eq!(
+            data.environment_variables(),
+            [
+                ("API_KEY".into(), "k2".into()),
+                ("PORT".into(), "8080".into())
+            ]
+        );
+        let future = ItemData::from_json(r#"{"v":1,"category":"wifi","title":"Home"}"#).unwrap();
+        assert_eq!(future.category, ItemCategory::Other);
+        assert!(is_env_name("_A1") && !is_env_name("1A") && !is_env_name("A-B"));
     }
 
     #[test]

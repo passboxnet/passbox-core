@@ -235,5 +235,6 @@
   "item.viewOnly": "Nur ansehen: Sie können diesen Eintrag kopieren und ausfüllen, aber nicht ändern.",
   "item.error.readOnly": "Diesen Eintrag können Sie nur ansehen. Wer den geteilten Tresor verwaltet, kann Ihnen Bearbeitungsrechte geben.",
   "save.sharedVault": "{vault} · {org}",
-  "settings.autoLockLimited": "Ihre Organisation erlaubt höchstens {minutes} Minuten. Passbox sperrt sich außerdem, wenn Ihr Bildschirm sperrt oder Sie den Browser schließen."
+  "settings.autoLockLimited": "Ihre Organisation erlaubt höchstens {minutes} Minuten. Passbox sperrt sich außerdem, wenn Ihr Bildschirm sperrt oder Sie den Browser schließen.",
+  "category.environment": "Umgebung"
 }

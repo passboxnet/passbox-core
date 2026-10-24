@@ -3,6 +3,8 @@
 //! The client is synchronous. Call it from a background thread in UI apps.
 //! All methods take `&self`; an internal lock serializes operations.
 
+mod agent;
+pub mod developer;
 pub mod item_tools;
 pub mod recovery;
 pub mod sharing;
@@ -1057,22 +1059,7 @@ impl Client {
     /// from the stored version, not from `data`.
     pub fn update_item(&self, item_id: &str, data: &ItemData) -> Result<()> {
         let current = self.item(item_id)?;
-        let mut data = data.clone();
-        let mut history = current.data.password_history();
-        if let Some(old) = current.data.field(field::PASSWORD)
-            && data.field(field::PASSWORD) != Some(old)
-        {
-            history.insert(
-                0,
-                PasswordHistoryEntry {
-                    value: old.to_owned(),
-                    replaced_at: now_ms(),
-                },
-            );
-            history.truncate(PASSWORD_HISTORY_LEN);
-        }
-        data.set_password_history(&history);
-        data.set_trashed_at(current.data.trashed_at());
+        let data = next_version(&current.data, data);
         self.write_item(&current.vault_id, item_id, current.revision + 1, &data)
     }
 
@@ -1421,7 +1408,30 @@ fn apply_delta(session: &mut Session, mut delta: SyncResponse) -> Vec<WrappedKey
     uploads
 }
 
-fn now_ms() -> i64 {
+/// The next version of an item: `data`, with the password history and trash
+/// state of the stored version `current` (a replaced password is added to
+/// the history).
+pub(crate) fn next_version(current: &ItemData, data: &ItemData) -> ItemData {
+    let mut data = data.clone();
+    let mut history = current.password_history();
+    if let Some(old) = current.field(field::PASSWORD)
+        && data.field(field::PASSWORD) != Some(old)
+    {
+        history.insert(
+            0,
+            PasswordHistoryEntry {
+                value: old.to_owned(),
+                replaced_at: now_ms(),
+            },
+        );
+        history.truncate(PASSWORD_HISTORY_LEN);
+    }
+    data.set_password_history(&history);
+    data.set_trashed_at(current.trashed_at());
+    data
+}
+
+pub(crate) fn now_ms() -> i64 {
     std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
         .map_or(0, |d| i64::try_from(d.as_millis()).unwrap_or(i64::MAX))

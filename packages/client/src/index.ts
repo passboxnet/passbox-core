@@ -46,12 +46,24 @@ export {
   type Vault,
 } from "./client";
 export {
+  type AgentEventRecord,
+  type AgentRequest,
+  type CreatedServiceAccount,
+  type ServiceAccount,
+  type ServiceAccountEventRecord,
+  type ServiceAccountPermission,
+  type ServiceAccountVaultChoice,
+  serviceAccountState,
+} from "./developer";
+export {
+  environmentVariables,
   FIELD,
   type FieldType,
   fieldValue,
   type ItemCategory,
   type ItemData,
   type ItemField,
+  isEnvName,
   newItemData,
   PASSWORD_HISTORY_LEN,
   type Passkey,
