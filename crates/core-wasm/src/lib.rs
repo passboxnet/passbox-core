@@ -16,6 +16,7 @@ use passbox_core::keyring::Keyring as CoreKeyring;
 use passbox_core::opaque::{ClientLoginFlow, ClientRegistrationFlow};
 use passbox_core::passkey::{self, Flags};
 use passbox_core::secret_key::SecretKey;
+use passbox_core::sharing::objects::{OrgKind, OrgRole, PrincipalType, VaultRole};
 use passbox_core::strength;
 use passbox_core::totp::Totp;
 use passbox_core::{Error, encoding, export, id};
@@ -467,6 +468,433 @@ impl Keyring {
     ) -> Result<String, JsValue> {
         self.inner
             .decrypt_item(vault_id, item_id, revision(revision_)?, encrypted)
+            .map_err(js_error)
+    }
+}
+
+// --- Key pairs, key directory and sharing ------------------------------------------
+//
+// Private keys (account key pairs, group keys) stay inside the keyring.
+// Objects cross the boundary as JSON; request builders return the JSON body
+// for the server endpoint named in their documentation
+// (`passbox_core::sharing::build`).
+
+fn to_json<T: serde::Serialize>(value: &T) -> Result<String, JsValue> {
+    serde_json::to_string(value).map_err(json_error)
+}
+
+fn from_json<T: serde::de::DeserializeOwned>(json: &str) -> Result<T, JsValue> {
+    serde_json::from_str(json).map_err(json_error)
+}
+
+fn epoch(value: f64) -> Result<u32, JsValue> {
+    if value.fract() == 0.0 && (0.0..=f64::from(u32::MAX)).contains(&value) {
+        Ok(value as u32)
+    } else {
+        Err(js_sys::Error::new("epoch must be a non-negative integer").into())
+    }
+}
+
+fn now(value: f64) -> i64 {
+    value as i64
+}
+
+fn principals(json: &str) -> Result<Vec<(PrincipalType, String)>, JsValue> {
+    let list: Vec<(String, String)> = from_json(json)?;
+    list.into_iter()
+        .map(|(t, id)| Ok((PrincipalType::parse(&t).map_err(js_error)?, id)))
+        .collect()
+}
+
+#[wasm_bindgen]
+impl Keyring {
+    /// Creates the account's key pairs (on sign-up, or on the first unlock of
+    /// an existing account). Returns JSON `{ keyVersion, bundle,
+    /// bundleSignature, encryptedPrivate }` for `PUT /api/v1/account/keys`.
+    #[wasm_bindgen(js_name = createAccountKeys)]
+    pub fn create_account_keys(&mut self, now_ms: f64) -> Result<String, JsValue> {
+        to_json(
+            &self
+                .inner
+                .create_account_keys(now(now_ms))
+                .map_err(js_error)?,
+        )
+    }
+
+    /// Loads the key pairs from `GET /api/v1/account/keys`. Throws if they do
+    /// not belong to this account or the halves do not match.
+    #[wasm_bindgen(js_name = loadAccountKeys)]
+    pub fn load_account_keys(
+        &mut self,
+        bundle: &str,
+        bundle_signature: &str,
+        encrypted_private: &str,
+    ) -> Result<(), JsValue> {
+        self.inner
+            .load_account_keys(bundle, bundle_signature, encrypted_private)
+            .map_err(js_error)
+    }
+
+    /// The account ID the keyring belongs to.
+    #[wasm_bindgen(getter, js_name = accountId)]
+    pub fn account_id(&self) -> String {
+        self.inner.account_id().to_owned()
+    }
+
+    #[wasm_bindgen(js_name = hasAccountKeys)]
+    pub fn has_account_keys(&self) -> bool {
+        self.inner.has_account_keys()
+    }
+
+    /// Fingerprint of the account's own keys (12 groups of five digits).
+    #[wasm_bindgen(js_name = ownFingerprint)]
+    pub fn own_fingerprint(&self) -> Option<String> {
+        self.inner.own_bundle().map(|b| b.fingerprint())
+    }
+
+    /// The trust store (pinned keys, organization fingerprints, verified
+    /// directory head, manifest versions) as JSON, for persisting.
+    #[wasm_bindgen(js_name = trustStore)]
+    pub fn trust_store(&self) -> Result<String, JsValue> {
+        to_json(self.inner.trust_store())
+    }
+
+    #[wasm_bindgen(js_name = setTrustStore)]
+    pub fn set_trust_store(&mut self, json: &str) -> Result<(), JsValue> {
+        self.inner.set_trust_store(from_json(json)?);
+        Ok(())
+    }
+
+    /// Merges the `sharing` object of a sync response, verifies everything
+    /// and opens keys. Returns JSON `{ view, wrappedKeys }`.
+    #[wasm_bindgen(js_name = applySharing)]
+    pub fn apply_sharing(&mut self, delta_json: &str) -> Result<String, JsValue> {
+        let delta = from_json(delta_json)?;
+        to_json(&self.inner.apply_sharing(delta))
+    }
+
+    /// The last verified view: `{ orgs, vaults, warnings }`.
+    #[wasm_bindgen(js_name = sharingView)]
+    pub fn sharing_view(&self) -> Result<String, JsValue> {
+        to_json(self.inner.sharing_view())
+    }
+
+    /// Pins the organization fingerprint from an invitation link.
+    #[wasm_bindgen(js_name = pinOrgRoot)]
+    pub fn pin_org_root(&mut self, org_id: &str, root_hash: &str) -> Result<(), JsValue> {
+        self.inner.pin_org_root(org_id, root_hash).map_err(js_error)
+    }
+
+    /// `[rootHash, fingerprint]` of an organization, as JSON.
+    #[wasm_bindgen(js_name = orgFingerprint)]
+    pub fn org_fingerprint(&self, org_id: &str) -> Result<String, JsValue> {
+        to_json(&self.inner.org_fingerprint(org_id).map_err(js_error)?)
+    }
+
+    /// Verifies a `GET /api/v1/keys/{id}` response. Returns JSON
+    /// `{ accountId, fingerprint, bundleHash, status, previousFingerprint }`.
+    #[wasm_bindgen(js_name = verifyDirectoryLookup)]
+    pub fn verify_directory_lookup(
+        &mut self,
+        account_id: &str,
+        response_json: &str,
+    ) -> Result<String, JsValue> {
+        let response = from_json(response_json)?;
+        to_json(
+            &self
+                .inner
+                .verify_directory_lookup(account_id, &response)
+                .map_err(js_error)?,
+        )
+    }
+
+    /// Trusts the current key of an account after a change. Returns its
+    /// fingerprint.
+    #[wasm_bindgen(js_name = acceptKeyChange)]
+    pub fn accept_key_change(&mut self, account_id: &str) -> Result<String, JsValue> {
+        self.inner.accept_key_change(account_id).map_err(js_error)
+    }
+
+    /// `POST /api/v1/orgs` body. `kind` is `family` or `team`.
+    #[wasm_bindgen(js_name = createOrg)]
+    pub fn create_org(
+        &mut self,
+        kind: &str,
+        meta_json: &str,
+        vault_meta_json: Option<String>,
+        now_ms: f64,
+    ) -> Result<String, JsValue> {
+        let kind = OrgKind::parse(kind).map_err(js_error)?;
+        to_json(
+            &self
+                .inner
+                .create_org(kind, meta_json, vault_meta_json.as_deref(), now(now_ms))
+                .map_err(js_error)?,
+        )
+    }
+
+    /// `POST /api/v1/orgs/{orgId}/vaults` body.
+    #[wasm_bindgen(js_name = createSharedVault)]
+    pub fn create_shared_vault(
+        &mut self,
+        org_id: &str,
+        meta_json: &str,
+        now_ms: f64,
+    ) -> Result<String, JsValue> {
+        to_json(
+            &self
+                .inner
+                .create_shared_vault(org_id, meta_json, now(now_ms))
+                .map_err(js_error)?,
+        )
+    }
+
+    /// `POST /api/v1/orgs/{orgId}/members/{accountId}/confirm` body (with
+    /// the attested `fingerprint`). Look the member up first.
+    #[wasm_bindgen(js_name = confirmMember)]
+    pub fn confirm_member(
+        &mut self,
+        org_id: &str,
+        account_id: &str,
+        now_ms: f64,
+    ) -> Result<String, JsValue> {
+        to_json(
+            &self
+                .inner
+                .confirm_member(org_id, account_id, now(now_ms))
+                .map_err(js_error)?,
+        )
+    }
+
+    /// `PUT /api/v1/orgs/{orgId}/members/{accountId}` body.
+    #[wasm_bindgen(js_name = setMemberRole)]
+    pub fn set_member_role(
+        &self,
+        org_id: &str,
+        account_id: &str,
+        role: &str,
+        now_ms: f64,
+    ) -> Result<String, JsValue> {
+        let role = OrgRole::parse(role).map_err(js_error)?;
+        to_json(
+            &self
+                .inner
+                .set_member_role(org_id, account_id, role, now(now_ms))
+                .map_err(js_error)?,
+        )
+    }
+
+    /// Re-attestations (JSON array of `PUT .../members/{id}` bodies) for the
+    /// members attested by `attester_id`.
+    #[wasm_bindgen(js_name = reattestMembers)]
+    pub fn reattest_members(
+        &self,
+        org_id: &str,
+        attester_id: &str,
+        now_ms: f64,
+    ) -> Result<String, JsValue> {
+        to_json(
+            &self
+                .inner
+                .reattest_members(org_id, attester_id, now(now_ms))
+                .map_err(js_error)?,
+        )
+    }
+
+    /// `POST /api/v1/orgs/{orgId}/rotate-key` body.
+    #[wasm_bindgen(js_name = rotateOrgKey)]
+    pub fn rotate_org_key(&mut self, org_id: &str, now_ms: f64) -> Result<String, JsValue> {
+        to_json(
+            &self
+                .inner
+                .rotate_org_key(org_id, now(now_ms))
+                .map_err(js_error)?,
+        )
+    }
+
+    /// `POST /api/v1/vaults/{vaultId}/members` body (share or change role).
+    #[wasm_bindgen(js_name = shareVault)]
+    pub fn share_vault(
+        &self,
+        vault_id: &str,
+        principal_type: &str,
+        principal_id: &str,
+        role: &str,
+        now_ms: f64,
+    ) -> Result<String, JsValue> {
+        let principal_type = PrincipalType::parse(principal_type).map_err(js_error)?;
+        let role = VaultRole::parse(role).map_err(js_error)?;
+        to_json(
+            &self
+                .inner
+                .share_vault(vault_id, principal_type, principal_id, role, now(now_ms))
+                .map_err(js_error)?,
+        )
+    }
+
+    /// `POST /api/v1/vaults/{vaultId}/rotate` body. `removed_json` is a JSON
+    /// array of `[principalType, principalId]` pairs.
+    #[wasm_bindgen(js_name = rotateVault)]
+    pub fn rotate_vault(
+        &mut self,
+        vault_id: &str,
+        removed_json: &str,
+        meta_json: &str,
+        now_ms: f64,
+    ) -> Result<String, JsValue> {
+        let removed = principals(removed_json)?;
+        to_json(
+            &self
+                .inner
+                .rotate_vault(vault_id, &removed, meta_json, now(now_ms))
+                .map_err(js_error)?,
+        )
+    }
+
+    /// `POST /api/v1/orgs/{orgId}/groups` body. `members_json` is a JSON
+    /// array of account IDs.
+    #[wasm_bindgen(js_name = createGroup)]
+    pub fn create_group(
+        &mut self,
+        org_id: &str,
+        meta_json: &str,
+        members_json: &str,
+        now_ms: f64,
+    ) -> Result<String, JsValue> {
+        let members: Vec<String> = from_json(members_json)?;
+        to_json(
+            &self
+                .inner
+                .create_group(org_id, meta_json, &members, now(now_ms))
+                .map_err(js_error)?,
+        )
+    }
+
+    /// `POST /api/v1/orgs/{orgId}/groups/{groupId}/members` body.
+    #[wasm_bindgen(js_name = addGroupMember)]
+    pub fn add_group_member(
+        &self,
+        group_id: &str,
+        account_id: &str,
+        now_ms: f64,
+    ) -> Result<String, JsValue> {
+        to_json(
+            &self
+                .inner
+                .add_group_member(group_id, account_id, now(now_ms))
+                .map_err(js_error)?,
+        )
+    }
+
+    /// `POST /api/v1/orgs/{orgId}/groups/{groupId}/rotate` body.
+    #[wasm_bindgen(js_name = rotateGroup)]
+    pub fn rotate_group(
+        &mut self,
+        group_id: &str,
+        removed_json: &str,
+        now_ms: f64,
+    ) -> Result<String, JsValue> {
+        let removed: Vec<String> = from_json(removed_json)?;
+        to_json(
+            &self
+                .inner
+                .rotate_group(group_id, &removed, now(now_ms))
+                .map_err(js_error)?,
+        )
+    }
+
+    #[wasm_bindgen(js_name = hasVaultKey)]
+    pub fn has_vault_key(&self, vault_id: &str, key_epoch: f64) -> Result<bool, JsValue> {
+        Ok(self.inner.has_vault_key(vault_id, epoch(key_epoch)?))
+    }
+
+    /// Encrypts item data with the vault key of `key_epoch` (0 for personal vaults).
+    #[wasm_bindgen(js_name = encryptItemAt)]
+    pub fn encrypt_item_at(
+        &self,
+        vault_id: &str,
+        key_epoch: f64,
+        item_id: &str,
+        revision_: f64,
+        data_json: &str,
+    ) -> Result<String, JsValue> {
+        self.inner
+            .encrypt_item_at(
+                vault_id,
+                epoch(key_epoch)?,
+                item_id,
+                revision(revision_)?,
+                data_json,
+            )
+            .map_err(js_error)
+    }
+
+    #[wasm_bindgen(js_name = decryptItemAt)]
+    pub fn decrypt_item_at(
+        &self,
+        vault_id: &str,
+        key_epoch: f64,
+        item_id: &str,
+        revision_: f64,
+        encrypted: &str,
+    ) -> Result<String, JsValue> {
+        self.inner
+            .decrypt_item_at(
+                vault_id,
+                epoch(key_epoch)?,
+                item_id,
+                revision(revision_)?,
+                encrypted,
+            )
+            .map_err(js_error)
+    }
+
+    #[wasm_bindgen(js_name = encryptVaultMetaAt)]
+    pub fn encrypt_vault_meta_at(
+        &self,
+        vault_id: &str,
+        key_epoch: f64,
+        meta_json: &str,
+    ) -> Result<String, JsValue> {
+        self.inner
+            .encrypt_vault_meta_at(vault_id, epoch(key_epoch)?, meta_json)
+            .map_err(js_error)
+    }
+
+    #[wasm_bindgen(js_name = decryptVaultMetaAt)]
+    pub fn decrypt_vault_meta_at(
+        &self,
+        vault_id: &str,
+        key_epoch: f64,
+        encrypted_meta: &str,
+    ) -> Result<String, JsValue> {
+        self.inner
+            .decrypt_vault_meta_at(vault_id, epoch(key_epoch)?, encrypted_meta)
+            .map_err(js_error)
+    }
+
+    #[wasm_bindgen(js_name = encryptOrgMeta)]
+    pub fn encrypt_org_meta(
+        &self,
+        org_id: &str,
+        key_epoch: f64,
+        meta_json: &str,
+    ) -> Result<String, JsValue> {
+        self.inner
+            .encrypt_org_meta(org_id, epoch(key_epoch)?, meta_json)
+            .map_err(js_error)
+    }
+
+    #[wasm_bindgen(js_name = encryptGroupMeta)]
+    pub fn encrypt_group_meta(
+        &self,
+        org_id: &str,
+        group_id: &str,
+        key_epoch: f64,
+        meta_json: &str,
+    ) -> Result<String, JsValue> {
+        self.inner
+            .encrypt_group_meta(org_id, group_id, epoch(key_epoch)?, meta_json)
             .map_err(js_error)
     }
 }

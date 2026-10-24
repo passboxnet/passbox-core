@@ -33,6 +33,8 @@ async function unlockedClient() {
   );
   const keyring = core.Keyring.create(keys, account.accountId);
   const encryptedAccountKey = keyring.encryptedAccountKey ?? "";
+  // Key pairs exist already, so unlocking makes no extra key requests.
+  keyring.createAccountKeys(1);
   const session = JSON.parse(keyring.exportSession()) as { sessionKey: string; blob: string };
   keys.free();
   keyring.free();
