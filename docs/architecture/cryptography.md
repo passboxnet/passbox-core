@@ -70,6 +70,12 @@ The extension keeps the session key, the encrypted blob and the server session t
 
 Code: [`crates/core/src/keyring.rs`](../../crates/core/src/keyring.rs), [`apps/extension/src/background/vault.ts`](../../apps/extension/src/background/vault.ts).
 
+## Export files (implemented)
+
+Encrypted exports (`.pbx-export`) use a key derived from a password chosen for the file: `HKDF-SHA256(Argon2id(password, salt, params), "passbox/v1/export")`, with the account's `KdfParams` bounds (minimum enforced on decryption, plus a maximum). The JSON header (format, version, KDF algorithm and parameters, salt, cipher) is the associated data of the XChaCha20-Poly1305 envelope. See [docs/import-export.md](../import-export.md).
+
+Code: [`crates/core/src/export.rs`](../../crates/core/src/export.rs).
+
 ## Passkeys (implemented)
 
 Passbox acts as a WebAuthn authenticator for ES256 (ECDSA P-256 with SHA-256, COSE algorithm −7, RustCrypto `p256`):
