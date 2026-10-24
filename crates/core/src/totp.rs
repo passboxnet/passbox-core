@@ -228,6 +228,52 @@ impl Totp {
         )
     }
 
+    /// Checks a code typed by a user against the codes of the time steps
+    /// from `unix_time / period - window` to `unix_time / period + window`
+    /// and returns the matching time step, so callers can reject a step that
+    /// was used before (replay protection). Spaces in `code` are ignored.
+    /// Every candidate is compared in constant time.
+    pub fn verify(&self, code: &str, unix_time: u64, window: u64) -> Option<u64> {
+        let code: String = code.chars().filter(|c| !c.is_whitespace()).collect();
+        let current = unix_time / self.period;
+        let mut matched = None;
+        for step in current.saturating_sub(window)..=current.saturating_add(window) {
+            let expected = self.generate(step.saturating_mul(self.period));
+            if constant_time_eq(expected.as_bytes(), code.as_bytes()) && matched.is_none() {
+                matched = Some(step);
+            }
+        }
+        matched
+    }
+
+    /// Returns an `otpauth://totp/` URI for authenticator apps (QR codes),
+    /// labelled `issuer:account`.
+    pub fn to_uri(&self) -> String {
+        let issuer = self.issuer.as_deref().unwrap_or_default();
+        let account = self.account.as_deref().unwrap_or_default();
+        let label = match (issuer.is_empty(), account.is_empty()) {
+            (false, false) => format!("{}:{}", percent_encode(issuer), percent_encode(account)),
+            (false, true) => percent_encode(issuer),
+            _ => percent_encode(account),
+        };
+        let algorithm = match self.algorithm {
+            OtpAlgorithm::Sha1 => "SHA1",
+            OtpAlgorithm::Sha256 => "SHA256",
+            OtpAlgorithm::Sha512 => "SHA512",
+        };
+        let mut uri = format!(
+            "otpauth://totp/{label}?secret={}&algorithm={algorithm}&digits={}&period={}",
+            self.secret_base32(),
+            self.digits,
+            self.period
+        );
+        if !issuer.is_empty() {
+            uri.push_str("&issuer=");
+            uri.push_str(&percent_encode(issuer));
+        }
+        uri
+    }
+
     /// Seconds until the code generated at `unix_time` expires.
     pub fn seconds_remaining(&self, unix_time: u64) -> u64 {
         self.period - (unix_time % self.period)
@@ -272,6 +318,27 @@ fn decode_base32(input: &str) -> Result<Vec<u8>> {
     BASE32_NOPAD
         .decode(cleaned.as_bytes())
         .map_err(|_| Error::InvalidOtp("secret is not valid Base32"))
+}
+
+/// Compares two byte strings without an early exit on the first difference.
+pub(crate) fn constant_time_eq(a: &[u8], b: &[u8]) -> bool {
+    if a.len() != b.len() {
+        return false;
+    }
+    a.iter().zip(b).fold(0u8, |acc, (x, y)| acc | (x ^ y)) == 0
+}
+
+/// Percent-encodes everything except unreserved characters (RFC 3986).
+fn percent_encode(input: &str) -> String {
+    let mut out = String::with_capacity(input.len());
+    for byte in input.bytes() {
+        if byte.is_ascii_alphanumeric() || matches!(byte, b'-' | b'.' | b'_' | b'~' | b'@') {
+            out.push(byte as char);
+        } else {
+            out.push_str(&format!("%{byte:02X}"));
+        }
+    }
+    out
 }
 
 fn percent_decode(input: &str) -> Result<String> {
@@ -438,6 +505,40 @@ mod tests {
         let back: Totp = serde_json::from_str(&json).unwrap();
         assert_eq!(back, totp);
         assert!(!format!("{totp:?}").contains("JBSWY3DPEHPK3PXP"));
+    }
+
+    #[test]
+    fn verifies_codes_within_the_window() {
+        let totp = Totp::with_options(SEED_SHA1.to_vec(), OtpAlgorithm::Sha1, 8, 30).unwrap();
+        // 1111111109 is in step 37037036; its code is 07081804 (RFC 6238).
+        assert_eq!(totp.verify("07081804", 1111111109, 1), Some(37037036));
+        assert_eq!(totp.verify("0708 1804", 1111111109 + 30, 1), Some(37037036));
+        assert_eq!(totp.verify("07081804", 1111111109 - 30, 1), Some(37037036));
+        assert_eq!(totp.verify("07081804", 1111111109 + 60, 1), None);
+        assert_eq!(totp.verify("07081804", 1111111109 + 30, 0), None);
+        assert_eq!(totp.verify("07081805", 1111111109, 1), None);
+        assert_eq!(totp.verify("", 1111111109, 1), None);
+        assert_eq!(totp.verify("0708180", 1111111109, 1), None);
+        // Time zero does not underflow.
+        let code = totp.generate(0);
+        assert_eq!(totp.verify(&code, 0, 1), Some(0));
+    }
+
+    #[test]
+    fn builds_uris_that_parse_back() {
+        let mut totp = Totp::from_base32("JBSWY3DPEHPK3PXP").unwrap();
+        totp.issuer = Some("Passbox (Work)".into());
+        totp.account = Some("anna+test@example.com".into());
+        let uri = totp.to_uri();
+        assert_eq!(
+            uri,
+            "otpauth://totp/Passbox%20%28Work%29:anna%2Btest@example.com?secret=JBSWY3DPEHPK3PXP\
+             &algorithm=SHA1&digits=6&period=30&issuer=Passbox%20%28Work%29"
+        );
+        let parsed = Totp::from_uri(&uri).unwrap();
+        assert_eq!(parsed.issuer.as_deref(), Some("Passbox (Work)"));
+        assert_eq!(parsed.account.as_deref(), Some("anna+test@example.com"));
+        assert_eq!(parsed.generate(59), totp.generate(59));
     }
 
     #[test]

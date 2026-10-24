@@ -31,6 +31,8 @@ pub enum Error {
     InvalidData(String),
     #[error("invalid generator options: {0}")]
     InvalidGeneratorOptions(&'static str),
+    #[error("WebAuthn verification failed: {0}")]
+    WebAuthn(&'static str),
 }
 
 pub type Result<T> = core::result::Result<T, Error>;

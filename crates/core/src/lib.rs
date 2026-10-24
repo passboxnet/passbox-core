@@ -21,5 +21,7 @@ pub mod random;
 pub mod secret_key;
 pub mod strength;
 pub mod totp;
+pub mod two_factor;
+pub mod webauthn;
 
 pub use error::{Error, Result};
