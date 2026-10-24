@@ -10,12 +10,13 @@
 //! Build with `pnpm --filter @passbox/core-wasm build`.
 
 use passbox_core::aead::{KEY_LEN, SymmetricKey};
-use passbox_core::generator::{self, PasswordOptions};
+use passbox_core::generator::{self, PassphraseOptions, PasswordOptions};
 use passbox_core::kdf::{self, KdfParams, MasterKeys as CoreMasterKeys};
 use passbox_core::keyring::Keyring as CoreKeyring;
 use passbox_core::opaque::{ClientLoginFlow, ClientRegistrationFlow};
 use passbox_core::passkey::{self, Flags};
 use passbox_core::secret_key::SecretKey;
+use passbox_core::strength;
 use passbox_core::totp::Totp;
 use passbox_core::{Error, encoding, id};
 use wasm_bindgen::prelude::*;
@@ -50,6 +51,41 @@ fn revision(value: f64) -> Result<u64, JsValue> {
 pub fn generate_password(options_json: &str) -> Result<String, JsValue> {
     let options: PasswordOptions = serde_json::from_str(options_json).map_err(json_error)?;
     generator::generate_password(&options).map_err(js_error)
+}
+
+/// Generates a word passphrase. `options_json` is a `PassphraseOptions`
+/// object (`words`, `separator`, `capitalize`, `includeDigit`).
+#[wasm_bindgen(js_name = generatePassphrase)]
+pub fn generate_passphrase(options_json: &str) -> Result<String, JsValue> {
+    let options: PassphraseOptions = serde_json::from_str(options_json).map_err(json_error)?;
+    generator::generate_passphrase(&options).map_err(js_error)
+}
+
+/// Estimates password strength. `user_inputs_json` is a JSON array of
+/// strings an attacker would try first (email, name). Returns JSON:
+/// `{"score":0-4,"bits":n,"warning":code|null,"suggestions":[codes],
+/// "acceptableMasterPassword":bool}`.
+#[wasm_bindgen(js_name = estimateStrength)]
+pub fn estimate_strength(password: &str, user_inputs_json: &str) -> Result<String, JsValue> {
+    let inputs: Vec<String> = serde_json::from_str(user_inputs_json).map_err(json_error)?;
+    let inputs: Vec<&str> = inputs.iter().map(String::as_str).collect();
+    let estimate = strength::estimate(password, &inputs);
+    Ok(serde_json::json!({
+        "score": estimate.score,
+        "bits": estimate.bits,
+        "warning": estimate.warning,
+        "suggestions": estimate.suggestions,
+        "acceptableMasterPassword": strength::is_acceptable_master_password(password, &estimate),
+    })
+    .to_string())
+}
+
+/// Checks a one-time password field: `undefined` when fine or empty,
+/// `"one_time_code"` for a single code instead of the setup key, or
+/// `"invalid"`.
+#[wasm_bindgen(js_name = totpInputProblem)]
+pub fn totp_input_problem(input: &str) -> Option<String> {
+    Totp::input_problem(input).map(str::to_owned)
 }
 
 /// Generates a new Secret Key in display format.

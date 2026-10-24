@@ -78,6 +78,68 @@ pub fn generate_password(options: &PasswordOptions) -> Result<String> {
     Ok(chars.into_iter().collect())
 }
 
+/// Options for [`generate_passphrase`].
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(default, rename_all = "camelCase")]
+pub struct PassphraseOptions {
+    /// Number of words, 3 to 20. Each adds about 12.9 bits.
+    pub words: usize,
+    pub separator: String,
+    /// Capitalize the first letter of every word.
+    pub capitalize: bool,
+    /// Append a random digit to one random word.
+    pub include_digit: bool,
+}
+
+impl Default for PassphraseOptions {
+    fn default() -> Self {
+        Self {
+            words: 5,
+            separator: "-".to_owned(),
+            capitalize: false,
+            include_digit: false,
+        }
+    }
+}
+
+const WORDLIST: &str = include_str!("../wordlists/eff_large.txt");
+
+/// Generates a passphrase from the EFF large word list: easy to type on a
+/// phone or TV and to read out.
+pub fn generate_passphrase(options: &PassphraseOptions) -> Result<String> {
+    if !(3..=20).contains(&options.words) {
+        return Err(Error::InvalidGeneratorOptions(
+            "a passphrase has 3 to 20 words",
+        ));
+    }
+    if options.separator.chars().count() > 3 {
+        return Err(Error::InvalidGeneratorOptions(
+            "the separator is at most 3 characters",
+        ));
+    }
+    let list: Vec<&str> = WORDLIST.lines().collect();
+    let bound = u32::try_from(list.len()).expect("the word list is small");
+    let mut words = Vec::with_capacity(options.words);
+    for _ in 0..options.words {
+        let word = list[random::below(bound)? as usize];
+        words.push(if options.capitalize {
+            let mut chars = word.chars();
+            chars
+                .next()
+                .map(|first| first.to_uppercase().chain(chars).collect())
+                .unwrap_or_default()
+        } else {
+            word.to_owned()
+        });
+    }
+    if options.include_digit {
+        let index = random::below(u32::try_from(words.len()).expect("at most 20 words"))? as usize;
+        let digits: Vec<char> = DIGITS.chars().collect();
+        words[index].push(pick(&digits)?);
+    }
+    Ok(words.join(&options.separator))
+}
+
 /// Generates a numeric PIN of the given length.
 pub fn generate_pin(length: usize) -> Result<String> {
     if !(4..=64).contains(&length) {
@@ -163,5 +225,36 @@ mod tests {
         let options: PasswordOptions = serde_json::from_str(r#"{"length":32}"#).unwrap();
         assert_eq!(options.length, 32);
         assert!(options.symbols);
+    }
+
+    #[test]
+    fn passphrases() {
+        let phrase = generate_passphrase(&PassphraseOptions::default()).unwrap();
+        let words: Vec<&str> = phrase.split('-').collect();
+        assert!(words.len() >= 5, "{phrase}");
+        assert_eq!(WORDLIST.lines().count(), 7776);
+
+        let phrase = generate_passphrase(&PassphraseOptions {
+            words: 4,
+            separator: " ".into(),
+            capitalize: true,
+            include_digit: true,
+        })
+        .unwrap();
+        let words: Vec<&str> = phrase.split(' ').collect();
+        assert_eq!(words.len(), 4);
+        assert!(words.iter().all(|w| w.starts_with(char::is_uppercase)));
+        assert_eq!(phrase.chars().filter(char::is_ascii_digit).count(), 1);
+        assert!(crate::strength::estimate(&phrase, &[]).score >= 3);
+
+        for words in [2, 21] {
+            assert!(
+                generate_passphrase(&PassphraseOptions {
+                    words,
+                    ..Default::default()
+                })
+                .is_err()
+            );
+        }
     }
 }

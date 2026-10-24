@@ -107,6 +107,23 @@ impl Totp {
         }
     }
 
+    /// Checks what a user typed into a one-time password field, so apps can
+    /// explain mistakes before saving. Returns `None` for valid (or empty)
+    /// input, `Some("one_time_code")` when it looks like a single 6 to 8
+    /// digit code instead of the setup key, and `Some("invalid")` otherwise.
+    pub fn input_problem(input: &str) -> Option<&'static str> {
+        let compact: String = input.chars().filter(|c| !c.is_whitespace()).collect();
+        if compact.is_empty() {
+            None
+        } else if (6..=8).contains(&compact.len()) && compact.chars().all(|c| c.is_ascii_digit()) {
+            Some("one_time_code")
+        } else if Self::parse(input).is_err() {
+            Some("invalid")
+        } else {
+            None
+        }
+    }
+
     /// Parses an `otpauth://` URI or a Base32 secret (including `steam://`).
     pub fn parse(input: &str) -> Result<Self> {
         if input.trim_start().starts_with("otpauth://") {
@@ -421,5 +438,23 @@ mod tests {
         let back: Totp = serde_json::from_str(&json).unwrap();
         assert_eq!(back, totp);
         assert!(!format!("{totp:?}").contains("JBSWY3DPEHPK3PXP"));
+    }
+
+    #[test]
+    fn input_problems() {
+        assert_eq!(Totp::input_problem(""), None);
+        assert_eq!(Totp::input_problem("  "), None);
+        assert_eq!(Totp::input_problem("482913"), Some("one_time_code"));
+        assert_eq!(Totp::input_problem("234 567"), Some("one_time_code"));
+        assert_eq!(Totp::input_problem("not a key!"), Some("invalid"));
+        assert_eq!(Totp::input_problem("JBSW Y3DP EHPK 3PXP"), None);
+        assert_eq!(
+            Totp::input_problem("otpauth://totp/Example:a?secret=JBSWY3DPEHPK3PXP"),
+            None
+        );
+        assert_eq!(
+            Totp::input_problem("otpauth://totp/broken"),
+            Some("invalid")
+        );
     }
 }

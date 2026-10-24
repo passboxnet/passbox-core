@@ -8,7 +8,7 @@
 use std::sync::Arc;
 
 use passbox_client as client;
-use passbox_core::generator::{self, PasswordOptions};
+use passbox_core::generator::{self, PassphraseOptions, PasswordOptions};
 use passbox_core::secret_key::SecretKey;
 use passbox_core::totp::Totp;
 
@@ -170,6 +170,10 @@ pub struct Item {
     pub revision: u64,
     /// Unix milliseconds.
     pub updated_at: i64,
+    /// Unix milliseconds when the item was moved to the trash.
+    pub trashed_at: Option<i64>,
+    /// Earlier passwords, newest first.
+    pub password_history: Vec<PasswordHistoryEntry>,
     pub data: ItemData,
 }
 
@@ -192,6 +196,8 @@ pub struct VaultHealth {
     pub reused: Vec<Vec<String>>,
     pub insecure_urls: Vec<String>,
     pub without_totp: Vec<String>,
+    /// Analyzed logins without any problem.
+    pub secure: u64,
     pub score: u8,
     pub analyzed: u64,
 }
@@ -201,6 +207,21 @@ pub struct Strength {
     pub score: u8,
     pub label: String,
     pub bits: u32,
+    /// Code for a localized warning, for example `recent_year`,
+    /// `common_password` or `name` (see `passbox_core::strength`).
+    pub warning: Option<String>,
+    /// Codes for localized tips, for example `add_words`.
+    pub suggestions: Vec<String>,
+    /// Good enough for a master password (score ≥ 3 and ≥ 12 characters).
+    pub acceptable_master_password: bool,
+}
+
+/// A password an item had before.
+#[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
+pub struct PasswordHistoryEntry {
+    pub value: String,
+    /// Unix milliseconds when it was replaced.
+    pub replaced_at: i64,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
@@ -342,6 +363,16 @@ fn item_to_ffi(item: client::Item) -> Item {
         vault_id: item.vault_id,
         revision: item.revision,
         updated_at: item.updated_at,
+        trashed_at: item.data.trashed_at(),
+        password_history: item
+            .data
+            .password_history()
+            .into_iter()
+            .map(|e| PasswordHistoryEntry {
+                value: e.value,
+                replaced_at: e.replaced_at,
+            })
+            .collect(),
         data: data_to_ffi(item.data),
     }
 }
@@ -471,8 +502,42 @@ impl PassboxClient {
         Ok(self.inner.update_item(&id, &data_from_ffi(data)?)?)
     }
 
+    /// Items in the trash, most recently trashed first.
+    pub fn trashed_items(&self) -> Result<Vec<Item>> {
+        Ok(self
+            .inner
+            .trashed_items()?
+            .into_iter()
+            .map(item_to_ffi)
+            .collect())
+    }
+
+    /// Moves an item to the trash (restorable for 30 days).
+    pub fn trash_item(&self, id: String) -> Result<()> {
+        Ok(self.inner.trash_item(&id)?)
+    }
+
+    pub fn restore_item(&self, id: String) -> Result<()> {
+        Ok(self.inner.restore_item(&id)?)
+    }
+
+    /// Deletes items trashed more than 30 days ago, or all trashed items
+    /// when `all` is set. Call after unlocking. Returns the number deleted.
+    pub fn purge_trash(&self, all: bool) -> Result<u32> {
+        Ok(u32::try_from(self.inner.purge_trash(all)?).unwrap_or(u32::MAX))
+    }
+
+    /// Permanently deletes an item. Prefer `trash_item`.
     pub fn delete_item(&self, id: String) -> Result<()> {
         Ok(self.inner.delete_item(&id)?)
+    }
+
+    /// Rates a password with the account email as context.
+    pub fn estimate_strength(&self, password: String) -> Result<Strength> {
+        Ok(strength_to_ffi(
+            &password,
+            &self.inner.estimate_strength(&password)?,
+        ))
     }
 
     pub fn create_vault(&self, name: String) -> Result<String> {
@@ -548,6 +613,7 @@ impl PassboxClient {
             reused: h.reused,
             insecure_urls: h.insecure_urls,
             without_totp: h.without_totp,
+            secure: h.secure as u64,
             score: h.score,
             analyzed: h.analyzed as u64,
         })
@@ -594,14 +660,56 @@ pub fn totp_code(uri_or_secret: String, unix_time: u64) -> Result<TotpCode> {
     })
 }
 
-#[uniffi::export]
-pub fn estimate_strength(password: String) -> Strength {
-    let strength = client::security::estimate_strength(&password);
+fn strength_to_ffi(password: &str, strength: &client::security::Strength) -> Strength {
     Strength {
         score: strength.score,
         label: strength.label().to_owned(),
         bits: strength.bits,
+        warning: strength.warning.map(str::to_owned),
+        suggestions: strength
+            .suggestions
+            .iter()
+            .map(|s| (*s).to_owned())
+            .collect(),
+        acceptable_master_password: passbox_core::strength::is_acceptable_master_password(
+            password, strength,
+        ),
     }
+}
+
+/// Rates a password. `user_inputs` are words an attacker would try first,
+/// such as the email address and name.
+#[uniffi::export]
+pub fn estimate_strength(password: String, user_inputs: Vec<String>) -> Strength {
+    let inputs: Vec<&str> = user_inputs.iter().map(String::as_str).collect();
+    strength_to_ffi(
+        &password,
+        &client::security::estimate_strength(&password, &inputs),
+    )
+}
+
+/// Generates a word passphrase (EFF word list), easy to type on phones.
+#[uniffi::export]
+pub fn generate_passphrase(
+    words: u32,
+    separator: String,
+    capitalize: bool,
+    include_digit: bool,
+) -> Result<String> {
+    Ok(generator::generate_passphrase(&PassphraseOptions {
+        words: words as usize,
+        separator,
+        capitalize,
+        include_digit,
+    })?)
+}
+
+/// Checks a one-time password field before saving: `None` when valid or
+/// empty, `one_time_code` when a single code was entered instead of the
+/// setup key, `invalid` otherwise.
+#[uniffi::export]
+pub fn totp_input_problem(input: String) -> Option<String> {
+    Totp::input_problem(&input).map(str::to_owned)
 }
 
 /// Normalizes a Secret Key typed by the user, or fails if it is malformed.
@@ -640,7 +748,19 @@ mod tests {
             24
         );
         assert_eq!(generate_pin(6).unwrap().len(), 6);
-        assert_eq!(estimate_strength("password".into()).score, 0);
+        assert_eq!(estimate_strength("password".into(), vec![]).score, 0);
+        assert!(!estimate_strength("Sommer2024!".into(), vec![]).acceptable_master_password);
+        assert_eq!(
+            generate_passphrase(4, " ".into(), false, false)
+                .unwrap()
+                .split(' ')
+                .count(),
+            4
+        );
+        assert_eq!(
+            totp_input_problem("123456".into()).as_deref(),
+            Some("one_time_code")
+        );
         assert!(normalize_secret_key("nope".into()).is_err());
     }
 

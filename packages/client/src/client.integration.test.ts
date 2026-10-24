@@ -111,6 +111,42 @@ describe.skipIf(!serverUrl)("PassboxClient against a server", () => {
     await expect(resumed.restoreSession({ ...state, accountId: "other" })).rejects.toThrow(/another account/);
   }, 60_000);
 
+  it("keeps password history and a trash shared with other clients", async () => {
+    const client = newClient();
+    await client.signUp(`${core.newId()}@example.com`, "correct horse battery staple");
+    const vault = client.getSnapshot().vaults[0];
+    if (!vault) throw new Error("no vault");
+    const data = newItemData("login", "Bank");
+    data.fields = data.fields.map((f) => (f.id === FIELD.password ? { ...f, value: "first" } : f));
+    // Keys from newer clients survive.
+    const id = await client.createItem(vault.id, { ...data, futureField: { x: 1 } } as typeof data);
+
+    const stored = () =>
+      client
+        .getSnapshot()
+        .items.concat(client.getSnapshot().trash)
+        .find((i) => i.id === id);
+    const current = stored()?.data ?? data;
+    await client.updateItem(id, {
+      ...current,
+      fields: current.fields.map((f) => (f.id === FIELD.password ? { ...f, value: "second" } : f)),
+    });
+    await client.updateItem(id, { ...(stored()?.data ?? data), title: "My bank", passwordHistory: [] });
+    expect(stored()?.data.passwordHistory?.map((e) => e.value)).toEqual(["first"]);
+    expect((stored()?.data as unknown as { futureField?: unknown } | undefined)?.futureField).toEqual({ x: 1 });
+
+    await client.trashItem(id);
+    expect(client.getSnapshot().items).toHaveLength(0);
+    expect(client.getSnapshot().trash.map((i) => i.id)).toEqual([id]);
+    expect(client.health().analyzed).toBe(0);
+    expect(await client.purgeTrash()).toBe(0);
+    await client.restoreItem(id);
+    expect(client.getSnapshot().items.map((i) => i.data.title)).toEqual(["My bank"]);
+    await client.trashItem(id);
+    expect(await client.purgeTrash(true)).toBe(1);
+    expect(client.getSnapshot().trash).toHaveLength(0);
+  }, 30_000);
+
   it("rejects a wrong Secret Key", async () => {
     const email = `${core.newId()}@example.com`;
     await newClient().signUp(email, "pw-123456");

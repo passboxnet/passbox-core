@@ -18,9 +18,12 @@ export {
   type ItemData,
   type ItemField,
   newItemData,
+  PASSWORD_HISTORY_LEN,
   type Passkey,
+  type PasswordHistoryEntry,
   parseItemData,
   parseVaultMeta,
+  TRASH_RETENTION_MS,
   templateFields,
   type VaultMeta,
 } from "./items";
@@ -30,6 +33,7 @@ export {
   estimateStrength,
   type ItemLike,
   type Strength,
+  type StrengthCore,
   type StrengthScore,
   type VaultHealth,
 } from "./security";

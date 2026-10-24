@@ -19,10 +19,14 @@ use crate::api::{
     AccountEvent, Api, HttpTransport, NewVault, SessionInfo, SyncItem, SyncResponse, SyncVault,
     Transport,
 };
-use crate::model::{DeviceAccount, Item, ItemData, Vault};
+use crate::model::{
+    DeviceAccount, Item, ItemData, PASSWORD_HISTORY_LEN, PasswordHistoryEntry, TRASH_RETENTION_MS,
+    Vault, field,
+};
 use crate::security::{VaultHealth, analyze_vault};
 use crate::store::{ACCOUNT_KEY, CACHE_KEY, Store};
 use crate::{Error, Result};
+use passbox_core::strength::{self, Strength};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Status {
@@ -154,10 +158,27 @@ impl Client {
     }
 
     /// Items sorted by title.
+    /// Items sorted by title, without those in the trash.
     pub fn items(&self) -> Result<Vec<Item>> {
+        self.items_where(|item| item.data.trashed_at().is_none())
+    }
+
+    /// Items in the trash, most recently trashed first.
+    pub fn trashed_items(&self) -> Result<Vec<Item>> {
+        let mut items = self.items_where(|item| item.data.trashed_at().is_some())?;
+        items.sort_by_key(|i| std::cmp::Reverse(i.data.trashed_at()));
+        Ok(items)
+    }
+
+    fn items_where(&self, keep: impl Fn(&Item) -> bool) -> Result<Vec<Item>> {
         let guard = self.lock_session();
         let session = guard.as_ref().ok_or(Error::Locked)?;
-        let mut items: Vec<Item> = session.items.values().cloned().collect();
+        let mut items: Vec<Item> = session
+            .items
+            .values()
+            .filter(|i| keep(i))
+            .cloned()
+            .collect();
         items.sort_by_key(|i| i.data.title.to_lowercase());
         Ok(items)
     }
@@ -179,7 +200,14 @@ impl Client {
     }
 
     pub fn health(&self) -> Result<VaultHealth> {
-        Ok(analyze_vault(&self.items()?))
+        let email = self.device_account()?.map(|a| a.email).unwrap_or_default();
+        Ok(analyze_vault(&self.items()?, &[email.as_str()]))
+    }
+
+    /// Rates a password, using the account email as context.
+    pub fn estimate_strength(&self, password: &str) -> Result<Strength> {
+        let email = self.device_account()?.map(|a| a.email).unwrap_or_default();
+        Ok(strength::estimate(password, &[email.as_str()]))
     }
 
     // --- Account -----------------------------------------------------------------
@@ -563,12 +591,70 @@ impl Client {
         Ok(item_id)
     }
 
-    /// Saves a new version of an item.
+    /// Saves a new version of an item. A replaced password is added to the
+    /// item's password history; the history and trash state always come
+    /// from the stored version, not from `data`.
     pub fn update_item(&self, item_id: &str, data: &ItemData) -> Result<()> {
         let current = self.item(item_id)?;
-        self.write_item(&current.vault_id, item_id, current.revision + 1, data)
+        let mut data = data.clone();
+        let mut history = current.data.password_history();
+        if let Some(old) = current.data.field(field::PASSWORD)
+            && data.field(field::PASSWORD) != Some(old)
+        {
+            history.insert(
+                0,
+                PasswordHistoryEntry {
+                    value: old.to_owned(),
+                    replaced_at: now_ms(),
+                },
+            );
+            history.truncate(PASSWORD_HISTORY_LEN);
+        }
+        data.set_password_history(&history);
+        data.set_trashed_at(current.data.trashed_at());
+        self.write_item(&current.vault_id, item_id, current.revision + 1, &data)
     }
 
+    /// Moves an item to the trash. It disappears from [`Client::items`] and
+    /// autofill, and can be restored for 30 days.
+    pub fn trash_item(&self, item_id: &str) -> Result<()> {
+        self.set_trashed(item_id, Some(now_ms()))
+    }
+
+    /// Restores an item from the trash.
+    pub fn restore_item(&self, item_id: &str) -> Result<()> {
+        self.set_trashed(item_id, None)
+    }
+
+    fn set_trashed(&self, item_id: &str, at: Option<i64>) -> Result<()> {
+        let current = self.item(item_id)?;
+        let mut data = current.data;
+        data.set_trashed_at(at);
+        self.write_item(&current.vault_id, item_id, current.revision + 1, &data)
+    }
+
+    /// Permanently deletes items that have been in the trash for more than
+    /// 30 days (or all trashed items when `all` is set). Returns how many
+    /// were deleted. Items changed on another device in the meantime are
+    /// skipped.
+    pub fn purge_trash(&self, all: bool) -> Result<usize> {
+        let cutoff = now_ms() - TRASH_RETENTION_MS;
+        let mut deleted = 0;
+        for item in self.trashed_items()? {
+            let expired = item.data.trashed_at().is_some_and(|at| at <= cutoff);
+            if !(all || expired) {
+                continue;
+            }
+            match self.delete_item(&item.id) {
+                Ok(()) => deleted += 1,
+                Err(Error::Conflict | Error::NotFound(_)) => {}
+                Err(e) => return Err(e),
+            }
+        }
+        Ok(deleted)
+    }
+
+    /// Permanently deletes an item on all devices. Prefer [`Client::trash_item`].
     pub fn delete_item(&self, item_id: &str) -> Result<()> {
         let current = self.item(item_id)?;
         let result =
@@ -752,4 +838,10 @@ fn apply_delta(session: &mut Session, delta: SyncResponse) {
         }
     }
     session.cache.cursor = session.cache.cursor.max(delta.cursor);
+}
+
+fn now_ms() -> i64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_or(0, |d| i64::try_from(d.as_millis()).unwrap_or(i64::MAX))
 }

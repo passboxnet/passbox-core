@@ -63,6 +63,23 @@ pub mod field {
     pub const CARD_CODE: &str = "card_code";
 }
 
+const TRASHED_AT: &str = "trashedAt";
+const PASSWORD_HISTORY: &str = "passwordHistory";
+
+/// Items stay in the trash this long before clients delete them.
+pub const TRASH_RETENTION_MS: i64 = 30 * 24 * 60 * 60 * 1000;
+/// Number of earlier passwords kept per item.
+pub const PASSWORD_HISTORY_LEN: usize = 20;
+
+/// A password the item had before, and when it was replaced.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PasswordHistoryEntry {
+    pub value: String,
+    /// Unix milliseconds.
+    pub replaced_at: i64,
+}
+
 /// Plaintext item, version 1.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ItemData {
@@ -149,6 +166,40 @@ impl ItemData {
         }
     }
 
+    /// When the item was moved to the trash (Unix milliseconds), if it is
+    /// there. Stored as `trashedAt` inside the encrypted item.
+    pub fn trashed_at(&self) -> Option<i64> {
+        self.extra.get(TRASHED_AT).and_then(Value::as_i64)
+    }
+
+    pub fn set_trashed_at(&mut self, at: Option<i64>) {
+        match at {
+            Some(at) => {
+                self.extra.insert(TRASHED_AT.into(), Value::from(at));
+            }
+            None => {
+                self.extra.remove(TRASHED_AT);
+            }
+        }
+    }
+
+    /// Earlier passwords, newest first. Stored as `passwordHistory`.
+    pub fn password_history(&self) -> Vec<PasswordHistoryEntry> {
+        self.extra
+            .get(PASSWORD_HISTORY)
+            .cloned()
+            .and_then(|v| serde_json::from_value(v).ok())
+            .unwrap_or_default()
+    }
+
+    pub fn set_password_history(&mut self, history: &[PasswordHistoryEntry]) {
+        if history.is_empty() {
+            self.extra.remove(PASSWORD_HISTORY);
+        } else if let Ok(value) = serde_json::to_value(history) {
+            self.extra.insert(PASSWORD_HISTORY.into(), value);
+        }
+    }
+
     pub fn from_json(json: &str) -> crate::Result<Self> {
         let data: Self = serde_json::from_str(json)?;
         if data.v != 1 {
@@ -212,5 +263,26 @@ mod tests {
         assert_eq!(item.field(field::PASSWORD), Some("pw"));
         assert_eq!(item.field("pin"), Some("1234"));
         assert_eq!(item.field(field::USERNAME), None);
+    }
+
+    #[test]
+    fn trash_and_history_live_in_the_item() {
+        let mut item = ItemData::new(ItemCategory::Login, "Mail");
+        assert_eq!(item.trashed_at(), None);
+        item.set_trashed_at(Some(1_700_000_000_000));
+        item.set_password_history(&[PasswordHistoryEntry {
+            value: "old".into(),
+            replaced_at: 1,
+        }]);
+        let json: Value = serde_json::to_value(&item).unwrap();
+        assert_eq!(json["trashedAt"], 1_700_000_000_000_i64);
+        assert_eq!(json["passwordHistory"][0]["replacedAt"], 1);
+        let back = ItemData::from_json(&json.to_string()).unwrap();
+        assert_eq!(back.trashed_at(), Some(1_700_000_000_000));
+        assert_eq!(back.password_history()[0].value, "old");
+        let mut back = back;
+        back.set_trashed_at(None);
+        back.set_password_history(&[]);
+        assert!(back.extra.is_empty());
     }
 }

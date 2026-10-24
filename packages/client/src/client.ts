@@ -8,7 +8,16 @@ import {
   type SyncResponse,
 } from "@passbox/api-client";
 import type * as Core from "@passbox/core-wasm";
-import { type ItemData, parseItemData, parseVaultMeta } from "./items";
+import {
+  FIELD,
+  fieldValue,
+  type ItemData,
+  PASSWORD_HISTORY_LEN,
+  parseItemData,
+  parseVaultMeta,
+  TRASH_RETENTION_MS,
+} from "./items";
+import { analyzeVault, estimateStrength, type Strength, type VaultHealth } from "./security";
 import type { KeyValueStorage } from "./storage";
 
 type CoreModule = typeof Core;
@@ -59,7 +68,10 @@ export interface ClientSnapshot {
   status: ClientStatus;
   email: string | undefined;
   vaults: Vault[];
+  /** Items sorted by title, without those in the trash. */
   items: Item[];
+  /** Items in the trash, most recently trashed first. */
+  trash: Item[];
   /** Items or vaults that could not be decrypted (tampered or unsupported). */
   errors: string[];
 }
@@ -152,7 +164,12 @@ export class PassboxClient {
       status: this.keyring ? "unlocked" : account ? "locked" : "signed-out",
       email: account?.email,
       vaults: [...this.vaults.values()].sort((a, b) => a.name.localeCompare(b.name)),
-      items: [...this.items.values()].sort((a, b) => a.data.title.localeCompare(b.data.title)),
+      items: [...this.items.values()]
+        .filter((item) => item.data.trashedAt === undefined)
+        .sort((a, b) => a.data.title.localeCompare(b.data.title)),
+      trash: [...this.items.values()]
+        .filter((item) => item.data.trashedAt !== undefined)
+        .sort((a, b) => (b.data.trashedAt ?? 0) - (a.data.trashedAt ?? 0)),
       errors: [...this.errors.values()],
     };
   }
@@ -495,13 +512,82 @@ export class PassboxClient {
     return id;
   }
 
-  /** Saves a new version of an existing item. */
+  /**
+   * Saves a new version of an existing item. A replaced password is added
+   * to the password history; history and trash state always come from the
+   * stored version, not from `data`.
+   */
   async updateItem(id: string, data: ItemData): Promise<void> {
     const item = this.items.get(id);
     if (!item) throw new Error("unknown item");
-    await this.writeItem(item.vaultId, id, item.revision + 1, data);
+    const { passwordHistory: _ignored, trashedAt: _trashed, ...rest } = data;
+    const next: ItemData = rest;
+    const oldPassword = fieldValue(item.data, FIELD.password);
+    let history = item.data.passwordHistory ?? [];
+    if (oldPassword !== undefined && fieldValue(data, FIELD.password) !== oldPassword) {
+      history = [{ value: oldPassword, replacedAt: Date.now() }, ...history].slice(0, PASSWORD_HISTORY_LEN);
+    }
+    if (history.length > 0) next.passwordHistory = history;
+    if (item.data.trashedAt !== undefined) next.trashedAt = item.data.trashedAt;
+    await this.writeItem(item.vaultId, id, item.revision + 1, next);
   }
 
+  /** Moves an item to the trash. It can be restored for 30 days. */
+  async trashItem(id: string): Promise<void> {
+    await this.setTrashed(id, Date.now());
+  }
+
+  /** Restores an item from the trash. */
+  async restoreItem(id: string): Promise<void> {
+    await this.setTrashed(id, undefined);
+  }
+
+  private async setTrashed(id: string, at: number | undefined) {
+    const item = this.items.get(id);
+    if (!item) throw new Error("unknown item");
+    const { trashedAt: _previous, ...data } = item.data;
+    await this.writeItem(item.vaultId, id, item.revision + 1, at === undefined ? data : { ...data, trashedAt: at });
+  }
+
+  /**
+   * Permanently deletes items that have been in the trash for more than 30
+   * days, or every trashed item when `all` is set. Items changed on another
+   * device meanwhile are skipped. Returns the number deleted.
+   */
+  async purgeTrash(all = false): Promise<number> {
+    const cutoff = Date.now() - TRASH_RETENTION_MS;
+    let deleted = 0;
+    for (const item of this.snapshot.trash) {
+      if (!all && (item.data.trashedAt ?? Number.POSITIVE_INFINITY) > cutoff) continue;
+      try {
+        await this.deleteItem(item.id);
+        deleted++;
+      } catch (error) {
+        if (!(error instanceof ConflictError)) throw error;
+      }
+    }
+    return deleted;
+  }
+
+  /**
+   * Rates a password with the account email (and `extraInputs`, such as an
+   * email typed during sign-up) as context.
+   */
+  estimateStrength(password: string, extraInputs: readonly string[] = []): Strength {
+    return estimateStrength(this.core, password, [...this.strengthContext(), ...extraInputs]);
+  }
+
+  /** Watchtower analysis of the items outside the trash. */
+  health(): VaultHealth {
+    return analyzeVault(this.core, this.snapshot.items, this.strengthContext());
+  }
+
+  private strengthContext(): string[] {
+    const account = this.deviceAccount;
+    return account ? [account.email] : [];
+  }
+
+  /** Permanently deletes an item on all devices. Prefer `trashItem`. */
   async deleteItem(id: string): Promise<void> {
     const item = this.items.get(id);
     if (!item) return;

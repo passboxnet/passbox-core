@@ -18,6 +18,7 @@ pub mod opaque;
 pub mod passkey;
 pub mod random;
 pub mod secret_key;
+pub mod strength;
 pub mod totp;
 
 pub use error::{Error, Result};

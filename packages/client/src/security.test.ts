@@ -1,19 +1,38 @@
-import { describe, expect, it, vi } from "vitest";
+import { readFile } from "node:fs/promises";
+import { createRequire } from "node:module";
+import * as core from "@passbox/core-wasm";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 import { FIELD, newItemData } from "./items";
 import { analyzeVault, breachCount, estimateStrength } from "./security";
 
+beforeAll(async () => {
+  const require = createRequire(import.meta.url);
+  const wasmPath = require.resolve("@passbox/core-wasm").replace(/\.js$/, "_bg.wasm");
+  await core.default({ module_or_path: await readFile(wasmPath) });
+});
+
 describe("estimateStrength", () => {
+  // Same cases as crates/client/src/security.rs.
   it.each([
     ["", 0],
     ["password", 0],
     ["Passwort!", 0],
-    ["summer2024", 1],
+    ["Sommer2024!", 1],
     ["aaaaaaaaaaaa", 0],
-    ["Tr0ub4dor&3x", 3],
+    ["Tr0ub4dor&3", 2],
     ["correct-horse-battery-staple", 4],
     ["9x$Lq!2vR#pW7zK@", 4],
   ])("rates %j as score %i", (password, score) => {
-    expect(estimateStrength(password).score).toBe(score);
+    expect(estimateStrength(core, password).score).toBe(score);
+  });
+
+  it("explains weak passwords and gates master passwords", () => {
+    const weak = estimateStrength(core, "Sommer2024!");
+    expect(weak.label).toBe("Weak");
+    expect(weak.warning).toBe("recent_year");
+    expect(weak.acceptableMasterPassword).toBe(false);
+    expect(estimateStrength(core, "michael.doehler", ["michael.doehler@example.com"]).score).toBeLessThanOrEqual(1);
+    expect(estimateStrength(core, "correct-horse-battery-staple").acceptableMasterPassword).toBe(true);
   });
 });
 
@@ -33,23 +52,27 @@ function login(id: string, password: string, url = "https://example.com", totp =
 
 describe("analyzeVault", () => {
   it("finds weak, reused and insecure logins", () => {
-    const health = analyzeVault([
+    const trashed = login("e", "123456", "http://x");
+    trashed.data.trashedAt = 1;
+    const health = analyzeVault(core, [
       login("a", "123456"),
       login("b", "x9$Lq!2vR#pW7zK@"),
       login("c", "x9$Lq!2vR#pW7zK@", "http://intranet.local"),
       login("d", "G7#kP2!mQ9$wX4&z", "https://bank.example", "JBSWY3DPEHPK3PXP"),
       { id: "note", data: newItemData("note", "note") },
+      trashed,
     ]);
     expect(health.analyzed).toBe(4);
     expect(health.weak).toEqual(["a"]);
     expect(health.reused).toEqual([["b", "c"]]);
     expect(health.insecureUrls).toEqual(["c"]);
     expect(health.withoutTotp).toEqual(["a", "b", "c"]);
+    expect(health.secure).toBe(1);
     expect(health.score).toBe(25);
   });
 
   it("scores an empty vault as healthy", () => {
-    expect(analyzeVault([]).score).toBe(100);
+    expect(analyzeVault(core, []).score).toBe(100);
   });
 });
 

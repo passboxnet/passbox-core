@@ -39,6 +39,22 @@ export interface Passkey {
   createdAt: number;
 }
 
+/** A password an item had before. */
+export interface PasswordHistoryEntry {
+  value: string;
+  /** Unix milliseconds when it was replaced. */
+  replacedAt: number;
+}
+
+/** Items stay in the trash this long before clients delete them. */
+export const TRASH_RETENTION_MS = 30 * 24 * 60 * 60 * 1000;
+/** Number of earlier passwords kept per item. */
+export const PASSWORD_HISTORY_LEN = 20;
+
+/**
+ * Item contents. Keys this version does not know are kept as they are
+ * (see `parseItemData`), so data from newer clients survives edits.
+ */
 export interface ItemData {
   v: 1;
   category: ItemCategory;
@@ -49,7 +65,24 @@ export interface ItemData {
   favorite: boolean;
   /** Passkeys of a login. Absent when there are none. */
   passkeys?: Passkey[];
+  /** Unix milliseconds when the item was moved to the trash. */
+  trashedAt?: number;
+  /** Earlier passwords, newest first. Maintained by `PassboxClient.updateItem`. */
+  passwordHistory?: PasswordHistoryEntry[];
 }
+
+const KNOWN_KEYS = new Set([
+  "v",
+  "category",
+  "title",
+  "fields",
+  "notes",
+  "tags",
+  "favorite",
+  "passkeys",
+  "trashedAt",
+  "passwordHistory",
+]);
 
 /** Well-known field IDs used for autofill and display. */
 export const FIELD = {
@@ -124,15 +157,31 @@ function parsePasskey(raw: unknown): Passkey | undefined {
   };
 }
 
-/** Validates decrypted JSON and fills defaults. Throws on unknown versions. */
+function parseHistory(raw: unknown): PasswordHistoryEntry[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter(
+      (e): e is PasswordHistoryEntry =>
+        typeof e?.value === "string" && typeof e?.replacedAt === "number" && Number.isFinite(e.replacedAt),
+    )
+    .map((e) => ({ value: e.value, replacedAt: e.replacedAt }))
+    .slice(0, PASSWORD_HISTORY_LEN);
+}
+
+/**
+ * Validates decrypted JSON and fills defaults. Throws on unknown versions.
+ * Unknown keys are kept unchanged.
+ */
 export function parseItemData(json: string): ItemData {
-  const raw = JSON.parse(json) as Partial<ItemData> & { v?: unknown };
+  const raw = JSON.parse(json) as Partial<ItemData> & { v?: unknown } & Record<string, unknown>;
   if (raw.v !== 1) throw new Error(`unsupported item version ${String(raw.v)}`);
   const fields = Array.isArray(raw.fields) ? raw.fields : [];
   const passkeys = Array.isArray(raw.passkeys)
     ? (raw.passkeys as unknown[]).map(parsePasskey).filter((p): p is Passkey => p !== undefined)
     : [];
+  const unknown = Object.fromEntries(Object.entries(raw).filter(([key]) => !KNOWN_KEYS.has(key)));
   const data: ItemData = {
+    ...unknown,
     v: 1,
     category: CATEGORIES.includes(raw.category as ItemCategory) ? (raw.category as ItemCategory) : "other",
     title: typeof raw.title === "string" ? raw.title : "",
@@ -149,6 +198,9 @@ export function parseItemData(json: string): ItemData {
     favorite: raw.favorite === true,
   };
   if (passkeys.length > 0) data.passkeys = passkeys;
+  if (typeof raw.trashedAt === "number" && Number.isFinite(raw.trashedAt)) data.trashedAt = raw.trashedAt;
+  const history = parseHistory(raw.passwordHistory);
+  if (history.length > 0) data.passwordHistory = history;
   return data;
 }
 
