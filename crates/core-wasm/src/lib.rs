@@ -1368,3 +1368,129 @@ impl DeviceLinkRequest {
         self.0.open(sealed).map_err(js_error)
     }
 }
+
+// --- Organization policies and audit log (wave D) ---------------------------------
+
+/// Policies (D2) and signed client events (D3). The verified policies come
+/// with every `applySharing` result (`view.policies`,
+/// `view.effectivePolicy`); these functions sign new versions and verify
+/// single records.
+#[wasm_bindgen]
+impl Keyring {
+    /// `PUT /api/v1/orgs/{orgId}/policy` body: the next version of the
+    /// organization's policy with `rules_json` (`PolicyRules`), signed by
+    /// this account (owners and admins). Sync first.
+    #[wasm_bindgen(js_name = signOrgPolicy)]
+    pub fn sign_org_policy(
+        &self,
+        org_id: &str,
+        rules_json: &str,
+        now_ms: f64,
+    ) -> Result<String, JsValue> {
+        let rules = from_json(rules_json)?;
+        to_json(
+            &self
+                .inner
+                .sign_org_policy(org_id, &rules, now(now_ms))
+                .map_err(js_error)?,
+        )
+    }
+
+    /// Verifies one policy record (for example from the history) against the
+    /// verified roster without changing pins. Returns `OrgPolicyView` JSON.
+    #[wasm_bindgen(js_name = verifyOrgPolicy)]
+    pub fn verify_org_policy(&self, org_id: &str, record_json: &str) -> Result<String, JsValue> {
+        let record = from_json(record_json)?;
+        to_json(
+            &self
+                .inner
+                .verify_org_policy(org_id, &record)
+                .map_err(js_error)?,
+        )
+    }
+
+    /// The policy in force for an organization (`OrgPolicyView` JSON or
+    /// `null`).
+    #[wasm_bindgen(js_name = orgPolicy)]
+    pub fn org_policy(&self, org_id: &str) -> Result<String, JsValue> {
+        to_json(&self.inner.org_policy(org_id))
+    }
+
+    /// The combination of every policy this account is bound by.
+    #[wasm_bindgen(js_name = effectivePolicy)]
+    pub fn effective_policy(&self) -> Result<String, JsValue> {
+        to_json(self.inner.effective_policy())
+    }
+
+    /// Signs client events (JSON array of `{ action, vaultId, itemId, field,
+    /// occurredAt }`) for `POST /api/v1/orgs/{orgId}/audit/client-events`.
+    #[wasm_bindgen(js_name = signClientEvents)]
+    pub fn sign_client_events(&self, org_id: &str, events_json: &str) -> Result<String, JsValue> {
+        let events: Vec<passbox_core::audit::ClientEventInput> = from_json(events_json)?;
+        to_json(
+            &self
+                .inner
+                .sign_client_events(org_id, &events)
+                .map_err(js_error)?,
+        )
+    }
+}
+
+/// Checks an exported audit log (JSON array of entries, oldest first).
+/// `anchor` is the hash the first entry must link to ("" for entry 1, the
+/// `head.prunedHash` of the export, or the head of an earlier export);
+/// `undefined` accepts any. Returns `ChainCheck` JSON.
+#[wasm_bindgen(js_name = verifyAuditChain)]
+pub fn verify_audit_chain(records_json: &str, anchor: Option<String>) -> Result<String, JsValue> {
+    let records: Vec<passbox_core::audit::AuditRecord> = from_json(records_json)?;
+    to_json(&passbox_core::audit::verify_chain(
+        &records,
+        anchor.as_deref(),
+    ))
+}
+
+/// Checks the signature of a client-reported audit event against the
+/// account's public bundle. Returns the event as JSON.
+#[wasm_bindgen(js_name = verifyClientEvent)]
+pub fn verify_client_event(
+    bundle: &str,
+    bundle_signature: &str,
+    event: &str,
+    signature: &str,
+) -> Result<String, JsValue> {
+    let bundle =
+        passbox_core::identity::SignedBundle::parse(bundle, bundle_signature).map_err(js_error)?;
+    let event = passbox_core::audit::verify_client_event(
+        &bundle,
+        &passbox_core::audit::SignedClientEvent {
+            event: event.to_owned(),
+            signature: signature.to_owned(),
+        },
+    )
+    .map_err(js_error)?;
+    to_json(&serde_json::json!({
+        "orgId": event.org_id,
+        "accountId": event.account_id,
+        "action": event.action,
+        "vaultId": event.vault_id,
+        "itemId": event.item_id,
+        "field": event.field,
+        "occurredAt": event.occurred_at,
+    }))
+}
+
+/// Whether a share link with this lifetime (days) and view limit (0 = no
+/// limit) is allowed by `rules_json` (`PolicyRules`). Returns `undefined`
+/// if allowed, otherwise the reason.
+#[wasm_bindgen(js_name = shareLinkProblem)]
+pub fn share_link_problem(
+    rules_json: &str,
+    days: u32,
+    max_views: u32,
+) -> Result<Option<String>, JsValue> {
+    let rules: passbox_core::policy::PolicyRules = from_json(rules_json)?;
+    Ok(rules
+        .check_share_link(days, max_views)
+        .err()
+        .map(|e| e.to_string()))
+}
