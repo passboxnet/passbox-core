@@ -492,11 +492,7 @@ pub fn generate_pin(length: u32) -> Result<String> {
 /// The current one-time password for an `otpauth://` URI or Base32 secret.
 #[uniffi::export]
 pub fn totp_code(uri_or_secret: String, unix_time: u64) -> Result<TotpCode> {
-    let totp = if uri_or_secret.starts_with("otpauth://") {
-        Totp::from_uri(&uri_or_secret)?
-    } else {
-        Totp::from_base32(&uri_or_secret)?
-    };
+    let totp = Totp::parse(&uri_or_secret)?;
     Ok(TotpCode {
         code: totp.generate(unix_time),
         seconds_remaining: totp.seconds_remaining(unix_time),

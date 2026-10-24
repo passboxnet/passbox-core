@@ -87,12 +87,7 @@ pub fn default_kdf_params() -> String {
 /// Generates the TOTP code for an `otpauth://` URI or a Base32 secret at `unix_time` seconds.
 #[wasm_bindgen(js_name = totpCode)]
 pub fn totp_code(uri_or_secret: &str, unix_time: f64) -> Result<String, JsValue> {
-    let totp = if uri_or_secret.starts_with("otpauth://") {
-        Totp::from_uri(uri_or_secret)
-    } else {
-        Totp::from_base32(uri_or_secret)
-    }
-    .map_err(js_error)?;
+    let totp = Totp::parse(uri_or_secret).map_err(js_error)?;
     // Time values from JavaScript are non-negative and well within u64 range.
     Ok(totp.generate(unix_time.max(0.0) as u64))
 }

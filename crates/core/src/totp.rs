@@ -31,7 +31,13 @@ pub struct Totp {
     pub period: u64,
     pub issuer: Option<String>,
     pub account: Option<String>,
+    /// Steam Guard codes: 5 characters from Steam's alphabet instead of digits.
+    #[serde(default)]
+    pub steam: bool,
 }
+
+/// Characters of Steam Guard codes.
+const STEAM_ALPHABET: &[u8; 26] = b"23456789BCDFGHJKMNPQRTVWXY";
 
 impl core::fmt::Debug for Totp {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
@@ -42,6 +48,7 @@ impl core::fmt::Debug for Totp {
             .field("period", &self.period)
             .field("issuer", &self.issuer)
             .field("account", &self.account)
+            .field("steam", &self.steam)
             .finish()
     }
 }
@@ -75,14 +82,38 @@ impl Totp {
             period,
             issuer: None,
             account: None,
+            steam: false,
         })
     }
 
     /// Creates a TOTP configuration from a Base32 secret, as shown by most websites.
     ///
     /// Case, spaces, dashes and padding are ignored.
+    ///
+    /// A `steam://` prefix (as used by KeePassXC) marks a Steam Guard secret.
     pub fn from_base32(secret: &str) -> Result<Self> {
-        Self::new(decode_base32(secret)?)
+        let trimmed = secret.trim();
+        match trimmed
+            .get(..8)
+            .filter(|p| p.eq_ignore_ascii_case("steam://"))
+        {
+            Some(_) => {
+                let mut totp = Self::new(decode_base32(&trimmed[8..])?)?;
+                totp.steam = true;
+                totp.issuer = Some("Steam".into());
+                Ok(totp)
+            }
+            None => Self::new(decode_base32(secret)?),
+        }
+    }
+
+    /// Parses an `otpauth://` URI or a Base32 secret (including `steam://`).
+    pub fn parse(input: &str) -> Result<Self> {
+        if input.trim_start().starts_with("otpauth://") {
+            Self::from_uri(input.trim())
+        } else {
+            Self::from_base32(input)
+        }
     }
 
     /// Parses an `otpauth://totp/...` URI.
@@ -104,6 +135,7 @@ impl Totp {
         let mut algorithm = OtpAlgorithm::Sha1;
         let mut digits = 6;
         let mut period = 30;
+        let mut steam = false;
         for pair in query.split('&').filter(|p| !p.is_empty()) {
             let (key, value) = pair.split_once('=').unwrap_or((pair, ""));
             let value = percent_decode(value)?;
@@ -128,6 +160,7 @@ impl Totp {
                         .parse()
                         .map_err(|_| Error::InvalidOtp("invalid period"))?
                 }
+                "encoder" => steam = value.eq_ignore_ascii_case("steam"),
                 _ => {}
             }
         }
@@ -144,6 +177,12 @@ impl Totp {
         )?;
         totp.issuer = issuer.or(label_issuer).filter(|s| !s.is_empty());
         totp.account = Some(account).filter(|s| !s.is_empty());
+        // Steam Guard: marked by `encoder=steam` or the issuer "Steam".
+        totp.steam = steam
+            || totp
+                .issuer
+                .as_deref()
+                .is_some_and(|i| i.eq_ignore_ascii_case("steam"));
         Ok(totp)
     }
 
@@ -154,6 +193,16 @@ impl Totp {
 
     /// Generates the code valid at `unix_time` (seconds since the epoch).
     pub fn generate(&self, unix_time: u64) -> String {
+        if self.steam {
+            let mut value = hotp_binary(&self.secret, unix_time / self.period, OtpAlgorithm::Sha1);
+            return (0..5)
+                .map(|_| {
+                    let c = STEAM_ALPHABET[(value % 26) as usize] as char;
+                    value /= 26;
+                    c
+                })
+                .collect();
+        }
         hotp(
             &self.secret,
             unix_time / self.period,
@@ -170,6 +219,12 @@ impl Totp {
 
 /// Computes an HOTP value (RFC 4226).
 pub fn hotp(secret: &[u8], counter: u64, digits: u32, algorithm: OtpAlgorithm) -> String {
+    let code = hotp_binary(secret, counter, algorithm) % 10u32.pow(digits);
+    format!("{code:0width$}", width = digits as usize)
+}
+
+/// The 31-bit dynamic truncation of the HMAC (RFC 4226, section 5.3).
+fn hotp_binary(secret: &[u8], counter: u64, algorithm: OtpAlgorithm) -> u32 {
     let message = counter.to_be_bytes();
     let digest = match algorithm {
         OtpAlgorithm::Sha1 => mac::<Hmac<Sha1>>(secret, &message),
@@ -177,14 +232,12 @@ pub fn hotp(secret: &[u8], counter: u64, digits: u32, algorithm: OtpAlgorithm) -
         OtpAlgorithm::Sha512 => mac::<Hmac<Sha512>>(secret, &message),
     };
     let offset = (digest[digest.len() - 1] & 0x0f) as usize;
-    let binary = u32::from_be_bytes([
+    u32::from_be_bytes([
         digest[offset] & 0x7f,
         digest[offset + 1],
         digest[offset + 2],
         digest[offset + 3],
-    ]);
-    let code = binary % 10u32.pow(digits);
-    format!("{code:0width$}", width = digits as usize)
+    ])
 }
 
 fn mac<M: Mac + KeyInit>(key: &[u8], message: &[u8]) -> Vec<u8> {
@@ -319,6 +372,38 @@ mod tests {
         let b = Totp::from_base32("JBSWY3DPEHPK3PXP").unwrap();
         assert_eq!(a.generate(1_700_000_000), b.generate(1_700_000_000));
         assert_eq!(a.secret_base32(), "JBSWY3DPEHPK3PXP");
+    }
+
+    #[test]
+    fn steam_guard_codes() {
+        // Reference: the 31-bit truncation rendered base-26 in Steam's alphabet.
+        let expected = {
+            let mut value = hotp_binary(b"12345678901234567890", 59 / 30, OtpAlgorithm::Sha1);
+            (0..5)
+                .map(|_| {
+                    let c = STEAM_ALPHABET[(value % 26) as usize] as char;
+                    value /= 26;
+                    c
+                })
+                .collect::<String>()
+        };
+        let secret = BASE32_NOPAD.encode(b"12345678901234567890");
+        for input in [
+            format!("otpauth://totp/Steam:gamer?secret={secret}&issuer=Steam"),
+            format!("otpauth://totp/gamer?secret={secret}&encoder=steam"),
+            format!("steam://{secret}"),
+        ] {
+            let totp = Totp::parse(&input).unwrap();
+            assert!(totp.steam, "{input}");
+            let code = totp.generate(59);
+            assert_eq!(code, expected);
+            assert_eq!(code.len(), 5);
+            assert!(code.bytes().all(|b| STEAM_ALPHABET.contains(&b)));
+        }
+        // Ordinary TOTP stays numeric.
+        let normal = Totp::parse(&format!("otpauth://totp/GitHub:me?secret={secret}")).unwrap();
+        assert!(!normal.steam);
+        assert_eq!(normal.generate(59), "287082");
     }
 
     #[test]
