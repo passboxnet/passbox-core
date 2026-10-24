@@ -1664,6 +1664,21 @@ export class PassboxClient {
     return this.bulk(ids, (data) => (data.trashedAt === undefined ? { ...data, trashedAt: at } : undefined));
   }
 
+  /** Archives several items with one sync at the end. Returns the items that failed. */
+  async archiveItems(ids: readonly string[]): Promise<BulkFailure[]> {
+    const at = Date.now();
+    return this.bulk(ids, (data) => (data.archivedAt === undefined ? { ...data, archivedAt: at } : undefined));
+  }
+
+  /** Takes several items out of the archive with one sync at the end. Returns the items that failed. */
+  async unarchiveItems(ids: readonly string[]): Promise<BulkFailure[]> {
+    return this.bulk(ids, (data) => {
+      if (data.archivedAt === undefined) return undefined;
+      const { archivedAt: _archived, ...rest } = data;
+      return rest;
+    });
+  }
+
   /** Marks several items as favorites (or not) with one sync at the end. Returns the items that failed. */
   async setFavorite(ids: readonly string[], favorite: boolean): Promise<BulkFailure[]> {
     return this.bulk(ids, (data) => (data.favorite === favorite ? undefined : { ...data, favorite }));
