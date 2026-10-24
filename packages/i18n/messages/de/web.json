@@ -379,7 +379,7 @@
   "addDevice.done": "Fertig. Geben Sie auf dem neuen Gerät Ihr Master-Passwort ein.",
   "addDevice.expired": "Der Code ist abgelaufen. Zeigen Sie einen neuen an.",
   "addDevice.mismatch": "Etwas stimmt nicht: Das Gerät konnte nicht nachweisen, dass es den Code kennt. Es wurde nichts gesendet. Zeigen Sie einen neuen Code an.",
-  "linkDevice.link": "Mit einem anderen Gerät anmelden",
+  "linkDevice.link": "Code von einem anderen Gerät verwenden",
   "linkDevice.title": "Mit einem anderen Gerät anmelden",
   "linkDevice.description": "Nutzen Sie ein Gerät, auf dem Passbox schon geöffnet ist. Den Geheimschlüssel müssen Sie dann nicht abtippen.",
   "linkDevice.step1": "Öffnen Sie auf dem anderen Gerät Einstellungen → Wiederherstellung → Gerät hinzufügen.",

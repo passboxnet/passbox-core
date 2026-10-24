@@ -379,7 +379,7 @@
   "addDevice.done": "Done. Enter your master password on the new device.",
   "addDevice.expired": "The code expired. Show a new one.",
   "addDevice.mismatch": "Something isn't right: the device didn't prove it knows the code. Nothing was sent. Show a new code.",
-  "linkDevice.link": "Sign in with another device",
+  "linkDevice.link": "Use a code from another device",
   "linkDevice.title": "Sign in with another device",
   "linkDevice.description": "Use a device where Passbox is already open. You don't need to type the Secret Key.",
   "linkDevice.step1": "On the other device, open Settings → Recovery → Add a device.",

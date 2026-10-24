@@ -106,7 +106,7 @@ payload    = Seal(ephemeral_pk, {"email", "accountId", "secretKey"}, purpose "de
 ```
 
 1. A signed-in device (Settings → Recovery → "Add a device") opens a link (10 minutes) and shows the code, plus a QR code with `passbox-link:v1?server=<url>&code=<code>` for the mobile apps.
-2. The new device ("Sign in with another device") types the code, creates an ephemeral X-Wing key pair and claims the link with its public key and the MAC (no session). The first claim wins; the server rate limits claims per IP.
+2. The new device ("Use a code from another device") types the code, creates an ephemeral X-Wing key pair and claims the link with its public key and the MAC (no session). The first claim wins; the server rate limits claims per IP.
 3. The signed-in device polls the link, shows the new device's name and IP and asks "Was that you?". Approving checks the MAC (a server that swapped in its own ephemeral key would have to know the secret) and uploads the sealed payload.
 4. The new device receives the payload once and asks for the **master password**, which is never transferred. It then signs in normally (with a second factor if the account uses one).
 
