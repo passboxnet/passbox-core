@@ -1,14 +1,17 @@
 import {
   type Account,
   type AccountEvent,
+  type AccountKeys,
   type AccountPreferences,
   type AdminApi,
   ApiError,
   type ClientKind,
+  type InvitationPreview,
   isTwoFactorChallenge,
   type KdfParams,
   type LoginFinishResult,
   type MailLocale,
+  type OrgInvitationInfo,
   type PassboxApi,
   type SecondFactor,
   type SessionInfo,
@@ -29,10 +32,27 @@ import {
   TRASH_RETENTION_MS,
 } from "./items";
 import { analyzeVault, estimateStrength, type Strength, type VaultHealth } from "./security";
+import {
+  type Invitation,
+  type KeyLookup,
+  type Org,
+  type OrgGroup,
+  type OrgRole,
+  type PrincipalType,
+  parseInvitationLink,
+  type SharedVault,
+  type SharingReport,
+  type SharingView,
+  type SharingWarning,
+  type VaultAccess,
+  type VaultRole,
+} from "./sharing";
 import type { KeyValueStorage } from "./storage";
 import { type CredentialsContainerLike, createCredential, getAssertion } from "./webauthn";
 
 type CoreModule = typeof Core;
+
+const EMPTY_SHARING: SharingView = { orgs: [], vaults: [], warnings: [] };
 
 /**
  * What this device remembers about the signed-in account. Like 1Password, the
@@ -51,6 +71,12 @@ export interface Vault {
   id: string;
   name: string;
   revision: number;
+  /** The organization of a shared vault; `undefined` for personal vaults. */
+  orgId?: string;
+  /** Current key epoch (0 or absent for personal vaults). */
+  keyEpoch?: number;
+  /** This account's verified role: personal vaults are `manage`. */
+  role?: VaultRole | undefined;
 }
 
 export interface Item {
@@ -58,6 +84,8 @@ export interface Item {
   vaultId: string;
   revision: number;
   updatedAt: number;
+  /** Vault key epoch the item is encrypted with (0 or absent for personal vaults). */
+  keyEpoch?: number;
   data: ItemData;
 }
 
@@ -109,6 +137,12 @@ export interface ClientSnapshot {
   trash: Item[];
   /** Items or vaults that could not be decrypted (tampered or unsupported). */
   errors: string[];
+  /** Organizations with verified members and groups. */
+  orgs: Org[];
+  /** Shared vaults with verified members and roles. */
+  sharedVaults: SharedVault[];
+  /** Problems found while verifying sharing data, for example changed keys. */
+  sharingWarnings: SharingWarning[];
 }
 
 /** Thrown when the email, master password or Secret Key is wrong. */
@@ -208,6 +242,12 @@ export type DisableFactor =
 
 const ACCOUNT_KEY = "passbox.account";
 /**
+ * Sharing trust store (pinned keys, organization fingerprints, verified key
+ * directory head, manifest versions), per account. Public data whose
+ * integrity matters: a changed copy could hide a key change.
+ */
+const TRUST_KEY = "passbox.trust";
+/**
  * The server's device token for this device. It exempts the device from the
  * per-email login lockout (so failed logins by someone else cannot block
  * unlocking) and grants no access by itself. Every login replaces it.
@@ -233,6 +273,8 @@ export interface PassboxClientOptions {
    * offer the security keys registered for it.
    */
   origin?: string;
+  /** Origin of the web app for invitation links, for example `https://passbox.example.com`. */
+  linkBase?: string;
 }
 
 /**
@@ -251,6 +293,7 @@ export class PassboxClient {
   private pending: PendingTwoFactor | undefined;
   /** When the current session token was issued by a full login (ms). */
   private loginAt = 0;
+  private readonly linkBase: string | undefined;
   private keyring: Core.Keyring | undefined;
   /** The account key encrypted with the master keys, kept to verify the master password offline. */
   private accountKeyCiphertext: string | undefined;
@@ -258,6 +301,7 @@ export class PassboxClient {
   private vaults = new Map<string, Vault>();
   private items = new Map<string, Item>();
   private errors = new Map<string, string>();
+  private sharingView: SharingView = EMPTY_SHARING;
   private listeners = new Set<() => void>();
   private snapshot: ClientSnapshot;
   /** Session token of the current unlock. */
@@ -269,6 +313,7 @@ export class PassboxClient {
     this.storage = options.storage;
     this.device = options.device;
     this.origin = options.origin;
+    this.linkBase = options.linkBase;
     this.snapshot = this.buildSnapshot();
   }
 
@@ -293,10 +338,17 @@ export class PassboxClient {
 
   private buildSnapshot(): ClientSnapshot {
     const account = this.deviceAccount;
+    const sharing = this.sharingView;
+    const roles = new Map(sharing.vaults.map((v) => [v.vaultId, v.role ?? undefined]));
     return {
       status: this.keyring ? "unlocked" : account ? "locked" : "signed-out",
       email: account?.email,
-      vaults: [...this.vaults.values()].sort((a, b) => a.name.localeCompare(b.name)),
+      vaults: [...this.vaults.values()]
+        .map((vault) => ({ ...vault, role: vault.orgId ? roles.get(vault.id) : ("manage" as const) }))
+        .sort((a, b) => a.name.localeCompare(b.name)),
+      orgs: sharing.orgs,
+      sharedVaults: sharing.vaults,
+      sharingWarnings: sharing.warnings,
       items: [...this.items.values()]
         .filter((item) => item.data.trashedAt === undefined)
         .sort((a, b) => a.data.title.localeCompare(b.data.title)),
@@ -736,6 +788,7 @@ export class PassboxClient {
     if (!account || account.accountId !== state.accountId) throw new Error("session belongs to another account");
     this.clearSession();
     this.keyring = this.core.Keyring.importSession(state.sessionKey, state.accountId, state.blob);
+    this.loadTrust(this.keyring, state.accountId);
     this.token = state.token;
     try {
       await this.sync();
@@ -777,6 +830,7 @@ export class PassboxClient {
     this.vaults.clear();
     this.items.clear();
     this.errors.clear();
+    this.sharingView = EMPTY_SHARING;
   }
 
   private deriveKeys(account: DeviceAccount, password: string): Core.MasterKeys {
@@ -881,6 +935,7 @@ export class PassboxClient {
       this.token = token;
       const remote = await this.api.account();
       this.keyring = this.core.Keyring.unlock(keys, remote.accountId, remote.encryptedAccountKey);
+      this.loadTrust(this.keyring, remote.accountId);
       this.accountKeyCiphertext = remote.encryptedAccountKey;
       this.loginAt = Date.now();
     } catch (error) {
@@ -894,18 +949,80 @@ export class PassboxClient {
   /** Fetches and decrypts everything that changed since the last sync. */
   async sync(): Promise<void> {
     const keyring = this.requireKeyring();
-    const delta = await this.api.sync(this.cursor);
+    await this.ensureAccountKeys(keyring);
+    const since = this.cursor;
+    const delta = await this.api.sync(since, { sharing: true });
     if (this.keyring !== keyring) return; // locked meanwhile
-    this.apply(keyring, delta);
+    const missingKey = await this.apply(keyring, delta);
+    if (missingKey && since !== 0 && this.keyring === keyring) {
+      // A shared vault's key could not be opened: fetch everything again once.
+      const full = await this.api.sync(0, { sharing: true });
+      if (this.keyring !== keyring) return;
+      await this.apply(keyring, full);
+    }
     this.emit();
   }
 
-  private apply(keyring: Core.Keyring, delta: SyncResponse) {
+  /** Loads the account's key pairs, creating and publishing them on the first unlock after the update. */
+  private async ensureAccountKeys(keyring: Core.Keyring): Promise<void> {
+    if (keyring.hasAccountKeys()) return;
+    let keys: AccountKeys | undefined;
+    try {
+      keys = await this.api.sharing.ownKeys();
+    } catch (error) {
+      if (!(error instanceof ApiError && error.status === 404)) throw error;
+    }
+    if (this.keyring !== keyring || keyring.hasAccountKeys()) return;
+    if (keys) {
+      keyring.loadAccountKeys(keys.bundle, keys.bundleSignature, keys.encryptedPrivate);
+    } else {
+      const upload = JSON.parse(keyring.createAccountKeys(Date.now())) as AccountKeys;
+      await this.api.sharing.publishKeys(upload);
+    }
+  }
+
+  private loadTrust(keyring: Core.Keyring, accountId: string) {
+    const raw = this.storage.getItem(`${TRUST_KEY}.${accountId}`);
+    if (!raw) return;
+    try {
+      keyring.setTrustStore(raw);
+    } catch {
+      // An unreadable trust store starts over (trust on first use).
+    }
+  }
+
+  private saveTrust(keyring: Core.Keyring) {
+    this.storage.setItem(`${TRUST_KEY}.${keyring.accountId}`, keyring.trustStore());
+  }
+
+  /** Applies a sync delta. Returns whether a verified shared vault is missing its current key. */
+  private async apply(keyring: Core.Keyring, delta: SyncResponse): Promise<boolean> {
+    let uploads: SharingReport["wrappedKeys"] = [];
+    if (delta.sharing) {
+      const report = JSON.parse(keyring.applySharing(JSON.stringify(delta.sharing))) as SharingReport;
+      this.sharingView = report.view;
+      uploads = report.wrappedKeys;
+      this.saveTrust(keyring);
+      const accessible = new Set(report.view.vaults.map((v) => v.vaultId));
+      for (const vault of [...this.vaults.values()]) {
+        if (vault.orgId && !accessible.has(vault.id)) {
+          this.vaults.delete(vault.id);
+          for (const item of [...this.items.values()]) if (item.vaultId === vault.id) this.items.delete(item.id);
+        }
+      }
+    }
     for (const vault of delta.vaults) {
+      const keyEpoch = vault.keyEpoch ?? 0;
       try {
-        if (!keyring.hasVault(vault.id)) keyring.addVault(vault.id, vault.encryptedKey);
-        const meta = parseVaultMeta(keyring.decryptVaultMeta(vault.id, vault.encryptedMeta));
-        this.vaults.set(vault.id, { id: vault.id, name: meta.name, revision: vault.revision });
+        if (!vault.orgId && !keyring.hasVault(vault.id)) keyring.addVault(vault.id, vault.encryptedKey);
+        const meta = parseVaultMeta(keyring.decryptVaultMetaAt(vault.id, keyEpoch, vault.encryptedMeta));
+        this.vaults.set(vault.id, {
+          id: vault.id,
+          name: meta.name,
+          revision: vault.revision,
+          keyEpoch,
+          ...(vault.orgId ? { orgId: vault.orgId } : {}),
+        });
         this.errors.delete(vault.id);
       } catch (error) {
         this.errors.set(vault.id, `Vault ${vault.id} could not be decrypted: ${String(error)}`);
@@ -918,12 +1035,14 @@ export class PassboxClient {
         continue;
       }
       try {
-        const json = keyring.decryptItem(item.vaultId, item.id, item.revision, item.encryptedData);
+        const keyEpoch = item.keyEpoch ?? 0;
+        const json = keyring.decryptItemAt(item.vaultId, keyEpoch, item.id, item.revision, item.encryptedData);
         this.items.set(item.id, {
           id: item.id,
           vaultId: item.vaultId,
           revision: item.revision,
           updatedAt: item.updatedAt,
+          keyEpoch,
           data: parseItemData(json),
         });
         this.errors.delete(item.id);
@@ -933,6 +1052,11 @@ export class PassboxClient {
       }
     }
     this.cursor = Math.max(this.cursor, delta.cursor);
+    // Own copies of newly opened vault keys; best effort.
+    for (const upload of uploads) {
+      await this.api.sharing.putWrappedKey(upload.vaultId, upload.keyEpoch, upload.wrappedKey).catch(() => undefined);
+    }
+    return this.sharingView.vaults.some((v) => v.verified && !v.hasKey);
   }
 
   private requireKeyring(): Core.Keyring {
@@ -964,7 +1088,8 @@ export class PassboxClient {
     try {
       await this.api.updateVault(id, {
         revision,
-        encryptedMeta: keyring.encryptVaultMeta(id, JSON.stringify({ name })),
+        encryptedMeta: keyring.encryptVaultMetaAt(id, vault.keyEpoch ?? 0, JSON.stringify({ name })),
+        ...(vault.orgId ? { keyEpoch: vault.keyEpoch ?? 0 } : {}),
       });
     } catch (error) {
       await this.handleWriteError(error);
@@ -1178,11 +1303,414 @@ export class PassboxClient {
   /** Encrypts and uploads one item version without syncing. */
   private async putItem(vaultId: string, id: string, revision: number, data: ItemData) {
     const keyring = this.requireKeyring();
-    const encryptedData = keyring.encryptItem(vaultId, id, revision, JSON.stringify(data));
-    const result = await this.api.putItem(id, { vaultId, revision, encryptedData });
+    const keyEpoch = this.vaults.get(vaultId)?.keyEpoch ?? 0;
+    const encryptedData = keyring.encryptItemAt(vaultId, keyEpoch, id, revision, JSON.stringify(data));
+    const result = await this.api.putItem(id, {
+      vaultId,
+      revision,
+      encryptedData,
+      ...(keyEpoch ? { keyEpoch } : {}),
+    });
     if (this.keyring === keyring) {
-      this.items.set(id, { id, vaultId, revision: result.revision, updatedAt: Date.now(), data });
+      this.items.set(id, { id, vaultId, revision: result.revision, updatedAt: Date.now(), keyEpoch, data });
     }
+  }
+
+  // --- Organizations and sharing -------------------------------------------------
+  //
+  // Signing, sealing and verification happen in the Rust core (WebAssembly);
+  // these methods run the HTTP calls and multi-step flows. See
+  // docs/architecture/sharing.md.
+
+  private viewNow(): SharingView {
+    return this.sharingView;
+  }
+
+  /** Organizations with verified members and groups. */
+  orgs(): Org[] {
+    return this.viewNow().orgs;
+  }
+
+  /** One organization; throws if unknown. */
+  org(orgId: string): Org {
+    const org = this.viewNow().orgs.find((o) => o.id === orgId);
+    if (!org) throw new Error("unknown organization");
+    return org;
+  }
+
+  /** Shared vaults with verified members, roles and key state. */
+  sharedVaults(): SharedVault[] {
+    return this.viewNow().vaults;
+  }
+
+  /** Problems found while verifying sharing data (for example `key_changed`). */
+  sharingWarnings(): SharingWarning[] {
+    return this.viewNow().warnings;
+  }
+
+  /** Ownership and this account's role for a vault. */
+  vaultAccess(vaultId: string): VaultAccess {
+    const shared = this.viewNow().vaults.find((v) => v.vaultId === vaultId);
+    if (shared) {
+      return { vaultId, orgId: shared.orgId, role: shared.role ?? undefined, verified: shared.verified };
+    }
+    const vault = this.vaults.get(vaultId);
+    if (vault && !vault.orgId) return { vaultId, orgId: undefined, role: "manage", verified: true };
+    throw new Error("unknown vault");
+  }
+
+  /** Fingerprint of this account's own keys, for comparing with others. */
+  ownFingerprint(): string {
+    const fingerprint = this.requireKeyring().ownFingerprint();
+    if (!fingerprint) throw new Error("the account has no key pairs yet");
+    return fingerprint;
+  }
+
+  /**
+   * Looks up an account's key in the key directory and verifies the proof.
+   * New keys are pinned; `status: "changed"` must be accepted with `acceptKeyChange`.
+   */
+  async lookupKey(accountId: string): Promise<KeyLookup> {
+    const keyring = this.requireKeyring();
+    const since = (JSON.parse(keyring.trustStore()) as { directory?: { size?: number } }).directory?.size ?? 0;
+    const response = await this.api.sharing.lookupKey(accountId, since);
+    const lookup = JSON.parse(keyring.verifyDirectoryLookup(accountId, JSON.stringify(response))) as KeyLookup;
+    this.saveTrust(keyring);
+    return lookup;
+  }
+
+  /** Checks that the key directory lists this account's own key. */
+  async verifyOwnKey(): Promise<KeyLookup> {
+    return this.lookupKey(this.requireKeyring().accountId);
+  }
+
+  /** Trusts the current key of an account after a change. Returns its fingerprint. */
+  acceptKeyChange(accountId: string): string {
+    const keyring = this.requireKeyring();
+    const fingerprint = keyring.acceptKeyChange(accountId);
+    this.saveTrust(keyring);
+    this.sharingView = JSON.parse(keyring.sharingView()) as SharingView;
+    this.emit();
+    return fingerprint;
+  }
+
+  /** Creates a family organization with its shared family vault. Returns the organization ID. */
+  async createFamily(name: string, vaultName: string): Promise<string> {
+    return this.createOrg("family", name, vaultName);
+  }
+
+  /** Creates a team organization. Returns its ID. */
+  async createTeam(name: string): Promise<string> {
+    return this.createOrg("team", name, undefined);
+  }
+
+  private async createOrg(kind: "family" | "team", name: string, vaultName: string | undefined): Promise<string> {
+    await this.sync();
+    const keyring = this.requireKeyring();
+    const body = JSON.parse(
+      keyring.createOrg(
+        kind,
+        JSON.stringify({ name }),
+        vaultName === undefined ? undefined : JSON.stringify({ name: vaultName }),
+        Date.now(),
+      ),
+    ) as { id: string };
+    await this.api.sharing.createOrg(body);
+    await this.sync();
+    return body.id;
+  }
+
+  /** Renames an organization (admins). */
+  async renameOrg(orgId: string, name: string): Promise<void> {
+    const keyring = this.requireKeyring();
+    const org = await this.orgRecord(orgId);
+    await this.api.sharing.updateOrg(orgId, {
+      revision: org.revision + 1,
+      metaEpoch: org.metaEpoch,
+      encryptedMeta: keyring.encryptOrgMeta(orgId, org.metaEpoch, JSON.stringify({ name })),
+    });
+    await this.sync();
+  }
+
+  private async orgRecord(orgId: string): Promise<{ revision: number; metaEpoch: number }> {
+    const delta = await this.api.sync(this.cursor, { sharing: true });
+    const orgs = (delta.sharing?.orgs ?? []) as { id: string; revision: number; metaEpoch: number }[];
+    const org = orgs.find((o) => o.id === orgId);
+    if (!org) throw new Error("unknown organization");
+    return org;
+  }
+
+  /** Deletes an organization with all its vaults (owner only). */
+  async deleteOrg(orgId: string): Promise<void> {
+    await this.api.sharing.deleteOrg(orgId);
+    await this.sync();
+  }
+
+  /**
+   * Invites someone by email. Returns the link (with the organization
+   * fingerprint); the server also mails it when a mailer is configured.
+   * `linkBase` defaults to the API base URL (the web app's origin).
+   */
+  async invite(orgId: string, email: string, role: Exclude<OrgRole, "owner">, linkBase?: string): Promise<Invitation> {
+    const keyring = this.requireKeyring();
+    const [root] = JSON.parse(keyring.orgFingerprint(orgId)) as [string, string];
+    const linkFragment = `org=${root}`;
+    const created = await this.api.sharing.invite(orgId, { email, role, linkFragment });
+    const base = (linkBase ?? this.linkBase ?? "").replace(/\/+$/, "");
+    return {
+      id: created.id,
+      token: created.token,
+      link: `${base}${created.path}#${linkFragment}`,
+      expiresAt: created.expiresAt,
+    };
+  }
+
+  /** Pending invitations (admins). */
+  async invitations(orgId: string): Promise<OrgInvitationInfo[]> {
+    return this.api.sharing.invitations(orgId);
+  }
+
+  async revokeInvitation(orgId: string, invitationId: string): Promise<void> {
+    await this.api.sharing.revokeInvitation(orgId, invitationId);
+  }
+
+  /** What an invitation link (or token) is for; works before signing in. */
+  async previewInvitation(link: string): Promise<InvitationPreview> {
+    return this.api.sharing.previewInvitation(parseInvitationLink(link).token);
+  }
+
+  /**
+   * Accepts an invitation for the signed-in account (which must have the
+   * invited email) and returns the organization ID. The organization
+   * fingerprint in the link is pinned. Membership stays `accepted` until an
+   * admin confirms it.
+   */
+  async acceptInvitation(link: string): Promise<string> {
+    const { token, orgRoot } = parseInvitationLink(link);
+    await this.sync();
+    const preview = await this.api.sharing.previewInvitation(token);
+    const keyring = this.requireKeyring();
+    if (orgRoot) {
+      keyring.pinOrgRoot(preview.orgId, orgRoot);
+      this.saveTrust(keyring);
+    }
+    const accepted = await this.api.sharing.acceptInvitation(token);
+    await this.sync();
+    return accepted.orgId;
+  }
+
+  /**
+   * Confirms a member who accepted an invitation (admins): verifies their key
+   * in the key directory, attests it and seals the organization key. In a
+   * family the member also gets the family vault (edit). Returns the attested
+   * fingerprint for optional comparison with the member.
+   */
+  async confirmMember(orgId: string, accountId: string): Promise<string> {
+    await this.sync();
+    const lookup = await this.lookupKey(accountId);
+    if (lookup.status === "changed") throw new Error("the member's key changed; compare fingerprints first");
+    const keyring = this.requireKeyring();
+    const body = JSON.parse(keyring.confirmMember(orgId, accountId, Date.now())) as { fingerprint: string };
+    await this.api.sharing.confirmMember(orgId, accountId, body);
+    await this.sync();
+    const org = this.org(orgId);
+    const vaultId = org.defaultVaultId;
+    if (
+      org.kind === "family" &&
+      vaultId &&
+      this.sharedVaults().some((v) => v.vaultId === vaultId && v.role === "manage")
+    ) {
+      await this.shareVault(vaultId, "account", accountId, "edit");
+    }
+    return body.fingerprint;
+  }
+
+  /** Changes a member's role (admins; admin rights only by the owner). */
+  async setMemberRole(orgId: string, accountId: string, role: Exclude<OrgRole, "owner">): Promise<void> {
+    const body = JSON.parse(this.requireKeyring().setMemberRole(orgId, accountId, role, Date.now()));
+    await this.api.sharing.updateMember(orgId, accountId, body);
+    await this.sync();
+  }
+
+  /** Blocks a member on the server (not cryptographic; `removeMember` rotates keys). */
+  async suspendMember(orgId: string, accountId: string): Promise<void> {
+    await this.api.sharing.suspendMember(orgId, accountId);
+    await this.sync();
+  }
+
+  async reactivateMember(orgId: string, accountId: string): Promise<void> {
+    await this.api.sharing.reactivateMember(orgId, accountId);
+    await this.sync();
+  }
+
+  /**
+   * Removes a member and rotates every key they had: their groups, the vaults
+   * they could open (items re-encrypted) and the organization key; members
+   * they attested are re-attested. Vaults this account cannot manage stay
+   * `rotationPending` for their managers.
+   */
+  async removeMember(orgId: string, accountId: string): Promise<void> {
+    await this.sync();
+    const attestations = JSON.parse(this.requireKeyring().reattestMembers(orgId, accountId, Date.now())) as {
+      accountId: string;
+    }[];
+    const removed = await this.api.sharing.removeMember(orgId, accountId);
+    await this.sync();
+    for (const groupId of removed.groups) {
+      if (this.org(orgId).groups.some((g) => g.id === groupId && g.isMember)) {
+        await this.rotateGroup(orgId, groupId, [accountId]);
+      }
+    }
+    await this.sync();
+    await this.rotatePendingVaults(orgId, [["account", accountId]]);
+    for (const attestation of attestations) {
+      await this.api.sharing.updateMember(orgId, attestation.accountId, attestation);
+    }
+    await this.sync();
+    await this.api.sharing.rotateOrgKey(orgId, JSON.parse(this.requireKeyring().rotateOrgKey(orgId, Date.now())));
+    await this.sync();
+  }
+
+  /** Leaves an organization (not possible for its owner). */
+  async leaveOrg(orgId: string): Promise<void> {
+    await this.api.sharing.removeMember(orgId, this.requireKeyring().accountId);
+    await this.sync();
+  }
+
+  /** Creates a shared vault in an organization (owners and admins). Returns its ID. */
+  async createSharedVault(orgId: string, name: string): Promise<string> {
+    const body = JSON.parse(this.requireKeyring().createSharedVault(orgId, JSON.stringify({ name }), Date.now())) as {
+      id: string;
+    };
+    await this.api.sharing.createSharedVault(orgId, body);
+    await this.sync();
+    return body.id;
+  }
+
+  /**
+   * Shares a vault with an account or group, or changes a member's role.
+   * Refused while the member's key changed and the change was not accepted.
+   */
+  async shareVault(vaultId: string, principalType: PrincipalType, principalId: string, role: VaultRole): Promise<void> {
+    const body = JSON.parse(this.requireKeyring().shareVault(vaultId, principalType, principalId, role, Date.now()));
+    await this.api.sharing.putVaultMember(vaultId, body);
+    await this.sync();
+  }
+
+  /**
+   * Removes a member from a vault: rotates the vault key and re-encrypts every
+   * item, so the former member cannot read anything added later (they may
+   * have kept what they saw).
+   */
+  async unshareVault(vaultId: string, principalType: PrincipalType, principalId: string): Promise<void> {
+    await this.rotateVaultKey(vaultId, [[principalType, principalId]]);
+  }
+
+  /** Verified members of a shared vault. */
+  vaultMembers(vaultId: string): SharedVault {
+    const vault = this.sharedVaults().find((v) => v.vaultId === vaultId);
+    if (!vault) throw new Error("unknown vault");
+    return vault;
+  }
+
+  /** Rotates the vaults of an organization marked for rotation that this account manages. */
+  async rotatePendingVaults(orgId: string, removed: [PrincipalType, string][] = []): Promise<void> {
+    const pending = this.sharedVaults().filter(
+      (v) => v.orgId === orgId && v.rotationPending && v.hasKey && v.role === "manage",
+    );
+    for (const vault of pending) await this.rotateVaultKey(vault.vaultId, removed);
+  }
+
+  /** Rotates a vault's key (without `removed`) and re-encrypts its items. */
+  async rotateVaultKey(vaultId: string, removed: [PrincipalType, string][] = []): Promise<void> {
+    await this.sync();
+    const vault = this.vaults.get(vaultId);
+    if (!vault) throw new Error("unknown vault");
+    const body = JSON.parse(
+      this.requireKeyring().rotateVault(
+        vaultId,
+        JSON.stringify(removed),
+        JSON.stringify({ name: vault.name }),
+        Date.now(),
+      ),
+    ) as { keyEpoch: number };
+    await this.api.sharing.rotateVault(vaultId, body);
+    await this.sync();
+    await this.reencryptVault(vaultId, body.keyEpoch);
+  }
+
+  /** Re-encrypts the items of a vault still at an older key epoch, 100 per request. */
+  async reencryptVault(vaultId: string, keyEpoch: number): Promise<void> {
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const keyring = this.requireKeyring();
+      const stale = [...this.items.values()].filter((i) => i.vaultId === vaultId && (i.keyEpoch ?? 0) < keyEpoch);
+      if (stale.length === 0) return;
+      for (let i = 0; i < stale.length; i += 100) {
+        const batch = stale.slice(i, i + 100).map((item) => ({
+          id: item.id,
+          revision: item.revision + 1,
+          keyEpoch,
+          encryptedData: keyring.encryptItemAt(
+            vaultId,
+            keyEpoch,
+            item.id,
+            item.revision + 1,
+            JSON.stringify(item.data),
+          ),
+        }));
+        await this.api.sharing.reencryptItems(vaultId, batch);
+      }
+      await this.sync();
+    }
+  }
+
+  /** Groups of an organization. */
+  groups(orgId: string): OrgGroup[] {
+    return this.org(orgId).groups;
+  }
+
+  /** Creates a group (admins); the creator is always a member. Returns its ID. */
+  async createGroup(orgId: string, name: string, members: string[] = []): Promise<string> {
+    const body = JSON.parse(
+      this.requireKeyring().createGroup(orgId, JSON.stringify({ name }), JSON.stringify(members), Date.now()),
+    ) as { id: string };
+    await this.api.sharing.createGroup(orgId, body);
+    await this.sync();
+    return body.id;
+  }
+
+  async renameGroup(orgId: string, groupId: string, name: string): Promise<void> {
+    const { metaEpoch } = await this.orgRecord(orgId);
+    await this.api.sharing.updateGroup(orgId, groupId, {
+      metaEpoch,
+      encryptedMeta: this.requireKeyring().encryptGroupMeta(orgId, groupId, metaEpoch, JSON.stringify({ name })),
+    });
+    await this.sync();
+  }
+
+  /** Deletes a group (admins). Unshare its vaults first. */
+  async deleteGroup(orgId: string, groupId: string): Promise<void> {
+    await this.api.sharing.deleteGroup(orgId, groupId);
+    await this.sync();
+  }
+
+  /** Adds a member to a group: one sealing of the group key. */
+  async addGroupMember(orgId: string, groupId: string, accountId: string): Promise<void> {
+    const body = JSON.parse(this.requireKeyring().addGroupMember(groupId, accountId, Date.now()));
+    await this.api.sharing.addGroupMember(orgId, groupId, body);
+    await this.sync();
+  }
+
+  /** Removes a member from a group: rotates the group key and the vaults shared with the group. */
+  async removeGroupMember(orgId: string, groupId: string, accountId: string): Promise<void> {
+    await this.rotateGroup(orgId, groupId, [accountId]);
+    await this.sync();
+    await this.rotatePendingVaults(orgId);
+  }
+
+  private async rotateGroup(orgId: string, groupId: string, removed: string[]): Promise<void> {
+    const body = JSON.parse(this.requireKeyring().rotateGroup(groupId, JSON.stringify(removed), Date.now()));
+    await this.api.sharing.rotateGroup(orgId, groupId, body);
   }
 
   private async handleWriteError(error: unknown): Promise<never> {

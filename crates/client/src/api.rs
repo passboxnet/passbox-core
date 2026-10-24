@@ -220,6 +220,12 @@ pub struct SyncVault {
     pub encrypted_meta: String,
     pub revision: u64,
     pub updated_at: i64,
+    /// Set for shared vaults (organization vaults).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub org_id: Option<String>,
+    /// Key epoch of `encrypted_meta` (0 for personal vaults).
+    #[serde(default)]
+    pub key_epoch: u32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -231,6 +237,9 @@ pub struct SyncItem {
     pub encrypted_data: Option<String>,
     pub deleted: bool,
     pub updated_at: i64,
+    /// Vault key epoch of `encrypted_data` (0 for personal vaults).
+    #[serde(default)]
+    pub key_epoch: u32,
 }
 
 #[derive(Debug, Deserialize)]
@@ -239,6 +248,9 @@ pub struct SyncResponse {
     pub cursor: i64,
     pub vaults: Vec<SyncVault>,
     pub items: Vec<SyncItem>,
+    /// Organizations, groups and shared vault keys (with `sharing=1`).
+    #[serde(default)]
+    pub sharing: Option<passbox_core::sharing::data::SharingDelta>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -559,10 +571,27 @@ impl Api {
     pub fn sync(&self, token: &str, since: i64) -> Result<SyncResponse> {
         self.call(
             "GET",
-            &format!("/api/v1/sync?since={since}"),
+            &format!("/api/v1/sync?since={since}&sharing=1"),
             Some(token),
             None,
         )
+    }
+
+    /// Sends a request with a JSON body (or none) and returns the JSON
+    /// answer (`null` for 204). Used by the sharing endpoints.
+    pub fn request(
+        &self,
+        method: &str,
+        path: &str,
+        token: &str,
+        body: Option<Value>,
+    ) -> Result<Value> {
+        self.call(method, path, Some(token), body)
+    }
+
+    /// `GET /api/v1/invitations/{token}` (no session needed).
+    pub fn invitation_preview(&self, token: &str) -> Result<Value> {
+        self.call("GET", &format!("/api/v1/invitations/{token}"), None, None)
     }
 
     pub fn create_vault(&self, token: &str, vault: &NewVault) -> Result<WriteResponse> {
@@ -580,12 +609,13 @@ impl Api {
         id: &str,
         revision: u64,
         encrypted_meta: &str,
+        key_epoch: u32,
     ) -> Result<WriteResponse> {
         self.call(
             "PUT",
             &format!("/api/v1/vaults/{id}"),
             Some(token),
-            Some(serde_json::json!({ "revision": revision, "encryptedMeta": encrypted_meta })),
+            Some(serde_json::json!({ "revision": revision, "encryptedMeta": encrypted_meta, "keyEpoch": key_epoch })),
         )
     }
 
@@ -596,12 +626,13 @@ impl Api {
         vault_id: &str,
         revision: u64,
         encrypted_data: &str,
+        key_epoch: u32,
     ) -> Result<WriteResponse> {
         self.call(
             "PUT",
             &format!("/api/v1/items/{id}"),
             Some(token),
-            Some(serde_json::json!({ "vaultId": vault_id, "revision": revision, "encryptedData": encrypted_data })),
+            Some(serde_json::json!({ "vaultId": vault_id, "revision": revision, "encryptedData": encrypted_data, "keyEpoch": key_epoch })),
         )
     }
 

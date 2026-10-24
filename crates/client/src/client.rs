@@ -3,14 +3,18 @@
 //! The client is synchronous. Call it from a background thread in UI apps.
 //! All methods take `&self`; an internal lock serializes operations.
 
-use std::collections::BTreeMap;
+pub mod sharing;
+
+use std::collections::{BTreeMap, BTreeSet};
 use std::sync::{Arc, Mutex, MutexGuard};
 
 use passbox_core::aead::SymmetricKey;
 use passbox_core::kdf::{self, KdfParams, MasterKeys, SALT_LEN};
-use passbox_core::keyring::Keyring;
+use passbox_core::keyring::{AccountKeysUpload, Keyring};
 use passbox_core::opaque::{ClientLoginFlow, ClientRegistrationFlow};
 use passbox_core::secret_key::SecretKey;
+use passbox_core::sharing::data::SharingData;
+use passbox_core::sharing::state::{TrustStore, WrappedKeyUpload};
 use passbox_core::{encoding, id};
 use serde::{Deserialize, Serialize};
 use zeroize::Zeroizing;
@@ -24,7 +28,7 @@ use crate::model::{
     Vault, field,
 };
 use crate::security::{VaultHealth, analyze_vault};
-use crate::store::{ACCOUNT_KEY, CACHE_KEY, DEVICE_TOKEN_KEY, Store};
+use crate::store::{ACCOUNT_KEY, CACHE_KEY, DEVICE_TOKEN_KEY, Store, TRUST_KEY};
 use crate::{Error, Result};
 use passbox_core::strength::{self, Strength};
 
@@ -52,6 +56,14 @@ struct Cache {
     cursor: i64,
     vaults: BTreeMap<String, SyncVault>,
     items: BTreeMap<String, SyncItem>,
+    /// The account's key pairs as published (private keys encrypted with
+    /// the account key), for offline unlock.
+    #[serde(default)]
+    account_keys: Option<AccountKeysUpload>,
+    /// Organizations, groups and shared vault keys as received; verified
+    /// again on every unlock.
+    #[serde(default)]
+    sharing: SharingData,
 }
 
 /// Version byte of the exported unlock key.
@@ -334,6 +346,9 @@ impl Client {
 
     fn finish_sign_in(&self, account: &DeviceAccount) -> Result<()> {
         // A different account may have used this device before.
+        if self.device_account()?.map(|a| a.account_id) != Some(account.account_id.clone()) {
+            self.store.delete(TRUST_KEY)?;
+        }
         self.store.delete(CACHE_KEY)?;
         self.store.put(ACCOUNT_KEY, &serde_json::to_vec(account)?)?;
         self.sync()
@@ -408,8 +423,18 @@ impl Client {
         };
 
         // Offline first: the cached account key proves the password locally.
-        let keyring = Keyring::unlock(&keys.auk, &account.account_id, &cache.encrypted_account_key)
-            .map_err(|_| Error::InvalidCredentials)?;
+        let mut keyring =
+            Keyring::unlock(&keys.auk, &account.account_id, &cache.encrypted_account_key)
+                .map_err(|_| Error::InvalidCredentials)?;
+        if let Some(own) = &cache.account_keys {
+            // A cache that does not match is ignored; the next sync reloads.
+            let _ = keyring.load_account_keys(
+                &own.bundle,
+                &own.bundle_signature,
+                &own.encrypted_private,
+            );
+        }
+        keyring.set_trust_store(self.trust_store()?);
         let mut session = Session {
             keyring,
             auk: keys.auk.clone(),
@@ -750,6 +775,7 @@ impl Client {
         self.lock();
         self.store.delete(CACHE_KEY)?;
         self.store.delete(DEVICE_TOKEN_KEY)?;
+        self.store.delete(TRUST_KEY)?;
         self.store.delete(ACCOUNT_KEY)
     }
 
@@ -771,8 +797,10 @@ impl Client {
     /// Unlocks with a session token from a complete login.
     fn install_login(&self, keys: &MasterKeys, token: String) -> Result<()> {
         let remote = self.api.account(&token)?;
-        let keyring = Keyring::unlock(&keys.auk, &remote.account_id, &remote.encrypted_account_key)
-            .map_err(|_| Error::InvalidCredentials)?;
+        let mut keyring =
+            Keyring::unlock(&keys.auk, &remote.account_id, &remote.encrypted_account_key)
+                .map_err(|_| Error::InvalidCredentials)?;
+        keyring.set_trust_store(self.trust_store()?);
         *self.lock_session() = Some(Session {
             keyring,
             auk: keys.auk.clone(),
@@ -893,6 +921,7 @@ impl Client {
     /// Fetches and decrypts everything that changed since the last sync and
     /// updates the offline cache.
     pub fn sync(&self) -> Result<()> {
+        self.ensure_account_keys()?;
         let since = self
             .lock_session()
             .as_ref()
@@ -900,11 +929,108 @@ impl Client {
             .cache
             .cursor;
         let delta = self.with_token(|token| self.api.sync(token, since))?;
+        if self.sync_once(delta)? && since != 0 {
+            // A shared vault's key could not be opened (for example after
+            // invalid data): fetch everything again once.
+            if let Some(session) = self.lock_session().as_mut() {
+                session.cache.cursor = 0;
+            }
+            let delta = self.with_token(|token| self.api.sync(token, 0))?;
+            self.sync_once(delta)?;
+        }
+        Ok(())
+    }
+
+    /// Applies one sync response; returns whether a verified shared vault
+    /// is missing its current key.
+    fn sync_once(&self, delta: SyncResponse) -> Result<bool> {
+        let uploads = {
+            let mut guard = self.lock_session();
+            let session = guard.as_mut().ok_or(Error::Locked)?;
+            let uploads = apply_delta(session, delta);
+            self.store
+                .put(CACHE_KEY, &serde_json::to_vec(&session.cache)?)?;
+            self.store.put(
+                TRUST_KEY,
+                &serde_json::to_vec(session.keyring.trust_store())?,
+            )?;
+            uploads
+        };
+        // Own copies of newly opened vault keys; best effort, the sealed
+        // copy keeps working until one is stored.
+        for upload in uploads {
+            let _ = self.with_token(|token| {
+                self.api.request(
+                    "PUT",
+                    &format!(
+                        "/api/v1/vaults/{}/keys/{}/wrapped",
+                        upload.vault_id, upload.key_epoch
+                    ),
+                    token,
+                    Some(serde_json::json!({ "wrappedKey": upload.wrapped_key })),
+                )
+            });
+        }
+        let guard = self.lock_session();
+        Ok(guard.as_ref().is_some_and(|s| {
+            s.keyring
+                .sharing_view()
+                .vaults
+                .iter()
+                .any(|v| v.verified && !v.has_key)
+        }))
+    }
+
+    fn trust_store(&self) -> Result<TrustStore> {
+        Ok(match self.store.get(TRUST_KEY)? {
+            Some(bytes) => serde_json::from_slice(&bytes).unwrap_or_default(),
+            None => TrustStore::default(),
+        })
+    }
+
+    /// Loads the account's key pairs, creating and publishing them on the
+    /// first unlock after the update (migration of existing accounts).
+    fn ensure_account_keys(&self) -> Result<()> {
+        {
+            let guard = self.lock_session();
+            let session = guard.as_ref().ok_or(Error::Locked)?;
+            if session.keyring.has_account_keys() && session.cache.account_keys.is_some() {
+                return Ok(());
+            }
+        }
+        let remote = match self
+            .with_token(|token| self.api.request("GET", "/api/v1/account/keys", token, None))
+        {
+            Ok(value) => Some(serde_json::from_value::<AccountKeysUpload>(value)?),
+            Err(Error::Server { status: 404, .. }) => None,
+            Err(e) => return Err(e),
+        };
         let mut guard = self.lock_session();
         let session = guard.as_mut().ok_or(Error::Locked)?;
-        apply_delta(session, delta);
-        self.store
-            .put(CACHE_KEY, &serde_json::to_vec(&session.cache)?)
+        match remote {
+            Some(keys) => {
+                session.keyring.load_account_keys(
+                    &keys.bundle,
+                    &keys.bundle_signature,
+                    &keys.encrypted_private,
+                )?;
+                session.cache.account_keys = Some(keys);
+                Ok(())
+            }
+            None => {
+                let upload = session.keyring.create_account_keys(now_ms())?;
+                drop(guard);
+                let body = serde_json::to_value(&upload)?;
+                self.with_token(|token| {
+                    self.api
+                        .request("PUT", "/api/v1/account/keys", token, Some(body.clone()))
+                })?;
+                if let Some(session) = self.lock_session().as_mut() {
+                    session.cache.account_keys = Some(upload);
+                }
+                Ok(())
+            }
+        }
     }
 
     // --- Editing -----------------------------------------------------------------
@@ -995,16 +1121,20 @@ impl Client {
         data: &ItemData,
     ) -> Result<()> {
         let json = serde_json::to_string(data)?;
-        let encrypted = {
+        let (encrypted, epoch) = {
             let guard = self.lock_session();
             let session = guard.as_ref().ok_or(Error::Locked)?;
-            session
-                .keyring
-                .encrypt_item(vault_id, item_id, revision, &json)?
+            let epoch = session.vaults.get(vault_id).map_or(0, |v| v.key_epoch);
+            (
+                session
+                    .keyring
+                    .encrypt_item_at(vault_id, epoch, item_id, revision, &json)?,
+                epoch,
+            )
         };
         let result = self.with_token(|token| {
             self.api
-                .put_item(token, item_id, vault_id, revision, &encrypted)
+                .put_item(token, item_id, vault_id, revision, &encrypted, epoch)
         });
         self.finish_write(result)
     }
@@ -1041,7 +1171,7 @@ impl Client {
     }
 
     pub fn rename_vault(&self, vault_id: &str, name: &str) -> Result<()> {
-        let (revision, encrypted) = {
+        let (revision, encrypted, epoch) = {
             let guard = self.lock_session();
             let session = guard.as_ref().ok_or(Error::Locked)?;
             let vault = session
@@ -1051,11 +1181,16 @@ impl Client {
             let meta = serde_json::json!({ "name": name }).to_string();
             (
                 vault.revision + 1,
-                session.keyring.encrypt_vault_meta(vault_id, &meta)?,
+                session
+                    .keyring
+                    .encrypt_vault_meta_at(vault_id, vault.key_epoch, &meta)?,
+                vault.key_epoch,
             )
         };
-        let result =
-            self.with_token(|token| self.api.update_vault(token, vault_id, revision, &encrypted));
+        let result = self.with_token(|token| {
+            self.api
+                .update_vault(token, vault_id, revision, &encrypted, epoch)
+        });
         self.finish_write(result)
     }
 }
@@ -1080,26 +1215,65 @@ fn apply_cache(session: &mut Session, cache: Cache) {
         cursor: cache.cursor,
         vaults: cache.vaults.into_values().collect(),
         items: cache.items.into_values().collect(),
+        sharing: None,
     };
     session.cache.account_id = cache.account_id;
     session.cache.encrypted_account_key = cache.encrypted_account_key;
+    session.cache.account_keys = cache.account_keys;
+    session.keyring.restore_sharing_data(cache.sharing);
+    session.cache.sharing = session.keyring.sharing_data().clone();
     apply_delta(session, delta);
 }
 
-fn apply_delta(session: &mut Session, delta: SyncResponse) {
+/// Applies a sync delta (or the cache). Returns own vault key copies to
+/// upload.
+fn apply_delta(session: &mut Session, mut delta: SyncResponse) -> Vec<WrappedKeyUpload> {
+    let mut uploads = Vec::new();
+    if let Some(sharing) = delta.sharing.take() {
+        let report = session.keyring.apply_sharing(sharing);
+        session.cache.sharing = session.keyring.sharing_data().clone();
+        uploads = report.wrapped_keys;
+        // Shared vaults the account lost access to disappear with their items.
+        let accessible: BTreeSet<String> =
+            session.cache.sharing.vault_access.keys().cloned().collect();
+        let gone: Vec<String> = session
+            .cache
+            .vaults
+            .values()
+            .filter(|v| v.org_id.is_some() && !accessible.contains(&v.id))
+            .map(|v| v.id.clone())
+            .collect();
+        for vault_id in gone {
+            session.cache.vaults.remove(&vault_id);
+            session.vaults.remove(&vault_id);
+            session.cache.items.retain(|_, i| i.vault_id != vault_id);
+            session.items.retain(|_, i| i.vault_id != vault_id);
+        }
+    }
+    // Re-try shared vaults that could not be opened before (for example
+    // before their key arrived).
+    let pending_vaults: Vec<SyncVault> = session
+        .cache
+        .vaults
+        .values()
+        .filter(|v| v.org_id.is_some() && !session.vaults.contains_key(&v.id))
+        .cloned()
+        .collect();
+    delta.vaults.splice(0..0, pending_vaults);
     for vault in delta.vaults {
         if !id::is_valid_id(&vault.id) {
             continue;
         }
         let decrypted = (|| -> Result<String> {
-            if !session.keyring.has_vault(&vault.id) {
+            if vault.org_id.is_none() && !session.keyring.has_vault(&vault.id) {
                 session.keyring.add_vault(&vault.id, &vault.encrypted_key)?;
             }
-            let meta: serde_json::Value = serde_json::from_str(
-                &session
-                    .keyring
-                    .decrypt_vault_meta(&vault.id, &vault.encrypted_meta)?,
-            )?;
+            let meta: serde_json::Value =
+                serde_json::from_str(&session.keyring.decrypt_vault_meta_at(
+                    &vault.id,
+                    vault.key_epoch,
+                    &vault.encrypted_meta,
+                )?)?;
             Ok(meta["name"]
                 .as_str()
                 .filter(|n| !n.is_empty())
@@ -1114,13 +1288,21 @@ fn apply_delta(session: &mut Session, delta: SyncResponse) {
                         id: vault.id.clone(),
                         name,
                         revision: vault.revision,
+                        org_id: vault.org_id.clone(),
+                        key_epoch: vault.key_epoch,
                     },
                 );
                 session.cache.vaults.insert(vault.id.clone(), vault);
             }
-            Err(e) => session
-                .errors
-                .push(format!("Vault {} could not be decrypted: {e}", vault.id)),
+            Err(e) => {
+                session
+                    .errors
+                    .push(format!("Vault {} could not be decrypted: {e}", vault.id));
+                // Keep shared vaults in the cache: their key may arrive later.
+                if vault.org_id.is_some() {
+                    session.cache.vaults.insert(vault.id.clone(), vault);
+                }
+            }
         }
     }
     for item in delta.items {
@@ -1137,7 +1319,13 @@ fn apply_delta(session: &mut Session, delta: SyncResponse) {
         };
         let decrypted = session
             .keyring
-            .decrypt_item(&item.vault_id, &item.id, item.revision, data)
+            .decrypt_item_at(
+                &item.vault_id,
+                item.key_epoch,
+                &item.id,
+                item.revision,
+                data,
+            )
             .map_err(Error::from)
             .and_then(|json| ItemData::from_json(&json));
         match decrypted {
@@ -1149,6 +1337,7 @@ fn apply_delta(session: &mut Session, delta: SyncResponse) {
                         vault_id: item.vault_id.clone(),
                         revision: item.revision,
                         updated_at: item.updated_at,
+                        key_epoch: item.key_epoch,
                         data,
                     },
                 );
@@ -1163,6 +1352,7 @@ fn apply_delta(session: &mut Session, delta: SyncResponse) {
         }
     }
     session.cache.cursor = session.cache.cursor.max(delta.cursor);
+    uploads
 }
 
 fn now_ms() -> i64 {

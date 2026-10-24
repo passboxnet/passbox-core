@@ -120,6 +120,7 @@ mod tests {
             id: id.into(),
             vault_id: "v".into(),
             revision: 1,
+            key_epoch: 0,
             updated_at: 0,
             data,
         }

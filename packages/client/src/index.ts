@@ -46,6 +46,24 @@ export {
   type StrengthScore,
   type VaultHealth,
 } from "./security";
+export {
+  type Invitation,
+  type KeyLookup,
+  type Org,
+  type OrgGroup,
+  type OrgKind,
+  type OrgMember,
+  type OrgRole,
+  type PrincipalType,
+  parseInvitationLink,
+  type SharedVault,
+  type SharedVaultMember,
+  type SharingView,
+  type SharingWarning,
+  type SharingWarningKind,
+  type VaultAccess,
+  type VaultRole,
+} from "./sharing";
 export { type KeyValueStorage, memoryStorage } from "./storage";
 export {
   assertionJson,

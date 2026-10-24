@@ -14,6 +14,9 @@ use passbox_core::totp::Totp;
 
 uniffi::setup_scaffolding!();
 
+mod sharing;
+pub use sharing::*;
+
 #[cfg(target_os = "android")]
 mod android;
 

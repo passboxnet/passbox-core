@@ -23,6 +23,11 @@ pub const CACHE_KEY: &str = "cache";
 /// this device from the server's per-email login lockout and grants no
 /// access by itself.
 pub const DEVICE_TOKEN_KEY: &str = "device_token";
+/// Key under which the sharing trust store is kept (JSON): pinned keys of
+/// people the account shares with, organization fingerprints, the last
+/// verified key directory head and manifest versions. Public data whose
+/// integrity matters: a changed copy could hide a key change.
+pub const TRUST_KEY: &str = "trust";
 
 pub trait Store: Send + Sync {
     fn get(&self, key: &str) -> Result<Option<Vec<u8>>>;

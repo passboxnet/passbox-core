@@ -204,7 +204,25 @@ export type AccountEventKind =
   | "two_factor_method_added"
   | "two_factor_method_removed"
   | "recovery_code_used"
-  | "recovery_codes_regenerated";
+  | "recovery_codes_regenerated"
+  | "keys_published"
+  | "org_created"
+  | "org_deleted"
+  | "org_invitation_created"
+  | "org_invitation_accepted"
+  | "org_membership_confirmed"
+  | "org_member_confirmed"
+  | "org_role_changed"
+  | "org_membership_suspended"
+  | "org_membership_reactivated"
+  | "org_membership_removed"
+  | "org_member_removed"
+  | "vault_shared"
+  | "vault_unshared"
+  | "vault_member_changed"
+  | "vault_key_rotated"
+  | "group_joined"
+  | "group_left";
 
 export interface AccountEvent {
   id: string;
@@ -344,10 +362,15 @@ export interface AdminApi {
 
 export interface SyncVault {
   id: string;
+  /** Empty for shared vaults: their keys arrive in `sharing.vaultKeys`. */
   encryptedKey: string;
   encryptedMeta: string;
   revision: number;
   updatedAt: number;
+  /** Set for shared (organization) vaults. */
+  orgId?: string;
+  /** Key epoch of `encryptedMeta`; absent (0) for personal vaults. */
+  keyEpoch?: number;
 }
 
 export interface SyncItem {
@@ -358,12 +381,95 @@ export interface SyncItem {
   encryptedData: string | null;
   deleted: boolean;
   updatedAt: number;
+  /** Vault key epoch of `encryptedData` (0 for personal vaults). */
+  keyEpoch?: number;
 }
 
 export interface SyncResponse {
   cursor: number;
   vaults: SyncVault[];
   items: SyncItem[];
+  /**
+   * Organizations, rosters, groups, sealed keys and manifests (only with
+   * `sharing`). Opaque to this package; `@passbox/core-wasm` verifies it.
+   */
+  sharing?: Record<string, unknown>;
+}
+
+/** Account key pairs as stored on the server (`/api/v1/account/keys`). */
+export interface AccountKeys {
+  keyVersion: number;
+  /** Base64url canonical public bundle (self-signed). */
+  bundle: string;
+  bundleSignature: string;
+  /** Private keys, encrypted with the account key. */
+  encryptedPrivate: string;
+}
+
+export interface InvitationCreated {
+  id: string;
+  /** Shown once; the server keeps only its hash. */
+  token: string;
+  /** `/invite/{token}`, relative to the web app. */
+  path: string;
+  expiresAt: number;
+}
+
+export interface OrgInvitationInfo {
+  id: string;
+  email: string;
+  role: string;
+  status: string;
+  createdBy: string;
+  createdAt: number;
+  expiresAt: number;
+}
+
+export interface InvitationPreview {
+  orgId: string;
+  orgKind: "family" | "team";
+  email: string;
+  role: string;
+  expiresAt: number;
+}
+
+/**
+ * The sharing endpoints. Request bodies are built and signed by
+ * `@passbox/core-wasm` (`Keyring.createOrg`, `shareVault`, ...); see
+ * docs/architecture/sharing.md and docs/api/openapi.yaml.
+ */
+export interface SharingApi {
+  ownKeys(): Promise<AccountKeys>;
+  publishKeys(keys: AccountKeys): Promise<void>;
+  /** Key directory lookup with a proof from `since` (last verified head size). */
+  lookupKey(accountId: string, since: number): Promise<unknown>;
+  createOrg(body: unknown): Promise<{ id: string; seq: number; defaultVaultId?: string | null }>;
+  updateOrg(orgId: string, body: { revision: number; metaEpoch: number; encryptedMeta: string }): Promise<void>;
+  deleteOrg(orgId: string): Promise<void>;
+  rotateOrgKey(orgId: string, body: unknown): Promise<void>;
+  invite(orgId: string, body: { email: string; role: string; linkFragment?: string }): Promise<InvitationCreated>;
+  invitations(orgId: string): Promise<OrgInvitationInfo[]>;
+  revokeInvitation(orgId: string, invitationId: string): Promise<void>;
+  previewInvitation(token: string): Promise<InvitationPreview>;
+  acceptInvitation(token: string): Promise<{ orgId: string; role: string }>;
+  confirmMember(orgId: string, accountId: string, body: unknown): Promise<void>;
+  updateMember(orgId: string, accountId: string, body: unknown): Promise<void>;
+  suspendMember(orgId: string, accountId: string): Promise<void>;
+  reactivateMember(orgId: string, accountId: string): Promise<void>;
+  removeMember(orgId: string, accountId: string): Promise<{ vaults: string[]; groups: string[] }>;
+  createGroup(orgId: string, body: unknown): Promise<unknown>;
+  updateGroup(orgId: string, groupId: string, body: { metaEpoch: number; encryptedMeta: string }): Promise<void>;
+  deleteGroup(orgId: string, groupId: string): Promise<void>;
+  addGroupMember(orgId: string, groupId: string, body: unknown): Promise<unknown>;
+  rotateGroup(orgId: string, groupId: string, body: unknown): Promise<{ vaults?: string[] }>;
+  createSharedVault(orgId: string, body: unknown): Promise<{ seq: number; keyEpoch: number }>;
+  putVaultMember(vaultId: string, body: unknown): Promise<{ seq: number; keyEpoch: number }>;
+  rotateVault(vaultId: string, body: unknown): Promise<{ seq: number; keyEpoch: number }>;
+  putWrappedKey(vaultId: string, keyEpoch: number, wrappedKey: string): Promise<void>;
+  reencryptItems(
+    vaultId: string,
+    items: { id: string; revision: number; keyEpoch: number; encryptedData: string }[],
+  ): Promise<{ id: string; status: "ok" | "conflict"; revision: number }[]>;
 }
 
 export interface WriteResponse {
@@ -459,10 +565,15 @@ export interface PassboxApi extends AdminApi {
   sessions(): Promise<SessionInfo[]>;
   revokeSession(id: string): Promise<void>;
   revokeOtherSessions(): Promise<void>;
-  sync(since: number): Promise<SyncResponse>;
+  /** With `sharing`, shared vaults and the sharing state are included. */
+  sync(since: number, options?: { sharing?: boolean }): Promise<SyncResponse>;
   createVault(vault: NewVault): Promise<WriteResponse>;
-  updateVault(id: string, req: { revision: number; encryptedMeta: string }): Promise<WriteResponse>;
-  putItem(id: string, req: { vaultId: string; revision: number; encryptedData: string }): Promise<WriteResponse>;
+  updateVault(id: string, req: { revision: number; encryptedMeta: string; keyEpoch?: number }): Promise<WriteResponse>;
+  putItem(
+    id: string,
+    req: { vaultId: string; revision: number; encryptedData: string; keyEpoch?: number },
+  ): Promise<WriteResponse>;
+  sharing: SharingApi;
   deleteItem(id: string, revision: number): Promise<WriteResponse>;
 }
 
@@ -521,7 +632,8 @@ export function createClient(options: ClientOptions = {}): PassboxApi {
     sessions: () => call("GET", "/api/v1/sessions"),
     revokeSession: (id) => call("DELETE", `/api/v1/sessions/${encodeURIComponent(id)}`),
     revokeOtherSessions: () => call("POST", "/api/v1/sessions/revoke-others", {}),
-    sync: (since) => call("GET", `/api/v1/sync?since=${encodeURIComponent(since)}`),
+    sync: (since, syncOptions) =>
+      call("GET", `/api/v1/sync?since=${encodeURIComponent(since)}${syncOptions?.sharing ? "&sharing=1" : ""}`),
     createVault: (vault) => call("POST", "/api/v1/vaults", vault),
     updateVault: (id, req) => call("PUT", `/api/v1/vaults/${encodeURIComponent(id)}`, req),
     putItem: (id, req) => call("PUT", `/api/v1/items/${encodeURIComponent(id)}`, req),
@@ -537,6 +649,47 @@ export function createClient(options: ClientOptions = {}): PassboxApi {
     adminInvites: () => call("GET", "/api/v1/admin/invites"),
     createInvite: (req) => call("POST", "/api/v1/admin/invites", req),
     revokeInvite: (id) => call("DELETE", `/api/v1/admin/invites/${encodeURIComponent(id)}`),
+    sharing: sharingApi(call),
+  };
+}
+
+type Call = <T>(method: string, path: string, body?: unknown) => Promise<T>;
+
+function sharingApi(call: Call): SharingApi {
+  const e = encodeURIComponent;
+  const org = (id: string) => `/api/v1/orgs/${e(id)}`;
+  const member = (orgId: string, accountId: string) => `${org(orgId)}/members/${e(accountId)}`;
+  const group = (orgId: string, groupId: string) => `${org(orgId)}/groups/${e(groupId)}`;
+  const vault = (id: string) => `/api/v1/vaults/${e(id)}`;
+  return {
+    ownKeys: () => call("GET", "/api/v1/account/keys"),
+    publishKeys: (keys) => call("PUT", "/api/v1/account/keys", keys),
+    lookupKey: (accountId, since) => call("GET", `/api/v1/keys/${e(accountId)}?since=${e(since)}`),
+    createOrg: (body) => call("POST", "/api/v1/orgs", body),
+    updateOrg: (orgId, body) => call("PUT", org(orgId), body),
+    deleteOrg: (orgId) => call("DELETE", org(orgId)),
+    rotateOrgKey: (orgId, body) => call("POST", `${org(orgId)}/rotate-key`, body),
+    invite: (orgId, body) => call("POST", `${org(orgId)}/invitations`, body),
+    invitations: (orgId) => call("GET", `${org(orgId)}/invitations`),
+    revokeInvitation: (orgId, id) => call("DELETE", `${org(orgId)}/invitations/${e(id)}`),
+    previewInvitation: (token) => call("GET", `/api/v1/invitations/${e(token)}`),
+    acceptInvitation: (token) => call("POST", "/api/v1/invitations/accept", { token }),
+    confirmMember: (orgId, accountId, body) => call("POST", `${member(orgId, accountId)}/confirm`, body),
+    updateMember: (orgId, accountId, body) => call("PUT", member(orgId, accountId), body),
+    suspendMember: (orgId, accountId) => call("POST", `${member(orgId, accountId)}/suspend`, {}),
+    reactivateMember: (orgId, accountId) => call("POST", `${member(orgId, accountId)}/reactivate`, {}),
+    removeMember: (orgId, accountId) => call("DELETE", member(orgId, accountId)),
+    createGroup: (orgId, body) => call("POST", `${org(orgId)}/groups`, body),
+    updateGroup: (orgId, groupId, body) => call("PUT", group(orgId, groupId), body),
+    deleteGroup: (orgId, groupId) => call("DELETE", group(orgId, groupId)),
+    addGroupMember: (orgId, groupId, body) => call("POST", `${group(orgId, groupId)}/members`, body),
+    rotateGroup: (orgId, groupId, body) => call("POST", `${group(orgId, groupId)}/rotate`, body),
+    createSharedVault: (orgId, body) => call("POST", `${org(orgId)}/vaults`, body),
+    putVaultMember: (vaultId, body) => call("POST", `${vault(vaultId)}/members`, body),
+    rotateVault: (vaultId, body) => call("POST", `${vault(vaultId)}/rotate`, body),
+    putWrappedKey: (vaultId, keyEpoch, wrappedKey) =>
+      call("PUT", `${vault(vaultId)}/keys/${e(keyEpoch)}/wrapped`, { wrappedKey }),
+    reencryptItems: (vaultId, items) => call("POST", `${vault(vaultId)}/items/batch`, { items }),
   };
 }
 
