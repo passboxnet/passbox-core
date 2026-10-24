@@ -589,6 +589,16 @@ impl Api {
         self.call(method, path, Some(token), body)
     }
 
+    /// Like [`Api::request`] without a session (recovery and device codes).
+    pub fn request_anonymous(
+        &self,
+        method: &str,
+        path: &str,
+        body: Option<Value>,
+    ) -> Result<Value> {
+        self.call(method, path, None, body)
+    }
+
     /// `GET /api/v1/invitations/{token}` (no session needed).
     pub fn invitation_preview(&self, token: &str) -> Result<Value> {
         self.call("GET", &format!("/api/v1/invitations/{token}"), None, None)

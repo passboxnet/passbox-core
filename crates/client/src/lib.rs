@@ -13,6 +13,11 @@ pub mod security;
 pub mod store;
 
 pub use api::{AccountEvent, SecurityKeyInfo, SessionInfo, TotpSetup, TwoFactorStatus};
+pub use client::recovery::{
+    CodeRecoveryStart, DeviceLinkStart, DeviceLinkState, EmergencyContact, EmergencyContacts,
+    EmergencyVaults, LinkedAccount, OrgRecovery, PendingOrgRecovery, RecoveryRequest,
+    RecoveryResult, RecoveryStatus,
+};
 pub use client::sharing::{
     Invitation, InvitationInfo, InvitationPreview, VaultAccess, parse_invitation_link,
 };

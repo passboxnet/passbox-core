@@ -3,6 +3,7 @@
 //! The client is synchronous. Call it from a background thread in UI apps.
 //! All methods take `&self`; an internal lock serializes operations.
 
+pub mod recovery;
 pub mod sharing;
 
 use std::collections::{BTreeMap, BTreeSet};
@@ -130,6 +131,8 @@ pub struct Client {
     pending: Mutex<Option<PendingLogin>>,
     /// Device name and client kind shown in the account's device list.
     device: Mutex<(String, String)>,
+    /// Recoveries and device codes in progress.
+    recovery: Mutex<recovery::RecoveryState>,
 }
 
 fn is_network(error: &Error) -> bool {
@@ -153,6 +156,7 @@ impl Client {
             session: Mutex::new(None),
             pending: Mutex::new(None),
             device: Mutex::new((String::new(), String::new())),
+            recovery: Mutex::new(recovery::RecoveryState::default()),
         }
     }
 

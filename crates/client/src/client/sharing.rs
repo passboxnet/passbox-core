@@ -89,11 +89,11 @@ pub fn parse_invitation_link(link: &str) -> (String, Option<String>) {
 }
 
 impl Client {
-    fn call(&self, method: &str, path: &str, body: Option<Value>) -> Result<Value> {
+    pub(super) fn call(&self, method: &str, path: &str, body: Option<Value>) -> Result<Value> {
         self.with_token(|token| self.api.request(method, path, token, body.clone()))
     }
 
-    fn with_keyring<T>(
+    pub(super) fn with_keyring<T>(
         &self,
         f: impl FnOnce(&mut passbox_core::keyring::Keyring) -> passbox_core::Result<T>,
     ) -> Result<T> {
