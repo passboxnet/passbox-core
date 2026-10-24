@@ -2,10 +2,17 @@ import {
   type AccountEvent,
   ApiError,
   type ClientKind,
+  isTwoFactorChallenge,
   type KdfParams,
+  type LoginFinishResult,
   type PassboxApi,
+  type SecondFactor,
   type SessionInfo,
   type SyncResponse,
+  type TwoFactorChallenge,
+  type TwoFactorMethod,
+  type TwoFactorStatus,
+  type WebAuthnRequestOptionsJson,
 } from "@passbox/api-client";
 import type * as Core from "@passbox/core-wasm";
 import {
@@ -19,6 +26,7 @@ import {
 } from "./items";
 import { analyzeVault, estimateStrength, type Strength, type VaultHealth } from "./security";
 import type { KeyValueStorage } from "./storage";
+import { type CredentialsContainerLike, createCredential, getAssertion } from "./webauthn";
 
 type CoreModule = typeof Core;
 
@@ -115,6 +123,85 @@ export class ConflictError extends Error {
   }
 }
 
+/**
+ * Thrown by `signIn`, `unlock`, `reauthenticate` and `changeMasterPassword`
+ * when the password was right but the account needs a second factor on this
+ * device. The client keeps the login pending (in memory, for 5 minutes):
+ * finish it with `completeTwoFactor` or `completeTwoFactorWithSecurityKey`,
+ * or drop it with `cancelTwoFactor`.
+ */
+export class TwoFactorRequiredError extends Error {
+  readonly methods: TwoFactorMethod[];
+  /** Options for a security key, when the account has one for this site. */
+  readonly webauthn: WebAuthnRequestOptionsJson | undefined;
+  readonly expiresAt: number;
+
+  constructor(challenge: TwoFactorChallenge) {
+    super("This account needs a second factor to sign in.");
+    this.name = "TwoFactorRequiredError";
+    this.methods = challenge.methods;
+    this.webauthn = challenge.webauthn;
+    this.expiresAt = challenge.expiresAt;
+  }
+}
+
+/** The two-factor code, recovery code or security key was not accepted. Try again. */
+export class InvalidTwoFactorCodeError extends Error {
+  constructor() {
+    super("The two-factor code is incorrect.");
+    this.name = "InvalidTwoFactorCodeError";
+  }
+}
+
+/** The pending login expired or was used up; sign in or unlock again. */
+export class TwoFactorExpiredError extends Error {
+  constructor() {
+    super("The sign-in expired. Start again.");
+    this.name = "TwoFactorExpiredError";
+  }
+}
+
+/** The server needs a recent login for this change; call `reauthenticate` first. */
+export class ReauthenticationRequiredError extends Error {
+  constructor() {
+    super("Enter your master password again to confirm this change.");
+    this.name = "ReauthenticationRequiredError";
+  }
+}
+
+/** Maps the server's two-factor error codes to typed errors. */
+function twoFactorError(error: unknown): unknown {
+  if (!(error instanceof ApiError)) return error;
+  switch (error.code) {
+    case "invalid_two_factor_code":
+      return new InvalidTwoFactorCodeError();
+    case "two_factor_expired":
+      return new TwoFactorExpiredError();
+    case "reauthentication_required":
+      return new ReauthenticationRequiredError();
+    default:
+      return error;
+  }
+}
+
+/** Why a login runs: it decides what a completed second step does. */
+type LoginPurpose = "signIn" | "unlock" | "reauth";
+
+interface PendingTwoFactor {
+  account: DeviceAccount;
+  keys: Core.MasterKeys;
+  challenge: TwoFactorChallenge;
+  purpose: LoginPurpose;
+}
+
+/** A login counts as recent for this long (the server allows 10 minutes). */
+const RECENT_LOGIN_MS = 9 * 60 * 1000;
+
+/** How a second factor for turning two-factor sign-in off is given. */
+export type DisableFactor =
+  | { method: "totp" | "recovery"; code: string }
+  | { method: "webauthn"; credentials?: CredentialsContainerLike };
+
 const ACCOUNT_KEY = "passbox.account";
 /**
  * The server's device token for this device. It exempts the device from the
@@ -137,6 +224,11 @@ export interface PassboxClientOptions {
   storage: KeyValueStorage;
   /** Identifies this device in the user's device list. */
   device?: { name: string; kind: ClientKind };
+  /**
+   * The web origin (`location.origin`) of a browser client, so sign-ins
+   * offer the security keys registered for it.
+   */
+  origin?: string;
 }
 
 /**
@@ -150,6 +242,11 @@ export class PassboxClient {
   private readonly api: PassboxApi;
   private readonly storage: KeyValueStorage;
   private readonly device: { name: string; kind: ClientKind } | undefined;
+  private readonly origin: string | undefined;
+  /** A login waiting for its second factor. */
+  private pending: PendingTwoFactor | undefined;
+  /** When the current session token was issued by a full login (ms). */
+  private loginAt = 0;
   private keyring: Core.Keyring | undefined;
   /** The account key encrypted with the master keys, kept to verify the master password offline. */
   private accountKeyCiphertext: string | undefined;
@@ -167,6 +264,7 @@ export class PassboxClient {
     this.api = options.api;
     this.storage = options.storage;
     this.device = options.device;
+    this.origin = options.origin;
     this.snapshot = this.buildSnapshot();
   }
 
@@ -248,7 +346,7 @@ export class PassboxClient {
       });
       keyring.free();
 
-      await this.login(account, keys);
+      await this.login(account, keys, "signIn");
       this.storage.setItem(ACCOUNT_KEY, JSON.stringify(account));
       await this.sync();
       return { secretKey: account.secretKey, accountId: account.accountId };
@@ -257,7 +355,10 @@ export class PassboxClient {
     }
   }
 
-  /** Signs in on a new device with email, master password and Secret Key. */
+  /**
+   * Signs in on a new device with email, master password and Secret Key.
+   * Throws `TwoFactorRequiredError` when the account needs a second factor.
+   */
   async signIn(email: string, password: string, secretKey: string): Promise<void> {
     const normalizedEmail = email.trim().toLowerCase();
     let normalizedKey: string;
@@ -276,25 +377,204 @@ export class PassboxClient {
     };
     const keys = this.deriveKeys(account, password);
     try {
-      await this.login(account, keys);
+      await this.login(account, keys, "signIn");
       this.storage.setItem(ACCOUNT_KEY, JSON.stringify(account));
     } finally {
-      keys.free();
+      this.releaseKeys(keys);
     }
     await this.sync();
   }
 
-  /** Unlocks the account remembered on this device. */
+  /**
+   * Unlocks the account remembered on this device. Throws
+   * `TwoFactorRequiredError` when the account needs a second factor and
+   * this device is not remembered.
+   */
   async unlock(password: string): Promise<void> {
     const account = this.deviceAccount;
     if (!account) throw new Error("no account on this device");
     const keys = this.deriveKeys(account, password);
     try {
-      await this.login(account, keys);
+      await this.login(account, keys, "unlock");
     } finally {
-      keys.free();
+      this.releaseKeys(keys);
     }
     await this.sync();
+  }
+
+  // --- Two-factor sign-in ----------------------------------------------------------
+
+  /** The login waiting for a second factor, if any. */
+  get pendingTwoFactor(): TwoFactorChallenge | undefined {
+    return this.pending?.challenge;
+  }
+
+  /**
+   * Completes the pending login with a 6-digit code or a recovery code.
+   * `rememberDevice` skips the second step on this device for 30 days.
+   * Throws `InvalidTwoFactorCodeError` (try again) or `TwoFactorExpiredError`
+   * (start over). Returns the number of recovery codes left after using one.
+   */
+  async completeTwoFactor(
+    factor: SecondFactor,
+    options: { rememberDevice?: boolean } = {},
+  ): Promise<{ recoveryCodesRemaining?: number }> {
+    const pending = this.pending;
+    if (!pending) throw new TwoFactorExpiredError();
+    let session: Awaited<ReturnType<PassboxApi["loginTwoFactor"]>>;
+    try {
+      session = await this.api.loginTwoFactor({
+        ...factor,
+        challengeToken: pending.challenge.challengeToken,
+        rememberDevice: options.rememberDevice ?? false,
+      });
+    } catch (error) {
+      const typed = twoFactorError(error);
+      if (typed instanceof TwoFactorExpiredError) this.cancelTwoFactor();
+      throw typed;
+    }
+    this.pending = undefined;
+    try {
+      if (session.deviceToken) this.storage.setItem(DEVICE_TOKEN_KEY, session.deviceToken);
+      await this.useSession(pending.keys, session.token, pending.purpose);
+      if (pending.purpose === "signIn") this.storage.setItem(ACCOUNT_KEY, JSON.stringify(pending.account));
+    } finally {
+      pending.keys.free();
+    }
+    if (pending.purpose !== "reauth") await this.sync();
+    return session.recoveryCodesRemaining === undefined
+      ? {}
+      : { recoveryCodesRemaining: session.recoveryCodesRemaining };
+  }
+
+  /**
+   * Completes the pending login with a security key or passkey: asks the
+   * browser (`navigator.credentials` unless `credentials` is given) to sign
+   * the server's challenge.
+   */
+  async completeTwoFactorWithSecurityKey(
+    options: { rememberDevice?: boolean; credentials?: CredentialsContainerLike; signal?: AbortSignal } = {},
+  ): Promise<{ recoveryCodesRemaining?: number }> {
+    const request = this.pending?.challenge.webauthn;
+    if (!request) throw new TwoFactorExpiredError();
+    const webauthn = await getAssertion(options.credentials ?? navigator.credentials, request, options.signal);
+    return this.completeTwoFactor(
+      { method: "webauthn", webauthn },
+      options.rememberDevice === undefined ? {} : { rememberDevice: options.rememberDevice },
+    );
+  }
+
+  /** Drops the pending login. */
+  cancelTwoFactor(): void {
+    this.pending?.keys.free();
+    this.pending = undefined;
+  }
+
+  /**
+   * Proves the master password again with a fresh login, for changes the
+   * server only accepts from a recent login (adding a second factor, for
+   * example). The vault stays unlocked; a wrong password throws
+   * `InvalidCredentialsError` without locking. May throw
+   * `TwoFactorRequiredError`; then `completeTwoFactor` finishes it.
+   */
+  async reauthenticate(password: string): Promise<void> {
+    const account = this.deviceAccount;
+    if (!account) throw new Error("no account on this device");
+    const keys = await this.checkedKeys(account, password);
+    try {
+      await this.login(account, keys, "reauth");
+    } finally {
+      this.releaseKeys(keys);
+    }
+  }
+
+  /** Whether the session comes from a login recent enough for sensitive changes. */
+  get hasRecentLogin(): boolean {
+    return this.token !== undefined && Date.now() - this.loginAt < RECENT_LOGIN_MS;
+  }
+
+  /** Two-factor status of the account. */
+  async twoFactorStatus(): Promise<TwoFactorStatus> {
+    this.requireKeyring();
+    return this.api.twoFactorStatus();
+  }
+
+  /**
+   * Starts setting up an authenticator app. Show `uri` as a QR code (and
+   * `secret` for typing), then call `confirmTotpSetup` with a first code.
+   * Throws `ReauthenticationRequiredError` without a recent login.
+   */
+  async startTotpSetup(): Promise<{ secret: string; uri: string }> {
+    this.requireKeyring();
+    return this.twoFactorCall(() => this.api.totpStart());
+  }
+
+  /** Turns the authenticator app on. Returns new recovery codes (shown once) if the account had none. */
+  async confirmTotpSetup(code: string): Promise<{ recoveryCodes?: string[] }> {
+    this.requireKeyring();
+    return this.twoFactorCall(() => this.api.totpConfirm(code.replace(/\s/g, "")));
+  }
+
+  /** Removes the authenticator app (only while a security key remains). */
+  async removeTotp(): Promise<void> {
+    this.requireKeyring();
+    await this.twoFactorCall(() => this.api.totpRemove());
+  }
+
+  /**
+   * Registers a security key or passkey as a second factor: the browser asks
+   * the user to touch it. Returns new recovery codes if the account had none.
+   */
+  async addSecurityKey(
+    name: string,
+    options: { credentials?: CredentialsContainerLike; origin?: string; signal?: AbortSignal } = {},
+  ): Promise<{ recoveryCodes?: string[] }> {
+    this.requireKeyring();
+    const origin = options.origin ?? this.origin ?? globalThis.location?.origin ?? "";
+    const { registrationId, publicKey } = await this.twoFactorCall(() => this.api.webauthnRegisterStart(origin));
+    const credential = await createCredential(options.credentials ?? navigator.credentials, publicKey, options.signal);
+    const result = await this.twoFactorCall(() =>
+      this.api.webauthnRegisterFinish({ registrationId, name, credential }),
+    );
+    return result.recoveryCodes ? { recoveryCodes: result.recoveryCodes } : {};
+  }
+
+  /** Removes a security key (only while another second factor remains). */
+  async removeSecurityKey(id: string): Promise<void> {
+    this.requireKeyring();
+    await this.twoFactorCall(() => this.api.webauthnRemove(id));
+  }
+
+  /** Replaces all recovery codes with 10 new ones, shown once. */
+  async regenerateRecoveryCodes(): Promise<string[]> {
+    this.requireKeyring();
+    return (await this.twoFactorCall(() => this.api.regenerateRecoveryCodes())).recoveryCodes;
+  }
+
+  /**
+   * Turns two-factor sign-in off. Needs a current code, a recovery code or
+   * the security key (`{ method: "webauthn" }`).
+   */
+  async disableTwoFactor(factor: DisableFactor): Promise<void> {
+    this.requireKeyring();
+    if (factor.method !== "webauthn") {
+      await this.twoFactorCall(() => this.api.disableTwoFactor(factor));
+      return;
+    }
+    const challenge = await this.twoFactorCall(() => this.api.twoFactorChallenge(this.origin));
+    if (!challenge.webauthn) throw new Error("no security key for this site");
+    const webauthn = await getAssertion(factor.credentials ?? navigator.credentials, challenge.webauthn);
+    await this.twoFactorCall(() =>
+      this.api.disableTwoFactor({ method: "webauthn", webauthn, challengeToken: challenge.challengeToken }),
+    );
+  }
+
+  private async twoFactorCall<T>(call: () => Promise<T>): Promise<T> {
+    try {
+      return await call();
+    } catch (error) {
+      throw twoFactorError(error);
+    }
   }
 
   // --- Account security ----------------------------------------------------------
@@ -324,18 +604,21 @@ export class PassboxClient {
   }
 
   /**
-   * Changes the master password. The current password is verified with a
-   * fresh login (the server only accepts the change from a recent login).
+   * Changes the master password. The current password is checked on the
+   * device; unless the session comes from a recent login, a fresh login
+   * follows (the server only accepts the change from a recent login), which
+   * may throw `TwoFactorRequiredError`: complete it and call this again.
    * Vaults and items stay as they are; every other device is signed out.
    */
   async changeMasterPassword(currentPassword: string, newPassword: string): Promise<void> {
     const account = this.deviceAccount;
     if (!account) throw new Error("no account on this device");
-    const currentKeys = this.deriveKeys(account, currentPassword);
+    this.requireKeyring();
+    const currentKeys = await this.checkedKeys(account, currentPassword);
     try {
-      await this.login(account, currentKeys);
+      if (!this.hasRecentLogin) await this.login(account, currentKeys, "reauth");
     } finally {
-      currentKeys.free();
+      this.releaseKeys(currentKeys);
     }
     const keyring = this.requireKeyring();
     const next: DeviceAccount = { ...account, kdfSalt: this.core.generateKdfSalt() };
@@ -423,6 +706,7 @@ export class PassboxClient {
 
   /** Forgets all decrypted data and keys. The account stays on this device. */
   lock(): void {
+    this.cancelTwoFactor();
     // The API client reads the token when the request starts, so start the
     // logout before clearing it. Best effort: the session expires anyway.
     const logout = this.token ? this.api.logout() : undefined;
@@ -444,6 +728,7 @@ export class PassboxClient {
     this.keyring = undefined;
     this.accountKeyCiphertext = undefined;
     this.token = undefined;
+    this.loginAt = 0;
     this.cursor = 0;
     this.vaults.clear();
     this.items.clear();
@@ -464,8 +749,31 @@ export class PassboxClient {
     }
   }
 
-  /** Runs the OPAQUE login and unlocks the keyring. */
-  private async login(account: DeviceAccount, keys: Core.MasterKeys): Promise<void> {
+  /** Frees master keys unless a pending second step still needs them. */
+  private releaseKeys(keys: Core.MasterKeys) {
+    if (this.pending?.keys !== keys) keys.free();
+  }
+
+  /**
+   * Derives the master keys and, while unlocked, checks them on the device
+   * against the account key, so a typo never reaches the server.
+   */
+  private async checkedKeys(account: DeviceAccount, password: string): Promise<Core.MasterKeys> {
+    const keys = this.deriveKeys(account, password);
+    const keyring = this.keyring;
+    if (!keyring) return keys;
+    try {
+      this.accountKeyCiphertext ??= keyring.encryptedAccountKey ?? (await this.api.account()).encryptedAccountKey;
+      this.core.Keyring.unlock(keys, account.accountId, this.accountKeyCiphertext).free();
+      return keys;
+    } catch (error) {
+      keys.free();
+      throw isInvalidCredentials(error) ? new InvalidCredentialsError() : error;
+    }
+  }
+
+  /** Runs the OPAQUE login. Returns a session or the second-factor challenge. */
+  private async authenticate(account: DeviceAccount, keys: Core.MasterKeys): Promise<LoginFinishResult> {
     const flow = this.core.LoginFlow.start(keys);
     try {
       // The server ignores a device token that belongs to another account.
@@ -480,19 +788,60 @@ export class PassboxClient {
         loginId: start.loginId,
         credentialFinalization,
         ...(this.device ? { deviceName: this.device.name, clientKind: this.device.kind } : {}),
+        ...(this.origin ? { origin: this.origin } : {}),
       });
-      const { token } = finish;
-      if (finish.deviceToken) this.storage.setItem(DEVICE_TOKEN_KEY, finish.deviceToken);
+      if (!isTwoFactorChallenge(finish) && finish.deviceToken) {
+        this.storage.setItem(DEVICE_TOKEN_KEY, finish.deviceToken);
+      }
+      return finish;
+    } catch (error) {
+      throw isInvalidCredentials(error) ? new InvalidCredentialsError() : error;
+    } finally {
+      flow.free();
+    }
+  }
+
+  /**
+   * Runs the OPAQUE login and unlocks the keyring (or, to reauthenticate,
+   * only replaces the session token). When the account needs a second
+   * factor, keeps `keys` for the pending login and throws
+   * `TwoFactorRequiredError`.
+   */
+  private async login(account: DeviceAccount, keys: Core.MasterKeys, purpose: LoginPurpose): Promise<void> {
+    let result: LoginFinishResult;
+    try {
+      result = await this.authenticate(account, keys);
+    } catch (error) {
+      if (purpose !== "reauth") this.clearSession();
+      throw error;
+    }
+    if (isTwoFactorChallenge(result)) {
+      if (purpose !== "reauth") this.clearSession();
+      this.cancelTwoFactor();
+      this.pending = { account, keys, challenge: result, purpose };
+      if (purpose !== "reauth") this.emit();
+      throw new TwoFactorRequiredError(result);
+    }
+    await this.useSession(keys, result.token, purpose);
+  }
+
+  /** Takes a session token from a complete login. */
+  private async useSession(keys: Core.MasterKeys, token: string, purpose: LoginPurpose) {
+    if (purpose === "reauth") {
+      this.token = token;
+      this.loginAt = Date.now();
+      return;
+    }
+    try {
       this.clearSession();
       this.token = token;
       const remote = await this.api.account();
       this.keyring = this.core.Keyring.unlock(keys, remote.accountId, remote.encryptedAccountKey);
       this.accountKeyCiphertext = remote.encryptedAccountKey;
+      this.loginAt = Date.now();
     } catch (error) {
       this.clearSession();
       throw isInvalidCredentials(error) ? new InvalidCredentialsError() : error;
-    } finally {
-      flow.free();
     }
   }
 

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { ApiError, createClient } from "./index";
+import { ApiError, createClient, isTwoFactorChallenge } from "./index";
 
 function fakeFetch(status: number, body: unknown) {
   return vi.fn(
@@ -46,5 +46,29 @@ describe("createClient", () => {
     expect(error).toBeInstanceOf(ApiError);
     expect(error).toMatchObject({ status: 409, code: "conflict", message: "changed" });
     expect((error as ApiError).body?.details?.currentRevision).toBe(3);
+  });
+
+  it("tells a two-factor challenge from a session", async () => {
+    const challenge = { twoFactorRequired: true, challengeToken: "c", expiresAt: 1, methods: ["totp"] };
+    const client = createClient({ fetch: fakeFetch(200, challenge) });
+    const result = await client.loginFinish({ loginId: "l", credentialFinalization: "f", origin: "https://x" });
+    expect(isTwoFactorChallenge(result)).toBe(true);
+    expect(isTwoFactorChallenge({ token: "t", accountId: "a", sessionId: "s", expiresAt: 1, deviceToken: "d" })).toBe(
+      false,
+    );
+  });
+
+  it("sends the second factor to login/two-factor", async () => {
+    const fetch = fakeFetch(200, { token: "t" });
+    const client = createClient({ fetch });
+    await client.loginTwoFactor({ challengeToken: "c", method: "totp", code: "123456", rememberDevice: true });
+    const [url, init] = fetch.mock.calls[0] ?? [];
+    expect(url).toBe("/api/v1/auth/login/two-factor");
+    expect(JSON.parse(init?.body as string)).toEqual({
+      challengeToken: "c",
+      method: "totp",
+      code: "123456",
+      rememberDevice: true,
+    });
   });
 });

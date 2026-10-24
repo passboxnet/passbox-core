@@ -3,14 +3,19 @@ export {
   type ClientStatus,
   ConflictError,
   type DeviceAccount,
+  type DisableFactor,
   type ImportEntry,
   type ImportItemsOptions,
   type ImportItemsResult,
   InvalidCredentialsError,
+  InvalidTwoFactorCodeError,
   type Item,
   PassboxClient,
   type PassboxClientOptions,
+  ReauthenticationRequiredError,
   type SessionState,
+  TwoFactorExpiredError,
+  TwoFactorRequiredError,
   type Vault,
 } from "./client";
 export {
@@ -41,3 +46,15 @@ export {
   type VaultHealth,
 } from "./security";
 export { type KeyValueStorage, memoryStorage } from "./storage";
+export {
+  assertionJson,
+  attestationJson,
+  base64UrlToBytes,
+  bytesToBase64Url,
+  type CredentialsContainerLike,
+  createCredential,
+  creationOptions,
+  getAssertion,
+  requestOptions,
+  webAuthnAvailable,
+} from "./webauthn";

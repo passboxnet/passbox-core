@@ -54,6 +54,96 @@ export interface LoginFinishResponse {
    * login lockout and grants no access by itself.
    */
   deviceToken: string;
+  /** Unused recovery codes left, after signing in with one. */
+  recoveryCodesRemaining?: number;
+}
+
+export type TwoFactorMethod = "totp" | "webauthn" | "recovery";
+
+/** A credential the browser may use, as in `PublicKeyCredentialDescriptor` (ID as Base64url). */
+export interface WebAuthnCredentialDescriptor {
+  type: "public-key";
+  id: string;
+}
+
+/** `PublicKeyCredentialRequestOptions` with binary values as Base64url. */
+export interface WebAuthnRequestOptionsJson {
+  challenge: string;
+  rpId: string;
+  allowCredentials: WebAuthnCredentialDescriptor[];
+  timeout: number;
+  userVerification: "required" | "preferred" | "discouraged";
+}
+
+/** `PublicKeyCredentialCreationOptions` with binary values as Base64url. */
+export interface WebAuthnCreationOptionsJson {
+  challenge: string;
+  rp: { id: string; name: string };
+  user: { id: string; name: string; displayName: string };
+  pubKeyCredParams: { type: "public-key"; alg: number }[];
+  timeout: number;
+  attestation: "none";
+  excludeCredentials: WebAuthnCredentialDescriptor[];
+  authenticatorSelection: {
+    residentKey: "discouraged" | "preferred" | "required";
+    userVerification: "required" | "preferred" | "discouraged";
+  };
+}
+
+/**
+ * Returned by `loginFinish` instead of a session when the account has
+ * two-factor authentication on and this device is not remembered. Complete
+ * it with `loginTwoFactor` within 5 minutes.
+ */
+export interface TwoFactorChallenge {
+  twoFactorRequired: true;
+  challengeToken: string;
+  expiresAt: number;
+  methods: TwoFactorMethod[];
+  /** Present when the account has security keys for this origin. */
+  webauthn?: WebAuthnRequestOptionsJson;
+}
+
+export type LoginFinishResult = LoginFinishResponse | TwoFactorChallenge;
+
+export function isTwoFactorChallenge(result: LoginFinishResult): result is TwoFactorChallenge {
+  return (result as TwoFactorChallenge).twoFactorRequired === true;
+}
+
+/** A WebAuthn assertion (`navigator.credentials.get`), binary values as Base64url. */
+export interface WebAuthnAssertionJson {
+  credentialId: string;
+  clientDataJson: string;
+  authenticatorData: string;
+  signature: string;
+}
+
+/** A WebAuthn registration (`navigator.credentials.create`), binary values as Base64url. */
+export interface WebAuthnAttestationJson {
+  clientDataJson: string;
+  attestationObject: string;
+}
+
+/** A second factor: a 6-digit code, a recovery code or a security key. */
+export type SecondFactor =
+  | { method: "totp"; code: string }
+  | { method: "recovery"; code: string }
+  | { method: "webauthn"; webauthn: WebAuthnAssertionJson };
+
+export interface SecurityKeyInfo {
+  id: string;
+  name: string;
+  createdAt: number;
+  /** 0 if never used. */
+  lastUsedAt: number;
+}
+
+export interface TwoFactorStatus {
+  /** Whether sign-ins need a second factor. */
+  enabled: boolean;
+  totp: boolean;
+  securityKeys: SecurityKeyInfo[];
+  recoveryCodesRemaining: number;
 }
 
 export type ClientKind = "web" | "extension" | "desktop" | "ios" | "android" | "cli";
@@ -77,7 +167,15 @@ export type AccountEventKind =
   | "logout"
   | "session_revoked"
   | "other_sessions_revoked"
-  | "password_changed";
+  | "password_changed"
+  | "login_two_factor"
+  | "two_factor_failed"
+  | "two_factor_enabled"
+  | "two_factor_disabled"
+  | "two_factor_method_added"
+  | "two_factor_method_removed"
+  | "recovery_code_used"
+  | "recovery_codes_regenerated";
 
 export interface AccountEvent {
   id: string;
@@ -175,7 +273,12 @@ export interface PassboxApi {
     credentialFinalization: string;
     deviceName?: string;
     clientKind?: ClientKind;
-  }): Promise<LoginFinishResponse>;
+    /** `location.origin` of a web client, to be offered its security keys. */
+    origin?: string;
+  }): Promise<LoginFinishResult>;
+  loginTwoFactor(
+    req: SecondFactor & { challengeToken: string; rememberDevice?: boolean },
+  ): Promise<LoginFinishResponse>;
   logout(): Promise<void>;
   account(): Promise<Account>;
   accountEvents(limit?: number): Promise<AccountEvent[]>;
@@ -186,6 +289,22 @@ export interface PassboxApi {
     kdfParams: KdfParams;
     encryptedAccountKey: string;
   }): Promise<void>;
+  twoFactorStatus(): Promise<TwoFactorStatus>;
+  /** Needs a login in the last 10 minutes. */
+  totpStart(): Promise<{ secret: string; uri: string }>;
+  totpConfirm(code: string): Promise<{ recoveryCodes?: string[] }>;
+  totpRemove(): Promise<void>;
+  webauthnRegisterStart(origin: string): Promise<{ registrationId: string; publicKey: WebAuthnCreationOptionsJson }>;
+  webauthnRegisterFinish(req: {
+    registrationId: string;
+    name: string;
+    credential: WebAuthnAttestationJson;
+  }): Promise<{ id: string; recoveryCodes?: string[] }>;
+  webauthnRemove(id: string): Promise<void>;
+  regenerateRecoveryCodes(): Promise<{ recoveryCodes: string[] }>;
+  /** A challenge for checking a second factor while signed in (needed for security keys). */
+  twoFactorChallenge(origin?: string): Promise<Omit<TwoFactorChallenge, "twoFactorRequired">>;
+  disableTwoFactor(req: SecondFactor & { challengeToken?: string }): Promise<void>;
   sessions(): Promise<SessionInfo[]>;
   revokeSession(id: string): Promise<void>;
   revokeOtherSessions(): Promise<void>;
@@ -230,11 +349,22 @@ export function createClient(options: ClientOptions = {}): PassboxApi {
     registerFinish: (req) => call("POST", "/api/v1/auth/register/finish", req),
     loginStart: (req) => call("POST", "/api/v1/auth/login/start", req),
     loginFinish: (req) => call("POST", "/api/v1/auth/login/finish", req),
+    loginTwoFactor: (req) => call("POST", "/api/v1/auth/login/two-factor", req),
     logout: () => call("POST", "/api/v1/auth/logout", {}),
     account: () => call("GET", "/api/v1/account"),
     accountEvents: (limit = 50) => call("GET", `/api/v1/account/events?limit=${encodeURIComponent(limit)}`),
     passwordChangeStart: (req) => call("POST", "/api/v1/account/password/start", req),
     passwordChangeFinish: (req) => call("POST", "/api/v1/account/password/finish", req),
+    twoFactorStatus: () => call("GET", "/api/v1/account/two-factor"),
+    totpStart: () => call("POST", "/api/v1/account/two-factor/totp/start", {}),
+    totpConfirm: (code) => call("POST", "/api/v1/account/two-factor/totp/confirm", { code }),
+    totpRemove: () => call("DELETE", "/api/v1/account/two-factor/totp"),
+    webauthnRegisterStart: (origin) => call("POST", "/api/v1/account/two-factor/webauthn/register/start", { origin }),
+    webauthnRegisterFinish: (req) => call("POST", "/api/v1/account/two-factor/webauthn/register/finish", req),
+    webauthnRemove: (id) => call("DELETE", `/api/v1/account/two-factor/webauthn/${encodeURIComponent(id)}`),
+    regenerateRecoveryCodes: () => call("POST", "/api/v1/account/two-factor/recovery-codes", {}),
+    twoFactorChallenge: (origin) => call("POST", "/api/v1/account/two-factor/challenge", origin ? { origin } : {}),
+    disableTwoFactor: (req) => call("POST", "/api/v1/account/two-factor/disable", req),
     sessions: () => call("GET", "/api/v1/sessions"),
     revokeSession: (id) => call("DELETE", `/api/v1/sessions/${encodeURIComponent(id)}`),
     revokeOtherSessions: () => call("POST", "/api/v1/sessions/revoke-others", {}),
