@@ -192,6 +192,21 @@ struct ErrorBody {
     error: String,
     #[serde(default)]
     message: String,
+    #[serde(default)]
+    details: Option<Value>,
+}
+
+/// The message of a `rate_limited` error. Keeps the wait time from
+/// `details.retryAfterSeconds` in a fixed format, so apps that only see the
+/// message (the FFI) can show "try again in N minutes" in their language.
+fn rate_limited_message(message: String, details: Option<&Value>) -> String {
+    match details
+        .and_then(|d| d.get("retryAfterSeconds"))
+        .and_then(Value::as_u64)
+    {
+        Some(seconds) => format!("too many attempts; try again in {seconds} seconds"),
+        None => message,
+    }
 }
 
 /// Typed wrapper around a [`Transport`] for one server.
@@ -226,7 +241,14 @@ impl Api {
         if !(200..300).contains(&status) {
             let parsed: Option<ErrorBody> = serde_json::from_slice(&bytes).ok();
             let (code, message) = parsed
-                .map(|b| (b.error, b.message))
+                .map(|b| {
+                    let message = if b.error == "rate_limited" {
+                        rate_limited_message(b.message, b.details.as_ref())
+                    } else {
+                        b.message
+                    };
+                    (b.error, message)
+                })
                 .unwrap_or_else(|| (String::new(), String::from_utf8_lossy(&bytes).into_owned()));
             return Err(match code.as_str() {
                 "invalid_credentials" => Error::InvalidCredentials,
@@ -439,5 +461,23 @@ impl Api {
             Some(token),
             None,
         )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn rate_limited_message_keeps_the_wait_time() {
+        let details = serde_json::json!({ "retryAfterSeconds": 300 });
+        assert_eq!(
+            rate_limited_message("too many attempts".into(), Some(&details)),
+            "too many attempts; try again in 300 seconds"
+        );
+        assert_eq!(
+            rate_limited_message("too many attempts".into(), None),
+            "too many attempts"
+        );
     }
 }

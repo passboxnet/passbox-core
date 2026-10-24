@@ -455,6 +455,28 @@ impl Client {
         Ok(())
     }
 
+    /// The Secret Key of this device's account, for showing the Emergency
+    /// Kit again. Requires the vault to be unlocked and `password` to be the
+    /// current master password; the check runs locally (the account key is
+    /// unwrapped with the derived key) and fails with
+    /// [`Error::InvalidCredentials`] otherwise.
+    pub fn reveal_secret_key(&self, password: &str) -> Result<String> {
+        let account = self.device_account()?.ok_or(Error::NoAccount)?;
+        let encrypted_account_key = {
+            let guard = self.lock_session();
+            guard
+                .as_ref()
+                .ok_or(Error::Locked)?
+                .cache
+                .encrypted_account_key
+                .clone()
+        };
+        let keys = derive(&account, password)?;
+        Keyring::unlock(&keys.auk, &account.account_id, &encrypted_account_key)
+            .map_err(|_| Error::InvalidCredentials)?;
+        Ok(account.secret_key)
+    }
+
     /// Locks and removes the account and its cache from this device.
     pub fn sign_out(&self) -> Result<()> {
         self.lock();
