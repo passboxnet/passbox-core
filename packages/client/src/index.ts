@@ -35,6 +35,7 @@ export {
   templateFields,
   type VaultMeta,
 } from "./items";
+export { looksLikeRecoveryCode, secondFactorFromInput } from "./secondFactor";
 export {
   analyzeVault,
   breachCount,
