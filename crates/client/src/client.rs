@@ -3,6 +3,7 @@
 //! The client is synchronous. Call it from a background thread in UI apps.
 //! All methods take `&self`; an internal lock serializes operations.
 
+pub mod analysis;
 pub mod item_tools;
 pub mod recovery;
 pub mod sharing;

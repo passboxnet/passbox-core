@@ -130,18 +130,43 @@ impl BreachRange for HibpRange {
     }
 }
 
+/// How breach checks reach Have I Been Pwned.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum BreachMode {
+    /// Through the user's Passbox server when it offers it
+    /// (`/api/v1/breach/range/{prefix}`), otherwise directly.
+    #[default]
+    Auto,
+    /// Only through the Passbox server: Have I Been Pwned never sees this
+    /// device's IP address. Fails when the server does not offer it.
+    Server,
+    /// Directly from this device.
+    Direct,
+}
+
 /// Breach lookups of the unlocked session.
 pub(crate) struct BreachState {
     source: Arc<dyn BreachRange>,
+    /// A source set with [`Client::set_breach_range`] replaces the server.
+    custom: bool,
+    pub(crate) mode: BreachMode,
     /// Counts by full SHA-1 hex of the password. Cleared on lock.
-    counts: HashMap<String, u64>,
+    pub(crate) counts: HashMap<String, u64>,
+    /// A full check of all items ran in this session.
+    pub(crate) checked: bool,
+    /// The last email monitoring results (for the security report).
+    pub(crate) exposed: Vec<passbox_core::analysis::ExposedEmail>,
 }
 
 impl Default for BreachState {
     fn default() -> Self {
         Self {
             source: Arc::new(HibpRange::default()),
+            custom: false,
+            mode: BreachMode::Auto,
             counts: HashMap::new(),
+            checked: false,
+            exposed: Vec::new(),
         }
     }
 }
@@ -289,17 +314,51 @@ impl Client {
     pub fn set_breach_range(&self, source: Box<dyn BreachRange>) {
         let mut state = self.lock_breach();
         state.source = Arc::from(source);
+        state.custom = true;
         state.counts.clear();
+        state.checked = false;
     }
 
-    fn lock_breach(&self) -> std::sync::MutexGuard<'_, BreachState> {
+    /// Chooses how breach checks reach Have I Been Pwned (default
+    /// [`BreachMode::Auto`]: through the Passbox server when available).
+    pub fn set_breach_mode(&self, mode: BreachMode) {
+        self.lock_breach().mode = mode;
+    }
+
+    pub fn breach_mode(&self) -> BreachMode {
+        self.lock_breach().mode
+    }
+
+    /// One range response, through the server or directly (see [`BreachMode`]).
+    fn fetch_range(&self, prefix: &str) -> Result<String> {
+        let (source, custom, mode) = {
+            let state = self.lock_breach();
+            (state.source.clone(), state.custom, state.mode)
+        };
+        if custom || mode == BreachMode::Direct {
+            return source.range(prefix);
+        }
+        match self.with_token(|token| self.api.breach_range(token, prefix))? {
+            Some(body) => Ok(body),
+            None if mode == BreachMode::Auto => source.range(prefix),
+            None => Err(Error::Network(
+                "your Passbox server does not offer breach checks; choose a direct check in the settings"
+                    .into(),
+            )),
+        }
+    }
+
+    pub(crate) fn lock_breach(&self) -> std::sync::MutexGuard<'_, BreachState> {
         self.breach
             .lock()
             .unwrap_or_else(std::sync::PoisonError::into_inner)
     }
 
     pub(crate) fn clear_breach_results(&self) {
-        self.lock_breach().counts.clear();
+        let mut state = self.lock_breach();
+        state.counts.clear();
+        state.checked = false;
+        state.exposed.clear();
     }
 
     /// How often `password` appears in known data breaches (0 = not found),
@@ -313,15 +372,11 @@ impl Client {
         }
         let (prefix, suffix) = breach::hash_parts(password);
         let full = format!("{prefix}{suffix}");
-        let source = {
-            let state = self.lock_breach();
-            if let Some(count) = state.counts.get(&full) {
-                return Ok(*count);
-            }
-            state.source.clone()
-        };
+        if let Some(count) = self.lock_breach().counts.get(&full) {
+            return Ok(*count);
+        }
         // No lock while waiting for the network, so locking stays instant.
-        let body = source.range(&prefix)?;
+        let body = self.fetch_range(&prefix)?;
         let count = breach::count_in_range(&body, &suffix);
         self.lock_breach().counts.insert(full, count);
         Ok(count)
@@ -345,7 +400,6 @@ impl Client {
                     .push(item.id.clone());
             }
         }
-        let source = self.lock_breach().source.clone();
         let mut ranges: HashMap<String, String> = HashMap::new();
         let mut found = Vec::new();
         for ((prefix, suffix), ids) in by_hash {
@@ -355,7 +409,7 @@ impl Client {
                 Some(count) => count,
                 None => {
                     if !ranges.contains_key(&prefix) {
-                        let body = source.range(&prefix)?;
+                        let body = self.fetch_range(&prefix)?;
                         ranges.insert(prefix.clone(), body);
                     }
                     let count = breach::count_in_range(&ranges[&prefix], &suffix);
@@ -371,10 +425,11 @@ impl Client {
             }
         }
         found.sort_by(|a, b| b.count.cmp(&a.count).then(a.item_id.cmp(&b.item_id)));
+        self.lock_breach().checked = true;
         Ok(found)
     }
 
-    fn known_breach_count(&self, password: &str) -> Option<u64> {
+    pub(crate) fn known_breach_count(&self, password: &str) -> Option<u64> {
         let (prefix, suffix) = breach::hash_parts(password);
         self.lock_breach()
             .counts

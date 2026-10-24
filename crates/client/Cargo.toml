@@ -20,6 +20,7 @@ axum.workspace = true
 passbox-server.workspace = true
 tokio.workspace = true
 tempfile = "3"
+sqlx.workspace = true
 
 [lints]
 workspace = true
