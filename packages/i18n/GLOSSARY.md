@@ -42,6 +42,19 @@ client (web, desktop, extension, iOS, Android) and on the website.
 | Add a device / Sign in with another device | Gerät hinzufügen / Mit einem anderen Gerät anmelden |
 | Device code | Gerätecode |
 | Remember this device | Dieses Gerät merken |
+| Organization / Family / Team | Organisation / Familie / Team |
+| Family & team (navigation) | Familie & Team |
+| Organizer (family owner) / Owner (team) | Organisator / Eigentümer |
+| Admin (team) / Co-organizer (family) | Administrator / Mitorganisator |
+| Member / Family member / Guest | Mitglied / Familienmitglied / Gast |
+| Invitation / Invite | Einladung / Einladen |
+| Role | Rolle |
+| Shared vault / Family vault | Geteilter Tresor / Familien-Tresor |
+| Group | Gruppe |
+| View / Edit / Manage (vault permissions) | Ansehen / Bearbeiten / Verwalten |
+| Security code (fingerprint) | Sicherheitscode |
+| Confirm (a member) | Bestätigen |
+| Pause access / Lift pause | Zugriff pausieren / Pause aufheben |
 
 Plain language first: no "OPAQUE", "ciphertext", "revision", "account ID"
 or "otpauth://" in default screens. Technical details go behind a

@@ -118,6 +118,21 @@ pub struct PendingInvitation {
     pub expires_at: i64,
 }
 
+/// What an invitation link is for, shown before accepting. The
+/// organization's name is encrypted, so only its kind is known.
+#[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
+pub struct InvitationPreview {
+    pub org_id: String,
+    /// `family` or `team`.
+    pub org_kind: String,
+    /// The invited email; only an account with this email can accept.
+    pub email: String,
+    pub role: String,
+    pub expires_at: i64,
+    /// Email of the admin who sent the invitation (older servers: none).
+    pub inviter_email: Option<String>,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
 pub struct KeyLookup {
     pub account_id: String,
@@ -305,6 +320,19 @@ impl PassboxClient {
 
     pub fn revoke_invitation(&self, org_id: String, invitation_id: String) -> Result<()> {
         Ok(self.inner.revoke_invitation(&org_id, &invitation_id)?)
+    }
+
+    /// What an invitation link (or token) is for. Works while signed out.
+    pub fn preview_invitation(&self, link: String) -> Result<InvitationPreview> {
+        let p = self.inner.preview_invitation(&link)?;
+        Ok(InvitationPreview {
+            org_id: p.org_id,
+            org_kind: p.org_kind,
+            email: p.email,
+            role: p.role,
+            expires_at: p.expires_at,
+            inviter_email: p.inviter_email,
+        })
     }
 
     /// Accepts an invitation link (or token); returns the organization ID.

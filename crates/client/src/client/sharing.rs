@@ -54,6 +54,9 @@ pub struct InvitationPreview {
     pub email: String,
     pub role: String,
     pub expires_at: i64,
+    /// Email of the admin who invited; missing from older servers.
+    #[serde(default)]
+    pub inviter_email: Option<String>,
 }
 
 /// Who owns a vault and what this account may do with it.

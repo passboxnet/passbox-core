@@ -465,6 +465,8 @@ export interface InvitationPreview {
   email: string;
   role: string;
   expiresAt: number;
+  /** Email of the admin who invited (servers before this field omit it). */
+  inviterEmail?: string;
 }
 
 /**
