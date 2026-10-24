@@ -92,8 +92,8 @@ Both are covered by integration tests against a real server; the Watchtower heur
 
 Implemented:
 
-- **Core:** Argon2id + Secret Key derivation, OPAQUE login, key hierarchy with context-bound XChaCha20-Poly1305 encryption, keyring session export, ES256 passkeys, TOTP/HOTP, password and PIN generator
-- **Server:** registration, login, sessions, vaults, items, incremental sync on SQLite and PostgreSQL, CORS for non-browser-origin clients, instance administration (registration modes, invitations, disabling accounts, hash-chained admin log) and mail over SMTP with a durable outbox
+- **Core:** Argon2id + Secret Key derivation, OPAQUE login, key hierarchy with context-bound XChaCha20-Poly1305 encryption, keyring session export, account key pairs (X-Wing, Ed25519), key directory verification, organization and shared vault verification, ES256 passkeys, TOTP/HOTP, password and PIN generator
+- **Server:** registration, login, sessions, vaults, items, incremental sync on SQLite and PostgreSQL, CORS for non-browser-origin clients, key directory, organizations (family and team) with invitations and roles, groups and shared vaults (see [sharing.md](sharing.md)), instance administration (registration modes, invitations, disabling accounts, hash-chained admin log) and mail over SMTP with a durable outbox
 - **Web client:** sign-up with Emergency Kit, sign-in on new devices, unlock, logins/notes/cards with TOTP and custom fields, vaults, favorites, tags, search, command palette, Watchtower, generator, settings, auto-lock, periodic sync, configurable server
 - **Extension:** sign-in and unlock, inline autofill (logins, multi-step forms, one-time codes, password suggestions), save and update prompts, passkeys with browser fallback
 - **Desktop (Windows, macOS, Linux):** Tauri 2 shell around the web client with tray, global shortcut and lock on sleep
@@ -102,4 +102,4 @@ Implemented:
 - **CLI:** sign-in, list/get/read, secret references and `pbx run`
 - Website, CI for every platform, Dockerfile
 
-Not yet: offline cache and offline unlock in the browser clients, sharing (account key pairs and vault membership), import from other password managers, passkeys on mobile, SSO/SCIM, rate limiting, signed releases, an external security audit.
+Not yet: offline cache and offline unlock in the browser clients, screens for sharing (the client APIs exist), import from other password managers, passkeys on mobile, SSO/SCIM, rate limiting, signed releases, an external security audit.
