@@ -223,5 +223,16 @@
   "generator.numbers": "Ziffern",
   "generator.symbols": "Sonderzeichen",
   "generator.avoidAmbiguous": "Verwechselbare Zeichen vermeiden",
-  "generator.avoidAmbiguousText": "Lässt l, I, 1, O, o und 0 weg."
+  "generator.avoidAmbiguousText": "Lässt l, I, 1, O, o und 0 weg.",
+  "vault.filter": "Tresor",
+  "vault.allVaults": "Alle Tresore",
+  "vault.viewOnlyOption": "{vault} (nur ansehen)",
+  "vault.shared": "Mit Ihrer Familie oder Ihrem Team geteilt",
+  "vault.sharingWarning.title": "Teilen braucht Ihre Aufmerksamkeit",
+  "vault.sharingWarning.text": "Passbox hat beim Prüfen geteilter Tresore {count, plural, one {# Problem} other {# Probleme}} gefunden, zum Beispiel einen geänderten Sicherheitscode. Die Web-App zeigt, was zu tun ist.",
+  "vault.sharingWarning.open": "In der Web-App öffnen",
+  "item.sharedVault": "{vault} · {org}",
+  "item.viewOnly": "Nur ansehen: Sie können diesen Eintrag kopieren und ausfüllen, aber nicht ändern.",
+  "item.error.readOnly": "Diesen Eintrag können Sie nur ansehen. Wer den geteilten Tresor verwaltet, kann Ihnen Bearbeitungsrechte geben.",
+  "save.sharedVault": "{vault} · {org}"
 }
