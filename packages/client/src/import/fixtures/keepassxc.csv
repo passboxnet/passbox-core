@@ -1,0 +1,4 @@
+"Group","Title","Username","Password","URL","Notes","TOTP","Icon","Last Modified","Created"
+"Root","Example Cloud","eve","KpXC-Pass-1","https://cloud.example.com","","otpauth://totp/Cloud:eve?secret=JBSWY3DPEHPK3PXP&period=30&digits=6&issuer=Cloud","0","2025-01-01T10:00:00Z","2024-06-01T10:00:00Z"
+"Root/Work/Servers","db01","postgres","Db-Pass-9","db01.example.internal:5432","Primary database","","12","2025-01-01T10:00:00Z","2024-06-01T10:00:00Z"
+"Root/Recycle Bin","Deleted thing","x","y","https://deleted.example.com","","","0","2025-01-01T10:00:00Z","2024-06-01T10:00:00Z"

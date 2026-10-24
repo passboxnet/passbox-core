@@ -6,7 +6,9 @@
   "type": "module",
   "description": "Platform-neutral Passbox client: sign-up, sign-in, unlock, sync and item editing.",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./import": "./src/import/index.ts",
+    "./export": "./src/export/index.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
@@ -14,7 +16,8 @@
   },
   "dependencies": {
     "@passbox/api-client": "workspace:*",
-    "@passbox/core-wasm": "workspace:*"
+    "@passbox/core-wasm": "workspace:*",
+    "fflate": "0.8.2"
   },
   "devDependencies": {
     "@types/node": "26.6.5",

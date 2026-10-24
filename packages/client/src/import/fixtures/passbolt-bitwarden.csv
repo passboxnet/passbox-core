@@ -1,0 +1,3 @@
+"name","login_username","login_uri","login_password","notes","folder","login_totp"
+"Jenkins","ci","https://ci.example.com","Pb-Bw-1","Build server","Engineering/CI","otpauth://totp/Jenkins:ci?secret=JBSWY3DPEHPK3PXP"
+"Wiki","jack","https://wiki.example.com","Pb-Bw-2","","",""

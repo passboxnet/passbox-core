@@ -1,0 +1,3 @@
+"Title","Username","URL","Password","Notes","Group","TOTP"
+"Jenkins","ci","https://ci.example.com","Pb-Kdbx-1","Build server","Engineering/CI","otpauth://totp/Jenkins:ci?secret=JBSWY3DPEHPK3PXP&issuer=Jenkins&algorithm=SHA1&digits=6&period=30"
+"Wiki","jack","https://wiki.example.com","Pb-Kdbx-2","","",""

@@ -64,6 +64,29 @@ export interface SessionState {
 
 export type ClientStatus = "signed-out" | "locked" | "unlocked";
 
+/** One item for `PassboxClient.importItems`. */
+export interface ImportEntry {
+  data: ItemData;
+  /** Update this existing item instead of creating a new one. */
+  updateId?: string;
+}
+
+export interface ImportItemsOptions {
+  /** Called after each item with the number processed so far. */
+  onProgress?: (done: number, total: number) => void;
+  signal?: AbortSignal;
+  /** Requests in flight at once (default 6). */
+  concurrency?: number;
+  /** Items between snapshot updates (default 200). */
+  batchSize?: number;
+}
+
+export interface ImportItemsResult {
+  created: number;
+  updated: number;
+  failed: { title: string; error: string }[];
+}
+
 export interface ClientSnapshot {
   status: ClientStatus;
   email: string | undefined;
@@ -334,6 +357,29 @@ export class PassboxClient {
     }
   }
 
+  /**
+   * Checks the master password before a sensitive action (such as an
+   * export) without signing in again: the derived key must decrypt the
+   * account key. Returns `false` for a wrong password.
+   */
+  async verifyMasterPassword(password: string): Promise<boolean> {
+    this.requireKeyring();
+    const account = this.deviceAccount;
+    if (!account) return false;
+    const remote = await this.api.account();
+    let keys: Core.MasterKeys | undefined;
+    try {
+      keys = this.deriveKeys(account, password);
+      this.core.Keyring.unlock(keys, remote.accountId, remote.encryptedAccountKey).free();
+      return true;
+    } catch (error) {
+      if (error instanceof InvalidCredentialsError || isInvalidCredentials(error)) return false;
+      throw error;
+    } finally {
+      keys?.free();
+    }
+  }
+
   /** Exports the unlocked session, or `undefined` when locked. */
   exportSession(): SessionState | undefined {
     const account = this.deviceAccount;
@@ -535,6 +581,10 @@ export class PassboxClient {
   async updateItem(id: string, data: ItemData): Promise<void> {
     const item = this.items.get(id);
     if (!item) throw new Error("unknown item");
+    await this.writeItem(item.vaultId, id, item.revision + 1, this.nextVersion(item, data));
+  }
+
+  private nextVersion(item: Item, data: ItemData): ItemData {
     const { passwordHistory: _ignored, trashedAt: _trashed, ...rest } = data;
     const next: ItemData = rest;
     const oldPassword = fieldValue(item.data, FIELD.password);
@@ -544,7 +594,100 @@ export class PassboxClient {
     }
     if (history.length > 0) next.passwordHistory = history;
     if (item.data.trashedAt !== undefined) next.trashedAt = item.data.trashedAt;
-    await this.writeItem(item.vaultId, id, item.revision + 1, next);
+    return next;
+  }
+
+  /**
+   * Creates many items (and, with `updateId`, updates existing ones as
+   * `updateItem` does) with several requests in flight and a single sync at
+   * the end, for imports of tens of thousands of items. Progress is reported
+   * after each item; the snapshot is refreshed every `batchSize` items.
+   * Items that fail are reported and do not stop the import. Stops early
+   * when `signal` is aborted.
+   */
+  async importItems(
+    vaultId: string,
+    entries: readonly ImportEntry[],
+    options: ImportItemsOptions = {},
+  ): Promise<ImportItemsResult> {
+    const keyring = this.requireKeyring();
+    if (!this.vaults.has(vaultId)) throw new Error("unknown vault");
+    const maxConcurrency = Math.max(1, options.concurrency ?? 6);
+    const batchSize = Math.max(1, options.batchSize ?? 200);
+    const result: ImportItemsResult = { created: 0, updated: 0, failed: [] };
+    const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+    // Fewer requests run in parallel while the server is struggling (for
+    // example "database is locked" on SQLite), more again once it recovers.
+    let limit = maxConcurrency;
+    let streak = 0;
+    let next = 0;
+    let done = 0;
+    let sinceEmit = 0;
+    const active = () => next < entries.length && !options.signal?.aborted && this.keyring === keyring;
+
+    /** One write, retried on server errors and dropped connections. */
+    const save = async (entry: ImportEntry) => {
+      const existing = entry.updateId ? this.items.get(entry.updateId) : undefined;
+      const id = existing?.id ?? this.core.newId();
+      for (let attempt = 0; ; attempt++) {
+        try {
+          if (existing) {
+            await this.putItem(existing.vaultId, id, existing.revision + 1, this.nextVersion(existing, entry.data));
+            result.updated++;
+          } else {
+            await this.putItem(vaultId, id, 1, entry.data);
+            result.created++;
+          }
+          if (++streak >= 20 && limit < maxConcurrency) {
+            limit++;
+            streak = 0;
+          }
+          return;
+        } catch (error) {
+          const retryable =
+            error instanceof TypeError || (error instanceof ApiError && (error.status >= 500 || error.status === 429));
+          // A create that reached the server before the connection dropped.
+          if (attempt > 0 && !existing && error instanceof ApiError && error.code === "conflict") {
+            result.created++;
+            return;
+          }
+          if (!retryable || attempt >= 7 || options.signal?.aborted) throw error;
+          limit = Math.max(1, Math.floor(limit / 2));
+          streak = 0;
+          await sleep(Math.min(2000, 50 * 2 ** attempt) * (0.5 + Math.random()));
+        }
+      }
+    };
+
+    const worker = async (index: number) => {
+      while (active()) {
+        if (index >= limit) {
+          await sleep(50);
+          continue;
+        }
+        const entry = entries[next++] as ImportEntry;
+        try {
+          await save(entry);
+        } catch (error) {
+          result.failed.push({
+            title: entry.data.title,
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
+        done++;
+        options.onProgress?.(done, entries.length);
+        if (++sinceEmit >= batchSize) {
+          sinceEmit = 0;
+          this.emit();
+          // Let the UI paint between batches.
+          await sleep(0);
+        }
+      }
+    };
+    await Promise.all(Array.from({ length: Math.min(maxConcurrency, entries.length) }, (_, i) => worker(i)));
+    this.emit();
+    if (this.keyring === keyring) await this.sync();
+    return result;
   }
 
   /** Moves an item to the trash. It can be restored for 30 days. */
@@ -617,16 +760,23 @@ export class PassboxClient {
   }
 
   private async writeItem(vaultId: string, id: string, revision: number, data: ItemData) {
-    const keyring = this.requireKeyring();
-    const encryptedData = keyring.encryptItem(vaultId, id, revision, JSON.stringify(data));
     try {
-      const result = await this.api.putItem(id, { vaultId, revision, encryptedData });
-      this.items.set(id, { id, vaultId, revision: result.revision, updatedAt: Date.now(), data });
+      await this.putItem(vaultId, id, revision, data);
       this.emit();
     } catch (error) {
       await this.handleWriteError(error);
     }
     await this.sync();
+  }
+
+  /** Encrypts and uploads one item version without syncing. */
+  private async putItem(vaultId: string, id: string, revision: number, data: ItemData) {
+    const keyring = this.requireKeyring();
+    const encryptedData = keyring.encryptItem(vaultId, id, revision, JSON.stringify(data));
+    const result = await this.api.putItem(id, { vaultId, revision, encryptedData });
+    if (this.keyring === keyring) {
+      this.items.set(id, { id, vaultId, revision: result.revision, updatedAt: Date.now(), data });
+    }
   }
 
   private async handleWriteError(error: unknown): Promise<never> {

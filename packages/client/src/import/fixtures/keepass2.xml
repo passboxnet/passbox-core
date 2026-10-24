@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<KeePassFile>
+	<Meta>
+		<Generator>KeePassXC</Generator>
+		<DatabaseName>Team Passwords</DatabaseName>
+		<RecycleBinEnabled>True</RecycleBinEnabled>
+		<RecycleBinUUID>cmVjeWNsZWJpbi11dWlkLTE=</RecycleBinUUID>
+	</Meta>
+	<Root>
+		<Group>
+			<UUID>cm9vdC1ncm91cC11dWlkLTE=</UUID>
+			<Name>Team Passwords</Name>
+			<Entry>
+				<UUID>ZW50cnktdXVpZC0wMDAwMDE=</UUID>
+				<Tags>admin;prod</Tags>
+				<Times>
+					<LastModificationTime>2025-05-01T10:00:00Z</LastModificationTime>
+				</Times>
+				<String><Key>Title</Key><Value>Mail &amp; Calendar</Value></String>
+				<String><Key>UserName</Key><Value>leo@example.com</Value></String>
+				<String><Key>Password</Key><Value ProtectInMemory="True"> Kp-Xml-&lt;Pass&gt; </Value></String>
+				<String><Key>URL</Key><Value>https://mail.example.com</Value></String>
+				<String><Key>Notes</Key><Value>Line 1
+Line 2</Value></String>
+				<String><Key>otp</Key><Value>otpauth://totp/Mail:leo?secret=JBSWY3DPEHPK3PXP&amp;period=30&amp;digits=6</Value></String>
+				<String><Key>Recovery PIN</Key><Value ProtectInMemory="True">9876</Value></String>
+				<String><Key>Department</Key><Value>IT</Value></String>
+				<Binary><Key>backup-codes.txt</Key><Value Ref="0"/></Binary>
+				<History>
+					<Entry>
+						<UUID>ZW50cnktdXVpZC0wMDAwMDE=</UUID>
+						<Times><LastModificationTime>2024-01-01T10:00:00Z</LastModificationTime></Times>
+						<String><Key>Title</Key><Value>Mail</Value></String>
+						<String><Key>Password</Key><Value ProtectInMemory="True">Old-Mail-Pass</Value></String>
+					</Entry>
+				</History>
+			</Entry>
+			<Group>
+				<UUID>d29yay1ncm91cC11dWlkLTE=</UUID>
+				<Name>Web</Name>
+				<Entry>
+					<UUID>ZW50cnktdXVpZC0wMDAwMDI=</UUID>
+					<String><Key>Title</Key><Value>Passkey demo</Value></String>
+					<String><Key>UserName</Key><Value>leo</Value></String>
+					<String><Key>Password</Key><Value ProtectInMemory="True"></Value></String>
+					<String><Key>URL</Key><Value>https://passkeys.example.com</Value></String>
+					<String><Key>KPEX_PASSKEY_CREDENTIAL_ID</Key><Value>q1v3a2V5LWNyZWQtaWQ</Value></String>
+					<String><Key>KPEX_PASSKEY_PRIVATE_KEY_PEM</Key><Value ProtectInMemory="True">-----BEGIN PRIVATE KEY-----
+MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgppj1hh+XzWzPVXH7
+JtXzkt6pymLMxswLBZv5aGQsVW2hRANCAASIxVojKy/+FXFB1f3a9KR+xqfKr2VM
+xBuLkleWndXOQJ0vsopAT76Kq/2RJbtJQainT3uu2JvJQw9pAu4DJjXh
+-----END PRIVATE KEY-----</Value></String>
+					<String><Key>KPEX_PASSKEY_RELYING_PARTY</Key><Value>passkeys.example.com</Value></String>
+					<String><Key>KPEX_PASSKEY_USERNAME</Key><Value>leo</Value></String>
+					<String><Key>KPEX_PASSKEY_USER_HANDLE</Key><Value>bGVvLWhhbmRsZQ</Value></String>
+				</Entry>
+				<Group>
+					<UUID>c3ViLWdyb3VwLXV1aWQtMQ==</UUID>
+					<Name>Shops</Name>
+					<Entry>
+						<UUID>ZW50cnktdXVpZC0wMDAwMDM=</UUID>
+						<String><Key>Title</Key><Value>Book shop</Value></String>
+						<String><Key>UserName</Key><Value>leo</Value></String>
+						<String><Key>Password</Key><Value ProtectInMemory="True"><![CDATA[Cd<a>ta]]></Value></String>
+						<String><Key>URL</Key><Value>books.example.com</Value></String>
+						<String><Key>TimeOtp-Secret-Base32</Key><Value>JBSWY3DPEHPK3PXP</Value></String>
+					</Entry>
+				</Group>
+			</Group>
+			<Group>
+				<UUID>cmVjeWNsZWJpbi11dWlkLTE=</UUID>
+				<Name>Recycle Bin</Name>
+				<Entry>
+					<UUID>ZW50cnktdXVpZC0wMDAwMDQ=</UUID>
+					<String><Key>Title</Key><Value>Old entry</Value></String>
+					<String><Key>Password</Key><Value>gone</Value></String>
+				</Entry>
+			</Group>
+		</Group>
+		<DeletedObjects/>
+	</Root>
+</KeePassFile>

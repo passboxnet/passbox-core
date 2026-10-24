@@ -1,0 +1,23 @@
+url,username,password,totp,extra,name,grouping,fav
+https://login.example.com/,grace@example.com,Lp-Pass-1,JBSWY3DPEHPK3PXP,Shared with team,Example Login,Work\Tools,1
+http://sn,,,,"NoteType:Credit Card
+Language:en-US
+Name on Card:Grace Example
+Type:Visa
+Number:4111111111111111
+Security Code:123
+Start Date:,
+Expiration Date:March,2029
+Notes:Company card",Company Visa,Finance,0
+http://sn,,,,Door code is 4711,Office door,,0
+http://sn,,,,"NoteType:Address
+Language:de-DE
+Title:Dr.
+First Name:Grace
+Last Name:Example
+Address 1:Musterstraße 1
+City / Town:Berlin
+Zip / Postal Code:10115
+Country:DE
+Email Address:grace@example.com
+Phone:+49 30 123456",Home address,,0

@@ -10,6 +10,7 @@
 pub mod aead;
 pub mod encoding;
 pub mod error;
+pub mod export;
 pub mod generator;
 pub mod id;
 pub mod kdf;

@@ -1,0 +1,135 @@
+{
+  "encrypted": false,
+  "folders": [
+    { "id": "6d2e3c1a-0000-4000-8000-000000000001", "name": "Work" },
+    { "id": "6d2e3c1a-0000-4000-8000-000000000002", "name": "Work/Servers" }
+  ],
+  "items": [
+    {
+      "passwordHistory": [{ "lastUsedDate": "2025-03-01T09:00:00.000Z", "password": "Old-GitHub-Pass" }],
+      "revisionDate": "2025-05-01T09:00:00.000Z",
+      "creationDate": "2024-01-01T09:00:00.000Z",
+      "deletedDate": null,
+      "id": "9a1b0000-0000-4000-8000-000000000001",
+      "organizationId": null,
+      "folderId": "6d2e3c1a-0000-4000-8000-000000000001",
+      "type": 1,
+      "reprompt": 0,
+      "name": "Code hosting",
+      "notes": "Company account",
+      "favorite": true,
+      "fields": [
+        { "name": "Recovery code", "value": "abcd-efgh-ijkl", "type": 1, "linkedId": null },
+        { "name": "Team", "value": "Platform", "type": 0, "linkedId": null },
+        { "name": "Username", "value": null, "type": 3, "linkedId": 100 }
+      ],
+      "login": {
+        "fido2Credentials": [
+          {
+            "credentialId": "4d5b6f72-1c2a-4e0b-9c33-7f1e2d3c4b5a",
+            "keyType": "public-key",
+            "keyAlgorithm": "ECDSA",
+            "keyCurve": "P-256",
+            "keyValue": "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg1CriKm0bZX5sF7cEMXPmZH-SfSJ-ymU9YzAaK5dG06-hRANCAATtPR7qCn2cMkPS01dPoB21IggF8_2ST_GfCS_kMFG1GIyG5bsb_iYysEnl83tvpC3byRHxORwFjJYUdFNwlXfD",
+            "rpId": "code.example.com",
+            "userHandle": "dXNlci0xMjM0NQ",
+            "userName": "kim@example.com",
+            "counter": "7",
+            "rpName": "Example Code",
+            "userDisplayName": "Kim Example",
+            "discoverable": "true",
+            "creationDate": "2025-02-01T09:00:00.000Z"
+          }
+        ],
+        "uris": [
+          { "match": null, "uri": "https://code.example.com/login" },
+          { "match": null, "uri": "https://code.example.com/sso" },
+          { "match": null, "uri": "androidapp://com.example.code" }
+        ],
+        "username": "kim@example.com",
+        "password": "Bw-Code-Pass-1",
+        "totp": "otpauth://totp/Code:kim?secret=JBSWY3DPEHPK3PXP&issuer=Code"
+      },
+      "collectionIds": null
+    },
+    {
+      "id": "9a1b0000-0000-4000-8000-000000000002",
+      "folderId": "6d2e3c1a-0000-4000-8000-000000000002",
+      "type": 2,
+      "name": "Server room",
+      "notes": "Door code 0815",
+      "favorite": false,
+      "secureNote": { "type": 0 },
+      "deletedDate": null
+    },
+    {
+      "id": "9a1b0000-0000-4000-8000-000000000003",
+      "folderId": null,
+      "type": 3,
+      "name": "Corporate card",
+      "notes": null,
+      "favorite": false,
+      "card": {
+        "cardholderName": "Kim Example",
+        "brand": "Visa",
+        "number": "4111111111111111",
+        "expMonth": "3",
+        "expYear": "2029",
+        "code": "123"
+      },
+      "deletedDate": null
+    },
+    {
+      "id": "9a1b0000-0000-4000-8000-000000000004",
+      "folderId": null,
+      "type": 4,
+      "name": "Kim (personal)",
+      "notes": null,
+      "favorite": false,
+      "identity": {
+        "title": "Dr",
+        "firstName": "Kim",
+        "middleName": null,
+        "lastName": "Example",
+        "address1": "Musterweg 5",
+        "address2": null,
+        "address3": null,
+        "city": "Hamburg",
+        "state": null,
+        "postalCode": "20095",
+        "country": "DE",
+        "company": "Example GmbH",
+        "email": "kim@example.com",
+        "phone": "+49 40 1234567",
+        "ssn": null,
+        "username": "kim",
+        "passportNumber": "C01X00T47",
+        "licenseNumber": null
+      },
+      "deletedDate": null
+    },
+    {
+      "id": "9a1b0000-0000-4000-8000-000000000005",
+      "folderId": null,
+      "type": 1,
+      "name": "Deleted login",
+      "favorite": false,
+      "login": { "uris": [], "username": "x", "password": "y", "totp": null },
+      "deletedDate": "2025-06-01T09:00:00.000Z"
+    },
+    {
+      "id": "9a1b0000-0000-4000-8000-000000000006",
+      "folderId": null,
+      "type": 5,
+      "name": "Deploy key",
+      "notes": null,
+      "favorite": false,
+      "sshKey": {
+        "privateKey": "-----BEGIN OPENSSH PRIVATE KEY-----\nsynthetic\n-----END OPENSSH PRIVATE KEY-----",
+        "publicKey": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIsynthetic deploy@example",
+        "keyFingerprint": "SHA256:synthetic"
+      },
+      "deletedDate": null
+    }
+  ]
+}
