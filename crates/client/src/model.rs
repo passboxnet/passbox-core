@@ -297,7 +297,10 @@ mod tests {
         assert_eq!(data.category, ItemCategory::Environment);
         assert_eq!(
             data.environment_variables(),
-            [("API_KEY".into(), "k2".into()), ("PORT".into(), "8080".into())]
+            [
+                ("API_KEY".into(), "k2".into()),
+                ("PORT".into(), "8080".into())
+            ]
         );
         let future = ItemData::from_json(r#"{"v":1,"category":"wifi","title":"Home"}"#).unwrap();
         assert_eq!(future.category, ItemCategory::Other);

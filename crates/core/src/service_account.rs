@@ -112,7 +112,10 @@ impl Token {
     /// Parses `pbx_sa_{id}_{secret}`. Surrounding whitespace is ignored.
     pub fn parse(token: &str) -> Result<Self> {
         let invalid = || Error::InvalidData("not a Passbox service account token".into());
-        let rest = token.trim().strip_prefix(TOKEN_PREFIX).ok_or_else(invalid)?;
+        let rest = token
+            .trim()
+            .strip_prefix(TOKEN_PREFIX)
+            .ok_or_else(invalid)?;
         if rest.len() != id::ID_LEN + 1 + SECRET_ENCODED_LEN || !rest.is_ascii() {
             return Err(invalid());
         }
@@ -652,7 +655,9 @@ mod tests {
             .unwrap();
         assert_eq!(opened.permission, Permission::Read);
         assert_eq!(
-            keyring.decrypt_item_at(&vault.id, 0, "item", 1, &item).unwrap(),
+            keyring
+                .decrypt_item_at(&vault.id, 0, "item", 1, &item)
+                .unwrap(),
             r#"{"title":"db"}"#
         );
         assert_eq!(

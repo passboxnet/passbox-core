@@ -10,8 +10,8 @@ use std::collections::BTreeMap;
 use std::sync::{Mutex, MutexGuard};
 
 use passbox_core::agent_grant::Decision;
-use passbox_core::service_account::{Permission, ServiceAccountKeyring, Token};
 use passbox_core::id;
+use passbox_core::service_account::{Permission, ServiceAccountKeyring, Token};
 use serde::Deserialize;
 use zeroize::Zeroizing;
 
@@ -407,12 +407,7 @@ impl ServiceAccountClient {
     }
 
     /// Verifies an agent decision signed by the owner.
-    fn verify_decision(
-        &self,
-        request: &[u8],
-        decision: &str,
-        signature: &str,
-    ) -> Result<Decision> {
+    fn verify_decision(&self, request: &[u8], decision: &str, signature: &str) -> Result<Decision> {
         let guard = self.lock();
         Ok(guard
             .as_ref()

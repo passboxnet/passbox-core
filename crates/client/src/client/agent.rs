@@ -49,12 +49,7 @@ impl Backend for Client {
         self.call(method, &format!("/api/v1/{path}"), body)
     }
 
-    fn verify_decision(
-        &self,
-        request: &[u8],
-        decision: &str,
-        signature: &str,
-    ) -> Result<Decision> {
+    fn verify_decision(&self, request: &[u8], decision: &str, signature: &str) -> Result<Decision> {
         let guard = self.lock_session();
         let session = guard.as_ref().ok_or(Error::Locked)?;
         Ok(session

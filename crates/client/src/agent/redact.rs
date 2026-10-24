@@ -70,7 +70,8 @@ impl Redactor {
                 self.patterns.push((form, replacement.clone()));
             }
         }
-        self.patterns.sort_by_key(|(p, _)| std::cmp::Reverse(p.len()));
+        self.patterns
+            .sort_by_key(|(p, _)| std::cmp::Reverse(p.len()));
     }
 
     pub fn is_empty(&self) -> bool {
@@ -119,7 +120,10 @@ mod tests {
         let mut r = Redactor::new();
         r.add("abc", "SHORT");
         assert!(r.is_empty());
-        r.add("-----BEGIN KEY-----\nAAAABBBBCCCCDDDD\n-----END KEY-----", "KEY");
+        r.add(
+            "-----BEGIN KEY-----\nAAAABBBBCCCCDDDD\n-----END KEY-----",
+            "KEY",
+        );
         let (out, _) = r.redact("leaked AAAABBBBCCCCDDDD here");
         assert_eq!(out, "leaked [redacted KEY] here");
     }

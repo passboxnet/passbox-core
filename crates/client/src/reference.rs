@@ -152,7 +152,9 @@ pub fn reference_for(vault: &Vault, items: &[Item], item: &Item, field: Option<&
     };
     let unique = items
         .iter()
-        .filter(|i| i.vault_id == item.vault_id && i.data.title.eq_ignore_ascii_case(&item.data.title))
+        .filter(|i| {
+            i.vault_id == item.vault_id && i.data.title.eq_ignore_ascii_case(&item.data.title)
+        })
         .count()
         == 1;
     let item_part = if unique && !item.data.title.contains('/') && !item.data.title.is_empty() {
@@ -259,7 +261,8 @@ mod tests {
 
     #[test]
     fn renders_templates() {
-        let template = "user=admin\npass={{ pbx://Work/GitHub/password }}\nkeep={{ other }}\n{{pbx://x/y/z}}";
+        let template =
+            "user=admin\npass={{ pbx://Work/GitHub/password }}\nkeep={{ other }}\n{{pbx://x/y/z}}";
         assert_eq!(
             template_references(template),
             ["pbx://Work/GitHub/password", "pbx://x/y/z"]
@@ -269,6 +272,9 @@ mod tests {
             out,
             "user=admin\npass=<pbx://Work/GitHub/password>\nkeep={{ other }}\n<pbx://x/y/z>"
         );
-        assert_eq!(render_template("a {{ b", |_| Ok(String::new())).unwrap(), "a {{ b");
+        assert_eq!(
+            render_template("a {{ b", |_| Ok(String::new())).unwrap(),
+            "a {{ b"
+        );
     }
 }

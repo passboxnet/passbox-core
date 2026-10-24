@@ -16,6 +16,7 @@ pub mod service_account;
 pub mod store;
 
 pub use api::{AccountEvent, SecurityKeyInfo, SessionInfo, TotpSetup, TwoFactorStatus};
+pub use client::developer::{AgentGrantRecord, ServiceAccountGrant, ServiceAccountInfo};
 pub use client::recovery::{
     CodeRecoveryStart, DeviceLinkStart, DeviceLinkState, EmergencyContact, EmergencyContacts,
     EmergencyVaults, LinkedAccount, OrgRecovery, PendingOrgRecovery, RecoveryRequest,
@@ -24,7 +25,6 @@ pub use client::recovery::{
 pub use client::sharing::{
     Invitation, InvitationInfo, InvitationPreview, VaultAccess, parse_invitation_link,
 };
-pub use client::developer::{AgentGrantRecord, ServiceAccountGrant, ServiceAccountInfo};
 pub use client::{Client, Connectivity, Status};
 pub use error::{Error, Result};
 pub use model::{DeviceAccount, FieldType, Item, ItemCategory, ItemData, ItemField, Vault, field};

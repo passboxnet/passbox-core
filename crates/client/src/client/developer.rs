@@ -197,9 +197,8 @@ impl Client {
         approved: bool,
         max_uses: u64,
     ) -> Result<()> {
-        let (decision, signature) = self.with_keyring(|k| {
-            k.decide_agent_grant(&grant.request, approved, max_uses, now_ms())
-        })?;
+        let (decision, signature) = self
+            .with_keyring(|k| k.decide_agent_grant(&grant.request, approved, max_uses, now_ms()))?;
         self.call(
             "POST",
             &format!("/api/v1/agent-grants/{}/decision", grant.id),
