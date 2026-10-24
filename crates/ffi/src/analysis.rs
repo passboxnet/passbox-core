@@ -55,7 +55,7 @@ pub struct SecurityFinding {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
-pub struct SecurityCategory {
+pub struct SecurityCategorySummary {
     pub kind: String,
     pub severity: String,
     /// Items with this finding that are not dismissed.
@@ -87,7 +87,7 @@ pub struct SecurityReport {
     pub logins: u32,
     pub breach_checked: bool,
     /// One per kind, in priority order.
-    pub categories: Vec<SecurityCategory>,
+    pub categories: Vec<SecurityCategorySummary>,
     /// All findings, dismissed ones included, most important first.
     pub findings: Vec<SecurityFinding>,
     /// Up to ten items to fix first.
@@ -219,7 +219,7 @@ impl PassboxClient {
             categories: report
                 .categories
                 .iter()
-                .map(|c| SecurityCategory {
+                .map(|c| SecurityCategorySummary {
                     kind: c.kind.as_str().to_owned(),
                     severity: c.severity.as_str().to_owned(),
                     count: c.count,
