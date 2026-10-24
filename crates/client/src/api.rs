@@ -328,7 +328,9 @@ impl Api {
                 "invalid_two_factor_code" => Error::InvalidTwoFactorCode,
                 "two_factor_expired" => Error::TwoFactorExpired,
                 "conflict"
-                    if path.starts_with("/api/v1/items") || path.starts_with("/api/v1/vaults/") =>
+                    if path.starts_with("/api/v1/items")
+                        || path.starts_with("/api/v1/vaults/")
+                        || path.starts_with("/api/v1/service-account/items") =>
                 {
                     Error::Conflict
                 }
