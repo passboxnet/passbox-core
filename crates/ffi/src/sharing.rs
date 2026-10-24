@@ -129,6 +129,8 @@ pub struct InvitationPreview {
     pub email: String,
     pub role: String,
     pub expires_at: i64,
+    /// Email of the admin who sent the invitation (older servers: none).
+    pub inviter_email: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
@@ -329,6 +331,7 @@ impl PassboxClient {
             email: p.email,
             role: p.role,
             expires_at: p.expires_at,
+            inviter_email: p.inviter_email,
         })
     }
 
