@@ -22,6 +22,7 @@ One source, generated everywhere:
 | Web, extension, desktop, website | `packages/ui/src/tokens.css` (Tailwind CSS v4 `@theme` + CSS variables `--pb-*`) |
 | iOS | `apps/ios/Shared/DesignTokens.swift` (dynamic light/dark colors without asset catalog entries, type scale, radii, spacing, motion, gradients) |
 | Android | `apps/android/app/src/main/java/dev/passbox/android/ui/theme/Tokens.kt` (Material `ColorScheme` light/dark, `PassboxColors`, `PassboxTokenTypography`, `PassboxShapeScale`, spacing, motion, gradients) |
+| Server pages and emails | `crates/server/src/brand/tokens.rs` (sRGB colors per theme, gradients, font stacks, radii) |
 | Logo, app icons, icon family | `scripts/generate-brand-assets.mjs`, see [brand.md](brand.md) |
 
 Change a value in `tokens.json`, run `node scripts/generate-design-tokens.mjs`

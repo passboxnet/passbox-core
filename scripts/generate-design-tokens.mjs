@@ -7,6 +7,7 @@
 //   apps/android/.../ui/theme/Tokens.kt           (whole file)
 //   docs/design/system.md                         (token tables between markers)
 //   docs/design/board.html                        (CSS variables between markers)
+//   crates/server/src/brand/tokens.rs             (whole file; server pages and emails)
 //
 //   node scripts/generate-design-tokens.mjs           write the files
 //   node scripts/generate-design-tokens.mjs --check   fail if a file is stale,
@@ -722,6 +723,74 @@ function replaceMdRegion(text, marker, lines, file) {
 // ---------------------------------------------------------------- write
 
 /** Formats CSS and HTML like `pnpm lint` expects (Biome), so the check compares like with like. */
+// ---------------------------------------------------------------- Rust (server pages and emails)
+
+/** sRGB for HTML emails, which cannot use OKLCH: `#RRGGBB`, or `rgba()` for translucent colors. */
+function cssSrgb(value, name) {
+  const { rgb, alpha } = toSrgb(value, name);
+  return alpha < 1 ? `rgba(${rgb.join(", ")}, ${num(alpha)})` : `#${rgb.map(hex2).join("")}`;
+}
+
+function rustFile() {
+  const out = [];
+  const field = (name) => name.replace(/-/g, "_");
+  // Lays out `pub const NAME: &str = "…";` the way rustfmt does (100 columns).
+  const strConst = (name, literal) => {
+    const head = `pub const ${name}: &str =`;
+    const oneLine = `${head} "${literal}";`;
+    if (oneLine.length <= 100 || `    "${literal}";`.length > 100) out.push(oneLine);
+    else out.push(head, `    "${literal}";`);
+  };
+  out.push(`//! Design tokens for the server's own HTML: emails and fallback pages.`);
+  out.push("//!");
+  out.push(`//! ${GENERATED}`);
+  out.push("//! Colors are sRGB because email clients do not understand OKLCH.");
+  out.push("");
+  out.push("/// The colors of one theme.");
+  out.push("#[derive(Debug, Clone, Copy)]");
+  out.push("pub struct Theme {");
+  for (const name of colorNames) {
+    out.push(`    /// ${tokens.color[name].use}`);
+    out.push(`    pub ${field(name)}: &'static str,`);
+  }
+  out.push("}");
+  for (const theme of themes) {
+    out.push("");
+    out.push(`/// The ${theme} theme.`);
+    out.push(`pub const ${theme.toUpperCase()}: Theme = Theme {`);
+    for (const name of colorNames)
+      out.push(`    ${field(name)}: "${cssSrgb(tokens.color[name][theme], `${name} (${theme})`)}",`);
+    out.push("};");
+  }
+  for (const [name, g] of Object.entries(tokens.gradient)) {
+    const stops = g.stops.map(([at, c]) => `${hexRgb(c, name)} ${Math.round(at * 100)}%`).join(", ");
+    out.push("");
+    out.push(`/// ${g.use}`);
+    strConst(`GRADIENT_${field(name).toUpperCase()}`, `linear-gradient(${g.angle}deg, ${stops})`);
+    out.push(`/// The middle stop of the ${name} gradient, for clients without CSS gradients.`);
+    strConst(
+      `GRADIENT_${field(name).toUpperCase()}_FALLBACK`,
+      hexRgb(g.stops[Math.floor(g.stops.length / 2)][1], name),
+    );
+  }
+  out.push("");
+  for (const [name, f] of Object.entries(tokens.font)) {
+    const stack = `"${f.family}", ${f.fallback}`.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+    out.push(`/// ${f.family} with its fallbacks (${f.license}). Pages serve the font; emails do not embed it.`);
+    strConst(`FONT_${field(name).toUpperCase()}`, stack);
+  }
+  out.push("");
+  out.push("/// Radii in CSS pixels (docs/design/system.md).");
+  out.push("pub mod radius {");
+  for (const [name, v] of Object.entries(tokens.radius)) {
+    out.push(`    /// ${v.use}`);
+    out.push(`    pub const ${field(name).toUpperCase()}: u32 = ${v.value};`);
+  }
+  out.push("}");
+  out.push("");
+  return `${out.join("\n")}`;
+}
+
 function biomeFormat(path, text) {
   if (!path.endsWith(".css")) return text;
   const biome = join(root, "node_modules/.bin/biome");
@@ -747,6 +816,7 @@ output("packages/ui/src/tokens.css", (text) =>
 output("docs/design/board.html", (text) => replaceRegion(text, "vars", cssVars(), "board.html", "      "));
 output("apps/ios/Shared/DesignTokens.swift", () => swiftFile());
 output("apps/android/app/src/main/java/dev/passbox/android/ui/theme/Tokens.kt", () => kotlinFile());
+output("crates/server/src/brand/tokens.rs", () => rustFile());
 output("docs/design/system.md", (text) => replaceMdRegion(text, "tokens", docsTables(), "system.md"));
 
 let changed = 0;
