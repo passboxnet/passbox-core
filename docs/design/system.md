@@ -21,7 +21,7 @@ One source, generated everywhere:
 | Generator and checks (sRGB gamut, WCAG contrast, stale outputs) | `scripts/generate-design-tokens.mjs` (`pnpm --filter @passbox/ui tokens`; `pnpm test` runs `--check`) |
 | Web, extension, desktop, website | `packages/ui/src/tokens.css` (Tailwind CSS v4 `@theme` + CSS variables `--pb-*`) |
 | iOS | `apps/ios/Shared/DesignTokens.swift` (dynamic light/dark colors without asset catalog entries, type scale, radii, spacing, motion, gradients) |
-| Android | `apps/android/app/src/main/java/dev/passbox/android/ui/theme/Tokens.kt` (Material `ColorScheme` light/dark, `PassboxColors`, `PassboxTypography`, `PassboxShapeScale`, spacing, motion, gradients) |
+| Android | `apps/android/app/src/main/java/dev/passbox/android/ui/theme/Tokens.kt` (Material `ColorScheme` light/dark, `PassboxColors`, `PassboxTokenTypography`, `PassboxShapeScale`, spacing, motion, gradients) |
 | Logo, app icons, icon family | `scripts/generate-brand-assets.mjs`, see [brand.md](brand.md) |
 
 Change a value in `tokens.json`, run `node scripts/generate-design-tokens.mjs`
@@ -52,7 +52,7 @@ and commit every changed file. Never edit generated regions by hand.
   `text-body-lg`, `text-body`, `text-body-sm`, `text-label`, `text-label-sm`,
   `text-caption`, `text-overline`, `text-stat`, `text-mono` (each sets size,
   line height, tracking and weight). SwiftUI: `.textStyle(DesignTokens.Typography.titleLg)`.
-  Compose: `PassboxType.TitleLg` or the Material roles in `PassboxTypography`.
+  Compose: `PassboxType.TitleLg` or the Material roles in `PassboxTokenTypography`.
 
 ## Color
 

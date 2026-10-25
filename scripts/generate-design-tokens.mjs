@@ -561,7 +561,7 @@ function kotlinFile() {
     labelSmall: "Overline",
   };
   out.push("/** Material 3 roles mapped onto the Passbox type scale. */");
-  out.push("val PassboxTypography = Typography(");
+  out.push("val PassboxTokenTypography = Typography(");
   for (const [role, step] of Object.entries(material)) out.push(`    ${role} = PassboxType.${step},`);
   out.push(")");
   out.push("");
