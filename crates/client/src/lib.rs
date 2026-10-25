@@ -16,11 +16,15 @@ pub mod service_account;
 pub mod store;
 
 pub use api::{AccountEvent, SecurityKeyInfo, SessionInfo, TotpSetup, TwoFactorStatus};
+pub use client::analysis::{
+    ALIAS_TAG, AliasProvider, AliasService, AliasTransport, EmailBreach, EmailMonitoring,
+    MonitoredEmail, ReportOptions, alias_field, create_alias_with,
+};
 pub use client::comfort::MoveOutcome;
 pub use client::developer::{AgentGrantRecord, ServiceAccountGrant, ServiceAccountInfo};
 pub use client::item_tools::{
-    BreachRange, BreachedItem, BulkFailure, HibpRange, ItemHealth, ItemProblem, ItemUsage,
-    ItemVersion, UsageKind,
+    BreachMode, BreachRange, BreachedItem, BulkFailure, HibpRange, ItemHealth, ItemProblem,
+    ItemUsage, ItemVersion, UsageKind,
 };
 pub use client::recovery::{
     CodeRecoveryStart, DeviceLinkStart, DeviceLinkState, EmergencyContact, EmergencyContacts,
@@ -35,6 +39,11 @@ pub use error::{Error, Result};
 pub use model::{
     Attachment, DeviceAccount, FieldType, Item, ItemCategory, ItemData, ItemField, Vault, field,
     format,
+};
+pub use passbox_core::analysis::{
+    CategorySummary, Finding, FindingKind, FixAction, Priority, Rating, SecurityReport, Severity,
+    lookalike::{Lookalike, LookalikeReason},
+    sites::SiteSupport,
 };
 pub use passbox_core::sharing::state::{
     DirectoryLookup, GroupView, MemberView, OrgView, SharedVaultView, SharingView, VaultMemberView,

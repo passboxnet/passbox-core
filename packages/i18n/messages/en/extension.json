@@ -236,5 +236,10 @@
   "item.error.readOnly": "You can only view this entry. Whoever manages the shared vault can give you edit rights.",
   "save.sharedVault": "{vault} · {org}",
   "settings.autoLockLimited": "Your organization allows at most {minutes} minutes. Passbox also locks when your screen locks and when you close the browser.",
+  "menu.lookalikeTitle": "Careful: this is not {site}",
+  "menu.lookalikeSaved": "The address only looks like a site you have a login for. Passbox fills nothing here. Don't enter your password; open the real site yourself.",
+  "menu.lookalikeKnown": "The address imitates a well-known site with look-alike characters. This is a common phishing trick.",
+  "save.lookalikeTitle": "This site only looks like {site}.",
+  "save.lookalikeText": "If you just entered the password of your real account on {host}, change it on the real site now.",
   "category.environment": "Environment"
 }

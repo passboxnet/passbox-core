@@ -236,5 +236,10 @@
   "item.error.readOnly": "Diesen Eintrag können Sie nur ansehen. Wer den geteilten Tresor verwaltet, kann Ihnen Bearbeitungsrechte geben.",
   "save.sharedVault": "{vault} · {org}",
   "settings.autoLockLimited": "Ihre Organisation erlaubt höchstens {minutes} Minuten. Passbox sperrt sich außerdem, wenn Ihr Bildschirm sperrt oder Sie den Browser schließen.",
+  "menu.lookalikeTitle": "Vorsicht: Das ist nicht {site}",
+  "menu.lookalikeSaved": "Die Adresse sieht nur aus wie eine Website, für die Sie eine Anmeldung haben. Passbox füllt hier nichts aus. Geben Sie Ihr Passwort nicht ein, sondern öffnen Sie die echte Website selbst.",
+  "menu.lookalikeKnown": "Die Adresse ahmt mit ähnlich aussehenden Zeichen eine bekannte Website nach. Das ist ein üblicher Phishing-Trick.",
+  "save.lookalikeTitle": "Diese Website sieht nur aus wie {site}.",
+  "save.lookalikeText": "Haben Sie gerade das Passwort Ihres echten Kontos auf {host} eingegeben, ändern Sie es jetzt auf der echten Website.",
   "category.environment": "Umgebung"
 }

@@ -751,6 +751,45 @@ impl Api {
         }
     }
 
+    /// `GET /api/v1/breach/range/{prefix}`: the padded Pwned Passwords range
+    /// through the server, or `None` when the server does not offer it.
+    pub fn breach_range(&self, token: &str, prefix: &str) -> Result<Option<String>> {
+        let (status, bytes) = self.transport.send(
+            "GET",
+            &format!("{}/api/v1/breach/range/{prefix}", self.base_url),
+            Some(token),
+            None,
+        )?;
+        let message = || {
+            serde_json::from_slice::<Value>(&bytes)
+                .ok()
+                .and_then(|v| v["message"].as_str().map(str::to_owned))
+                .unwrap_or_else(|| String::from_utf8_lossy(&bytes).into_owned())
+        };
+        match status {
+            200 => Ok(Some(String::from_utf8_lossy(&bytes).into_owned())),
+            404 => Ok(None),
+            401 => Err(Error::Server {
+                status,
+                code: "unauthorized".into(),
+                message: "the session expired".into(),
+            }),
+            403 => Err(Error::Network(format!(
+                "Have I Been Pwned could not be reached: {}",
+                message()
+            ))),
+            _ => Err(Error::Server {
+                status,
+                code: if status == 429 {
+                    "rate_limited".into()
+                } else {
+                    String::new()
+                },
+                message: message(),
+            }),
+        }
+    }
+
     pub fn delete_item(&self, token: &str, id: &str, revision: u64) -> Result<WriteResponse> {
         self.call(
             "DELETE",

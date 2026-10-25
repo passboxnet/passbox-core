@@ -1,0 +1,2453 @@
+# 2fa.directory snapshot of 2026-10-24, https://api.2fa.directory/v4/all.json
+# License: MIT, 2fa.directory contributors (see THIRD_PARTY_NOTICES.md)
+# domain<TAB>methods<TAB>documentation; methods: t=TOTP u=security key s=SMS e=email c=call a=vendor app h=vendor hardware
+101domain.com	t	https://help.101domain.com/kb/setup-two-factor-authentication
+123-reg.co.uk	stu	https://www.123-reg.co.uk/support/my-account/how-do-i-enable-2-step-verification-on-my-account/
+123formbuilder.com	t	https://www.123formbuilder.com/docs/multi-factor-authentication-login
+126.com	st	https://help.mail.163.com/faq.do?m=list&categoryID=297
+15five.com	t	https://success.15five.com/hc/en-us/articles/360002698811#h_01G1GXTSKCGMSC3ECKRFSC8NWM
+1822direkt.de	as	https://www.1822direkt.de/service/sicherheitsportal/sicheres-online-banking/
+1password.ca	ahtu	https://support.1password.com/two-factor-authentication/
+1password.com	ahtu	https://support.1password.com/two-factor-authentication/
+1password.eu	ahtu	https://support.1password.com/two-factor-authentication/
+20i.com	t	https://www.20i.com/support/my-services/two-factor-authentication-my20i
+23andme.com	t	https://customercare.23andme.com/hc/en-us/articles/360034119874
+2checkout.com	et	https://knowledgecenter.2checkout.com/Onboarding/Activate-and-set-up-your-2Checkout-account/Two-factor-authentication
+3commas.io	t	https://help.3commas.io/en/articles/3424452
+4cd.edu	cst	https://4cd-doit.atlassian.net/wiki/spaces/ITPU/pages/2320465929
+500px.com	t	https://support.500px.com/hc/en-us/articles/205115877
+53.com	s	
+99app.com	s	
+a2hosting.com	t	https://www.a2hosting.com/kb/a2-hosting-customer-portal/account-management/enabling-two-factor-authentication-for-your-a2-hosting-account
+abode.mx	t	https://support.goabode.com/docs/two-factor-authentication
+above.com	t	https://www.above.com/manual/my-account-manual-two-step-auth.html
+accelo.com	t	https://www.accelo.com/resources/help/faq/user-permissions-and-settings/two-factor-authentication/
+access.login.nhs.uk	s	https://www.nhs.uk/nhs-services/online-services/nhs-app/nhs-app-help-and-support/logging-in-to-the-nhs-app/
+access.service.gov.uk	acst	https://www.gov.uk/guidance/keeping-your-hmrc-login-details-safe#multi-factor-authentication
+account.meethue.com	et	
+accountable.eu	t	https://help.accountable.eu/en/articles/6976966
+accountonline.com	cs	https://online.citi.com/JRS/pands/detail.do?ID=SecurityCenter&section=security_tools
+accounts.firefox.com	t	https://support.mozilla.org/en-US/kb/secure-firefox-account-two-step-authentication
+accounts.lidl.com	es	
+accounts.nintendo.com	t	https://en-americas-support.nintendo.com/app/answers/detail/a_id/27496
+acorns.com	es	https://www.acorns.com/support/how-do-i-turn-on-two-factor-authentication-on-my-account/
+acquia.com	st	https://docs.acquia.com/cloud-platform/access/signin/
+actionnetwork.org	as	https://help.actionnetwork.org/hc/en-us/articles/217206826
+actionstep.com	t	https://support.actionstep.com/support/solutions/articles/150000019975
+active24.com	t	https://faq.active24.com/cz/183996-
+activecampaign.com	st	https://help.activecampaign.com/hc/en-us/articles/360008574740
+activestate.com	t	https://docs.activestate.com/platform/user/prefs/twofactor/
+activision.com	st	https://support.activision.com/articles/using-two-factor-authentication-with-an-activision-account
+adafruit.com	stu	https://learn.adafruit.com/how-to-set-up-2-factor-authentication-on-adafruit
+addiko.hr	at	https://www.addiko.hr/static/uploads/mtoken-uputa-za-koristenje.pdf
+adelaidebank.com.au	aes	https://www.bendigobank.com.au/support/e-banking/multi-factor-authentication
+adelaidebendigo.com.au	aes	https://www.bendigobank.com.au/support/e-banking/multi-factor-authentication
+adguard-dns.io	t	https://kb.adguard.com/en/general/2fa
+adguard-vpn.com	t	https://kb.adguard.com/en/general/2fa
+adguard.com	t	https://kb.adguard.com/en/general/2fa
+adobe.com	aes	https://helpx.adobe.com/manage-account/using/secure-your-adobe-account.html
+adressa.no	st	https://payment.schibsted.no/profile-pages/faq#how-to-activate-and-deactivate-2fa
+adt.com	ces	https://www.adt.com/help/pulse/mfa
+adyen.com	t	https://docs.adyen.com/account/multi-factor-authentication
+aero.zip	tu	https://aero.zip/faq/2fa-support
+aeza.net	t	
+affinityfcu.com	ces	https://www.affinityfcu.com/Privacy-Disclosures/Business-Banking-User-Guide.pdf
+afip.gob.ar	a	https://www.afip.gob.ar/claveFiscal/informacion-basica/solicitud.asp
+aftenbladet.no	st	https://payment.schibsted.no/profile-pages/faq#how-to-activate-and-deactivate-2fa
+aftenposten.no	st	https://payment.schibsted.no/profile-pages/faq#how-to-activate-and-deactivate-2fa
+afternic.com	stu	https://help.afternic.com/s/article/How-can-I-set-up-Two-Factor-Authentication-for-my-account
+afterpay.co.nz	es	
+afterpay.com	es	
+afterpay.com.au	es	
+aftonbladet.se	st	https://payment.schibsted.no/profile-pages/faq#how-to-activate-and-deactivate-2fa
+agl.com.au	es	https://www.agl.com.au/help-support/energy/manage-your-account/account-registration-and-logins/log-in-and-create-passwords
+aha.io	acsu	https://www.aha.io/support/ideas/ideas/settings/account-settings#security-and-single-sign-on
+airasia.com	e	
+airbank.cz	as	https://www.airbank.cz/co-vas-nejvic-zajima/jake-bezpecnostni-prvky-u-nas-mame
+airbnb.com	es	https://www.airbnb.com/help/article/501
+airbrake.io	t	https://airbrake.io/docs/features/two-factor-authentication/
+aircanada.com	es	https://www.aircanada.com/ca/en/aco/home/customer-profile/frequently-asked-questions.html#/tab_tfa-faq-tabs_title_2
+airship.com	t	https://docs.airship.com/tutorials/security/2fa/
+airtable.com	cst	https://support.airtable.com/docs/enabling-two-factor-authentication
+aiven.io	t	https://help.aiven.io/en/articles/947120
+ajax.systems	t	https://support.ajax.systems/en/how-secure-ajax-account/
+akc.org	e	https://www.akc.org/about/site/two-factor-authentication/
+alaskaair.com	s	
+alchemer.com	st	https://help.alchemer.com/help/multi-factor-authentication#user
+algolia.com	t	https://www.algolia.com/doc/security/best-security-practices/#two-factor-authentication
+alibabacloud.com	t	https://www.alibabacloud.com/help/en/cloud-migration-guide-for-beginners/latest/configure-security-settings-for-an-alibaba-cloud-account
+aliyun.com	t	https://www.alibabacloud.com/help/en/cloud-migration-guide-for-beginners/latest/configure-security-settings-for-an-alibaba-cloud-account
+all-inkl.com	t	https://all-inkl.com/wichtig/faq/#2fa
+allegro.pl	st	https://allegro.pl/pomoc/dla-kupujacych/logowanie-i-haslo/dwustopniowe-logowanie-najczesciej-zadawane-pytania-dykqg9nMKSZ
+alliantcreditunion.org	s	https://www.alliantcreditunion.org/help/how-does-alliant-two-factor-authentication-work
+allianz.de	s	https://www.allianz.de/service/meine-allianz/#faq
+allmylinks.com	t	
+ally.com	cs	https://www.ally.com/messages/sms/
+altcointrader.co.za	t	https://altcointrader.zendesk.com/hc/en-gb/articles/360007179680
+alterdice.com	et	
+altoira.com	t	
+altra.org	es	
+amazingmarvin.com	t	https://help.amazingmarvin.com/en/articles/5019430
+amazon.ae	cst	https://www.amazon.com/gp/help/customer/display.html?nodeId=G3PWZPU52FKN7PW4
+amazon.ca	cst	https://www.amazon.com/gp/help/customer/display.html?nodeId=G3PWZPU52FKN7PW4
+amazon.cn	cst	https://www.amazon.com/gp/help/customer/display.html?nodeId=G3PWZPU52FKN7PW4
+amazon.co.jp	cst	https://www.amazon.com/gp/help/customer/display.html?nodeId=G3PWZPU52FKN7PW4
+amazon.co.uk	cst	https://www.amazon.com/gp/help/customer/display.html?nodeId=G3PWZPU52FKN7PW4
+amazon.com	cst	https://www.amazon.com/gp/help/customer/display.html?nodeId=G3PWZPU52FKN7PW4
+amazon.com.au	cst	https://www.amazon.com/gp/help/customer/display.html?nodeId=G3PWZPU52FKN7PW4
+amazon.com.br	cst	https://www.amazon.com/gp/help/customer/display.html?nodeId=G3PWZPU52FKN7PW4
+amazon.com.mx	cst	https://www.amazon.com/gp/help/customer/display.html?nodeId=G3PWZPU52FKN7PW4
+amazon.com.tr	cst	https://www.amazon.com/gp/help/customer/display.html?nodeId=G3PWZPU52FKN7PW4
+amazon.de	cst	https://www.amazon.com/gp/help/customer/display.html?nodeId=G3PWZPU52FKN7PW4
+amazon.es	cst	https://www.amazon.com/gp/help/customer/display.html?nodeId=G3PWZPU52FKN7PW4
+amazon.fr	cst	https://www.amazon.com/gp/help/customer/display.html?nodeId=G3PWZPU52FKN7PW4
+amazon.in	cst	https://www.amazon.com/gp/help/customer/display.html?nodeId=G3PWZPU52FKN7PW4
+amazon.it	cst	https://www.amazon.com/gp/help/customer/display.html?nodeId=G3PWZPU52FKN7PW4
+amazon.nl	cst	https://www.amazon.com/gp/help/customer/display.html?nodeId=G3PWZPU52FKN7PW4
+amazon.sa	cst	https://www.amazon.com/gp/help/customer/display.html?nodeId=G3PWZPU52FKN7PW4
+amazon.se	cst	https://www.amazon.com/gp/help/customer/display.html?nodeId=G3PWZPU52FKN7PW4
+amazon.sg	cst	https://www.amazon.com/gp/help/customer/display.html?nodeId=G3PWZPU52FKN7PW4
+americafirst.com	est	https://www.americafirst.com/online_banking.html
+americancentury.com	est	https://www.americancentury.com/support-center/privacy-security/security-center/#account-security-log-in-for-required-changes
+americanexpress.com	es	https://www.americanexpress.com/uk/benefits/service-security/safety-fraud/authentication.html#tabs-759524196_3
+ameriprise.com	ast	https://www.ameriprise.com/customer-service/2-step-verification-faq
+amtrak.com	es	
+ancestry.com	es	https://support.ancestry.com/s/article/MFA
+andrewsfcu.org	ces	https://www.andrewsfcu.org/Support/Security#Prevention_Tips
+angel.co	st	https://help.wellfound.com/article/1064--
+ankama.com	ae	https://support.ankama.com/hc/en-us/articles/360019984217
+anthem.com	ces	
+any.run	t	
+anycoindirect.eu	st	https://anycoindirect.eu/en/support/anycoin-direct/security#what-is-two-factor-authentication-2fa
+anydesk.com	t	https://support.anydesk.com/Two-Factor_Authentication
+ao.com	s	
+aok.de	s	https://meine.aok.de/landingpage/faq
+apnic.net	t	https://help.apnic.net/s/article/How-do-I-enable-disable-two-factor-authentication
+apobank.de	as	https://www.apobank.de/unsere-leistungen/konto-karte/mobile-banking/apotan
+app.flexera.com	st	https://docs.flexera.com/svr/ug/Content/helplibrary/Configure_Two_Factor_Authentication__2FA_.htm
+app.sendloop.com	a	https://www.notion.so/aa9e468f24cb4efab3cfef4e7ca4e41d
+app.terraform.io	st	https://www.terraform.io/docs/enterprise/users-teams-organizations/2fa.html
+app.vagrantup.com	st	https://www.vagrantup.com/docs/vagrant-cloud/users/authentication.html#two-factor-authentication
+appfigures.com	t	https://help.appfigures.com/en/article/hd61rb/
+appfolio.com	t	https://www.appfolio.com/help/online-portal
+appleid.apple.com	acsu	https://support.apple.com/en-us/HT204915
+appodeal.com	et	
+appoptics.com	t	https://documentation.solarwinds.com/en/success_center/pingdom/content/shared/mfa-users.htm
+appsignal.com	t	https://docs.appsignal.com/user-account/two-factor-authentication.html
+appveyor.com	t	https://www.appveyor.com/blog/2018/11/07/2FA-implementation/
+appwrite.io	et	https://appwrite.io/docs/advanced/security/mfa
+aqara.com	ae	
+arduino.cc	t	https://support.arduino.cc/hc/en-us/articles/360018131120
+arena.net	est	https://help.guildwars2.com/hc/en-us/articles/230672927
+arin.net	t	https://www.arin.net/reference/materials/security/twofactor/
+arlo.com	aes	https://kb.arlo.com/000062288
+artifacthub.io	t	
+artists.spotify.com	st	https://artists.spotify.com/en/help/article/2-step-verification
+artstation.com	a	https://help.artstation.com/hc/en-us/articles/360057111771
+arubacloud.com	a	https://kb.cloud.it/computing/uso-e-tecnologie/accesso-al-pannello-di-controllo-con-otp.aspx
+arubainstanton.com	t	https://www.arubainstanton.com/techdocs/en/content/get-started/mobile/security.htm
+asana.com	t	https://asana.com/guide/help/fundamentals/two-factor-authentication
+ashesofcreation.com	t	https://ashesofcreation.zendesk.com/hc/en-us/articles/360022983234
+aspiration.com	es	
+assembla.com	t	https://articles.assembla.com/en/articles/1914077
+astrogaming.com	et	
+asu.edu	acsu	https://getprotected.asu.edu/services/identity-and-access-management/duo-two-factor-authentication
+asus.com	et	
+atera.com	t	https://support.atera.com/hc/en-us/articles/360022522253
+aternos.org	t	
+atlanticcityelectic.com	ces	
+atlas-myrmv.massdot.state.ma.us	cst	https://www.mass.gov/doc/online-registration-renewal-instructions/download
+atriumhealth.org	e	
+att.com	s	https://www.att.com/support/article/my-account/KM1249672/
+attentive.com	cs	https://help.attentivemobile.com/hc/articles/14208870889876
+attentivemobile.com	cs	https://help.attentivemobile.com/hc/articles/14208870889876
+atu.edu	ahs	https://support.atu.edu/support/solutions/folders/7000078509
+au.com	s	https://id.auone.jp/id/pc/content/note/devauth/pc_login/index.html
+audiense.com	t	https://help.audiense.com/knowledge/two-factor-authentication
+audiofanzine.com	t	https://fr.audiofanzine.com/login/a.faq2fa.html
+auone.jp	s	https://id.auone.jp/id/pc/content/note/devauth/pc_login/index.html
+aura.com	es	https://www.aura.com/help/how-do-i-enable-my-2-factor-authentication
+australianretirementtrust.com.au	es	https://www.australianretirementtrust.com.au/articles/mfa-security
+auth.hashicorp.com	t	https://developer.hashicorp.com/hcp/docs/hcp/admin/iam/mfa
+auth.meethue.com	et	
+auth.opera.com	t	
+auth0.com	astu	https://auth0.com/docs/secure/multi-factor-authentication/enable-mfa
+autocode.com	s	https://autocode.com/autocode/threads/two-factor-authentication-announcements-6bfe5f55/
+autodesk.com	cest	https://knowledge.autodesk.com/customer-service/account-management/account-profile/account-security/two-step-verification
+automater.pl	t	https://help.automater.com/help/two-factor-authentication-2fa
+autotask.net	t	https://www.autotask.net/help/Content/2_Getting_Started/Profile/Preferences/GoogleAuthenticator.htm
+availity.com	cst	https://apps.availity.com/availity/Demos/QRG_AP_2step_Providers.pdf#%5B%7B%22num%22%3A38%2C%22gen%22%3A0%7D%2C%7B%22name%22%3A%22XYZ%22%7D%2C72%2C724.504%2Cnull%5D
+avanza.se	at	https://www.avanza.se/kundservice.html/1335/tvafaktorsinloggning/d264248e-bea3-48a0-bf2d-157309734649
+avast.com	t	https://support.avast.com/en-gb/article/Account-2-Step-Verification/
+avg.com	t	https://support.avg.com/SupportArticleView?l=en&urlname=AVG-Account-2-step-verification
+awardwallet.com	t	https://awardwallet.com/faqs#44
+aware.com.au	s	
+awin.com	t	https://success.awin.com/s/article/How-to-activate-and-deactivate-the-Two-Step-Verification
+aws.amazon.com	htu	https://aws.amazon.com/iam/features/mfa/
+axos.com	es	
+axosbank.com	es	
+axs.com	ces	https://support.axs.com/hc/articles/360017633759
+azure.microsoft.com	acst	https://azure.microsoft.com/en-us/documentation/articles/multi-factor-authentication/
+back4app.com	t	https://www.back4app.com/docs/security/multi-factor-authentication
+backblaze.com	st	https://help.backblaze.com/hc/en-us/articles/217666588
+bahn.com	st	https://www.bahn.de/hilfe/kundenkonto/kundenkonto-2fa
+bahn.de	st	https://www.bahn.de/hilfe/kundenkonto/kundenkonto-2fa
+balena.io	t	https://www.balena.io/docs/learn/manage/account/#two-factor-authentication
+baloise.ch	s	
+bamboohr.com	t	https://help.bamboohr.com/hc/en-us/articles/360052655731
+bancoguayaquil.com	as	https://www.bancoguayaquil.com/documents/files/Manual%20de%20uso%20de%20token%20de%20seguridad.pdf
+bancointernacional.com.ec	as	https://www.bancointernacional.com.ec/storage/2020/11/BI-NBOE-TutorialPDF-12Softoken.pdf
+bank.lendingclub.com	ces	https://radiusbank.custhelp.com/app/answers/detail/a_id/86
+bank99.at	a	https://bank99.at/blog/okay99-app-sicher-im-online-banking
+bankera.com	s	https://bankera.com/faq/how-to-enable-second-factor-authentication/
+banking.barclaysus.com	ces	https://www.barclaycardus.com/servicing/security-center?howWeProtectYou=#loginProcess
+banking.lendingclub.com	ces	https://radiusbank.custhelp.com/app/answers/detail/a_id/86
+bankofamerica.com	esu	https://www.bankofamerica.com/security-center/online-banking/
+bankofscotland.co.uk	acs	https://www.bankofscotland.co.uk/aboutonline/changes-to-internet-banking.html
+barclays.co.uk	ah	https://www.barclays.co.uk/ways-to-bank/online-banking/pinsentry-guide/
+baremetrics.com	t	
+barmenia.de	st	https://www.barmenia.de/deu/bde_privat/bde_service/bde_selfservice/bde_meine_barmenia/erstanmeldung.xhtml
+basecamp.com	tu	https://3.basecamp-help.com/article/443--
+batch.com	t	https://help.batch.com/en/articles/2721053
+battle.net	as	https://battle.net/support/article/24520
+bbbank.de	ah	https://www.bbbank.de/produkte/konten-und-karten/online-banking/tan-verfahren.html
+bca.co.id	h	https://www.bca.co.id/en/Individu/Produk/E-Banking/Klik-BCA
+becu.org	s	
+beget.com	est	https://beget.com/ru/kb/manual/nastrojki-akkaunta#security
+bell.ca	ces	https://support.bell.ca/billing-and-accounts/security_and_privacy/mybell_mfa
+belong.com.au	es	https://www.belong.com.au/support/internet/getting-started/two-step-verification
+bendigobank.com.au	aes	https://www.bendigobank.com.au/support/e-banking/multi-factor-authentication
+benefitscal.com	es	https://www.calsaws.org/wp-content/uploads/2024/02/BenefitsCal-Quick-Guide-Two-Step-Verification-1.pdf
+berkeley.edu	ahu	https://calnetweb.berkeley.edu/calnet-2-step
+bestbuy.com	st	https://www.bestbuy.com/site/help-topics/2-step-verification/pcmcat1561056149844.c
+betfair.com	st	https://support.betfair.com/app/answers/detail/a_id/126
+bethesda.net	st	https://help.bethesda.net/app/answers/detail/a_id/48931
+bethpagefcu.com	es	
+betterment.com	cst	https://www.betterment.com/resources/understanding-account-security/#3
+betvictor.com	st	
+beyondbank.com.au	as	https://www.beyondbank.com.au/need-help/how-do-i-register-for-secure-sms-on-internet-banking
+bge.com	ces	
+bglcorp.com	st	https://support.sf360.com.au/hc/en-au/articles/360020963051
+bgsaxo.it	as	
+bhfcu.com	ces	https://www.bhfcu.com/Landing/Online-Banking-FAQs
+bibox.com	est	https://support.bibox.jp/hc/en-us/articles/900006744823
+bigcommerce.ca	ae	https://support.bigcommerce.com/s/article/Setting-Up-2FA
+bigcommerce.co.uk	ae	https://support.bigcommerce.com/s/article/Setting-Up-2FA
+bigcommerce.com	ae	https://support.bigcommerce.com/s/article/Setting-Up-2FA
+bigcommerce.com.au	ae	https://support.bigcommerce.com/s/article/Setting-Up-2FA
+bigcommerce.de	ae	https://support.bigcommerce.com/s/article/Setting-Up-2FA
+bigcommerce.es	ae	https://support.bigcommerce.com/s/article/Setting-Up-2FA
+bigcommerce.fr	ae	https://support.bigcommerce.com/s/article/Setting-Up-2FA
+bigcommerce.it	ae	https://support.bigcommerce.com/s/article/Setting-Up-2FA
+bigcommerce.nl	ae	https://support.bigcommerce.com/s/article/Setting-Up-2FA
+biggerpockets.com	s	https://www.biggerpockets.com/forums/25/topics/232201-new-biggerpockets-security-improvements
+bigpond.com	aes	https://www.telstra.com.au/mytelstra/my-telstra-security
+bigpond.com.au	aes	https://www.telstra.com.au/mytelstra/my-telstra-security
+bigw.com.au	ces	
+bilbasen.dk	st	https://account.vend.no/faq#how-to-activate-and-deactivate-2fa
+bill.com	cst	https://help.bill.com/hc/en-us/articles/360000023843
+binance.com	stu	https://www.binance.com/en/support/faq/c-1?navId=1#11
+bitbar.com	t	https://bitbar.com/blog/multi-factor-authentication/
+bitbns.com	st	https://bitbns.freshdesk.com/support/solutions/articles/35000047047
+bitbucket.org	tu	https://support.atlassian.com/bitbucket-cloud/docs/enable-two-step-verification/
+bitbuy.ca	st	https://support.bitbuy.ca/hc/en-us/articles/360059151172
+bitcoin.de	ht	https://www.bitcoin.de/de/faq/was-ist-die-2-step-verification-2-faktor-authentifizierung/46.html
+bitdefender.com	et	https://www.bitdefender.com/consumer/support/answer/1581/
+bitfinex.com	tu	https://support.bitfinex.com/hc/en-us/sections/900000097443
+bitflyer.com	est	https://bitflyer.com/en-jp/faq/2-10
+bitforex.com	st	https://support.bitforex.com/hc/en-us/articles/360006825152
+bitget.com	cst	https://www.bitget.com/support/articles/12560603808391
+bitgo.com	htu	
+bithumb.com	st	https://en.bithumb.com/customer_support/info_guide?seq=510
+bitly.com	s	https://support.bitly.com/hc/en-us/articles/230650187
+bitmex.com	ht	https://blog.bitmex.com/use-two-factor-authentication-and-dont-reuse-passwords/
+bitpanda.com	t	https://support.bitpanda.com/hc/en-us/articles/360002015220
+bitpay.com	t	https://support.bitpay.com/hc/en-us/articles/360006612692
+bitrise.io	t	https://devcenter.bitrise.io/getting-started/account-security/
+bitrix24.com	t	https://helpdesk.bitrix24.com/open/9800171/
+bitrix24.eu	t	https://helpdesk.bitrix24.com/open/9800171/
+bitrix24.net	t	https://helpdesk.bitrix24.com/open/9800171/
+bitrix24.ru	t	https://helpdesk.bitrix24.com/open/9800171/
+bitski.com	es	
+bitskins.com	t	
+bitso.com	t	https://help.bitso.com/en/support/solutions/articles/1000166781
+bitstamp.net	t	https://www.bitstamp.net/faq/what-is-two-factor-authentication
+bittrex.com	t	https://bittrex.zendesk.com/hc/en-us/articles/5873174805531
+bitvavo.com	t	https://support.bitvavo.com/hc/en-us/articles/4405125367057
+bitwarden.com	acehstu	https://help.bitwarden.com/article/setup-two-step-login/
+bkex.com	t	https://bkex.zendesk.com/hc/en-us/articles/360021899473
+blackbaud.com	st	https://docs.blackbaud.com/bbid-docs/get-started/multi-factor-auth
+blacknight.com	t	https://help.blacknight.com/hc/en-us/articles/360001358517
+bladeandsoul.com	t	https://support.bladeandsoul.com/hc/en-us/articles/207578553
+blizzard.com	as	https://battle.net/support/article/24520
+blockchain.com	hst	https://support.blockchain.com/hc/en-us/articles/4417080375316
+blockchain.info	hst	https://support.blockchain.com/hc/en-us/articles/4417080375316
+blocket.se	st	https://account.vend.no/faq#how-to-activate-and-deactivate-2fa
+blockfi.com	t	
+blossom88.com	t	https://docs.blossom88.com/docs/setup/two-factor/
+bluehost.com	est	https://www.bluehost.com/help/article/two-factor-authentication
+blueskyweb.xyz	e	
+bluesnap.com	t	https://support.bluesnap.com/docs/two-factor_authentication
+bmedonline.it	as	https://www.bancamediolanum.it/static-assets/documents/Codice_BMed_regole_e_funzionamento.pdf
+bmo.com	acs	https://www.bmo.com/en-ca/main/personal/security-centre/how-to-protect-yourself/
+bmoharris.com	ces	
+bmoinvestorline.com	ces	https://www.bmoinvestorline.com/General_Info/MFA_preEnroll_SD_EN.html
+bnktothefuture.com	t	https://bnktothefuture.freshdesk.com/support/solutions/articles/9000068450
+bochk.com	h	https://www.bochk.com/en/security/2factorauthentication.html
+bofa.com	esu	https://www.bankofamerica.com/security-center/online-banking/
+bohemia.net	t	
+bokio.se	at	https://www.bokio.se/hjalp/bokio-medlemskap/ditt-bokiokonto/tvafaktor-autentisering-med-bokio/
+bolt.eu	e	
+bonus.ly	t	https://help.bonus.ly/en/articles/2817280
+booking.com	est	
+boost.com.au	es	https://boost.com.au/pages/two-step-verification
+boostmobile.com.au	es	https://boost.com.au/pages/two-step-verification
+boots.com	cs	
+boursedirect.fr	st	https://www.boursedirect.fr/fr/support/faq/connexion
+boursorama-banque.com	cs	https://www.boursorama.com/aide-en-ligne/mon-espace-client/la-directive-europeenne-relative-aux-services-de-paiement-dsp2/question/64587956
+boursorama.com	cs	https://www.boursorama.com/aide-en-ligne/mon-espace-client/la-directive-europeenne-relative-aux-services-de-paiement-dsp2/question/64587956
+bowens.com.au	es	
+box.com	st	https://support.box.com/hc/en-us/articles/360043697154
+braintreepayments.com	stu	https://developer.paypal.com/braintree/articles/risk-and-security/control-panel-security/two-factor-authentication
+brandwatch.com	t	https://social-media-management-help.brandwatch.com/hc/en-us/articles/4499676228765
+braze.com	as	https://www.braze.com/docs/user_guide/administrative/app_settings/company_settings/security_settings/
+brevo.com	st	https://help.brevo.com/hc/articles/360021203440
+brex.com	st	https://www.brex.com/support/two-factor-authentication
+britishairways.com	stu	
+broadcom.com	acst	https://knowledge.broadcom.com/external/article?articleId=216428
+bsky.app	e	
+bsky.social	e	
+bt.com	es	https://www.bt.com/help/security/two-step-authentication
+bt.no	st	https://payment.schibsted.no/profile-pages/faq#how-to-activate-and-deactivate-2fa
+btcbox.co.jp	t	https://support.btcbox.co.jp/hc/en-us/articles/360001886053
+btcmarkets.net	t	https://www.btcmarkets.net/frequently-asked-questions
+btcpop.co	t	https://blog.btcpop.co/2017/04/27/signing-security-btcpop-co-account/
+btcturk.com	est	https://www.btcturk.com/kolay/yardim/guvenlik
+bu.edu	acsu	https://www.bu.edu/tech/support/duo/
+bubble.io	t	https://bubble.io/support/en/articles/8520687
+buda.com	t	https://soporte.buda.com/es/articles/2379080
+buddy.works	st	https://buddy.works/docs/account/security#two-factor-authentication-2fa
+buffer.com	st	https://support.buffer.com/hc/en-us/articles/360038349434
+bugcrowd.com	t	https://docs.bugcrowd.com/customers/role-and-account-management/security/using-two-factor-authentication/
+bugsnag.com	t	https://docs.bugsnag.com/product/account-and-security/#security
+bugzilla.mozilla.org	at	https://wiki.mozilla.org/BMO/UserGuide/Two-Factor_Authentication
+buhl.de	t	https://www.buhl.de/shop/faqs?category=325
+buick.com	est	
+buildium.com	cst	https://www.buildium.com/two-factor-authentication/
+buildkite.com	t	https://buildkite.com/docs/tutorials/2fa
+builtwith.com	t	https://kb.builtwith.com/account-management/how-to-enable-2fa-on-builtwith/
+bullionstar.com	st	https://www.bullionstar.com/help/2-factor-authentication
+bullionvault.com	t	https://www.bullionvault.com/help/two_factor_auth.html
+bunnings.co.nz	es	
+bunnings.com.au	es	
+bunny.net	t	
+bupa.com.au	e	https://www.bupa.com.au/help/privacy-and-security-trust-centre/mybupa-and-digital-security
+business.trustpilot.com	s	https://support.trustpilot.com/hc/en-us/articles/360017418299
+buymeacoffee.com	et	https://help.buymeacoffee.com/en/articles/8693915
+bw-bank.de	ah	https://meine.bw-bank.de/articles/am-14-september-tritt-psd2-in-kraft-was-bedeutet-das-fuer-sie
+bybit.com	est	https://help.bybit.com/hc/en-us/articles/360039748653
+bytbil.com	st	https://account.vend.no/faq#how-to-activate-and-deactivate-2fa
+byu.edu	achstu	https://duo.byu.edu/
+cadillac.com	est	
+cal.com	t	
+calendly.com	t	https://help.calendly.com/hc/articles/26682031653399
+callcentric.com	e	https://www.callcentric.com/features/two_point_authentication
+callofduty.com	st	https://support.activision.com/articles/using-two-factor-authentication-with-an-activision-account
+calpoly.edu	achsu	https://calpoly.atlassian.net/wiki/spaces/CPKB/pages/3539066
+caltech.edu	ah	https://www.imss.caltech.edu/services/security/mfa/self-enrollment
+cam.ac.uk	achst	https://help.uis.cam.ac.uk/service/accounts-passwords/set-multi-factor-authentication-your-university-microsoft-account
+campaignmonitor.com	t	https://help.campaignmonitor.com/two-factor-authentication
+canada.ca	cst	https://www.canada.ca/en/revenue-agency/services/e-services/cra-login-services/multi-factor-authentication-access-cra-login-services.html
+canary.is	s	https://help.canary.is/hc/en-us/articles/360043987254
+canva.com	t	https://www.canva.com/help/login-verification/
+capcom-europe.com	t	https://cid.capcom.com/en/support/
+capcom.co.jp	t	https://cid.capcom.com/en/support/
+capcom.com	t	https://cid.capcom.com/en/support/
+capcom.com.tw	t	https://cid.capcom.com/en/support/
+capcomusa.com	t	https://cid.capcom.com/en/support/
+capitalgroup.com	es	https://www.capitalgroup.com/individual/security/how-we-protect-your-account.html
+capitalone.com	aes	https://www.capitalone.com/digital/mobile-app-verification/
+capsulecrm.com	t	https://capsulecrm.com/support/user-preferences/#enabling-two-factor-authentication
+carbonite.com	cs	https://support.carbonite.com/articles/Personal-Pro-Mac-Windows-Introduction-to-2-Step-Verification
+cardmarket.com	t	
+caribbean.rbcroyalbank.com	ah	https://www.rbcroyalbank.com/caribbean/digital-hub/security-two-factor.html
+carleton.ca	achs	https://carleton.ca/its/duo/config/
+carrd.co	t	https://carrd.co/docs/account/enabling-google-authenticator
+carta.com	st	https://support.carta.com/s/article/2-factor-authentication
+cash.app	et	https://cash.app/help/en/en-us/3127
+cashrewards.com.au	s	https://help.cashrewards.com.au/support/solutions/articles/1000304169
+caspio.com	st	https://howto.caspio.com/caspio-id/managing-caspio-id/#Enable2FA
+cat.com	st	https://catcrm.my.site.com/HelpCenter/s/article/How-do-I-enable-make-changes-or-disable-Multi-Factor-Authentication-MFA-for-my-account
+cbq.qa	s	https://cbonline.cbq.qa/RIB/Common/FAQContent
+cdn77.com	t	https://client.cdn77.com/support/knowledgebase/billing/cdn77-two-step-authentication
+cdnsun.com	t	https://cdnsun.com/knowledgebase/billing/two-factor-authentication
+cembra.ch	s	https://faq.cembra.ch/de/videos/login-mit-mtan/
+central.sophos.com	et	https://docs.sophos.com/central/customer/help/en-us/ManageYourProducts/GlobalSettings/MultiFactorAuthentication/index.html
+cex.io	st	https://support.cex.io/en/articles/4814825
+cgd.pt	s	https://www.cgd.pt/Ajuda/Seguranca/Pages/Autenticacao-Dupla-SMS-Token.aspx
+changelly.com	ht	https://support.changelly.com/en/support/solutions/articles/14000111533
+chargebee.com	t	https://www.chargebee.com/docs/2fa.html
+charliehr.com	t	https://intercom.help/charliehr/en/articles/1037152
+chartbeat.com	st	https://help.chartbeat.com/hc/en-us/articles/209531888
+chase.com	achs	https://2fa.directory/notes/chase/
+chat.google.com	acstu	https://safety.google/authentication/
+chatgpt.com	st	https://help.openai.com/articles/7967234
+chatwork.com	st	https://support-en.chatwork.com/hc/en-us/articles/360023097632
+checkfront.com	st	https://support.checkfront.com/hc/en-us/articles/115003849053
+checkmategaming.com	t	https://www.checkmategaming.com/article/more-secure-to-serve-you-better--473.htm
+chegg.com	e	https://www.chegg.com/contactus?a=How-does-multi-factor-authentication-work---id--HhfxSshaSpKIqQW-Er4qfA
+chevrolet.com	est	
+chime.com	s	https://www.chime.com/security-and-control/
+choko.link	t	https://support.choko.link/hc/choko/articles/1751036302-2fa
+cibc.com	acs	https://www.cibc.com/en/privacy-security/two-step-verification.html
+cinemark.com	es	https://www.cinemark.com/faqs/two-factor-authentication-2fa-faqs
+cineplex.com	cs	https://cineplex.service-now.com/gsc?id=kb_article&sysparm_article=KB0011023
+circle.com	st	https://support.circle.com/hc/en-us/articles/213560483
+cisco.com	t	
+citadelbanking.com	acest	
+citi.com	cs	https://online.citi.com/JRS/pands/detail.do?ID=SecurityCenter&section=security_tools
+citibank.com	cs	https://online.citi.com/JRS/pands/detail.do?ID=SecurityCenter&section=security_tools
+citibankonline.com	cs	https://online.citi.com/JRS/pands/detail.do?ID=SecurityCenter&section=security_tools
+citicards.com	cs	https://online.citi.com/JRS/pands/detail.do?ID=SecurityCenter&section=security_tools
+classlink.com	stu	https://www.classlink.com/solutions/multi-factor-authentication
+clearpay.co.uk	es	
+clearscore.com	st	https://help.clearscore.com/hc/en-us/sections/360003360940
+clemson.edu	achsu	https://2fa.app.clemson.edu/
+clever.com	as	https://support.clever.com/hc/en-us/articles/202062333
+clevertap.com	t	https://docs.clevertap.com/docs/account-security
+clickup.com	st	https://help.clickup.com/hc/en-us/articles/6327741965591
+cliniko.com	t	https://help.cliniko.com/en/articles/1023989
+clio.com	t	https://help.clio.com/hc/en-us/articles/9284706542619
+clippercard.com	e	
+close.com	t	https://help.close.com/docs/enabling-2fa
+cloud.baidu.com	st	https://intl.cloud.baidu.com/doc/IAM/s/2jwvyc50i-en
+cloud.google.com	acstu	https://safety.google/authentication/
+cloud.hashicorp.com	t	https://developer.hashicorp.com/hcp/docs/hcp/admin/iam/mfa
+cloud.ibm.com	etu	https://cloud.ibm.com/docs/account?topic=account-enablemfa
+cloud.malwarebytes.com	t	https://support.threatdown.com/hc/en-us/articles/8787932508307
+cloud.oracle.com	acestu	https://docs.oracle.com/en/cloud/paas/identity-cloud/uaids/configure-authentication-factors.html
+cloud66.com	tu	https://help.cloud66.com/node/account/two-factor-authentication.html
+cloudamqp.com	st	https://www.cloudamqp.com/blog/two-factor-authentication.html
+cloudbees.com	t	https://docs.cloudbees.com/docs/cloudbees-feature-management/latest/security/two-factor-authentication
+cloudbet.com	t	https://cloudbet.zendesk.com/hc/en-us/articles/223120088/
+cloudconvert.com	t	
+cloudflare.com	tu	https://developers.cloudflare.com/fundamentals/setup/account/account-security/2fa/
+cloudhq.net	t	https://support.cloudhq.net/how-to-set-up-and-enable-two-factor-authentication-2fa/
+cloudinary.com	t	
+cloudns.net	t	https://www.cloudns.net/wiki/article/201/
+cloudways.com	t	https://support.cloudways.com/enabling-two-factor-authentication-for-your-cloudways-account/
+clover.com	st	https://www.clover.com/help/two-factor-authentication
+cloze.com	st	https://help.cloze.com/knowledge_base/topics/how-do-i-enable-2-step-authentication
+clubhouse.io	t	https://help.shortcut.com/hc/en-us/articles/360044506931
+cm.com	as	https://www.cm.com/customer-service/#36-69/Account/652/How%20do%20I%20enable%20Two-Factor%20Authentication?
+cmu.edu	ahu	https://www.cmu.edu/computing/services/security/identity-access/authentication/how-to/use2fa-weblogin.html
+cobalt.io	t	https://cobaltio.zendesk.com/hc/en-us/articles/4408918977940
+coda.io	t	https://help.coda.io/en/articles/3833338
+codeanywhere.com	s	https://docs.codeanywhere.com/#two-factor-authentication
+codebasehq.com	t	https://support.codebasehq.com/articles/tips-tricks/how-do-i-setup-two-factor-authentication
+codeberg.org	tu	https://docs.codeberg.org/security/2fa/
+codeclimate.com	as	https://docs.codeclimate.com/docs/enabling-two-factor-authentication
+cognitoforms.com	et	https://www.cognitoforms.com/product/two-factor-authentication
+coinbase.com	stu	https://help.coinbase.com/en/coinbase/getting-started/verify-my-account/how-do-i-set-up-2-factor-authentication
+coinberry.com	t	https://help.coinberry.com/hc/en-us/articles/4505782775569
+coincheck.com	t	https://faq.coincheck.com/s/article/20204?language=en_US
+coindcx.com	est	https://support.coindcx.com/hc/en-gb/articles/360003181855
+coindeal.com	st	https://coindeal.com/security
+coinfalcon.com	t	https://support.coinfalcon.com/en-us/article/-nkjppd/
+coingate.com	t	https://support.coingate.com/hc/en-us/articles/4402503798034
+coinify.com	t	https://help.coinify.com/hc/en-us/articles/360014173320
+coinigy.com	t	https://support.coinigy.com/hc/en-us/articles/360001134694
+coinjar.com	st	https://support.coinjar.com/hc/en-us/articles/202910075
+coinloan.io	t	https://blog.coinloan.io/securing-your-accounts-with-two-factor-authentication-2fa/
+coinmarketcap.com	et	
+coinone.co.kr	t	
+coinpayments.net	est	
+coinpayu.com	t	
+coinremitter.com	t	
+coins.ph	t	https://support.coins.ph/hc/en-us/articles/202604924
+coinsmart.com	t	https://support.coinsmart.com/hc/en-us/articles/360014948893
+coinspot.com.au	st	https://coinspot.zendesk.com/hc/en-us/sections/115000049254
+cointiger.com	st	https://cointiger.zendesk.com/hc/en-us/articles/360009805534
+cointracker.io	t	https://help.cointracker.io/en/articles/2641553
+cointracking.info	t	
+cointraffic.io	t	
+coinut.com	t	https://help.coinut.com/hc/en-us/articles/360005061354
+coinzilla.com	et	
+coles.com.au	es	
+collegeboard.org	e	
+colorado.edu	acsu	https://oit.colorado.edu/services/identity-access-management/duo-multi-factor-authentication
+columbia.edu	acu	https://www.cuit.columbia.edu/mfa
+combell.com	t	https://www.combell.com/en/help/kb/how-do-i-enable-two-factor-authentication/
+comcast.com	aes	https://www.xfinity.com/support/articles/two-step-verification-xfinity-app-setup/
+comdirect.de	ahs	https://www.comdirect.de/konto/psd2-phototan.html
+comed.com	ces	https://www.comed.com/MyAccount/CustomerSupport/pages/faqs.aspx#WebPartWPQ15
+commbank.com.au	as	https://www.commbank.com.au/digital-banking/netbank/multi-factor-authentication.html
+commercial.metrobankonline.co.uk	ah	https://www.metrobankonline.co.uk/help-and-support/what-is-sca/#item17066
+commerzbank.de	ahs	https://www.commerzbank.de/konten-zahlungsverkehr/service/tan-verfahren/
+communityamerica.com	cst	https://www.cacuonlinebanking.com/tob/live/usp-core/static/help.html#login_security
+comodo.com	st	https://help.comodo.com/topic-289-1-716-11276-.html
+compose.com	stu	https://www.compose.com/articles/introducing-fido-universal-2nd-factor-authentication/
+comviq.se	a	
+concur.ae	t	https://dam.sap.com/mac/app/p/pdf/asset/preview/kA9GcJq?ltr=a&rc=10
+concur.be	t	https://dam.sap.com/mac/app/p/pdf/asset/preview/kA9GcJq?ltr=a&rc=10
+concur.ca	t	https://dam.sap.com/mac/app/p/pdf/asset/preview/kA9GcJq?ltr=a&rc=10
+concur.cl	t	https://dam.sap.com/mac/app/p/pdf/asset/preview/kA9GcJq?ltr=a&rc=10
+concur.cn	t	https://dam.sap.com/mac/app/p/pdf/asset/preview/kA9GcJq?ltr=a&rc=10
+concur.co	t	https://dam.sap.com/mac/app/p/pdf/asset/preview/kA9GcJq?ltr=a&rc=10
+concur.co.in	t	https://dam.sap.com/mac/app/p/pdf/asset/preview/kA9GcJq?ltr=a&rc=10
+concur.co.jp	t	https://dam.sap.com/mac/app/p/pdf/asset/preview/kA9GcJq?ltr=a&rc=10
+concur.co.uk	t	https://dam.sap.com/mac/app/p/pdf/asset/preview/kA9GcJq?ltr=a&rc=10
+concur.co.za	t	https://dam.sap.com/mac/app/p/pdf/asset/preview/kA9GcJq?ltr=a&rc=10
+concur.com	t	https://dam.sap.com/mac/app/p/pdf/asset/preview/kA9GcJq?ltr=a&rc=10
+concur.com.ar	t	https://dam.sap.com/mac/app/p/pdf/asset/preview/kA9GcJq?ltr=a&rc=10
+concur.com.au	t	https://dam.sap.com/mac/app/p/pdf/asset/preview/kA9GcJq?ltr=a&rc=10
+concur.com.br	t	https://dam.sap.com/mac/app/p/pdf/asset/preview/kA9GcJq?ltr=a&rc=10
+concur.com.hk	t	https://dam.sap.com/mac/app/p/pdf/asset/preview/kA9GcJq?ltr=a&rc=10
+concur.com.mx	t	https://dam.sap.com/mac/app/p/pdf/asset/preview/kA9GcJq?ltr=a&rc=10
+concur.com.sg	t	https://dam.sap.com/mac/app/p/pdf/asset/preview/kA9GcJq?ltr=a&rc=10
+concur.de	t	https://dam.sap.com/mac/app/p/pdf/asset/preview/kA9GcJq?ltr=a&rc=10
+concur.dk	t	https://dam.sap.com/mac/app/p/pdf/asset/preview/kA9GcJq?ltr=a&rc=10
+concur.es	t	https://dam.sap.com/mac/app/p/pdf/asset/preview/kA9GcJq?ltr=a&rc=10
+concur.fi	t	https://dam.sap.com/mac/app/p/pdf/asset/preview/kA9GcJq?ltr=a&rc=10
+concur.fr	t	https://dam.sap.com/mac/app/p/pdf/asset/preview/kA9GcJq?ltr=a&rc=10
+concur.it	t	https://dam.sap.com/mac/app/p/pdf/asset/preview/kA9GcJq?ltr=a&rc=10
+concur.kr	t	https://dam.sap.com/mac/app/p/pdf/asset/preview/kA9GcJq?ltr=a&rc=10
+concur.nl	t	https://dam.sap.com/mac/app/p/pdf/asset/preview/kA9GcJq?ltr=a&rc=10
+concur.no	t	https://dam.sap.com/mac/app/p/pdf/asset/preview/kA9GcJq?ltr=a&rc=10
+concur.pe	t	https://dam.sap.com/mac/app/p/pdf/asset/preview/kA9GcJq?ltr=a&rc=10
+concur.se	t	https://dam.sap.com/mac/app/p/pdf/asset/preview/kA9GcJq?ltr=a&rc=10
+concur.tw	t	https://dam.sap.com/mac/app/p/pdf/asset/preview/kA9GcJq?ltr=a&rc=10
+concursolutions.com	t	https://dam.sap.com/mac/app/p/pdf/asset/preview/kA9GcJq?ltr=a&rc=10
+coned.com	acst	https://www.coned.com/-/media/files/coned/documents/small-medium-large-businesses/building-project-center/contractor-resources/user-registration-guide.pdf?la=en
+connectwise.com	ehst	https://docs.connectwise.com/ConnectWise_Control_Documentation/Get_started/Administration_page/Security_page/Enable_two-factor_authentication_for_host_accounts
+consentmanager.net	t	https://help.consentmanager.net/books/cmp/page/working-with-two-factor-authentication
+consorsbank.de	ah	https://www.consorsbank.de/ev/Service-Beratung/secureplus
+constellix.com	t	https://support.constellix.com/support/solutions/articles/47001012279
+contabo.com	t	https://contabo.com/en/customer-support/faq/#2fa-questions
+contentful.com	t	https://www.contentful.com/faq/two-factor-authentication/
+contentstack.com	as	https://www.contentstack.com/docs/developers/two-factor-authentication/
+convertkit.com	st	https://help.convertkit.com/en/articles/3925724
+cookieyes.com	t	https://www.cookieyes.com/documentation/two-factor-authentication/
+copilot.microsoft.com	acest	https://support.microsoft.com/account-billing/c7910146-672f-01e9-50a0-93b4585e7eb4
+cordial.com	st	https://support.cordial.com/hc/en-us/articles/360004846512
+cornell.edu	achsu	https://it.cornell.edu/twostep
+corporatefinanceinstitute.com	t	https://help.corporatefinanceinstitute.com/article/728--
+cosmolex.com	s	https://support.cosmolex.com/knowledge-base/how-to-enable-two-factor-authentication/
+costco.co.uk	es	https://www.costco.co.uk/two-step-verification
+coursera.org	t	https://www.coursera.support/s/article/learner-000002204-Update-your-login-settings#set_up_2FA
+cox.com	ces	https://www.cox.com/residential/support/enrolling-in-multifactor-authentication-in-my-account.html
+cpoms.co.uk	tu	https://raptor.my.site.com/CPOMS/s/article/CPOMS-Login-Help-Guide-4cb23e40
+cpoms.net	tu	https://raptor.my.site.com/CPOMS/s/article/CPOMS-Login-Help-Guide-4cb23e40
+cpp.edu	ahstu	https://cpp.service-now.com/ehelp?id=kb_article&sys_id=ed4dcbc3dbeb1f449bba68461b96198e
+cqu.edu.au	acst	
+cra-arc.gc.ca	cst	https://www.canada.ca/en/revenue-agency/services/e-services/cra-login-services/multi-factor-authentication-access-cra-login-services.html
+crashplan.com	et	https://support.crashplan.com/hc/articles/43858880152461
+crashplanpro.com	et	https://support.crashplan.com/hc/articles/43858880152461
+crazydomains.com	cs	https://www.crazydomains.co.uk/help/how-to-enable-or-disable-two-step-verification-system/
+creditkarma.com	cs	https://support.creditkarma.com/s/article/Can-I-use-Two-Factor-Authentication-on-Credit-Karma
+credly.com	t	https://support.credly.com/hc/articles/10479287806107
+cron-job.org	ht	
+cronometer.com	t	https://support.cronometer.com/hc/en-us/articles/360042096672
+crowdcube.com	t	
+crowdcube.eu	t	
+crowdin.com	tu	https://support.crowdin.com/account-settings/#two-factor-authentication
+crowdsupply.com	tu	
+crypto.com	t	https://help.crypto.com/en/articles/3511439
+cryptonator.com	ast	https://cryptonator.zendesk.com/hc/en-us/articles/201715352
+cryptotaxcalculator.io	t	https://help.summ.com/articles/9126168
+csas.cz	as	https://www.csas.cz/cs/mobilni-aplikace/george-klic
+csn.se	a	https://tjanster.csn.se/bas/vanligaFragor.do
+csob.cz	as	https://www.csob.cz/portal/people/accounts/internet-and-mobile-banking/csob-smart-key
+currencycloud.com	a	https://support.currencycloud.com/hc/en-gb/articles/360018656420
+current-rms.com	ast	https://help.current-rms.com/en/articles/1767596
+customer.io	t	https://customer.io/docs/two-factor-auth
+customercontrolpanel.de	t	https://www.netcup-wiki.de/wiki/Stammdaten_CCP#Zwei-Faktor-Authentifizierung_.282FA.29
+cyon.ch	t	https://www.cyon.ch/support/a/zwei-schritt-verifizierung-aktivieren
+dab-bank.de	ah	https://b2b.dab-bank.de/Tradingcenter/Service-Infos/SecurePlus/
+dan.com	t	https://news.dan.com/214543-
+danskebank.dk	ah	https://www.nemid.nu/dk-en/get_started/
+danskebank.se	a	https://danskebank.se/privat/digitala-tjanster/ovriga-tjanster/bankid
+dashlane.com	t	https://support.dashlane.com/hc/en-us/articles/202625042
+databox.com	st	https://help.databox.com/overview-two-factor-authentication-2fa
+datadoghq.com	t	https://docs.datadoghq.com/account_management/multi-factor_authentication/
+datarobot.com	t	https://docs.datarobot.com/en/docs/platform/authentication/2fa.html
+datev.de	hst	https://apps.datev.de/help-center/documents/1022726
+datto.com	at	https://help.workplace.datto.com/managerhelp/Content/3_ONLINE/Settings/2Factor_Authentication.htm
+dba.dk	st	https://account.vend.no/faq#how-to-activate-and-deactivate-2fa
+dbs.com.sg	h	https://www.dbs.com.sg/personal/deposits/security-and-you/we-protect-you.page#slideToN10051
+dcu.org	ces	https://www.dcu.org/online-banking/online-banking-enhancements.html
+deakin.edu.au	achstu	https://help.deakin.edu.au/ithelp?id=kb_article&sysparm_article=KB0013804
+deel.com	t	https://help.letsdeel.com/hc/en-gb/articles/4407737656465
+deepl.com	t	https://support.deepl.com/hc/articles/17764808297628
+degiro.at	t	https://www.degiro.nl/helpdesk/account-en-persoonlijke-gegevens/toegang-tot-uw-degiro-account/hoe-kan-ik-twee-stapsverificatie
+degiro.ch	t	https://www.degiro.nl/helpdesk/account-en-persoonlijke-gegevens/toegang-tot-uw-degiro-account/hoe-kan-ik-twee-stapsverificatie
+degiro.co.no	t	https://www.degiro.nl/helpdesk/account-en-persoonlijke-gegevens/toegang-tot-uw-degiro-account/hoe-kan-ik-twee-stapsverificatie
+degiro.co.uk	t	https://www.degiro.nl/helpdesk/account-en-persoonlijke-gegevens/toegang-tot-uw-degiro-account/hoe-kan-ik-twee-stapsverificatie
+degiro.cz	t	https://www.degiro.nl/helpdesk/account-en-persoonlijke-gegevens/toegang-tot-uw-degiro-account/hoe-kan-ik-twee-stapsverificatie
+degiro.de	t	https://www.degiro.nl/helpdesk/account-en-persoonlijke-gegevens/toegang-tot-uw-degiro-account/hoe-kan-ik-twee-stapsverificatie
+degiro.dk	t	https://www.degiro.nl/helpdesk/account-en-persoonlijke-gegevens/toegang-tot-uw-degiro-account/hoe-kan-ik-twee-stapsverificatie
+degiro.es	t	https://www.degiro.nl/helpdesk/account-en-persoonlijke-gegevens/toegang-tot-uw-degiro-account/hoe-kan-ik-twee-stapsverificatie
+degiro.fi	t	https://www.degiro.nl/helpdesk/account-en-persoonlijke-gegevens/toegang-tot-uw-degiro-account/hoe-kan-ik-twee-stapsverificatie
+degiro.fr	t	https://www.degiro.nl/helpdesk/account-en-persoonlijke-gegevens/toegang-tot-uw-degiro-account/hoe-kan-ik-twee-stapsverificatie
+degiro.gr	t	https://www.degiro.nl/helpdesk/account-en-persoonlijke-gegevens/toegang-tot-uw-degiro-account/hoe-kan-ik-twee-stapsverificatie
+degiro.hu	t	https://www.degiro.nl/helpdesk/account-en-persoonlijke-gegevens/toegang-tot-uw-degiro-account/hoe-kan-ik-twee-stapsverificatie
+degiro.ie	t	https://www.degiro.nl/helpdesk/account-en-persoonlijke-gegevens/toegang-tot-uw-degiro-account/hoe-kan-ik-twee-stapsverificatie
+degiro.it	t	https://www.degiro.nl/helpdesk/account-en-persoonlijke-gegevens/toegang-tot-uw-degiro-account/hoe-kan-ik-twee-stapsverificatie
+degiro.nl	t	https://www.degiro.nl/helpdesk/account-en-persoonlijke-gegevens/toegang-tot-uw-degiro-account/hoe-kan-ik-twee-stapsverificatie
+degiro.pl	t	https://www.degiro.nl/helpdesk/account-en-persoonlijke-gegevens/toegang-tot-uw-degiro-account/hoe-kan-ik-twee-stapsverificatie
+degiro.pt	t	https://www.degiro.nl/helpdesk/account-en-persoonlijke-gegevens/toegang-tot-uw-degiro-account/hoe-kan-ik-twee-stapsverificatie
+degiro.se	t	https://www.degiro.nl/helpdesk/account-en-persoonlijke-gegevens/toegang-tot-uw-degiro-account/hoe-kan-ik-twee-stapsverificatie
+degussa-bank.de	ahs	https://www.degussa-bank.de/apptan-verfahren
+delaware.gov	acs	https://webfiles.dti.delaware.gov/pdfs/Setting-Up-Your-MFA.pdf
+delighted.com	s	https://help.delighted.com/article/526--#2-step
+delightedapp.com	s	https://help.delighted.com/article/526--#2-step
+delinea.com	acestu	https://docs.delinea.com/ss/10.8.0/authentication/two-factor-authentication
+deliverr.com	s	https://support.deliverr.com/hc/en-us/articles/4575365498519
+dell.com	es	https://www.dell.com/en-uk/lp/protect-your-account-faq
+delmarva.com	ces	
+delta.com	aes	
+deltadental.com	s	
+deltadentalar.com	s	
+deltadentalaz.com	s	
+deltadentalco.com	s	
+deltadentalcoversme.com	s	
+deltadentalct.com	s	
+deltadentalia.com	s	
+deltadentalid.com	s	
+deltadentalil.com	s	
+deltadentalin.com	s	
+deltadentalins.com	s	
+deltadentalks.com	s	
+deltadentalma.com	s	
+deltadentalmi.com	s	
+deltadentalmn.org	s	
+deltadentalmo.com	s	
+deltadentalne.org	s	
+deltadentalnj.com	s	
+deltadentalnm.com	s	
+deltadentaloh.com	s	
+deltadentalok.org	s	
+deltadentalpr.com	s	
+deltadentalri.com	s	
+deltadentalsc.com	s	
+deltadentalsd.com	s	
+deltadentalva.com	s	
+deltadentalwa.com	s	
+deltadentalwi.com	s	
+deltadentalwy.org	s	
+demio.com	t	https://help.demio.com/en/articles/4794494
+deployhq.com	t	https://www.deployhq.com/support/managing-your-account/personal-profile/two-factor-authentication
+depop.com	s	https://depophelp.zendesk.com/hc/en-gb/articles/360017103878
+deputy.com	t	https://help.deputy.com/hc/en-au/articles/4621532398351
+desertfinancial.com	es	https://www.desertfinancial.com/faq/online-solutions-faqs/security
+desjardins.com	as	https://www.desjardins.com/securite/validation-2-etapes/
+detectify.com	t	https://support.detectify.com/support/solutions/articles/48001061904
+deutsche-bank.de	ahs	https://www.deutsche-bank.de/pk/lp/psd2.html
+deutsche-rentenversicherung.de	h	https://www.deutsche-rentenversicherung.de/DRV/DE/Online-Dienste/unsere_online-dienste.html
+deutschepost.de	et	
+developer.nexmo.com	cs	
+deviantart.com	t	https://www.deviantartsupport.com/kb/en/article/what-is-two-factor-authentication-and-how-do-i-enable-or-disable-it
+dext.com	t	https://help.receipt-bank.com/hc/articles/360002530177
+dhl.de	e	https://www.dhl.de/de/toolbar/footer/datenschutz.html#kundenkontoundempfaengerservices
+didiglobal.com	s	
+didimobility.co.jp	s	
+digicert.com	t	https://www.digicert.com/two-factor-authentication.htm
+digid.nl	acs	https://www.digid.nl/nl/vraag-en-antwoord/hoe-kan-ik-de-sms-controle-toevoegen/
+digitalcombatsimulator.com	t	https://www.digitalcombatsimulator.com/en/support/faq/User_profile/#3319486
+digitalocean.com	st	https://www.digitalocean.com/docs/accounts/security/2fa/
+digitalriver.com	s	https://docs.digitalriver.com/digital-river-api/administration/dashboard/profile-settings/enabling-two-factor-authentication
+digitalsurge.com.au	t	https://help.digitalsurge.com.au/en/articles/5573002
+digitec.ch	t	https://www.digitec.ch/en/page/6589
+dinahosting.com	t	https://dinahosting.com/ayuda/activar-autenticacion-dos-pasos-en-panel/
+dinero.dk	stu	https://dinero.dk/support/to-faktor-login
+directadmin.com	t	https://directadmin.com/features.php?id=1754
+directnic.com	ht	https://directnic.com/knowledge/article/137
+discogs.com	t	https://support.discogs.com/hc/en-us/articles/4403461442317
+discord.com	stu	https://support.discord.com/hc/en-us/articles/219576828
+discordapp.com	stu	https://support.discord.com/hc/en-us/articles/219576828
+discover.com	ces	https://www.discover.com/credit-cards/member-benefits/security-center/protect-account/account-verification.html
+discovercard.com	ces	https://www.discover.com/credit-cards/member-benefits/security-center/protect-account/account-verification.html
+disk.yandex.com	a	https://yandex.com/support/id/authorization/twofa.html
+disqus.com	et	https://help.disqus.com/articles/9768685
+dkb.de	ah	https://www.dkb.de/info/neue-anmeldung
+dmarcanalyzer.com	t	https://www.dmarcanalyzer.com/set-two-factor-authentication-additional-security/
+dmarcian.com	tu	https://dmarcian.com/secure-dmarcian-2fa/
+dmm.com	t	https://support.dmm.com/accounts/article/46818
+dmoj.ca	t	https://dmoj.ca/post/144-2-factor-authentication
+dnb.no	ahs	https://www.dnb.no/privat/kundeservice/innlogging-nettbank.html
+dnsfilter.com	t	https://help.dnsfilter.com/hc/en-us/articles/4419435706003
+dnsimple.com	tu	https://support.dnsimple.com/articles/two-factor-authentication/
+docker.com	t	https://docs.docker.com/docker-hub/2fa/
+doctolib.com	es	https://doctolibpatient.zendesk.com/hc/articles/360021300860
+doctolib.de	es	https://doctolibpatient.zendesk.com/hc/articles/360021300860
+doctolib.fr	es	https://doctolibpatient.zendesk.com/hc/articles/360021300860
+doctolib.it	es	https://doctolibpatient.zendesk.com/hc/articles/360021300860
+docusign.com	cest	https://support.docusign.com/en/guides/ndse-user-guide-two-step-verification
+docusign.net	cest	https://support.docusign.com/en/guides/ndse-user-guide-two-step-verification
+dodo.com	es	https://www.dodo.com/protecting-your-account
+dodo.com.au	es	https://www.dodo.com/protecting-your-account
+dollargeneral.com	cs	
+domain.com.au	s	https://help.domain.com.au/hc/en-us/articles/360012412713
+domeneshop.no	st	https://domeneshop.no/faq?id=344
+dominionenergy.com	es	
+dominodatalab.com	t	https://support.dominodatalab.com/hc/en-us/articles/115000998406
+donateblood.com.au	es	
+doppler.com	etu	https://docs.doppler.com/docs/multi-factor-authentication
+dotdigital.com	s	https://support.dotdigital.com/hc/en-gb/articles/212212678
+dotloop.com	cst	https://support.dotloop.com/s/article/Two-Factor-Authentication
+draftkings.com	s	https://help.draftkings.com/hc/en-us/articles/4409699580691
+drchrono.com	as	https://support.drchrono.com/hc/en-us/articles/200030385
+dreamhost.com	ht	https://help.dreamhost.com/hc/en-us/articles/216013897
+drift.com	t	
+drive.google.com	acstu	https://safety.google/authentication/
+dropbox.com	stu	https://help.dropbox.com/account-access/enable-2-factor-authentication
+drs.ct.gov	estu	https://portal.ct.gov/drs/myconnect/myconnect-2/faq
+druide.com	t	https://www.antidote.info/en/druide-account/client-portal-user-guide/druide-account/safeguarding-your-account
+drupal.org	t	https://www.drupal.org/drupalorg/docs/user-accounts/setting-up-two-factor-authentication
+duke.edu	ah	https://idms-mfa.oit.duke.edu/mfa/help
+dwolla.com	t	https://www.dwolla.com/updates/introducing-two-factor-authentication-for-dwolla/
+dynadot.com	stu	https://www.dynadot.com/community/help/question/2-step-verification
+dynu.com	st	https://www.dynu.com/en-US/Blog/Article?Article=It-is-time-to-enable-two-factor-authentication
+e24.no	st	https://payment.schibsted.no/profile-pages/faq#how-to-activate-and-deactivate-2fa
+ea.com	cest	https://help.ea.com/en-us/help/account/origin-login-verification-information/
+eagle.ru	t	https://www.digitalcombatsimulator.com/en/support/faq/User_profile/#3319486
+earthclassmail.com	st	https://help.earthclassmail.com/hc/en-us/articles/4410499059351
+easybank.at	as	https://www.easybank.at/easybank/faq#Zeichnungsverfahren
+easydmarc.com	t	https://easydmarc.com/blog/two-factor-authentication/
+easydns.com	est	https://kb.easydns.com/knowledge/account-security/
+easysendy.com	t	https://easysendy.com/sendy/sendy-version-2-1-0-two-factor-authentication-released
+eb.de	ah	https://www.eb.de/institutionen_cf/zahlungsverkehr/online-banking.html
+ebay-kleinanzeigen.de	e	https://themen.kleinanzeigen.de/hilfe/nutzerkonto/2FA/
+ebay.at	ast	https://www.ebay.com/help/account/protecting-account/tips-keeping-ebay-account-secure?id=4872#section2
+ebay.be	ast	https://www.ebay.com/help/account/protecting-account/tips-keeping-ebay-account-secure?id=4872#section2
+ebay.ca	ast	https://www.ebay.com/help/account/protecting-account/tips-keeping-ebay-account-secure?id=4872#section2
+ebay.ch	ast	https://www.ebay.com/help/account/protecting-account/tips-keeping-ebay-account-secure?id=4872#section2
+ebay.cn	ast	https://www.ebay.com/help/account/protecting-account/tips-keeping-ebay-account-secure?id=4872#section2
+ebay.co.jp	ast	https://www.ebay.com/help/account/protecting-account/tips-keeping-ebay-account-secure?id=4872#section2
+ebay.co.uk	ast	https://www.ebay.com/help/account/protecting-account/tips-keeping-ebay-account-secure?id=4872#section2
+ebay.com	ast	https://www.ebay.com/help/account/protecting-account/tips-keeping-ebay-account-secure?id=4872#section2
+ebay.com.au	ast	https://www.ebay.com/help/account/protecting-account/tips-keeping-ebay-account-secure?id=4872#section2
+ebay.com.hk	ast	https://www.ebay.com/help/account/protecting-account/tips-keeping-ebay-account-secure?id=4872#section2
+ebay.com.my	ast	https://www.ebay.com/help/account/protecting-account/tips-keeping-ebay-account-secure?id=4872#section2
+ebay.com.sg	ast	https://www.ebay.com/help/account/protecting-account/tips-keeping-ebay-account-secure?id=4872#section2
+ebay.com.tw	ast	https://www.ebay.com/help/account/protecting-account/tips-keeping-ebay-account-secure?id=4872#section2
+ebay.de	ast	https://www.ebay.com/help/account/protecting-account/tips-keeping-ebay-account-secure?id=4872#section2
+ebay.es	ast	https://www.ebay.com/help/account/protecting-account/tips-keeping-ebay-account-secure?id=4872#section2
+ebay.fr	ast	https://www.ebay.com/help/account/protecting-account/tips-keeping-ebay-account-secure?id=4872#section2
+ebay.ie	ast	https://www.ebay.com/help/account/protecting-account/tips-keeping-ebay-account-secure?id=4872#section2
+ebay.in	ast	https://www.ebay.com/help/account/protecting-account/tips-keeping-ebay-account-secure?id=4872#section2
+ebay.it	ast	https://www.ebay.com/help/account/protecting-account/tips-keeping-ebay-account-secure?id=4872#section2
+ebay.nl	ast	https://www.ebay.com/help/account/protecting-account/tips-keeping-ebay-account-secure?id=4872#section2
+ebay.ph	ast	https://www.ebay.com/help/account/protecting-account/tips-keeping-ebay-account-secure?id=4872#section2
+ebay.pl	ast	https://www.ebay.com/help/account/protecting-account/tips-keeping-ebay-account-secure?id=4872#section2
+eccouncil.org	es	https://aspen.eccouncil.org/aspen/Help/2FactorAuthentication-User_Manual.pdf
+eclincher.com	t	
+ecobee.com	st	https://support.ecobee.com/hc/en-us/articles/360040957212
+ecu.edu	cst	https://ecu.teamdynamix.com/TDClient/1409/Portal/Requests/ServiceDet?ID=31556
+educative.io	e	
+eduid.ch	st	https://help.switch.ch/eduid/faqs/?lang=en#mfa
+edwardjones.ca	ces	https://www.edwardjones.com/sites/default/files/acquiadam/2020-10/online-access-user-guide-MKT-11935A-A.pdf
+edwardjones.com	ces	https://www.edwardjones.com/sites/default/files/acquiadam/2020-10/online-access-user-guide-MKT-11935A-A.pdf
+ee.co.uk	s	https://ee.co.uk/help/profile/registration-setup/account-authentication
+efirstbank.com	a	https://www.efirstbank.com/internet-banking/login-options.htm
+egnyte.com	acst	https://helpdesk.egnyte.com/hc/en-us/articles/360028032991
+elastic.co	st	https://www.elastic.co/guide/en/cloud/current/ec-account-user-settings.html#ec-account-security-mfa
+elasticemail.com	es	https://help.elasticemail.com/en/articles/2783376
+elderscrollsonline.com	e	https://help.elderscrollsonline.com/app/answers/detail/a_id/8611
+element.io	t	https://ems-docs.element.io/link/6#bkmrk-how-do-i-enable-2fa-
+elevenlabs.io	s	https://help.elevenlabs.io/hc/articles/21636341747985
+elmah.io	t	https://docs.elmah.io/how-to-enable-two-factor-login/
+elster.de	ah	https://www.elster.de/eportal/helpGlobal?themaGlobal=help_eop
+emailmeform.com	t	https://support.emailmeform.com/hc/en-us/sections/360002042671
+emich.edu	ah	https://www.emich.edu/it/security/esp/duo.php
+emplifi.io	t	https://support.socialbakers.com/hc/en-us/articles/360015072719
+eneba.com	st	https://support.eneba.com/hc/en-us/articles/360010216714
+energyaustralia.com.au	e	https://www.energyaustralia.com.au/home/help-and-support/faqs/multi-factor-authentication
+engineyard.com	t	https://support.cloud.engineyard.com/hc/en-us/articles/4412829652507
+enom.com	t	https://enom.help/2fa
+ente.io	t	
+entrust.net	ah	https://www.entrust.com/knowledgebase/ssl/multifactor-authentication-faq
+envato.com	t	https://help.market.envato.com/hc/articles/115005592963
+envoyer.io	t	https://docs.envoyer.io/1.0/accounts/your-account.html#securing-your-account-with-two-factor-authentication
+eon.de	t	
+epayslips.co.uk	tu	
+epicgames.com	aest	https://www.epicgames.com/help/c74/c112/a3218
+epik.com	t	https://support.epik.com/hc/en-us/articles/10721574479771
+eqbank.ca	s	
+erau.edu	acsu	
+erstebank.hr	ah	https://www.erstebank.hr/hr/sigurnost#/modalComponent/isOpen/true/url/%2Fhr%2Fconfiguration%2Fleads%2Fsigurnost0%2Fsigurno-online-bankarenje.modal
+eset.com	t	https://help.eset.com/home_eset/en-US/two_factor_authentication.html
+esri.com	t	https://doc.arcgis.com/en/arcgis-online/reference/multifactor.htm
+etana.com	t	https://support.etana.com/hc/en-us/articles/360053109333
+etoro.com	s	https://www.etoro.com/en-us/customer-service/help/1281239912/-
+etrade.com	ah	https://us.etrade.com/security-center/securityid
+ets.org	cs	
+etsy.com	cst	https://help.etsy.com/hc/en-us/articles/115015569567#h_01EZCBHFZHS7NBB4VA7NFE9YMX
+eufylife.com	es	https://support.eufylife.com/s/article/Two-Step-Verification-for-eufySecurity-App
+eukhost.com	t	https://www.eukhost.com/kb/how-to-enable-two-factor-authentication-2fa/
+eurodns.com	t	https://help.eurodns.com/s/article/how-do-i-activate-two-step-verification-on-my-account
+eveonline.com	et	https://support.eveonline.com/hc/en-us/articles/203465601
+everlaw.com	et	https://support.everlaw.com/hc/en-us/articles/206312165
+evernote.com	cst	https://help.evernote.com/hc/en-us/articles/208314238
+everyday.com.au	es	
+everydayrewards.co.nz	es	
+everydayrewards.com.au	es	
+exact.com	t	https://support.exactonline.com/community/s/knowledge-base#All-All-HNO-Task-general-security-gen-auth-totpregphndsktpt
+exeloncorp.com	ces	
+exmo.com	st	https://info.exmo.com/en/education/how-to-enable-2fa/
+expensify.com	t	https://community.expensify.com/discussion/7385
+experian.co.uk	cs	
+experian.com	cs	
+expo.dev	st	https://docs.expo.dev/accounts/two-factor/
+expressvpn.com	e	
+f-secure.com	t	https://community.f-secure.com/common-home-en/kb/articles/9144
+f2pool.com	t	https://f2pool.zendesk.com/hc/articles/360058722731
+facebook.com	stu	https://www.facebook.com/help/148233965247823
+faceit.com	t	https://support.faceit.com/hc/en-us/articles/115000254670
+fairwinds.org	ces	https://www.fairwinds.org/inside/privacy/security_we.asp#multifactor-auth
+fakturoid.cz	t	https://www.fakturoid.cz/podpora/nastaveni/dvoufazove-overeni
+falcon.io	t	https://social-media-management-help.brandwatch.com/hc/en-us/articles/4499676228765
+fallguys.com	aest	https://www.epicgames.com/help/c74/c112/a3218
+fanatical.com	t	https://support.fanatical.com/hc/en-us/articles/360002761397
+fanatics.com	es	
+fandom.com	t	https://community.fandom.com/wiki/Help:2FA
+fanduel.com	st	https://www.fanduel.com/2fa-how-it-works
+fastcomet.com	t	https://www.fastcomet.com/tutorials/getting-started/enabling-two-factor-authentication
+fasthosts.co.uk	t	https://help.fasthosts.co.uk/app/answers/detail/a_id/3345
+fastly.com	t	https://docs.fastly.com/guides/account-management-and-security/enabling-and-disabling-two-factor-authentication
+fastmail.com	hstu	https://www.fastmail.com/help/account/2fa.html
+fathomhq.com	est	https://support.fathomhq.com/en/articles/4483786
+faucetcrypto.com	t	
+faucetpay.io	et	https://faq.faucetpay.io/knowledge-base/what-is-2fa-and-how-do-i-enable-it-in-my-account/
+fauna.com	t	https://docs.fauna.com/fauna/current/administration/multifactor_auth
+favro.com	t	https://help.favro.com/en/articles/1019897
+fax.plus	t	https://help.alohi.com/hc/en-us/articles/10305460302876#h_01HQNATZ23QZDS1ZD727628RP7
+fedex.com	es	
+feedly.com	t	https://docs.feedly.com/article/747-how-to-enable-two-factor-authentication
+fi.google.com	acstu	https://safety.google/authentication/
+fiber.google.com	acstu	https://safety.google/authentication/
+fidelity.com	acst	https://www.fidelity.com/security/extra-security-login
+fig.co	t	https://republic.com/help/how-do-i-add-a-digital-asset-wallet-on-republic-1
+figma.com	st	https://help.figma.com/hc/en-us/articles/360039817634
+filen.io	t	https://support.filen.io/knowledgebase.php?article=20
+files.com	hstu	https://www.files.com/docs/features/twofactor-authentication-2fa
+finary.com	t	https://help.finary.com/en/articles/6518627
+findmyshift.com	t	https://www.findmyshift.com/help/what-is-two-factor-authentication
+finecobank.com	as	https://finecobank.com/it/online/sicurezza/
+finn.no	st	https://account.vend.no/faq#how-to-activate-and-deactivate-2fa
+finnair.com	st	
+fio.cz	as	https://www.fio.cz/bank-services/internetbanking/security
+firmex.com	est	https://support.firmex.com/hc/en-us/articles/204467648
+firstcommunity.com	ces	https://www.firstcommunityexpressnet.com/tob/live/usp-core/static/help.html#login_security
+firstdirect.com	ah	https://www1.firstdirect.com/help/secure-key/
+firsttechfed.com	acehst	https://www.firsttechfed.com/help/security/prevent#multifunction
+fit.google.com	acstu	https://safety.google/authentication/
+fitbit.com	acstu	https://safety.google/authentication/
+fiverr.com	es	https://www.fiverr.com/support/articles/360010239658
+flexera.com	st	https://docs.flexera.com/svm/Content/helplibrary/Configure_Two_Factor_Authentication__2FA_.htm
+flightaware.com	t	https://support.flightaware.com/hc/articles/30610324836759
+flipsnack.com	t	https://help.flipsnack.com/en/articles/6291629-how-to-set-up-the-two-factor-authentication-option
+floatplane.com	t	
+flourish.studio	t	https://help.flourish.studio/article/362--
+fly-metrics.net	t	
+fly.io	t	
+flybuys.com.au	s	
+fogbugz.com	t	https://support.fogbugz.com/hc/en-us/articles/360011262434
+followmyhealth.com	est	https://support.followmyhealth.com/2020/03/10/turning-on-two-factor-authentication-while-logged-into-your-account/
+forge.laravel.com	t	https://forge.laravel.com/docs/1.0/accounts/your-account.html#securing-your-account-with-two-factor-authentication
+formsite.com	t	https://support.formsite.com/hc/en-us/articles/360000686614
+formspree.io	t	https://help.formspree.io/hc/articles/4407875207187
+formstack.com	st	https://help.formstack.com/s/article/Two-Factor-Authentication
+fortnite.com	aest	https://www.epicgames.com/help/c74/c112/a3218
+fortrabbit.com	t	https://help.fortrabbit.com/account#toc-setting-up-2fa
+foursquare.com	es	https://foursquare.atlassian.net/servicedesk/customer/portal/20/article/3355476115
+fpmarkets.com	s	https://www.youtube.com/watch?v=aEXDRisRtUs
+fpmarkets.eu	s	https://www.youtube.com/watch?v=aEXDRisRtUs
+fragdenstaat.de	tu	https://fragdenstaat.de/hilfe/ihr-konto-verwalten/zwei-faktor-login/
+frame.io	st	https://support.frame.io/en/articles/4766302
+freeagent.com	t	https://www.freeagent.com/support/kb/getting-started/two-step-verification
+freecreditreport.com	cs	
+freedommobile.ca	es	
+freee.co.jp	t	https://support.freee.co.jp/hc/ja/articles/360001200143
+freehostia.com	et	
+freelancer.com	es	https://www.freelancer.com/support/general/2-step-verification
+freetaxusa.com	cest	https://www.freetaxusa.com/faqsearch?search_keyword=authentication
+freewallet.org	t	https://freewallet.org/blog/2fa-faq
+freshbooks.com	e	https://www.freshbooks.com/blog/2fa-two-factor-authentication
+freshworks.com	t	https://support.freshworks.com/support/solutions/articles/50000001025
+front.com	t	https://help.front.com/en/articles/2376
+frontapp.com	t	https://help.front.com/en/articles/2376
+frontify.com	t	https://help.frontify.com/en/articles/3947094
+ftb.ca.gov	cs	
+fvn.no	st	https://payment.schibsted.no/profile-pages/faq#how-to-activate-and-deactivate-2fa
+g2a.com	t	https://supporthub.g2a.com/marketplace/en/g2a-account/how-can-i-activate-an-additional-login-verification-on-my-g2a-account
+gaijin.net	aest	https://support.gaijin.net/hc/en-us/articles/203623622
+galaxus.ch	t	https://www.galaxus.ch/en/page/6589
+gamebanana.com	t	https://gamebanana.com/blogs/19253
+gamemaker.io	et	https://help.yoyogames.com/hc/en-us/articles/216757288
+gandi.net	tu	https://docs.gandi.net/en/account_management/security/
+garena.sg	a	
+garmin.com	es	https://support.garmin.com/en-GB/?faq=uGHS8ZqOIhA0usBzBMdJu7
+gate.io	est	https://www.gate.io/help/question/16445
+gatech.edu	acsu	https://oit.gatech.edu/two-factor-authentication
+gatehub.net	t	https://support.gatehub.net/hc/en-us/articles/360021168234
+geforce.com	etu	https://login.nvgs.nvidia.com/v1/help/nfactor
+geico.com	es	https://www.geico.com/web-and-mobile/2SV/
+gemini.com	asu	https://support.gemini.com/hc/en-us/articles/204732985
+georgetown.edu	au	https://uis.georgetown.edu/security/duo/
+geotrust.com	e	
+getdropbox.com	stu	https://help.dropbox.com/account-access/enable-2-factor-authentication
+getflywheel.com	st	https://getflywheel.com/wordpress-support/how-to-enable-two-factor-authentication-on-flywheel
+getpocket.com	t	https://support.mozilla.org/en-US/kb/secure-firefox-account-two-step-authentication
+getresponse.com	aest	https://www.getresponse.com/help/how-to-use-two-factor-authentication-in-getresponse.html
+getscreen.me	aet	https://getscreen.me/en/docs/dashboard#account-authentication
+gigaone.pl	t	https://www.gigaone.pl/wsparcie-techniczne/2fa
+gitguardian.com	e	
+github.com	astu	https://docs.github.com/en/github/authenticating-to-github/securing-your-account-with-two-factor-authentication-2fa/configuring-two-factor-authentication
+gitlab.com	etu	https://docs.gitlab.com/user/profile/account/two_factor_authentication/
+glassdoor.com	st	
+gleam.io	t	https://gleam.io/faq/accounts-and-billing/account/how-do-i-turn-on-2fa
+gls.de	ah	https://www.gls.de/privatkunden/faq/onlinebanking/was-ist-die-zwei-faktor-authentifizierung-2fa-1/
+gm.com	est	
+gmail.com	acstu	https://safety.google/authentication/
+gmc.com	est	
+gmu.edu	achs	https://its.gmu.edu/knowledge-base/list-of-2fa-authentication-options/
+gmx.at	t	https://hilfe.gmx.net/sicherheit/2fa/einrichten.html
+gmx.com	t	https://support.gmx.com/security/2fa/setup-twofactor.html#indexlink_help_security_2fa
+gmx.net	t	https://hilfe.gmx.net/sicherheit/2fa/einrichten.html
+go.wepay.com	st	https://support.wepay.com/hc/en-us/articles/203609693
+goabode.co.uk	t	https://support.goabode.com/docs/two-factor-authentication
+goabode.com	t	https://support.goabode.com/docs/two-factor-authentication
+gocardless.com	st	https://support.gocardless.com/hc/en-gb/articles/360001164385
+godaddy.com	stu	https://www.godaddy.com/help/enable-two-step-verification-7502
+godt.no	st	https://payment.schibsted.no/profile-pages/faq#how-to-activate-and-deactivate-2fa
+gofundme.com	cs	https://support.gofundme.com/hc/en-us/articles/360001980947
+gog.com	et	https://support.gog.com/hc/en-us/articles/115003660533
+googlemail.com	acstu	https://safety.google/authentication/
+gopro.com	s	https://community.gopro.com/t5/en/Setting-Up-Two-Step-Verification/ta-p/395873
+gosquared.com	st	https://www.gosquared.com/support/articles/6493653
+gosuslugi.ru	hst	https://www.gosuslugi.ru/help/faq/login/101923
+goteleport.com	tu	https://goteleport.com/docs/access-controls/guides/webauthn/
+goto.com	t	https://support.goto.com/meeting/help/how-do-i-set-up-and-use-multi-factor-authentication-for-my-gotomeeting-account
+gov.uk	st	https://www.gov.uk/guidance/getting-a-security-code-for-govuk-one-login
+gradintel.com	et	
+grammarly.com	st	https://support.grammarly.com/hc/en-us/articles/360032922091
+greengeeks.com	t	https://www.greengeeks.com/support/article/two-factor-authentication-greengeeks/
+greenhost.net	t	https://greenhost.net/blog/2016/03/01/spring-news-2-factor-authentication-service-center-haproxy-plugin-for-let-s-encrypt-and-more/
+greenmangaming.com	e	https://greenmangaming.zendesk.com/hc/en-us/articles/360024393612
+group.me	s	https://support.microsoft.com/en-us/office/30a7b8fd-5052-4b6f-aa10-85c1560cdf59
+groupme.com	s	https://support.microsoft.com/en-us/office/30a7b8fd-5052-4b6f-aa10-85c1560cdf59
+groups.io	t	https://groups.io/helpcenter/membersmanual/1/understanding-groups-io-accounts/setting-account-preferences-and-viewing-account-information
+growingio.com	t	https://docs.growingio.com/v3/product-manual/personal/security
+guideline.com	t	https://success.guideline.com/hc/articles/360034791412
+guilded.gg	t	https://support.guilded.gg/hc/en-us/articles/1500008991902
+guildwars2.com	est	https://help.guildwars2.com/hc/en-us/articles/230672927
+gumlet.com	t	https://docs.gumlet.com/docs/profile-overview#password-and-2fa
+gumroad.com	e	https://help.gumroad.com/article/292--
+gusto.com	cst	https://support.gusto.com/1066223171
+gwu.edu	acst	https://it.gwu.edu/two-step-authentication
+gyazo.com	e	https://help.gyazo.com/--5ed8969fc1eca80023e84383
+hackerone.com	t	https://docs.hackerone.com/hackers/two-factor-authentication.html
+hackthebox.com	t	https://help.hackthebox.com/articles/5185265
+hackthebox.eu	t	https://help.hackthebox.com/articles/5185265
+halebop.se	a	
+halifax-online.co.uk	cs	https://www.halifax.co.uk/aboutonline/changes-to-online-banking/
+halifax.co.uk	cs	https://www.halifax.co.uk/aboutonline/changes-to-online-banking/
+hallon.se	a	
+handelsbanken.se	a	https://www.handelsbanken.se/shb/INeT/ICentSv.nsf/Default/qAE99695C4C1D033DC12579120036EB43?Opendocument
+hanseaticbank.de	s	https://www.hanseaticbank.de/services/alle-faqs/psd2
+happyfox.com	t	https://support.happyfox.com/kb/article/709--
+harvard.edu	achstu	https://huit.harvard.edu/twostep
+hatchinvest.nz	t	https://help.hatchinvest.nz/en/articles/2996776
+hatena.ne.jp	t	https://hatena.zendesk.com/hc/ja/articles/29892170781209
+hawaiianairlines.com	s	
+hawaiidentalservice.com	s	
+hbf.com.au	es	https://www.hbf.com.au/support/guides/how-to/2-step-verification
+hcaptcha.com	u	
+he.net	t	
+headway.co	cestu	https://help.headway.co/hc/articles/4428388155028#h_01J6CN885B50GFFC3QCXY51QT7
+healthapp.google	acstu	https://safety.google/authentication/
+healthcare.gov	ces	https://www.healthcare.gov/how-can-i-protect-myself-from-fraud-in-the-health-insurance-marketplace/
+healthcomp.com	es	https://personifyhealth.zendesk.com/hc/articles/28007677707675
+heap.io	t	https://help.heap.io/heap-administration/secure-access/2fa/
+heathrow.com	st	
+heimdalsecurity.com	t	https://support.heimdalsecurity.com/hc/articles/212721589
+hello.vrchat.com	t	https://docs.vrchat.com/docs/setup-2fa
+hellobonsai.com	es	https://headwayapp.co/bonsai-updates/254093
+hellosign.com	st	https://faq.hellosign.com/hc/en-us/articles/360025164091
+hellostake.com	t	https://hellostake.com/au/support/wall-st/articles/35000152372
+helpscout.com	st	https://docs.helpscout.com/article/907--
+heroku.com	ahtu	https://devcenter.heroku.com/articles/multi-factor-authentication
+hetzner.com	ht	https://docs.hetzner.com/accounts-panel/accounts/two-factor-authentication/
+hevodata.com	t	https://docs.hevodata.com/account-management/personal-settings/two-factor-authentication/
+hewlettpackardenterprise.com	atu	https://support.hpe.com/hpesc/public/docDisplay?docId=sd00002926en_us&page=GUID-78722BEA-6517-4C6E-96F3-92E9D81903E2.html
+hexonet.net	t	https://www.hexonet.net/assets/pdf/2FA.pdf
+hey.com	tu	https://hey.com/security/
+hide.me	t	https://hide.me/en/blog/hide-me-vpn-now-supports-2fa/
+hidrive.com	t	https://www.strato.de/faq/cloud-speicher/2-Faktor-Authentifizierung/
+hilton.com	es	https://www.hilton.com/en/help-center/your-account/enhanced-security-authentication/
+hint.com	t	https://support.hint.com/en/articles/2360627
+hirezstudios.com	es	
+hitbtc.com	t	https://support.hitbtc.com/en/support/solutions/articles/63000224976
+hivehome.com	s	https://community.hivehome.com/s/article/What-is-Two-Factor-Authentication-and-how-do-I-set-it-up
+hl.co.uk	cs	https://www.hl.co.uk/help/managing-your-online-account/passwords-and-security/passwords/how-do-i-log-in
+hmc.edu	achsu	https://www.hmc.edu/cis/duo-two-factor-authentication/
+holded.com	s	https://academy.holded.com/hc/en-us/articles/4403375077265
+holvi.com	a	https://support.holvi.com/hc/en-gb/articles/360002711557
+home-assistant.io	t	https://www.home-assistant.io/docs/authentication/multi-factor-auth/
+home.saxo	as	
+home.sophos.com	est	https://support.home.sophos.com/hc/en-us/articles/360032204471
+honeybadger.io	t	https://www.honeybadger.io/blog/account-security-updates/#how-to-enable
+hootsuite.com	et	https://help.hootsuite.com/hc/en-us/articles/1260804307989
+hostek.co.uk	t	https://wiki.hostek.com/Client_Area_-_Two_Factor_Authentication
+hostek.com	t	https://wiki.hostek.com/Client_Area_-_Two_Factor_Authentication
+hostens.com	t	https://www.hostens.com/knowledgebase/how-to-enhance-account-security/
+hosteurope.de	s	https://www.hosteurope.de/faq/kis/allgemeines0/wo-kann-ich-passworte-neu-vergeben/
+hostinger.com	et	https://support.hostinger.com/articles/4888148
+hostiso.com	t	
+hostmonster.com	et	https://my.hostmonster.com/cgi/help/two-factor-authentication
+hostplus.com.au	cs	https://hostplus.com.au/secure-your-account
+hostpoint.ch	st	https://support.hostpoint.ch/en/administrative/hostpoint-id/general-questions-about-two-factor-authentication
+hostus.us	t	https://my.hostus.us/knowledgebase/106
+hostwinds.ae	t	
+hostwinds.cn	t	
+hostwinds.co.uk	t	
+hostwinds.com	t	
+hostwinds.de	t	
+hostwinds.es	t	
+hostwinds.fr	t	
+hostwinds.in	t	
+hostwinds.it	t	
+hostwinds.kr	t	
+hostwinds.ng	t	
+hostwinds.nl	t	
+hostwinds.pt	t	
+hostwinds.ru	t	
+hotdoc.com.au	e	https://help.hotdoc.com.au/hc/articles/9565844108175
+hotjar.com	t	https://help.hotjar.com/hc/en-us/articles/4406998019223
+hotmail.com	acest	https://support.microsoft.com/en-us/help/12408/
+hover.com	st	https://help.hover.com/hc/en-us/articles/217282267
+hp.com	t	
+hpe.com	atu	https://support.hpe.com/hpesc/public/docDisplay?docId=sd00002926en_us&page=GUID-78722BEA-6517-4C6E-96F3-92E9D81903E2.html
+hrblock.com	est	
+hsbc.co.uk	ah	https://www.hsbc.co.uk/help/security-centre/secure-key/secure-key-help/
+hsbc.com.au	a	https://www.hsbc.com.au/ways-to-bank/support/digital-secure-key/
+huaweicloud.com	est	https://support.huaweicloud.com/intl/en-us/usermanual-iam/iam_10_0002.html
+hubspot.com	st	https://knowledge.hubspot.com/articles/kcs_article/account/how-can-i-set-up-two-factor-authentication-for-my-hubspot-login
+huggingface.co	t	https://huggingface.co/docs/hub/en/security-2fa
+huk.de	cs	
+huk24.de	s	https://www.huk24.de/unsere-services/login-und-mehr#spr05
+humana.com	es	https://www.humana.com/2-step-verification
+humblebundle.com	st	https://support.humblebundle.com/hc/en-us/articles/202421374
+huntington.com	ces	
+huobi.com	est	https://huobiglobal.zendesk.com/hc/en-us/articles/360000191282
+hushmail.com	est	https://help.hushmail.com/article/740--
+hva.nl	ct	https://student.hva.nl/az-lemmas/studenten/hva-breed/its-si/tweestapsverificatie/2-stapsverificatie.html
+hype.it	s	
+hypixel.net	etu	https://support.hypixel.net/hc/en-us/articles/360019538060
+hypovereinsbank.de	ahs	https://www.hypovereinsbank.de/hvb/services/digitales-banking/psd2/tan-verfahren
+hytale.com	etu	https://support.hytale.com/hc/articles/44212029550491
+hytale.net	etu	https://support.hytale.com/hc/articles/44212029550491
+icabanken.se	a	https://www.icabanken.se/kundservice/hjalp-med-att-logga-in/
+icdsoft.com	t	https://tickets.suresupport.com/faq/article-1700
+icedrive.net	stu	https://twitter.com/icedrivecloud/status/1412044506447364097
+icicibank.com	s	https://www.icicibank.com/online-safe-banking/otp.page
+icloud.com	acsu	https://support.apple.com/en-us/HT204915
+id.atlassian.com	stu	https://support.atlassian.com/atlassian-account/docs/manage-two-step-verification-for-your-atlassian-account/
+id.me	acstu	https://help.id.me/hc/en-us/articles/360018113053
+identity.webrootanywhere.com	t	https://answers.webroot.com/Webroot/ukp.aspx?vw=1&solid=3476
+idrive.com	est	https://www.idrive.com/online-backup-web-faq#twostep
+ifttt.com	st	https://help.ifttt.com/hc/en-us/articles/115010193007
+ig.com	a	https://www.ig.com/uk/help-and-support/accounts-and-statements/my-accounts/how-do-i-set-up-two-factor-authentication
+ig.me	st	https://help.instagram.com/566810106808145
+iinet.com.au	s	https://help.iinet.net.au/multi-factor-authentication-iinet
+iinet.net.au	s	https://help.iinet.net.au/multi-factor-authentication-iinet
+immobilienscout24.de	st	https://sicherheit.immobilienscout24.de/2-faktor-authentifizierung.html
+immowelt.de	e	https://support.immowelt.de/immoweltde/faq/gewerbliche-anbieter/meine-immowelt/sichere-anmeldung.html
+imperva.com	est	https://docs.imperva.com/bundle/cloud-application-security/page/settings/account-settings.htm
+impots.gouv.fr	e	https://www.impots.gouv.fr/actualite/la-securite-de-votre-espace-particulier-se-renforce
+improvmx.com	t	
+inbox.lv	t	https://help.inbox.lv/category/10017/question/10713
+indeed.com	cs	https://www.indeed.com/lead/two-factor-authentication
+independentreserve.com	st	https://blog.independentreserve.com/knowledge-base/setting-up-2fa-using-google-authenticator
+independer.nl	et	
+infinity.co	s	https://www.infinity.co/knowledge-base/article/2-factor-authentication
+infobip.com	cs	https://www.infobip.com/news/increased-portal-account-security-with-2-factor-authentication
+infomaniak.com	ast	https://www.infomaniak.com/en/support/faq/1940
+ing.com.au	s	
+ing.de	ah	https://www.ing.de/hilfe/auftraege-freigeben/
+ing.it	as	https://www.ing.it/faq/codici-e-dati-anagrafici/token-cos-e-come-funziona.html
+ing.lu	ah	https://www.ing.lu/webing/content/siteing/en/Individuals/Onlineproduct/Contact/frequently-asked-questions/faq-online-banking-.html#accordion-16b6eafd77-item-36c4e5a172
+ing.pl	asu	https://www.ing.pl/indywidualni/bankowosc-internetowa/bezpieczenstwo/klucze-zabezpieczen-u2f
+inmotionhosting.com	t	https://www.inmotionhosting.com/support/edu/cpanel/how-to-configure-and-use-two-factor-authentication/
+instagram.com	st	https://help.instagram.com/566810106808145
+instant-gaming.com	t	
+instantscripts.com.au	s	
+instructure.com	st	https://community.canvaslms.com/t5/Student-Guide/How-do-I-set-up-multi-factor-authentication-for-my-user-account/ta-p/524
+insurance.everyday.com.au	es	
+insurance.woolworths.com.au	es	
+intelli.zoolz.com	t	https://wiki.zoolz.com/how-do-i-enable-two-factor-authentication-on-my-zoolz-intelligent-account/
+interactivebrokers.ca	ahs	https://www.interactivebrokers.com/en/index.php?f=ibgStrength&p=log
+interactivebrokers.co.in	ahs	https://www.interactivebrokers.com/en/index.php?f=ibgStrength&p=log
+interactivebrokers.co.jp	ahs	https://www.interactivebrokers.com/en/index.php?f=ibgStrength&p=log
+interactivebrokers.co.uk	ahs	https://www.interactivebrokers.com/en/index.php?f=ibgStrength&p=log
+interactivebrokers.com	ahs	https://www.interactivebrokers.com/en/index.php?f=ibgStrength&p=log
+interactivebrokers.com.au	ahs	https://www.interactivebrokers.com/en/index.php?f=ibgStrength&p=log
+interactivebrokers.com.hk	ahs	https://www.interactivebrokers.com/en/index.php?f=ibgStrength&p=log
+interactivebrokers.hu	ahs	https://www.interactivebrokers.com/en/index.php?f=ibgStrength&p=log
+interactivebrokers.ie	ahs	https://www.interactivebrokers.com/en/index.php?f=ibgStrength&p=log
+interactivebrokers.sg	ahs	https://www.interactivebrokers.com/en/index.php?f=ibgStrength&p=log
+intercom.com	t	https://www.intercom.com/help/en/articles/181
+internetbs.net	t	https://2fa.directory/notes/internetbs/
+interserver.net	t	https://www.interserver.net/tips/kb/enable-two-factor-authentication-in-a-cpanel-account/
+intesasanpaolo.com	as	https://www.intesasanpaolo.com/content/internetbanking/it/faq/common/faqHome/app-intesa-sanpaolo-mobile.privati.html
+intigriti.com	t	https://kb.intigriti.com/en/articles/5378980
+intuit.com	cst	https://accounts-help.intuit.com/app/intuit/1995123
+investvoyager.com	st	https://investvoyager.zendesk.com/hc/en-us/articles/4407561324699
+invictuscapital.com	cst	
+invoice.2go.com	e	https://support.2go.com/hc/en-au/articles/360049057751
+invoiced.com	as	https://docs.invoiced.com/faqs#wBTZz
+inwx.com	t	https://www.inwx.com/en/offer/mobiletan
+ionos.com	at	https://www.ionos.com/help/web-security/two-factor-authentication-two-factor-authentication/set-up-two-factor-authentication/
+iozoom.com	t	https://www.iozoom.com/client/announcements/6
+ipko.pl	asu	https://iko.pkobp.pl/funkcje/mobilna-autoryzacja/
+ironvest.com	t	https://ironvest-kb.groovehq.com/help/how-can-i-enable-two-factor-authentication
+irs.gov	acsu	https://www.irs.gov/privacy-disclosure/secure-access-how-to-register-for-certain-online-self-help-tools
+isc2.org	st	
+islonline.com	estu	https://help.islonline.com/35746/286527
+itch.io	t	https://itch.io/docs/advanced/two-factor-authentication
+iterable.com	t	https://support.iterable.com/hc/en-us/articles/115004821703
+itglue.com	t	https://support.itglue.com/hc/en-us/articles/360004933757
+itslearning.com	t	https://support.itslearning.com/en/support/solutions/articles/7000066757
+ivpn.net	t	https://www.ivpn.net/knowledgebase/232/Do-you-offer-Two-Factor-Authentication.html
+iwantmyname.com	a	https://help.iwantmyname.com/hc/en-gb/articles/360014435197
+jamfnow.com	t	https://support.jamfnow.com/s/article/207717923-How-to-turn-on-Two-Factor-Authentication
+jep.coop	as	
+jetblue.com	es	https://www.jetblue.com/help/trueblue-basics#what-is-2-step-authentication
+jetbrains.com	t	https://sales.jetbrains.com/hc/en-gb/articles/360013015240
+jetstar.com	e	
+jianguoyun.com	ast	https://help.jianguoyun.com/?p=1251
+jitbit.com	t	https://support.jitbit.com/helpdesk/KB/View/11048235
+join-lemmy.org	t	
+joinmastodon.org	tu	https://github.com/McKael/mastodon-documentation/blob/master/Using-Mastodon/2FA.md
+joker.com	t	https://joker.com/faq/content/52/480/en/what-is-two_factor_authentication.html
+jotform.com	t	https://www.jotform.com/help/how-to-enable-two-factor-authentication/
+jottacloud.com	st	https://docs.jottacloud.com/en/articles/1292931
+jovia.org	cst	https://www.jovia.org/knowledge-base/how-do-i-enable-authenticator-apps-within-online-and-mobile-banking
+joyent.com	t	https://docs.joyent.com/public-cloud/getting-started/2fa
+jp.mercari.com	cs	https://www.mercari.com/jp/help_center/article/248/
+jumpcloud.com	tu	https://jumpcloud.com/support/set-up-authenticator-app-for-user-account
+justgiving.com	e	https://justgiving-charity-support.zendesk.com/hc/en-us/articles/360019687158
+justhost.com	et	https://my.justhost.com/hosting/help/two-factor-authentication
+justworks.com	est	https://help.justworks.com/hc/en-us/articles/360004477492
+kagi.com	t	https://help.kagi.com/kagi/privacy/two-factor-authentication.html
+kahoot.com	t	https://support.kahoot.com/hc/articles/43448661146771
+kahoot.it	t	https://support.kahoot.com/hc/articles/43448661146771
+kajabi.com	t	https://help.kajabi.com/hc/en-us/articles/8293506425115
+kakao.com	as	https://cs.kakao.com/helps?service=52&category=1095
+kanka.io	t	https://docs.kanka.io/en/latest/account/security/two-factor-authentication.html
+kaspersky.com	st	https://help.kaspersky.com/KPC/1.0/en-US/152628.htm
+kayako.com	t	https://help.kayako.com/hc/en-us/articles/360006376420
+keepersecurity.com	cstu	https://www.keepersecurity.com/security#twoFactor
+keepsolid.com	et	https://www.keepsolid.com/passwarden/security/tfa
+keycdn.com	t	https://www.keycdn.com/support/enabling-two-factor-authentication
+kick.com	t	https://help.kick.com/en/articles/7120898
+kickex.com	et	https://support.kickex.com/hc/en-us/articles/360019513860
+kickstarter.com	cst	https://help.kickstarter.com/hc/en-us/articles/115005127094
+kinguin.net	e	
+kinsta.com	t	https://kinsta.com/knowledgebase/two-factor-authentication/
+kintone.com	t	https://get.kintone.help/general/en/user/list_2fa/enable_2fa.html
+kit.edu	ht	https://www.scc.kit.edu/dienste/2fa.php
+klarna.no	a	https://www.klarna.com/no/kundeservice/hvordan-logger-jeg-inn/
+klarna.se	a	https://www.klarna.com/se/kundservice/hur-loggar-jag-in/
+klart.se	st	https://payment.schibsted.no/profile-pages/faq#how-to-activate-and-deactivate-2fa
+klaviyo.com	t	https://help.klaviyo.com/hc/en-us/articles/360026617692
+kleinanzeigen.de	e	https://themen.kleinanzeigen.de/hilfe/nutzerkonto/2FA/
+knack.com	t	https://learn.knack.com/article/seuor9vxmw
+knowbe4.com	t	https://support.knowbe4.com/hc/en-us/articles/225681448
+knownhost.com	t	https://www.knownhost.com/wiki/my-knownhost/two-factor
+ko-fi.com	est	https://help.ko-fi.com/hc/en-us/articles/6355489342737
+koho.ca	cst	https://help.koho.ca/articles/9401393
+koofr.eu	tu	https://koofr.eu/help/two-factor-authentication/does-koofr-offer-two-factor-authentication/
+korbit.co.kr	t	https://support.korbit.co.kr/customer/en/portal/articles/1717692
+kraken.com	ehtu	https://support.kraken.com/hc/en-us/articles/360000426923
+kriptomat.io	st	https://help.kriptomat.io/en/articles/1986160
+krystal.uk	t	https://help.krystal.uk/getting-started/how-do-i-setup-two-factor-authentication-2-fa-on-my-krystal-account
+kuna.io	t	https://support.kuna.io/en/support/solutions/articles/17000083405
+lansforsakringar.se	a	https://www.lansforsakringar.se/privat/att-vara-kund/digitala-tjanster-telefonbank/internetbanken/
+larian.com	st	
+lastpass.com	ahstu	https://support.logmeininc.com/lastpass/help/enable-multifactor-authentication-lp010002
+latoken.com	est	https://latoken.zendesk.com/hc/en-us/articles/360010034040
+latrobe.edu.au	at	https://www.latrobe.edu.au/students/support/it/mfa
+launchdarkly.com	t	https://docs.launchdarkly.com/home/account-security/mfa
+launchpad.net	ht	https://help.ubuntu.com/community/SSO/FAQs/2FA
+lcn.com	t	https://www.lcn.com/support/articles/how-to-set-up-and-use-two-factor-authentication/
+leagueoflegends.com	e	https://support-valorant.riotgames.com/hc/articles/4415709691667
+leaseweb.com	st	https://kb.leaseweb.com/customer-portal-api/account-management/managing-your-account/setup-two-factor-authentication
+leboncoin.fr	es	
+leetcode.cn	aestu	
+leetcode.com	aestu	
+lego.com	e	
+lendingclub.com	e	https://help.lendingclub.com/hc/en-us/articles/215562677#h_95bff530-80b8-43ec-9ae1-ffae87e563f5
+lenovo.com	est	
+letsdeel.com	t	https://help.letsdeel.com/hc/en-gb/articles/4407737656465
+letsdothis.com	t	https://intercom.help/ldt-partner-help/en/articles/9423487
+letterboxd.com	t	
+lexoffice.de	t	https://support.lexoffice.de/de-form/articles/4290490
+lhv.ee	ah	
+lichess.org	t	
+lidentitenumerique.laposte.fr	a	https://aide.lidentitenumerique.laposte.fr/kb/guide/fr/YapekkW4gf
+lidl.de	es	
+lieferando.de	e	https://lieferando.de/kundenservice/artikel/warum-muss-ich-bei-der-anmeldung-einen-code-eingeben
+ligabank.de	ah	https://www.ligabank.de/liga-direkt/faq-zum-online-banking.html#parsys_faqliste_330836501
+lihkg.com	et	https://help.lihkg.com/privacy/account-security/
+line6.com	t	
+linkedin.com	ast	https://www.linkedin.com/help/linkedin/answer/544
+linksyssmartwifi.com	es	https://www.linksys.com/us/support-article?articleNum=317753
+linktr.ee	cst	https://linktr.ee/help/articles/6108442
+linode.com	t	https://www.linode.com/docs/security/linode-manager-security-controls
+liquid.com	t	https://help.liquid.com/en/articles/4883860
+liquidweb.com	t	https://www.liquidweb.com/kb/how-to-enable-two-factor-authentication-2fa/
+listrak.com	e	https://help.listrak.com/en/articles/1505298
+litebit.eu	st	https://support.litebit.eu/hc/en-us/articles/115000953504
+litmus.com	as	https://help.litmus.com/article/128--
+lloydsbank.com	acs	https://www.lloydsbank.com/online-banking/changes-to-internet-banking.asp
+lmcu.org	a	https://www.lmcu.org/personal/banking/services/mobile-authenticator/
+lnk.bio	t	https://help.lnk.bio/en/articles/8372705
+lobste.rs	t	https://lobste.rs/s/1cyltz/two_factor_authentication_now_available
+localizejs.com	st	https://help.localizejs.com/docs/users-two-factor-authentication
+loggly.com	t	https://documentation.solarwinds.com/en/success_center/pingdom/content/shared/mfa-users.htm
+logi.com	et	
+logicmonitor.com	acs	https://www.logicmonitor.com/support/settings/users-and-roles/two-factor-authentication
+login.bce.baidu.com	st	https://intl.cloud.baidu.com/doc/IAM/s/2jwvyc50i-en
+login.gov	chstu	https://www.login.gov/help/get-started/authentication-methods/
+login.microsoftonline.com	acest	https://support.microsoft.com/account-billing/c7910146-672f-01e9-50a0-93b4585e7eb4
+login.nvgs.nvidia.com	etu	https://login.nvgs.nvidia.com/v1/help/nfactor
+login.sophos.com	et	https://docs.sophos.com/central/customer/help/en-us/ManageYourProducts/GlobalSettings/MultiFactorAuthentication/index.html
+login.threatsim.com	s	
+logitech.com	et	
+logme.in	t	https://support.goto.com/meeting/help/how-do-i-set-up-and-use-multi-factor-authentication-for-my-gotomeeting-account
+logmein.com	t	https://support.goto.com/meeting/help/how-do-i-set-up-and-use-multi-factor-authentication-for-my-gotomeeting-account
+logmeininc.com	t	https://support.goto.com/meeting/help/how-do-i-set-up-and-use-multi-factor-authentication-for-my-gotomeeting-account
+lokalise.com	t	https://docs.lokalise.com/en/articles/2329387
+lolesports.com	e	https://support-valorant.riotgames.com/hc/articles/4415709691667
+lonestar.edu	acst	https://www.lonestar.edu/OTS-MFA.htm
+looker.com	t	https://www.looker.com/docs/admin/security/two-factor-authentication
+loopia.se	a	https://blogg.loopia.se/2015/03/16/nu-kan-du-logga-in-med-tvafaktorsautentiering-hos-loopia-genom-bankid/
+lowes.com	s	https://www.lowes.com/l/help/contact-us#Multi-FactorAuthentication
+ltrbxd.com	t	
+ltu.edu.au	at	https://www.latrobe.edu.au/students/support/it/mfa
+lu.ma	t	https://help.luma.com/p/two-factor-authentication
+lufthansa.com	st	https://www.miles-and-more.com/row/en/general-information/help-and-contact/help/2-factor-authentication.html
+luma.com	t	https://help.luma.com/p/two-factor-authentication
+lunchmoney.app	t	
+luno.com	t	https://www.luno.com/help/en/articles/1000203420
+m1.com	t	https://help.m1.com/en/articles/9331936
+m365.cloud.microsoft	acest	https://support.microsoft.com/account-billing/c7910146-672f-01e9-50a0-93b4585e7eb4
+macquarie.com.au	a	https://www.macquarie.com.au/help/personal/accessing-online-and-mobile-banking/macquarie-authenticator-and-multi-factor-authentication/set-up-macquarie-authenticator
+macstadium.com	t	https://docs.macstadium.com/docs/two-factor-authentication
+macu.com	est	
+magnet.me	t	
+maicoin.com	st	https://maicoin2.freshdesk.com/en/support/solutions/articles/32000016116
+mail.163.com	st	https://help.mail.163.com/faq.do?m=list&categoryID=297
+mail.aol.com	cestu	https://help.aol.com/articles/2-step-verification-stronger-than-your-password-alone
+mail.com	t	https://support.mail.com/security/2fa/index.html
+mail.de	tu	https://mail.de/hilfe/u2f-authenticator
+mail.google.com	acstu	https://safety.google/authentication/
+mail.ru	su	https://help.mail.ru/mail/settings/2fa
+mail.sapo.pt	stu	https://ajuda.sapo.pt/id-67553
+mail.yandex.com	a	https://yandex.com/support/id/authorization/twofa.html
+mailbox.org	ht	https://kb.mailbox.org/de/privat/sicherheit-privatsphaere/die-zwei-faktor-authentifizierung-einrichten/
+mailchi.mp	st	https://kb.mailchimp.com/accounts/login/set-up-a-two-factor-authentication-app-at-login
+mailchimp.com	st	https://kb.mailchimp.com/accounts/login/set-up-a-two-factor-authentication-app-at-login
+mailerlite.com	t	https://www.mailerlite.com/help/how-to-turn-on-two-factor-authentication-2fa
+mailfence.com	t	https://mailfence.com/en/two-factor-authentication.jsp
+mailgun.com	t	https://help.mailgun.com/hc/en-us/articles/360011664433
+mailjet.com	t	https://documentation.mailjet.com/hc/articles/10553745110043
+mailo.com	at	https://faq.mailo.com/acces/activer-la-double-authentification.htm
+make.com	t	https://www.make.com/en/help/access-management/two-factor-authentication
+malwarebytes.com	e	https://support.malwarebytes.com/hc/en-us/articles/4402158331411
+managebuilding.com	cst	https://www.buildium.com/two-factor-authentication/
+mandtbank.com	aes	https://www.mtb.com/help-center/banking-security/online-mobile-banking-security
+mangadex.org	tu	
+mapbox.com	t	https://docs.mapbox.com/accounts/guides/settings/#two-factor-authentication
+marcus.com	es	
+markmonitor.com	ahs	
+marktplaats.nl	s	https://help.marktplaats.nl/s/article/bescherm-je-account-met-de-sms-beveiligingscontrole
+maropost.com	e	https://support.maropost.com/hc/en-us/articles/360015708033
+marriott.com	es	https://help.marriott.com/s/article/Article-34205
+mastodon.social	tu	https://github.com/McKael/mastodon-documentation/blob/master/Using-Mastodon/2FA.md
+mathworks.com	est	https://www.mathworks.com/mw_account/two_step_verification/frequently-asked-questions.html
+matomo.org	t	https://matomo.org/faq/general/faq_27245/
+mattermost.com	t	https://docs.mattermost.com/onboard/multi-factor-authentication.html
+mbconnectline.com	cest	
+mbna.ca	cs	https://www.mbna.ca/help-centre/credit-cards/two-step-verification-faq/
+mbna.co.uk	acs	https://www.mbna.co.uk/credit-cards/help-and-support/changes-to-online-shopping.html
+mbna.com	esu	https://www.bankofamerica.com/security-center/online-banking/
+mcafee.com	s	https://www.mcafee.com/support/s/article/000002100
+mcgill.ca	acst	https://mcgill.service-now.com/itportal?id=kb_article_view&sys_kb_id=b1508e941be04910591ca9b7624bcb85
+meet.google.com	acstu	https://safety.google/authentication/
+mega.io	t	https://mega.io/help/client/webclient/security-and-privacy#5bb525f9f1b70989348b45de
+meine-barmenia.de	st	https://www.barmenia.de/deu/bde_privat/bde_service/bde_selfservice/bde_meine_barmenia/erstanmeldung.xhtml
+meineschufa.de	s	https://www.meineschufa.de/de/faq/login
+meister.co	t	https://support.mindmeister.com/hc/en-us/articles/4408402251154
+meisterlabs.com	t	https://support.mindmeister.com/hc/en-us/articles/4408402251154
+meisternote.com	t	https://support.mindmeister.com/hc/en-us/articles/4408402251154
+meistertask.com	t	https://support.mindmeister.com/hc/en-us/articles/4408402251154
+memsource.com	t	https://support.phrase.com/hc/en-us/articles/6999456070556
+meny.no	s	https://www.trumf.no/kundeservice/#innlogging
+meraki.cisco.com	st	https://documentation.meraki.com/General_Administration/Other_Topics/Two-Factor_Authentication
+meraki.com	st	https://documentation.meraki.com/General_Administration/Other_Topics/Two-Factor_Authentication
+mercadobitcoin.com.br	t	https://suporte.mercadobitcoin.com.br/hc/pt-br/articles/360039357491
+mercadolibre.cl	st	https://www.mercadolivre.com.br/ajuda/945
+mercadolibre.co.cr	st	https://www.mercadolivre.com.br/ajuda/945
+mercadolibre.com	st	https://www.mercadolivre.com.br/ajuda/945
+mercadolibre.com.ar	st	https://www.mercadolivre.com.br/ajuda/945
+mercadolibre.com.bo	st	https://www.mercadolivre.com.br/ajuda/945
+mercadolibre.com.co	st	https://www.mercadolivre.com.br/ajuda/945
+mercadolibre.com.do	st	https://www.mercadolivre.com.br/ajuda/945
+mercadolibre.com.ec	st	https://www.mercadolivre.com.br/ajuda/945
+mercadolibre.com.gt	st	https://www.mercadolivre.com.br/ajuda/945
+mercadolibre.com.hn	st	https://www.mercadolivre.com.br/ajuda/945
+mercadolibre.com.mx	st	https://www.mercadolivre.com.br/ajuda/945
+mercadolibre.com.ni	st	https://www.mercadolivre.com.br/ajuda/945
+mercadolibre.com.pa	st	https://www.mercadolivre.com.br/ajuda/945
+mercadolibre.com.pe	st	https://www.mercadolivre.com.br/ajuda/945
+mercadolibre.com.py	st	https://www.mercadolivre.com.br/ajuda/945
+mercadolibre.com.sv	st	https://www.mercadolivre.com.br/ajuda/945
+mercadolibre.com.uy	st	https://www.mercadolivre.com.br/ajuda/945
+mercadolibre.com.ve	st	https://www.mercadolivre.com.br/ajuda/945
+mercadolivre.com.br	st	https://www.mercadolivre.com.br/ajuda/945
+mercadopago.com	as	
+mercury.cash	t	https://support.mercury.cash/en/articles/3881123
+mercury.com	tu	https://help.mercury.com/t/m1h3d07
+meridiancu.ca	cs	https://www.meridiancu.ca/bank-anywhere/online-banking/signing-in-for-the-first-time-online
+merrilledge.com	su	https://www.ml.com/privacy-and-security-center/usb-security-key.html
+messagebird.com	es	https://support.messagebird.com/hc/en-us/articles/12896784423057
+messenger.com	stu	https://www.facebook.com/help/148233965247823
+meta.com	st	https://www.meta.com/help/quest/articles/accounts/account-settings-and-management/two-factor-meta-account/
+metal.equinix.com	st	https://metal.equinix.com/developers/docs/accounts/two-factor-authentication/
+metamask.io	t	https://docs.metamask.io/developer-tools/dashboard/how-to/two-factor-authentication
+metorik.com	t	https://help.metorik.com/article/22-how-can-i-enable-2fa-on-my-account
+mexc.com	t	https://www.mexc.com/learn/article/17827791509545
+miamioh.edu	achsu	https://www.miamioh.edu/it-services/special-groups/info-security/duo/
+michaels.com	es	
+microsoft365.com	acest	https://support.microsoft.com/account-billing/c7910146-672f-01e9-50a0-93b4585e7eb4
+microworkers.com	et	https://www.microworkers.com/blog/whats-new-in-mw-implementation-of-two-factor-authentication-2fa/
+migadu.com	t	
+migros.ch	ast	https://account.migros.ch/help#secureWhy2FactorPassword
+miles-and-more.com	st	https://www.miles-and-more.com/row/en/general-information/help-and-contact/help/2-factor-authentication.html
+mimecast.com	est	https://community.mimecast.com/docs/DOC-1915
+mindmeister.com	t	https://support.mindmeister.com/hc/en-us/articles/4408402251154
+minds.com	et	https://help.minds.com/hc/minds/articles/1705423904-two_factor-authentication
+minecraft.net	acest	https://support.microsoft.com/en-us/help/12408/
+mines.edu	ahu	https://its.mines.edu/mfa/
+minmote.no	st	https://payment.schibsted.no/profile-pages/faq#how-to-activate-and-deactivate-2fa
+mint.intuit.com	cst	https://accounts-help.intuit.com/app/intuit/1995176
+mintos.com	t	https://help.mintos.com/hc/en-us/sections/360000373858
+miro.com	t	https://help.miro.com/hc/en-us/articles/7935469290002
+misshosting.bg	t	https://github.com/2factorauth/twofactorauth/issues/3634#issuecomment-454688629
+misshosting.com	t	https://github.com/2factorauth/twofactorauth/issues/3634#issuecomment-454688629
+misshosting.dk	t	https://github.com/2factorauth/twofactorauth/issues/3634#issuecomment-454688629
+misshosting.fi	t	https://github.com/2factorauth/twofactorauth/issues/3634#issuecomment-454688629
+misshosting.no	t	https://github.com/2factorauth/twofactorauth/issues/3634#issuecomment-454688629
+misshosting.se	t	https://github.com/2factorauth/twofactorauth/issues/3634#issuecomment-454688629
+missiveapp.com	t	https://missiveapp.com/faq/enable-2-factor-authentication
+mist.com	t	https://www.mist.com/documentation/two-factor-authentication-mobile-authenticator/
+mixpanel.com	s	https://help.mixpanel.com/hc/en-us/articles/115004485966
+ml.com	su	https://www.ml.com/privacy-and-security-center/usb-security-key.html
+mlp.de	ahs	https://mlp.de/banking/konto-und-karte/psd2/
+mobile.everyday.com.au	es	https://mobile.everyday.com.au/two-factor-authentication
+mobile.woolworths.com.au	es	https://mobile.everyday.com.au/two-factor-authentication
+modahealth.com	s	
+modrinth.com	t	
+mojang.com	acest	https://support.microsoft.com/en-us/help/12408/
+mojedatovaschranka.cz	as	https://www.mojedatovaschranka.cz/static/ISDS/help/page1.html#1_5_4
+monarchmoney.com	t	https://help.monarchmoney.com/hc/en-us/articles/360054392152
+monash.edu	atu	https://www.monash.edu/esolutions/accounts-passwords/multi-factor-authentication
+monash.edu.my	atu	https://www.monash.edu/esolutions/accounts-passwords/multi-factor-authentication
+monday.com	st	https://support.monday.com/hc/en-us/articles/360000787745
+monex.co.jp	st	https://info.monex.co.jp/help/security/mfa/index.html
+moneybird.com	t	https://www.moneybird.nl/blog/twee-staps-verificatie/
+moneybird.nl	t	https://www.moneybird.nl/blog/twee-staps-verificatie/
+mongodb.com	aestu	https://docs.atlas.mongodb.com/security-multi-factor-authentication/
+moniker.com	et	https://faq.moniker.com/login-into-moniker
+moqups.com	t	https://support.moqups.com/hc/en-us/articles/360019781980#account_2FA
+more.com.au	es	https://www.more.com.au/help/multi-factor-authentication-what-is-it-and-why-it-s-important
+morganstanley.com	cstu	https://www.morganstanley.com/what-we-do/wealth-management/online-security/authentication
+mos.ru	st	
+msu.edu	acsu	https://secureit.msu.edu/multi-factor/index.html
+mtb.com	aes	https://www.mtb.com/help-center/banking-security/online-mobile-banking-security
+mulesoft.com	atu	https://docs.mulesoft.com/access-management/multi-factor-authentication
+multcloud.com	es	https://www.multcloud.com/help/two-step-verification.html
+muni.cz	tu	https://it.muni.cz/en/services/muni-unified-login/multi-factor-authentication
+mural.co	t	https://support.mural.co/en/articles/5315716
+musicmagpie.co.uk	e	
+mxtoolbox.com	st	https://mxtoolbox.com/support/knowledgebase/?faq=455
+my.cigna.com	es	
+my.gov.au	st	https://my.gov.au/en/about/help/mygov-website/sign-in-to-mygov/use-an-authenticator
+my.ny.gov	acst	https://dol.ny.gov/MFA
+my.plesk.com	t	https://docs.platform360.io/scp/dashboard/user-profile.html#multifactor-authentication
+my.sophos.com	est	https://support.home.sophos.com/hc/en-us/articles/360032204471
+my.webrootanywhere.com	t	https://answers.webroot.com/Webroot/ukp.aspx?vw=1&solid=3476
+myanimelist.net	t	https://myanimelist.net/about.php?go=support
+mychart.org	est	https://www.mychart.org/Help/two-factor-auth
+mydeal.com.au	ces	
+myemma.com	st	https://support.e2ma.net/s/article/Two-factor-authentication
+myfico.com	s	
+myfritz.net	htu	https://en.avm.de/myfritz/faqs/security-tips-for-using-myfritz/
+mygovid.ie	s	https://www.mygovid.ie/en-IE/HelpAndSupport?section=pageButton-SecurityAndPrivacy&answer=show-answer32
+myhealthone.com	ces	
+myheritage.com	st	https://www.myheritage.com/help-center/en/article/how-do-i-set-up-two-factor-authentication-for-my-myheritage-account
+myki.com.au	st	https://transport.vic.gov.au/help-and-support/ptv-app-help/set-up-multi-factor-authentication-for-myki-in-the-ptv-app
+mymerrill.com	su	https://www.ml.com/privacy-and-security-center/usb-security-key.html
+mymyki.com.au	st	https://transport.vic.gov.au/help-and-support/ptv-app-help/set-up-multi-factor-authentication-for-myki-in-the-ptv-app
+myob.co.nz	est	https://help.myob.com/wiki/x/bwfq
+myob.com	est	https://help.myob.com/wiki/x/bwfq
+myob.com.au	est	https://help.myob.com/wiki/x/bwfq
+mypath.pa.gov	est	https://revenue-pa.custhelp.com/app/answers/detail/a_id/3939
+myprimobox.com	t	
+myprimobox.net	t	
+myringgo.co.uk	es	https://www.ringgo.co.uk/multi-factor-authentication-mfa
+myringgo.com	es	https://www.ringgo.co.uk/multi-factor-authentication-mfa
+mytax.illinois.gov	et	https://tax.illinois.gov/programs/mytax/authenticationguide.html
+n-able.com	t	https://documentation.n-able.com/covedataprotection/USERGUIDE/documentation/Content/service-management/console/sso_migration.htm
+n26.com	as	https://support.n26.com/en-eu/security/passwords-and-codes/how-to-log-in-with-two-factor-authentication
+n8n.cloud	t	https://docs.n8n.io/user-management/two-factor-auth/
+n8n.io	t	https://docs.n8n.io/user-management/two-factor-auth/
+naga.com	t	https://support.naga.com/en/articles/5057605
+nairaex.com	t	https://support.nairaex.com/support/solutions/articles/43000335554
+name.com	t	https://www.name.com/support/articles/205934297-setting-up-two-step-verification-with-google-authenticator
+namebase.io	t	
+namecheap.com	tu	https://www.namecheap.com/security/2fa-two-factor-authentication/
+namehero.com	t	https://www.namehero.com/knowledgebase/163
+names.co.uk	t	https://www.names.co.uk/support/3011.html
+namesilo.com	t	https://www.namesilo.com/Support/2~Factor-Authentication
+nandos.co.uk	es	https://help.nandos.co.uk/hc/articles/4417183221521
+nandos.com.au	s	
+nasafcu.com	cest	https://www.nasafcu.com/img/newebranch/ebranch_new.html
+nationwide.co.uk	hs	https://www.nationwide.co.uk/support/security-centre/internet-banking-security/new-log-in-experience
+natwest.com	h	https://www.natwest.com/banking-with-natwest/how-to/card-reader.html
+naver.com	a	https://help.naver.com/service/5640/contents/21127?lang=en
+navyfederal.org	aes	https://www.navyfederal.org/services/security/two-step-verification.html
+nb.fidelity.com	cs	https://nb.fidelity.com/public/nb/default/resourceslibrary/articles/securityfaqlearnmore
+ncsecu.org	s	https://www.ncsecu.org/MobileServices/OneTimePasscode.html
+ncsu.edu	acstu	https://oit.ncsu.edu/it-security/2fa/
+nd.edu	acstu	https://nd.service-now.com/nd_portal?id=kb_article_view&sysparm_article=KB0017218
+ndax.io	t	https://help.ndax.io/en_us/categories/-B1hNr3zSi
+nedelta.com	s	
+neolo.com	t	https://ar.neolo.com/knowledgebase/215/Autenticacion-de-2-factores.html
+neopets.com	t	https://neopass.support.neopets.com/hc/articles/25933646591501
+nest.com	acstu	https://support.google.com/googlenest/answer/9295081
+nest.google.com	acstu	https://support.google.com/googlenest/answer/9295081
+netacad.com	at	https://www.cisco.com/c/en/us/about/help/login-account-help.html#~change-password
+netbank.com.au	as	https://www.commbank.com.au/digital-banking/netbank/multi-factor-authentication.html
+netbk.co.jp	a	https://www.netbk.co.jp/contents/lineup/smartauth-neo/
+netcorecloud.com	et	https://emaildocs.netcorecloud.com/docs/two-factor-authentication-2fa
+netcup.de	t	https://www.netcup-wiki.de/wiki/Stammdaten_CCP#Zwei-Faktor-Authentifizierung_.282FA.29
+netcup.eu	t	https://www.netcup-wiki.de/wiki/Stammdaten_CCP#Zwei-Faktor-Authentifizierung_.282FA.29
+neteller.com	aest	https://www.neteller.com/en/support#/path/1362152022
+netim.com	t	https://support.netim.com/en/wiki/2FA
+netlify.com	t	https://docs.netlify.com/accounts-and-billing/user-settings/#two-factor-authentication-2fa
+neto.com.au	t	https://www.netohq.com/support/s/article/multi-factor-authentication
+netohq.com	t	https://www.netohq.com/support/s/article/multi-factor-authentication
+netsuite.com	t	https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/section_4410552915.html
+networksolutions.com	s	https://customerservice.networksolutions.com/prweb/PRAuth/webkm/help/article/KC-344/networksolutions
+newegg.com	est	https://kb.newegg.com/knowledge-base/2-step-verification/
+newgrounds.com	t	
+nexcess.net	st	https://help.nexcess.net/client-portal/how-to-use-two-factor-authentication-in-the-client-portal
+nexon.com	est	https://support.nexon.net/hc/en-us/articles/360026634532
+nextdns.io	t	
+nextdoor.co.uk	es	https://help.nextdoor.com/s/article/About-2-Step-Verification
+nextdoor.com	es	https://help.nextdoor.com/s/article/About-2-Step-Verification
+nextdoor.de	es	https://help.nextdoor.com/s/article/About-2-Step-Verification
+nextdoor.nl	es	https://help.nextdoor.com/s/article/About-2-Step-Verification
+nexusmods.com	t	https://help.nexusmods.com/article/74--
+ngpvan.com	st	
+ngrok.com	t	
+nhsapp.service.nhs.uk	s	https://www.nhs.uk/nhs-services/online-services/nhs-app/nhs-app-help-and-support/logging-in-to-the-nhs-app/
+niagahoster.co.id	t	https://www.niagahoster.co.id/kb/fitur-keamanan-terbaru-member-area-niagahoster-two-factor-authentication-2fa
+nic.ru	st	https://www.nic.ru/help/1529/
+nicehash.com	ht	https://www.nicehash.com/support/general-help/security/how-to-setup-2fa-security
+nicovideo.jp	et	https://qa.nicovideo.jp/faq/show/4500
+niftypm.com	t	https://help.niftypm.com/en/articles/5356559
+nimbusweb.me	t	https://nimbusweb.me/guides/settings/account-settings-2-step-verification-for-sign-in/
+nitrotype.com	t	https://www.nitrotype.com/news/read/254/-
+noip.com	t	https://www.noip.com/support/knowledgebase/two-factor-authentication-last-pass/
+nominet.uk	t	https://registrars.nominet.uk/gtlds/onboarding-account-management/your-account/account-security-2/two-factor-authentication-user-guide-2/
+nordaccount.com	tu	https://support.nordvpn.com/hc/articles/19442299167889
+nordea.fi	ah	https://www.nordea.fi/en/personal/our-services/online-mobile-services/access-codes.html
+nordea.se	a	https://www.nordea.se/privat/vardagstjanster/internet-mobil-telefon/bank-id.html
+nordlayer.com	st	https://help.nordlayer.com/docs/set-up-2fa
+nordlocker.com	tu	https://support.nordvpn.com/hc/articles/19442299167889
+nordnet.se	a	
+nordpass.com	tu	https://support.nordpass.com/hc/articles/360002770497
+nordstellar.com	t	https://support.nordpass.com/hc/articles/40207000238993
+nordvpn.com	tu	https://support.nordvpn.com/hc/articles/19442299167889
+norgesgruppen.no	s	https://www.trumf.no/kundeservice/#innlogging
+noridianmedicareportal.com	es	https://med.noridianmedicare.com/web/portalguide/registration/multi-factor-authentication
+norisbank.de	ahs	https://www.norisbank.de/service/zwei-faktor-authentifizierung.html
+northwesternmutual.com	cst	https://www.northwesternmutual.com/security-and-privacy/
+norton.com	cstu	https://support.norton.com/sp/en/us/home/current/solutions/v100023155_NortonM_Retail_1_en_us
+nostarch.com	t	
+notejoy.com	t	https://notejoy.com/help/two-factor-authentication
+notesnook.com	est	https://blog.notesnook.com/improving-user-account-security-with-2fa
+notion.so	st	https://www.notion.so/help/two-step-verification
+novanode.win	etu	https://docs.vaultcord.com/misc/multi-factor-authentication
+nozbe.com	st	https://nozbe.help/management/settings/#settings_2fa
+npmjs.com	u	https://docs.npmjs.com/configuring-two-factor-authentication
+ns1.com	t	https://ns1.com/articles/enabling-2-factor-authentication
+nsandi.com	cs	https://www.nsandi.com/get-to-know-us/security/improved-security
+nuget.org	acstu	https://azure.microsoft.com/en-us/documentation/articles/multi-factor-authentication/
+nulab.com	stu	https://support.nulab.com/hc/en-us/articles/7732936736537
+nutmeg.com	st	https://support.personalinvesting.jpmorgan.com/?article=115000495111-How-to-set-up-and-manage-2-step-verification
+nvidia.com	etu	https://login.nvgs.nvidia.com/v1/help/nfactor
+nyu.edu	asu	https://www.nyu.edu/life/information-technology/accounts-and-access/access/mfa.html
+o2.pl	au	https://pomoc.o2.pl/1login/jak-wlaczyc-i-wylaczyc-logowanie-dwustopniowe
+o2switch.fr	et	
+obsidian.md	t	https://help.obsidian.md/Obsidian/2-factor+authentication
+oculus.com	st	https://www.meta.com/help/quest/articles/accounts/account-settings-and-management/two-factor-meta-account/
+odoo.com	t	https://www.odoo.com/documentation/latest/applications/general/auth/2fa.html
+office.com	acest	https://support.microsoft.com/account-billing/c7910146-672f-01e9-50a0-93b4585e7eb4
+office.microsoft.com	acest	https://support.microsoft.com/account-billing/c7910146-672f-01e9-50a0-93b4585e7eb4
+office365.com	acest	https://support.microsoft.com/account-billing/c7910146-672f-01e9-50a0-93b4585e7eb4
+oikotie.fi	st	https://account.vend.no/faq#how-to-activate-and-deactivate-2fa
+okcupid.com	s	https://help.okcupid.com/hc/en-us/articles/5221247074701
+okta.com	acehstu	https://help.okta.com/en-us/content/topics/security/mfa/mfa-factors.htm
+okx.com	st	https://www.okx.com/help/how-do-i-link-an-authenticator-app
+olb.de	ah	https://www.olb.de/service/ihre-fragen/onlinebanking/psd2
+olg.ca	t	https://www.olg.ca/en/frequently-asked-questions.html#mfa-faqs
+omg.lol	t	https://home.omg.lol/info/two-factor-authentication
+omgserv.com	t	https://www.omgserv.com/fr/faq-site/comment_activer_la_double_authentification-103/
+omni.se	st	https://payment.schibsted.no/profile-pages/faq#how-to-activate-and-deactivate-2fa
+oncehub.com	s	https://help.oncehub.com/help/set-up-two-factor-authentication
+one.com	at	https://help.one.com/hc/en-us/articles/4404699986321
+onedrive.live.com	acest	https://support.microsoft.com/help/12408
+onehub.com	st	https://support.onehub.com/hc/en-us/articles/360039792571
+onelogin.com	ahstu	https://support.onelogin.com/kb/4266569
+onesignal.com	t	https://documentation.onesignal.com/docs/two-step-authentication
+onet.pl	tu	https://pomoc.poczta.onet.pl/baza-wiedzy/czym-jest-weryfikacja-dwuetapowa/
+oneview.malwarebytes.com	t	https://support.threatdown.com/hc/en-us/articles/8788574400531
+onlinesbi.com	as	https://www.onlinesbi.com/sbijava/mobile/sbsecure_otp_app_faq.html
+onlydomains.com	e	https://support.onlydomains.com/hc/articles/15889679813789
+onshape.com	t	https://cad.onshape.com/help/Content/managefreeaccount.htm
+onvista-bank.de	cs	https://www.onvista-bank.de/service/sicherheit/transaktionssicherheit.html#tab-1301-2
+openai.com	st	https://help.openai.com/articles/7967234
+openapply.com	t	https://help.openapply.com/hc/articles/9061135475865
+openbank.es	s	https://www.openbank.es/en/security
+opencollective.com	tu	https://docs.opencollective.com/help/product/two-factor-authentication
+opendns.com	st	https://umbrella.cisco.com/blog/2014/05/22/launching-two-step-verification/
+openprovider.com	t	https://support.openprovider.eu/hc/en-us/articles/360019461160#h_01EZ761VFJZEZ95SJN3EYWXAMG
+openprovider.eu	t	https://support.openprovider.eu/hc/en-us/articles/360019461160#h_01EZ761VFJZEZ95SJN3EYWXAMG
+opensea.io	st	https://support.opensea.io/articles/8866947
+opensrs.com	st	https://help.opensrs.com/hc/en-us/articles/360009702113-Using-two-factor-authentication-in-webmail
+optimizely.com	t	https://help.optimizely.com/Account_Settings/Protect_your_account_with_individual_2-step_verification
+optumbank.com	es	https://www.optumbank.com/support/healthsafe-id-sign-in.html
+optus.com.au	es	https://www.optus.com.au/support/answer?id=20183
+oraclecloud.com	acestu	https://docs.oracle.com/en/cloud/paas/identity-cloud/uaids/configure-authentication-factors.html
+orcid.org	t	https://support.orcid.org/hc/en-us/articles/360006971673
+oregonstate.edu	ahu	https://oregonstate.teamdynamix.com/TDClient/1935/Portal/KB/?CategoryID=8235
+origin.com	cest	https://help.ea.com/en-us/help/account/origin-login-verification-information/
+osf.io	t	https://help.osf.io/article/239--
+osu.edu	ahstu	https://buckeyepass.osu.edu
+osu.ppy.sh	et	
+otago.ac.nz	acstu	https://otago.custhelp.com/app/answers/detail/a_id/3073
+otpbanka.hr	h	https://www.otpbanka.hr/hr/upute/otp-token-upute-za-koristenje
+oui.sncf	e	https://www.sncf-connect.com/en-en/help/your-customer-account
+outbrain.com	et	https://www.outbrain.com/help/advertisers/two-factor-authentication/
+outlook.com	acest	https://support.microsoft.com/en-us/help/12408/
+outlook.live.com	acest	https://support.microsoft.com/en-us/help/12408/
+ovh.com	stu	https://docs.ovh.com/gb/en/customer/secure-account-with-2FA/
+ox.ac.uk	acst	https://help.it.ox.ac.uk/mfa
+ozbargain.com.au	t	https://ozbargain.com.au/node/449886
+pachca.com	t	https://crm.pachca.com/know/articles/dvuhfaktornaya-autentifikaciya-(2fa)/
+pacificpower.net	s	
+packagist.org	t	https://github.com/composer/packagist/pull/1031
+paddle.com	t	https://www.paddle.com/help/start/set-up-paddle/how-can-i-enable-two-factor-authentication-on-my-account
+pairdomains.com	st	https://www.pairdomains.com/kb/posts/345
+paladinsoftware.com	t	https://social-media-management-help.brandwatch.com/hc/en-us/articles/4499676228765
+pandasecurity.com	t	https://www.pandasecurity.com/en/support/card?id=700088
+panic.com	t	https://help.panic.com/sync/panic-sync-sync.panic.com/#enabling-2fa
+panorama9.com	t	
+panther.com	t	https://help.panther.com/articles/7050426254
+papertrail.com	t	https://documentation.solarwinds.com/en/success_center/pingdom/content/shared/mfa-users.htm
+parallels.com	et	https://kb.parallels.com/125441
+paribu.com	st	https://destek.paribu.com/hc/articles/360010998153
+parimatch.com	t	https://faq.parimatch.com/en/account-access-and-security/
+park.io	a	https://park.io/support
+parsec.app	t	https://support.parsec.app/hc/en-us/articles/4424732242445
+parsecgaming.com	t	https://support.parsec.app/hc/en-us/articles/4424732242445
+particle.io	t	https://docs.particle.io/tutorials/developer-tools/two-step-authentication/
+passpack.com	ht	https://passpack.com/support/getting-started/two-factor-authentication/
+patelco.org	ces	https://www.patelco.org/member-support/digital-banking-services/online-banking#564171AC
+patient.labcorp.com	ast	https://patient.labcorp.com/help-center/q-and-a/8000/1
+patientaccess.com	t	https://support.patientaccess.com/signing-in/sign-in-or-register-using-two-factor-authentication
+patientsknowbest.com	t	https://support.patientsknowbest.com/support/solutions/articles/11000130901
+patreon.com	st	https://support.patreon.com/hc/en-us/articles/206538086
+paxful.com	st	https://paxful.com/support/en-us/articles/6469323062300
+paxos.com	t	https://help.paxos.com/hc/en-us/articles/360042320451
+pay.amazon.com	cst	https://www.amazon.com/gp/help/customer/display.html?nodeId=G3PWZPU52FKN7PW4
+pay.google.com	acstu	https://safety.google/authentication/
+payback.de	a	https://www.payback.de/faq/2-schritt-verifizierung
+paychex.com	cs	
+paycor.com	cest	https://support.paycor.com/s/article/Multi-Factor-Authentication-MFA-Requirements-and-Setup
+payeer.com	aes	
+payfit.com	es	https://support.payfit.com/en/articles/73141
+paykassa.pro	t	https://paykassa.pro/en/news/s-paykassa-vashi-dannye-pod-nadejnoy-zashchitoy/
+payoneer.com	cs	https://payoneer.custhelp.com/app/answers/detail/a_id/31268
+paypal-search.com	tu	https://www.paypal.com/us/cshelp/article/help167
+paypal.com	tu	https://www.paypal.com/us/cshelp/article/help167
+paypay.ne.jp	s	
+paysafecard.com	aes	https://www.paysafecard.com/en/support/question/38/
+paytm.com	s	https://blog.paytm.com/secure-2-step-authentication-login-on-paytms-website-6dd5a20ae1b2
+payworks.ca	t	
+pccasegear.com	t	
+pcfinancial.ca	ces	https://www.pcfinancial.ca/en/learning-hub/faqs/managing-your-account/what-is-a-2-step-verification/
+pcloud.com	st	https://www.pcloud.com/help/general-help-center/how-can-i-set-up-two-factor-authentication
+peco.com	ces	
+penfed.org	aest	https://home.penfed.org/help/s/article/PenFed-Security-Center
+pent.no	st	https://payment.schibsted.no/profile-pages/faq#how-to-activate-and-deactivate-2fa
+pepco.com	ces	
+pepipost.com	et	https://emaildocs.netcorecloud.com/docs/two-factor-authentication-2fa
+perimeter81.com	acstu	https://support.perimeter81.com/docs/two-factor-authentication
+personalcapital.com	aces	https://support.personalcapital.com/hc/en-us/sections/200230560
+personalinvesting.jpmorgan.com	st	https://support.personalinvesting.jpmorgan.com/?article=115000495111-How-to-set-up-and-manage-2-step-verification
+personalsavings.americanexpress.com	ces	https://www.americanexpress.com/en-us/banking/online-savings/login-security-and-help/
+personifyhealth.com	es	https://personifyhealth.zendesk.com/hc/articles/28007677707675
+pge.com	cs	
+pharmacy2u.co.uk	su	
+phemex.com	t	https://phemex.com/getting-started/how-do-i-enable-google-two-factor-authentication
+philips-hue.com	et	
+phrase.com	t	https://support.phrase.com/hc/en-us/articles/6999456070556
+pichincha.com	as	https://www.pichincha.com/portal/Portals/0/manuales/InstructivoAutogestionToken.pdf
+pinata.cloud	t	
+pingdom.com	t	https://documentation.solarwinds.com/en/success_center/pingdom/content/shared/mfa-users.htm
+pinterest.com	as	https://help.pinterest.com/en/articles/two-factor-authentication
+pipedrive.com	e	https://support.pipedrive.com/hc/en-us/articles/360000808405
+pirateship.com	et	https://support.pirateship.com/en/articles/9931109-what-is-two-factor-authentication-2fa-on-pirate-ship
+pivotaltracker.com	t	https://www.pivotaltracker.com/help/articles/two_factor_auth/
+piwik.pro	t	https://help.piwik.pro/support/getting-started/two-factor-authentication/
+pixieset.com	t	https://help.pixieset.com/hc/en-us/articles/360046803431
+pixiv.net	t	https://www.pixiv.help/hc/en-us/articles/20876082054553
+pkobp.pl	asu	https://iko.pkobp.pl/funkcje/mobilna-autoryzacja/
+placeit.net	t	https://help.market.envato.com/hc/articles/115005592963
+plaid.com	st	https://plaid.com/docs/account/security/#two-factor-authentication
+plan.io	t	https://support.plan.io/news/133
+planethoster.com	t	https://blog.planethoster.com/securite-espace-client-planethoster/
+planetscale.com	t	https://planetscale.com/docs/concepts/mfa
+planfix.com	t	https://planfix.com/help/Two-factor_authentication
+planningcenter.com	st	https://support.planningcenteronline.com/hc/en-us/articles/6984288823579
+plastiq.com	s	https://help.plastiq.com/hc/en-us/articles/360006794893
+platform360.io	t	https://docs.platform360.io/scp/dashboard/user-profile.html#multifactor-authentication
+plausible.io	t	https://plausible.io/docs/2fa
+play.eslgaming.com	tu	
+play.google.com	acstu	https://safety.google/authentication/
+playblackdesert.com	t	https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=164
+playruneterra.com	e	https://support-valorant.riotgames.com/hc/articles/4415709691667
+playstation.com	st	https://www.playstation.com/support/account/2sv-psn-login/
+playvalorant.com	e	https://support-valorant.riotgames.com/hc/articles/4415709691667
+pleo.io	st	https://help.pleo.io/en/articles/5628169
+plex.tv	t	https://support.plex.tv/articles/two-factor-authentication/
+plivo.com	cs	https://support.plivo.com/hc/en-us/articles/360041766411
+pluralsight.com	t	https://help.pluralsight.com/help/multifactor-authentication
+plurk.com	t	https://www.plurk.com/p/mrcii5
+plus500.at	cs	
+plus500.bg	cs	
+plus500.co.il	cs	
+plus500.co.nz	cs	
+plus500.co.uk	cs	
+plus500.com	cs	
+plus500.com.au	cs	
+plus500.com.hr	cs	
+plus500.com.mt	cs	
+plus500.cz	cs	
+plus500.de	cs	
+plus500.dk	cs	
+plus500.ee	cs	
+plus500.es	cs	
+plus500.fi	cs	
+plus500.fr	cs	
+plus500.gr	cs	
+plus500.hu	cs	
+plus500.is	cs	
+plus500.it	cs	
+plus500.lt	cs	
+plus500.lv	cs	
+plus500.nl	cs	
+plus500.pl	cs	
+plus500.pt	cs	
+plus500.ro	cs	
+plus500.ru	cs	
+plus500.se	cs	
+plus500.si	cs	
+plus500.sk	cs	
+plutus.it	t	https://support.plutus.it/hc/en-us/articles/7203346943517
+pm.me	tu	https://proton.me/support/two-factor-authentication-2fa
+pnc.com	s	https://www.pnc.com/en/security-privacy/added-layer-security.html
+pobox.com	ht	https://www.pobox.help/hc/en-us/sections/1500000033741
+pochta.ru	st	
+pocketsmith.com	t	https://learn.pocketsmith.com/article/167--
+podio.com	t	https://help.podio.com/hc/en-us/articles/360017456279
+podme.com	st	https://payment.schibsted.no/profile-pages/faq#how-to-activate-and-deactivate-2fa
+poeditor.com	t	https://poeditor.com/kb/how-to-enable-two-factor-authentication
+polisystems.ch	t	https://wiki.polisystems.ch/English/Tutorials/Two-factor-authentification-on-Poli-Systems-Portal/
+poloniex.com	t	https://support.poloniex.com/hc/en-us/articles/360040016513
+porkbun.com	tu	https://kb.porkbun.com/article/19--
+portal.adtpulse.com	ces	https://www.adt.com/help/pulse/mfa
+portu.cz	s	https://www.portu.cz/bezpecnost/
+postbank.de	ah	https://www.postbank.de/privatkunden/sicherheitsverfahren.html
+poste.it	as	https://www.poste.it/cosa-fare-sicurezza.html
+posteo.de	t	https://posteo.de/en/help/what-is-two-factor-authentication-and-how-do-i-set-it-up
+postman.com	t	https://learning.postman.com/docs/getting-started/postman-account/#setting-up-two-factor-authentication
+postmarkapp.com	st	https://postmarkapp.com/support/article/1081-how-do-i-use-two-factor-authentication-2fa
+postype.com	t	https://help.postype.com/hc/ko/articles/21876052282009
+powerreviews.com	t	https://help.powerreviews.com/hc/en-us/articles/7277746655771
+practicebetter.io	t	https://help.practicebetter.io/hc/en-us/articles/360055519791
+practicepanther.com	e	https://support.practicepanther.com/en/articles/1658238
+preyproject.com	t	https://help.preyproject.com/article/248--
+principal.com	cst	https://secure02.principal.com/publicvsupply/GetFile?fm=ww42&ty=VOP&EXT=.VOP
+privacy.com	t	https://support.privacy.com/hc/en-us/articles/360012047174
+privateinternetaccess.com	t	https://www.privateinternetaccess.com/helpdesk/kb/articles/how-do-i-enable-and-use-two-factor-authentication
+probit.com	stu	https://www.probit.com/en-us/hc/360018127111
+produbanco.com.ec	as	https://www.produbanco.com.ec/media/677613/manual-activaci%C3%B3n-token-digital2021.pdf
+product.gree.net	t	
+profitwell.com	t	https://learn.profitwell.com/article/wsudrpi199-setting-up-2-factor-authentication
+progressive.com	es	
+prostocash.com	t	
+protolabs.com	t	
+proton.me	tu	https://proton.me/support/two-factor-authentication-2fa
+protonmail.com	tu	https://proton.me/support/two-factor-authentication-2fa
+protonvpn.com	tu	https://proton.me/support/two-factor-authentication-2fa
+prudential.com	s	
+psnprofiles.com	t	
+psu.edu	achsu	https://get2fa.psu.edu
+ptv.vic.gov.au	st	https://transport.vic.gov.au/help-and-support/ptv-app-help/set-up-multi-factor-authentication-for-myki-in-the-ptv-app
+publishers.basicattentiontoken.org	tu	https://support.brave.com/hc/en-us/articles/360021649491
+purdue.edu	ah	https://www.it.purdue.edu/login/
+purse.io	t	https://support.purse.io/en/article/2-factor-authentication-2fa-xa8jxn/
+pusher.com	t	https://support.pusher.com/hc/en-us/articles/4411997260049
+pushover.net	t	https://support.pushover.net/i49
+put.io	t	https://help.put.io/en/articles/4783180-two-factor-authentication-2fa
+puter.com	t	
+putler.com	t	https://www.putler.com/documentation/activate-2fa-on-your-putler-account/
+pypi.org	tu	https://pypi.org/help/#twofa
+pythonanywhere.com	t	https://help.pythonanywhere.com/pages/SecuringYourAccount/
+pz.gov.pl	as	https://pz.gov.pl/Instrukcja_Uzytkownika_PZ.pdf
+qantas.com	est	https://qantas.com/au/en/frequent-flyer/member-account-security.html#frequently-asked-questions
+qlik.com	t	https://help.qlik.com/en-US/cloud-services/Subsystems/Hub/Content/Sense_Hub/Introduction/qcs-MFA.htm
+qnap.com	et	https://www.qnap.com/en-us/how-to/tutorial/article/how-to-enhance-account-security-using-2-step-verification
+qsuper.qld.gov.au	es	https://www.australianretirementtrust.com.au/articles/mfa-security
+qtrade.ca	cs	https://help.qtrade.ca/hc/en-ca/articles/4640357680283
+questionpro.com	s	https://questionpro.com/help/two-factor-authentication.html
+questrade.com	cest	https://www.questrade.com/learning/questrade-basics/lesson/account-profile-and-security
+quickbooks.intuit.com	cest	https://quickbooks.intuit.com/learn-support/en-us/manage-passwords/verify-your-account-with-multi-factor-authentication/00/186340
+quicken.com	ces	https://www.quicken.com/support/secure-login-mfa-information
+quickfile.co.uk	t	https://community.quickfile.co.uk/t/2-factor-authentication/8892
+quidax.com	st	https://support.quidax.com/hc/en-us/articles/360016734491
+quora.com	e	
+rabobank.com.au	h	https://www.rabobank.com.au/help-and-support/digipass#how-to-set-up-your-digipass-for-the-first-time
+rabobank.nl	h	https://www.rabobank.nl/bedrijven/betalen/zelf-betalingen-doen/rabo-scanner/
+rackspace.com	st	https://docs.rackspace.com/docs/multi-factor-authentication
+racv.com.au	es	https://www.racv.com.au/help-and-support/account-membership.html#Whatistwostepverification
+radiusbank.com	ces	https://radiusbank.custhelp.com/app/answers/detail/a_id/86
+railway.app	t	https://docs.railway.app/reference/accounts#two-factor-authentication
+raindrop.io	t	https://raindropio.canny.io/feature-requests/p/two-factor-authentication-2fa
+raisin.co.uk	cst	
+raisin.com	cst	
+raisin.es	cst	
+raisin.fr	cst	
+raisin.ie	cst	
+raisin.nl	cst	
+raizinvest.com.au	e	https://raizinvest.com.au/blog/verifying-raiz-account-multifactor-authentication/
+ramnode.com	t	https://clientarea.ramnode.com/knowledgebase.php?action=displayarticle&id=4129
+ramp.com	est	https://support.ramp.com/hc/en-us/articles/5775209997715
+rapidapi.com	st	https://docs.rapidapi.com/docs/account-creation-and-settings#two-factor-authentication-2fa
+rapidgator.net	t	
+raspberrypi.com	t	https://www.raspberrypi.com/documentation/services/id.html
+ravelin.com	t	https://ravelin.zendesk.com/hc/en-us/articles/115001071665
+raycast.com	t	
+raygun.com	st	https://raygun.com/documentation/privacy-security/two-factor-auth/
+razer.com	st	https://mysupport.razer.com/app/answers/detail/a_id/1716
+rbcroyalbank.com	as	https://www.rbcroyalbank.com/ways-to-bank/tutorials/general/2-step-verification.html
+rbs.co.uk	s	https://personal.rbs.co.uk/personal/fraud-and-security/sca.html
+readme.com	t	https://docs.readme.com/docs/two-factor-authentication
+readme.io	t	https://docs.readme.com/docs/two-factor-authentication
+realme.govt.nz	st	https://www.realme.govt.nz/help/#second-factor-authentication
+realvnc.com	t	https://help.realvnc.com/hc/en-us/articles/360003110878
+rebel.com	t	https://support.rebel.com/hc/en-us/articles/360039417613
+rebrandly.com	t	https://support.rebrandly.com/hc/en-us/articles/360007220373
+recruitee.com	st	https://support.recruitee.com/en/articles/5209837
+recurly.com	est	https://docs.recurly.com/docs/two-factor-authentication
+reddit.com	t	https://www.reddithelp.com/hc/en-us/articles/360043470031
+redhat.com	t	https://access.redhat.com/documentation/en-us/red_hat_customer_portal/1/html-single/using_two-factor_authentication/index
+redis.com	st	https://docs.redis.com/latest/rc/security/access-control/multi-factor-authentication/
+redislabs.com	st	https://docs.redis.com/latest/rc/security/access-control/multi-factor-authentication/
+redshelf.com	t	https://solve.redshelf.com/hc/en-us/articles/1260802590609
+refersion.com	st	https://support.refersion.com/en/articles/2989703
+register365.com	t	https://www.register365.com/support/articles/enabling-two-factor-authentication-for-the-control-panel/
+registro.br	tu	https://registro.br/ajuda/gerenciamento-de-conta/token/
+rejoiner.com	st	https://docs.rejoiner.com/docs/user-account#managing-two-factor-authentication
+remind.com	e	https://help.remind.com/hc/en-us/articles/360017140539
+remitano.com	t	https://support.remitano.com/en/articles/781044
+remitly.com	acs	https://help.remitly.com/s/article/two-factor-authentication-verification
+remotedesktopmanager.com	t	https://help.remotedesktopmanager.com/howto_googleauthenticator.htm
+render.com	t	
+repairshopr.com	st	https://feedback.repairshopr.com/knowledgebase/articles/928266
+replicon.com	et	https://www.replicon.com/help/setting-up-your-multi-factor-2-step-authentication-method/
+report-uri.com	tu	https://docs.report-uri.com/help/twofa/
+republic.co	t	https://republic.com/help/how-do-i-add-a-digital-asset-wallet-on-republic-1
+republic.com	t	https://republic.com/help/how-do-i-add-a-digital-asset-wallet-on-republic-1
+resend.com	t	
+rest.com.au	s	
+restorecord.com	t	
+restream.io	t	https://support.restream.io/en/articles/870429
+rev.com	et	https://support.rev.com/hc/en-us/articles/360035810851
+revenuecat.com	t	https://docs.revenuecat.com/docs/security
+revolut.com	aes	https://www.revolut.com/en-US/help/more/revolut-web-app/accessing-the-retail-web-app
+rewind.com	t	https://rewind.com/blog/how-to-set-up-a-2fa-for-rewind/
+rightcapital.com	t	https://help.rightcapital.com/article/40-two-step-verification
+ring.com	st	https://support.ring.com/hc/en-us/articles/360039693891
+ringcentral.com	es	https://support.ringcentral.com/article/Enabling-or-disabling-Account-Validation.html
+ringgo.co.uk	es	https://www.ringgo.co.uk/multi-factor-authentication-mfa
+riotgames.com	e	https://support-valorant.riotgames.com/hc/articles/4415709691667
+ripe.net	t	https://www.ripe.net/participate/member-support/ripe-ncc-access/two-step-verification
+ripio.com	t	https://launchpad.ripio.com/blog/que-es-autenticacion-dos-factores-2fa
+rippling.com	t	
+river.com	st	https://river.com/support/knowledge-base/articles/enable-multi-factor-authentication
+rivian.com	est	https://rivian.com/support/article/what-is-two-factor-authentication
+rmit.edu.au	ast	https://www.rmit.edu.au/students/support-and-facilities/it-services-for-students/cyber-safety/multi-factor-authentication
+robertsspaceindustries.com	et	https://support.robertsspaceindustries.com/hc/en-us/articles/115009965628
+robinhood.com	as	https://robinhood.com/support/articles/verifying-its-you/
+roblox.com	etu	https://en.help.roblox.com/hc/en-us/articles/212459863
+roboform.com	est	https://help.roboform.com/hc/en-us/articles/115002729512
+rocketbeans.tv	t	https://forum.rocketbeans.tv/t/35407/31
+rocketleague.com	aest	https://www.epicgames.com/help/c74/c112/a3218
+rockstargames.com	t	https://support.rockstargames.com/articles/360000031747
+rogers.com	es	https://www.rogers.com/support/billing-accounts/understanding-multi-factor-authentication
+roku.com	e	https://support.roku.com/article/22482363662103
+rollbar.com	t	https://rollbar.com/docs/two-factor-authentication/
+rubygems.org	t	https://guides.rubygems.org/setting-up-multifactor-authentication/
+rug.nl	t	https://www.rug.nl/society-business/centre-for-information-technology/security/multi-factor-authentication
+runbox.com	t	https://help.runbox.com/account-security/
+runcloud.io	st	https://runcloud.io/docs/account/authentication.html
+runescape.com	t	https://support.runescape.com/hc/en-gb/articles/206811835
+runpanther.io	t	https://help.panther.com/articles/7050426254
+runsignup.com	t	https://runsignup.blog/2018/09/06/multi-factor-authentication/
+safecu.org	ces	https://www.safecu.org/personal/online-security/enhanced-login-security
+sailpoint.com	acehs	
+sailthru.com	t	https://getstarted.sailthru.com/mfa/mfa-hub/login-mfa/
+salesforce.com	aestu	https://developer.salesforce.com/docs/atlas.en-us.securityImplGuide.meta/securityImplGuide/add_time-based_token.htm
+samsung.com	st	https://v3.account.samsung.com/guide/two-step-verification/introduction
+sanebox.com	t	https://www.sanebox.com/help/127
+sans.org	tu	
+santander.de	as	https://www.santander.de/privatkunden/service-kontakt/information/faq/psd2/
+santander.pl	as	https://www.santander.pl/klient-indywidualny/kontakt/pytania-i-odpowiedzi-bankowosc-internetowa
+santander.pt	s	https://www.santander.pt/pt_PT/Particulares/Informacoes/psd2-diretiva-servicos-pagamento.html
+satoshitango.com	t	https://github.com/2factorauth/twofactorauth/pull/2321#issuecomment-273971890
+saxobank.com	as	
+saxotrader.com	as	
+scalable.capital	a	https://de.scalable.capital/faq#sicherheit-datenschutz
+scalefusion.com	et	https://help.mobilock.in/article/6j7ps7cw8x
+scalegrid.io	t	https://help.scalegrid.io/docs/account-two-factor-authentication
+scaleway.com	t	https://www.scaleway.com/docs/account/how-to/use-2fa/
+scalr.com	t	https://scalr-wiki.atlassian.net/wiki/display/docs/Two-Factor+Authentication
+schibsted.com	st	https://payment.schibsted.no/profile-pages/faq#how-to-activate-and-deactivate-2fa
+schibsted.dk	st	https://payment.schibsted.no/profile-pages/faq#how-to-activate-and-deactivate-2fa
+schibsted.fi	st	https://payment.schibsted.no/profile-pages/faq#how-to-activate-and-deactivate-2fa
+schibsted.no	st	https://payment.schibsted.no/profile-pages/faq#how-to-activate-and-deactivate-2fa
+schibsted.se	st	https://payment.schibsted.no/profile-pages/faq#how-to-activate-and-deactivate-2fa
+schneider-electric.cn	t	https://www.se.com/ww/en/faqs/FAQ000220689/
+schneider-electric.com	t	https://www.se.com/ww/en/faqs/FAQ000220689/
+schoolsfirstfcu.org	cs	
+schwab.com	ahs	https://www.schwab.com/help/two-factor-authentication
+schwabplan.com	ahs	https://www.schwab.com/help/two-factor-authentication
+scotiabank.com	acs	https://www.scotiabank.com/ca/en/personal/bank-your-way/digital-banking-guide/banking-basics/two-step-verification.html
+scriptinghelpers.org	t	
+scryfall.com	t	https://scryfall.com/docs/privacy#scryfall-accounts
+scu.edu	acsu	https://scu.edu/technology/get-connected/duo/learn-more-about-2fa/
+sdccd.edu	achs	https://www.sdccd.edu/students/student-email.aspx
+sdcce.edu	achs	https://www.sdccd.edu/students/student-email.aspx
+sdcity.edu	achs	https://www.sdccd.edu/students/student-email.aspx
+sdfcu.org	est	https://www.sdfcuib.org/dbank/live/static/help.html#update_security_options
+sdfcuib.org	est	https://www.sdfcuib.org/dbank/live/static/help.html#update_security_options
+sdmesa.edu	achs	https://www.sdccd.edu/students/student-email.aspx
+sdmiramar.edu	achs	https://www.sdccd.edu/students/student-email.aspx
+se.com	t	https://www.se.com/ww/en/faqs/FAQ000220689/
+seatgeek.com	st	https://support.seatgeek.com/hc/en-us/articles/360007288013
+seb.se	a	https://seb.se/privat/digitala-tjanster
+section.io	st	https://www.section.io/docs/how-to/user-management/enable-two-factor-authentication-on-your-account/
+secure-afterpay.com.au	es	
+securesafe.com	s	https://www.securesafe.com/en/faq/general-questions/how-can-i-activate-2-factor-authentication/
+securitytrails.com	t	https://securitytrails.com/support/knowledge-base/two-factor-authentication-2fa-2/
+sefcu.com	cest	https://www.sefcu.com/node/11406/tutorial
+segment.com	st	https://segment.com/docs/iam/mfa/
+segment.io	st	https://segment.com/docs/iam/mfa/
+selfwealth.com.au	t	https://www.selfwealth.com.au/two-factor-authentication-now-available/
+semaphoreci.com	t	https://semaphoreci.com/docs/two-step-verification.html
+semrush.com	e	https://www.semrush.com/kb/1130--
+sendcloud.com	t	https://support.sendcloud.com/hc/en-gb/articles/4418777976212#1
+sendgrid.com	as	https://sendgrid.com/docs/ui/account-and-settings/two-factor-authentication/
+sendinblue.com	st	https://help.brevo.com/hc/articles/360021203440
+sendowl.com	t	https://help.sendowl.com/help/two-factor-authentication
+sendsafely.com	st	https://blog.sendsafely.com/authenticator-app
+senko.digital	t	https://wiki.senko.digital/personal-area/two-factor-authentication
+sentry.io	stu	https://blog.sentry.io/2016/06/22/introducing-2fa
+serif.com	et	https://store.serif.com/help/two-step-verification/
+serpapi.com	t	
+server.nitrado.net	tu	https://server.nitrado.net/en-US/guides/two-factor-authentication-en
+server.pro	t	
+serverpilot.io	t	https://serverpilot.io/docs/how-to-enable-two-factor-authentication/
+serverspace.io	st	https://serverspace.io/support/help/how-to-install-and-use-the-google-authenticator-application/
+service.nsw.gov.au	ast	https://www.service.nsw.gov.au/services/myservicensw-account/multi-factor-authentication
+service.vic.gov.au	st	https://service.vic.gov.au/find-services/digital-wallet/create-account/account-security
+serviceportal.hamburg.de	h	https://serviceportal.hamburg.de/HamburgGateway/FVP/FV/BasisHilfe/HilfeA-Z.aspx#Wie_kann_ich_die_Funktion_%E2%80%9EAnmelden_mit_Online-Ausweisfunktion%E2%80%9C_einrichten?
+servus.ca	t	https://www.servus.ca/security/protect-yourself/two-step-authentication
+settle.co	t	https://help.settle.com/articles/6801735
+settle.com	t	https://help.settle.com/articles/6801735
+seznam.cz	at	https://napoveda.seznam.cz/cz/login/dvoufazove-overeni/
+sezzle.com	s	https://merchant-help.sezzle.com/hc/en-us/articles/16960335317908
+sffirecu.org	cest	https://sffirecu.org/how-to-use-a-2fa-application
+sfu.ca	ht	https://www.sfu.ca/information-systems/services/mfa/
+shadow.tech	tu	https://support.shadow.tech/hc/en-us/articles/8741331563676
+shareworks.com	t	
+shaw.ca	es	https://www.rogers.com/support/billing-accounts/understanding-multi-factor-authentication
+shift4shop.com	t	https://support.3dcart.com/knowledgebase/article/View/866/11/
+shop.app	es	https://help.shop.app/en/shop/shop-pay-settings/security/verification-code
+shopify.com	stu	https://help.shopify.com/manual/your-account/account-security/two-step-authentication
+short.io	t	https://docs.short.io/articles/short.io-basics-and-security/security/how-to-enable-two-factor-authentication-2fa
+shortcut.com	t	https://help.shortcut.com/hc/en-us/articles/360044506931
+shrimpy.io	t	https://help.shrimpy.io/hc/en-us/articles/1260803097310
+shu.edu	acsu	https://tech-shu-edu.refined.site/space/PUBLICKBA/2096431118/Guide%20to%20Enrolling%20a%20Device%20in%20Duo
+shy.gg	t	https://docs.shy.gg/essentials/two-factor-auth
+sidequestvr.com	et	
+sign.plus	t	https://help.alohi.com/hc/en-us/articles/10305460302876#h_01HQND8H36NDF3HTF1Y7WEBFGP
+signal.org	cs	https://support.signal.org/hc/articles/360007059792
+signnow.com	e	
+signrequest.com	cst	https://help.signrequest.com/hc/en-us/articles/360004932594
+similarweb.com	e	https://support.similarweb.com/hc/en-us/articles/360016545238
+simplelogin.io	tu	
+simpletax.ca	st	https://help.wealthsimple.com/hc/en-ca/articles/360056584134
+simplii.com	acs	https://simplii.intelliresponse.com/index.jsp?requestType=NormalRequest&source=3&id=2453&sessionId=98d8d6f6-50df-11ed-bb3e-d1cbac750b11&question=Why+can+I+no+longer+receive+my+one-time+verification+code+%28OTVC%29+by+email
+simplisafe.com	e	https://support.simplisafe.com/articles/account-billing/multifactor-authentication-mfa-for-simplisafe-accounts/64beb488633e864d94307c2c
+simplybook.me	t	https://help.simplybook.me/index.php/Google_Authenticator_custom_feature
+sinch.com	s	https://community.sinch.com/t5/Account-Management/How-do-I-enable-2FA-in-the-Sinch-Customer-Dashboard/ta-p/7191
+singlekey-id.com	es	https://singlekey-id.com/auth/en-us/frequently-asked-questions#two-step-authentication
+singpass.gov.sg	ahs	https://www.singpass.gov.sg/main/html/faq.html
+sipgate.de	t	https://help.sipgate.de/hc/de/articles/4421549797649
+sisense.com	t	https://dtdocs.sisense.com/article/two-factor
+site123.com	s	
+siteground.com	t	https://www.siteground.com/kb/enable-two-step-verification/
+sj.se	cs	
+sjsu.edu	ah	https://sjsu.edu/it/security/multi-factor/duo-setup.php
+sjsu.okta.com	ah	https://sjsu.edu/it/security/multi-factor/duo-setup.php
+skandia.se	a	https://www.skandia.se/kontakta-skandia/kundservice/bankid-logga-in/
+sketch.com	t	https://www.sketch.com/docs/workspaces/managing-your-sketch-account/
+sketchup.com	et	https://help.sketchup.com/admin/multi-factor-authentication
+skinport.com	et	
+skrill.com	aes	https://skrill.com/en-us/support#/path/1753623122
+skype.com	aest	https://support.microsoft.com/help/12408
+slack.com	st	https://get.slack.help/hc/en-us/articles/204509068
+smarkets.com	t	https://help.smarkets.com/hc/en-gb/articles/115000822171
+smartly.io	t	https://support.smartly.io/hc/en-us/articles/360003493934
+smartsimple.com	ht	https://wiki.smartsimple.com/wiki/Two-Factor_Authentication
+smartsurvey.co.uk	st	https://help.smartsurvey.co.uk/article/two-factor-authentication
+smartthings.com	st	https://v3.account.samsung.com/guide/two-step-verification/introduction
+smartvault.com	ces	https://help.smartvault.com/hc/en-us/articles/360051275493
+smarty.co.uk	es	https://help.smarty.co.uk/en/articles/5390803
+smspool.net	t	https://www.smspool.net/article/eb7a182841
+smugmug.com	t	https://www.smugmughelp.com/hc/articles/19399691642132
+snapchat.com	st	https://help.snapchat.com/hc/sections/5685887734676
+sncf-connect.com	e	https://www.sncf-connect.com/en-en/help/your-customer-account
+socalgas.com	st	https://www.socalgas.com/help-center/2-factor-authentication
+socketlabs.com	st	https://help.socketlabs.com/docs/two-step-verification
+sofi.com	cest	https://support.sofi.com/hc/en-us/articles/9274826655757
+sogolytics.com	e	https://www.sogolytics.com/help/2-step-authentication/
+solarwinds.cloud	t	https://documentation.solarwinds.com/en/success_center/pingdom/content/shared/mfa-users.htm
+solarwinds.com	t	https://documentation.solarwinds.com/en/success_center/pingdom/content/shared/mfa-users.htm
+solium.com	t	
+sonic.com	cst	https://help.sonic.com/hc/en-us/articles/236079387
+sonix.ai	t	https://help.sonix.ai/en/articles/4188823
+sonyentertainmentnetwork.com	st	https://www.playstation.com/support/account/2sv-psn-login/
+soundcloud.com	t	https://help.soundcloud.com/hc/en-us/articles/20707203094043
+sourceforge.net	t	https://sourceforge.net/p/forge/documentation/Multifactor%20Authentication/
+southxchange.com	t	
+spacehey.com	t	
+spaceship.com	tu	
+spar.no	s	https://www.trumf.no/kundeservice/#innlogging
+sparda.de	ah	https://www.sparda.de/online-sicherheit-psd2/
+sparkasse.de	ahs	https://www.sparkasse.de/service/sicherheit-im-internet/tan-verfahren.html
+sparkpost.com	t	https://www.sparkpost.com/docs/my-account-and-profile/enabling-two-factor-authentication/
+spectrocoin.com	est	https://blog.spectrocoin.com/en/how-to-enable-two-factor-authentication-at-spectrocoin/
+speedrun.com	e	https://www.speedrun.com/the_site/thread/g7osi/1
+speedway.com	e	https://www.speedway.com/about/faq/twofactorauthentication
+splashtop.com	t	https://support-splashtopbusiness.splashtop.com/hc/en-us/articles/212724923
+split.io	t	https://help.split.io/hc/articles/360020825212
+spreedly.com	t	https://docs.spreedly.com/guides/multi-factor-authentication/
+spri.ng	t	https://www.spri.ng/blog/two-factor-authentication-guide
+sproutsocial.com	t	https://support.sproutsocial.com/hc/en-us/articles/213938786
+square-enix-games.com	aht	https://square-enix-games.com/en_US/seaccount/otp
+square-enix.com	aht	https://square-enix-games.com/en_US/seaccount/otp
+square.com	st	https://squareup.com/help/us/en/article/5593
+square.site	st	https://squareup.com/help/us/en/article/5593
+squarespace.com	st	https://support.squarespace.com/hc/en-us/articles/360000044827
+squareup.com	st	https://squareup.com/help/us/en/article/5593
+ssa.gov	es	https://www.ssa.gov/myaccount/MoreInformationAboutMFA.html
+ssl.com	e	https://www.ssl.com/guide/how-to-enable-two-factor-2fa-authentication-for-your-ssl-com-account/
+ssltrust.com.au	t	https://www.ssltrust.com.au/help/account-management/enable-2factor
+stackfield.com	t	https://www.stackfield.com/help/-2032
+stackpath.com	t	https://support.stackpath.com/hc/en-us/articles/5917362460059#h2_5
+stake.com.au	t	https://hellostake.com/au/support/wall-st/articles/35000152372
+standardnotes.com	tu	https://standardnotes.com/help/25
+stanford.edu	achsu	https://uit.stanford.edu/service/webauth/twostep
+star.link	es	https://www.starlink.com/support/article/52aff4ed-3167-ec24-d54c-249563df8f5e
+starbucks.com	s	https://customerservice.starbucks.com/sbux?id=topics&article=KB0013186
+starlink.com	es	https://www.starlink.com/support/article/52aff4ed-3167-ec24-d54c-249563df8f5e
+starone.org	ces	
+startmail.com	t	https://support.startmail.com/hc/en-us/articles/360006682158
+stash.com	ces	https://ask.stash.com/ask/what-is-two-factor-authentication/
+statamic.com	t	
+statefarm.com	es	https://www.statefarm.com/customer-care/privacy-security/security
+status.io	h	https://kb.status.io/security/yubikey/
+statuscake.com	st	https://www.statuscake.com/kb/knowledge-base/how-to-change-the-statuscake-password-for-login/
+statuspage.io	st	https://support.atlassian.com/atlassian-account/docs/manage-two-step-verification-for-your-atlassian-account/
+stessa.com	t	https://support.stessa.com/en/articles/4649760#enabling-two-factor-authentication
+stockx.com	s	https://help.stockx.com/s/article/What-is-Two-Step-Verification
+store.steampowered.com	ae	https://help.steampowered.com/en/faqs/view/06B0-26E6-2CF8-254C
+stormgain.com	st	https://support.stormgain.com/articles/two-factor-authentication-google-authenticator-and-sms
+strato-hosting.co.uk	t	https://www.strato.de/faq/sicherheit/zwei-faktor-authentifizierung-einstellen/
+strato.de	t	https://www.strato.de/faq/sicherheit/zwei-faktor-authentifizierung-einstellen/
+strato.es	t	https://www.strato.de/faq/sicherheit/zwei-faktor-authentifizierung-einstellen/
+strato.fr	t	https://www.strato.de/faq/sicherheit/zwei-faktor-authentifizierung-einstellen/
+strato.nl	t	https://www.strato.de/faq/sicherheit/zwei-faktor-authentifizierung-einstellen/
+stripe.com	stu	https://support.stripe.com/questions/enable-two-step-authentication
+stubhub.com	t	
+studentaid.gov	est	https://studentaid.gov/help-center/answers/topic/managing_your_account/article/choose-between-an-authenticator-app-text-email
+studioninja.co	t	https://help.studioninja.co/en/articles/4481947
+subito.it	e	
+subscribestar.com	et	https://www.subscribestar.com/posts/1320999
+substack.com	t	https://support.substack.com/hc/en-us/articles/4785929336980
+sucuri.net	t	https://docs.sucuri.net/billing/two-factor-authentication/
+sugarsync.com	a	https://support.sugarsync.com/hc/en-us/articles/1260802041509
+summ.com	t	https://help.summ.com/articles/9126168
+sumologic.com	t	https://help.sumologic.com/docs/manage/security/about-two-step-verification/
+sunsuper.com.au	es	https://www.australianretirementtrust.com.au/articles/mfa-security
+supabase.com	t	https://supabase.com/docs/guides/platform/multi-factor-authentication
+superloop.com	es	
+superloop.com.au	es	
+surfshark.com	et	https://support.surfshark.com/hc/en-us/articles/360011448319
+survicate.com	t	https://help.survicate.com/en/articles/5006684
+svd.se	st	https://payment.schibsted.no/profile-pages/faq#how-to-activate-and-deactivate-2fa
+swedbank.se	a	https://www.swedbank.se/foretag/digitala-tjanster/mobilt-bankid/fragor-och-svar-om-mobilt-bankid.html
+swinburne.edu.au	acst	https://www.swinburne.edu.au/privacy/cybersecurity-hub/
+swisscom.ch	as	https://www.swisscom.ch/de/privatkunden/hilfe/daten-und-rechnungen/das-swisscom-login.html#Login_Methoden
+swisslife.ch	s	
+switchplus.ch	s	https://switchie.ch/en/2-factor-authentication-2fa/
+swtor.com	a	https://www.swtor.com/info/security-key
+swyftx.com	t	https://support.swyftx.com/hc/articles/12807078449305
+swyftx.com.au	t	https://support.swyftx.com/hc/articles/12807078449305
+sydney.edu.au	atu	https://www.sydney.edu.au/students/log-in-to-university-systems.html
+sync.com	et	https://www.sync.com/help/how-do-i-setup-two-factor-authentication/
+synchronybank.com	cs	https://www.synchronybank.com/why-synchrony/secure-banking/
+synergywholesale.com	est	https://synergywholesale.com/faq/article/can-i-enable-two-factor-authentication-on-my-wholesale-system-account/
+synology.com	etu	https://kb.synology.com/en-us/DSM/help/DSM/SecureSignIn/2factor_authentication
+system76.com	cst	
+szkb.ch	s	https://www.szkb.ch/pub/ueber-die-szkb/servicezentrum/e-services/sicherheit-im-internet
+t-mobile.com	hst	https://www.t-mobile.com/support/account/set-up-and-manage-your-t-mobile-id#heading4
+t-online.de	st	https://www.telekom.de/hilfe/vertrag-rechnung/login-daten-passwoerter/mehr-faktor-authentifizierung
+tableau.com	at	https://help.tableau.com/current/online/en-us/to_signin.htm#register-for-multifactor-authentication
+taboola.com	est	https://help.taboola.com/hc/en-us/articles/360053360873
+talend.com	t	https://help.qlik.com/en-US/cloud-services/Subsystems/Hub/Content/Sense_Hub/Introduction/qcs-MFA.htm
+talkdesk.com	tu	https://support.talkdesk.com/hc/en-us/articles/360015179592
+tamu.edu	achsu	https://it.tamu.edu/duo/
+tangerine.ca	s	https://www.tangerine.ca/en/faq/answer?permaLink=how-register-mobile-number-log-with-step-authentication--generic-phone--en--0--1&responseId=219--
+tangerinetelecom.com.au	s	https://www.tangerinetelecom.com.au/help/what-is-multi-factor-authentication
+target.com	es	https://security.target.com/two-factor-auth/
+targobank.de	ahs	https://www.targobank.de/de/service/tan-verfahren/index.html
+tax.service.gov.uk	acst	https://www.gov.uk/guidance/keeping-your-hmrc-login-details-safe#multi-factor-authentication
+taxact.com	est	https://www.taxact.com/support/24138/2019/how-is-a-verification-code-used?hideLayout=True
+taxbit.com	t	https://help.taxbit.com/hc/en-us/articles/4410674012311
+taxdome.com	t	https://help.taxdome.com/article/95--
+td.com	acs	https://www.td.com/privacy-and-security/privacy-and-security/how-we-protect-you/online-security/2fa.jsp
+teams.live.com	aest	https://support.microsoft.com/help/12408
+teamviewer.com	t	https://community.teamviewer.com/English/kb/articles/4711
+teamwork.com	t	https://support.teamwork.com/projects/security/enabling-two-factor-authentication-on-your-profile
+tebex.io	est	
+technicpack.net	t	
+teespring.com	t	https://www.spri.ng/blog/two-factor-authentication-guide
+tek.no	st	https://payment.schibsted.no/profile-pages/faq#how-to-activate-and-deactivate-2fa
+tele2.se	a	
+telegram.org	cs	https://telegram.org/blog/sessions-and-2-step-verification
+telekom.de	st	https://www.telekom.de/hilfe/vertrag-rechnung/login-daten-passwoerter/mehr-faktor-authentifizierung
+telenor.se	a	
+telia.se	a	https://www.telia.se/privat/support/info/logga-in-med-bankid-och-eleg-pa-mitt-telia
+tello.com	t	https://tello.com/help_center/how-do-i-set-up-and-use-two-factor-authentication
+telnyx.com	t	https://support.telnyx.com/en/articles/3739748
+telstra.com	aes	https://www.telstra.com.au/mytelstra/my-telstra-security
+telstra.com.au	aes	https://www.telstra.com.au/mytelstra/my-telstra-security
+telus.com	a	https://www.telus.com/en/support/article/my-telus-2-step-verification
+telzio.com	t	https://telzio.com/support/two-factor-authentication
+temple.edu	achs	https://its.temple.edu/two-step-verification
+termius.com	at	https://support.termius.com/hc/en-us/articles/4402191604505#2fa
+tesla.com	t	https://www.tesla.com/support/multi-factor-authentication
+teslafi.com	t	https://about.teslafi.com/security/
+teslamotors.com	t	https://www.tesla.com/support/multi-factor-authentication
+test.de	t	https://www.test.de/Hilfe-5836822-5225600/#id5935575
+texas.gov	es	https://www.texas.gov/help-support/frequently-asked-questions/#what-services-can-i-complete-on-txt-
+textlocal.com	st	https://www.textlocal.com/support/knowledge-base/two-factor-authentication/
+textmagic.com	s	https://support.textmagic.com/article/set-up-two-factor-authentication-and-security/
+tfl.gov.uk	st	https://tfl.gov.uk/help-and-contact/protecting-your-account
+thefusebase.com	t	https://nimbusweb.me/guides/settings/account-settings-2-step-verification-for-sign-in/
+theiconic.co.nz	st	https://theiconicsupport.zendesk.com/hc/articles/34125099545241
+theiconic.com	st	https://theiconicsupport.zendesk.com/hc/articles/34125099545241
+theiconic.com.au	st	https://theiconicsupport.zendesk.com/hc/articles/34125099545241
+therapynotes.com	t	https://support.therapynotes.com/article/231--
+threads.com	st	https://help.instagram.com/566810106808145
+threads.net	st	https://help.instagram.com/566810106808145
+threatconnect.com	t	https://kb.threatconnect.com/customer/en/portal/articles/2214975
+threatlocker.com	at	https://threatlocker.kb.help/login-settings/
+threatx.com	t	https://support.threatx.com/hc/en-us/articles/360022157591
+three.co.uk	s	
+thrivecart.com	t	https://support.thrivecart.com/help/where-do-i-get-my-6-digit-access-code-2-factor-authentication
+ti.to	t	https://help.tito.io/en/articles/3023132
+tiaa-cref.org	cs	
+tiaabank.com	cs	https://www.tiaabank.com/security?solutions=security-tools
+tibia.com	t	https://www.tibia.com/support/?subtopic=gethelp&topicid=21
+ticketsource.co.uk	t	
+ticketsource.eu	t	
+ticketsource.us	t	
+ticktick.com	et	https://help.ticktick.com/articles/7307588296744370176
+tiktok.com	est	https://support.tiktok.com/en/safety-hc/account-and-user-safety/account-safety
+tilaa.com	ht	https://support.tilaa.com/hc/en-us/articles/360020167352
+time4vps.com	t	https://www.time4vps.com/knowledgebase/2-factor-authentication/
+timetastic.co.uk	t	https://help.timetastic.co.uk/hc/en-us/articles/360015994257
+timetastic.us	t	https://help.timetastic.co.uk/hc/en-us/articles/360015994257
+ting.com	st	https://help.ting.com/hc/en-us/articles/209351258
+tinkercad.com	cest	https://knowledge.autodesk.com/customer-service/account-management/account-profile/account-security/two-step-verification
+tinyurl.com	t	
+tk.de	a	https://www.tk.de/techniker/unternehmensseiten/unternehmen/die-tk-app/2023678
+to-do.live.com	acest	https://support.microsoft.com/en-us/help/12408/
+to-do.office.com	acest	https://support.microsoft.com/en-us/help/12408/
+todoist.com	t	https://todoist.com/help/articles/how-to-enable-two-factor-authentication
+tokopedia.com	cst	https://www.tokopedia.com/help/article/bagaimana-cara-mengaktifkan-fitur-keamanan-akun
+toodledo.com	t	https://www.toodledo.com/info/help.php#168
+toontownrewritten.com	t	https://www.toontownrewritten.com/help/faq/accounts--login#twostep
+torguard.net	t	
+tori.fi	st	https://account.vend.no/faq#how-to-activate-and-deactivate-2fa
+torontomu.ca	tu	https://www.torontomu.ca/ccs/services/ITSecurity/protecting-your-identity/two-factor-authentication/
+toshl.com	t	https://toshl.com/blog/two-factor-authentication-and-how-to-use-it/
+towerfcu.org	cst	
+toya.net.pl	est	https://toya.net.pl/dokumenty/pobierz/instrukcja-2fa
+tp-link.com	et	
+tpg.com.au	s	https://support.tpg.com.au/multi-factor-authentication-tpg
+tplinkcloud.com	et	
+trading212.com	t	https://helpcentre.trading212.com/hc/en-us/articles/360012452237
+tradingview.com	st	https://www.tradingview.com/support/solutions/43000572460/
+transferwise.com	acst	https://wise.com/help/articles/2932125
+transifex.com	t	https://help.transifex.com/en/articles/6984122
+transip.nl	t	https://www.transip.nl/knowledgebase/artikel/162
+transperth.wa.gov.au	aes	
+transport.vic.gov.au	st	https://transport.vic.gov.au/help-and-support/ptv-app-help/set-up-multi-factor-authentication-for-myki-in-the-ptv-app
+travala.com	t	https://blog.travala.com/explaining-how-the-travala-wallet-functions/
+travelers.com	cst	https://www.travelers.com/about-travelers/campaigns/multifactor-authentication
+tre.se	a	
+treasurydirect.gov	e	https://www.treasurydirect.gov/indiv/help/TDHelp/help_ug_274-SecFeaturesProtectAcctLearnMore.htm
+trello.com	st	https://support.atlassian.com/atlassian-account/docs/manage-two-step-verification-for-your-atlassian-account/
+trendmicro.com	est	https://helpcenter.trendmicro.com/en-us/article/tmka-21720
+tresorit.com	cest	https://support.tresorit.com/hc/en-us/articles/216114527
+trimble.com	st	https://help.trimble.com/s/article/What-is-Multi-Factor-Authentication
+trionworlds.com	ae	https://support.trionworlds.com/hc/en-us/articles/204183357
+tronderbladet.no	st	https://payment.schibsted.no/profile-pages/faq#how-to-activate-and-deactivate-2fa
+trovi.sk	est	https://help.trovi.sk/en/getting-started/5cCNz3dpcdtETyEamRFVuE/two-factor-authentication-2fa-in-trovi/5mA49v715DG4XwfYbpfzW9
+trovo.live	st	
+troweprice.com	cest	https://www.troweprice.com/retirement-plan-services/en/our-advantage/cyber-security/multi-factor-authentication.html
+truekey.com	aeh	https://service.mcafee.com/?page=shell&shell=article-view&articleId=TS102352
+truist.com	ces	
+trumf.no	s	https://www.trumf.no/kundeservice/#innlogging
+trustage.com	ces	https://www.trustage.com/my-account/help/online-account-information-faqs
+tryhackme.com	t	
+tsb.co.uk	cs	https://www.tsb.co.uk/otp/
+tsp.gov	es	https://www.tsp.gov/account-basics/protect-your-tsp-account/
+tu-berlin.de	st	https://www.campusmanagement.tu-berlin.de/menue/dienste/konto_karte/tan_verfahren/
+tu-darmstadt.de	htu	https://www.hrz.tu-darmstadt.de/tuid-2fa
+tu.berlin	st	https://www.campusmanagement.tu-berlin.de/menue/dienste/konto_karte/tan_verfahren/
+tumblr.com	st	https://help.tumblr.com/two-factor-authentication/
+tunecore.ca	cs	https://support.tunecore.com/hc/en-us/articles/360000650226
+tunecore.co.uk	cs	https://support.tunecore.com/hc/en-us/articles/360000650226
+tunecore.com	cs	https://support.tunecore.com/hc/en-us/articles/360000650226
+tunecore.com.au	cs	https://support.tunecore.com/hc/en-us/articles/360000650226
+tunecore.de	cs	https://support.tunecore.com/hc/en-us/articles/360000650226
+tunecore.fr	cs	https://support.tunecore.com/hc/en-us/articles/360000650226
+tunecore.in	cs	https://support.tunecore.com/hc/en-us/articles/360000650226
+tunecore.it	cs	https://support.tunecore.com/hc/en-us/articles/360000650226
+tunnelbear.com	et	https://help.tunnelbear.com/hc/articles/16123360922267
+turbosquid.com	es	
+turbotax.intuit.com	cst	https://ttlc.intuit.com/questions/2902682
+turo.com	es	
+tuta.com	tu	https://tuta.com/support/#2fa
+tutanota.com	tu	https://tuta.com/support/#2fa
+tv.nu	st	https://payment.schibsted.no/profile-pages/faq#how-to-activate-and-deactivate-2fa
+tweakers.net	t	https://tweakers.net/plan/3096/
+twilio.com	acst	https://support.twilio.com/hc/en-us/sections/360008377353
+twingate.com	tu	https://www.twingate.com/docs/two-factor-authentication-security-policies
+twitch.tv	ast	https://help.twitch.tv/s/article/two-factor-authentication
+twitter.com	stu	https://help.x.com/en/managing-your-account/two-factor-authentication
+typeform.com	e	https://www.typeform.com/help/a/4405277894548/
+ub.edu	cst	https://www.ub.edu/portal/web/iub/2fa
+ubc.ca	achsu	https://it.ubc.ca/mfa
+uber.com	st	https://help.uber.com/riders/article/turn-on-2-step-verification?nodeId=b8bb9152-8c91-4f49-83c4-35cf2e1dcf72
+ubereats.com	st	https://help.uber.com/h/b8bb9152-8c91-4f49-83c4-35cf2e1dcf72
+ubi.com	est	https://www.ubisoft.com/help?article=000065723
+ubisoft.com	est	https://www.ubisoft.com/help?article=000065723
+ubisoftconnect.com	est	https://www.ubisoft.com/help?article=000065723
+ubnt.com	aet	https://help.ui.com/hc/en-us/articles/115012986607
+ubs.com	ah	https://www.ubs.com/ch/en/help/e-banking/process.html
+ubt.com	cst	https://www.ubt.com/learning-center/blogs/multifactor-authentication-and-your-account
+ucalgary.ca	acst	https://it.ucalgary.ca/mfa/gettingstarted
+ucdavis.edu	au	https://movetoduo.ucdavis.edu
+uci.edu	ah	https://www.oit.uci.edu/services/accounts-passwords/duo/
+ucla.edu	achsu	https://dts.ucla.edu/products-services/security/multi-factor-authentication/activate-ucla-logon-mfa
+uclahealth.org	est	
+ucmerced.edu	ahsu	https://it.ucmerced.edu/2FA
+ucr.edu	ahu	https://its.ucr.edu/mfa
+ucsb.edu	ah	https://it.ucsb.edu/mfa
+ucsc.edu	ah	https://slughub.ucsc.edu/its?id=kb_article&sysparm_article=KB0021200
+ucsd.edu	ahu	https://blink.ucsd.edu/technology/security/services/two-step-login/
+ucsf.edu	ah	https://it.ucsf.edu/service/multi-factor-authentication-duo
+ud.com	t	https://www.uniteddomains.com/twofactorauth/
+udel.edu	chst	https://www1.udel.edu/it/help/2fa/main.html
+udemy.com	e	https://support.udemy.com/hc/en-us/articles/4420349685015
+ui.com	aet	https://help.ui.com/hc/en-us/articles/115012986607
+uidaho.edu	achsu	https://support.uidaho.edu/TDClient/KB/ArticleDet?ID=109
+uk2.net	st	https://www.uk2.net/knowledgebase/display/UK2/Two+Factor+Authentication+Security+-+2FA
+ukfast.co.uk	hst	https://github.com/2factorauth/twofactorauth/pull/997#issuecomment-77708501
+ukpostbox.com	e	
+ukraine.com.ua	acst	https://www.ukraine.com.ua/wiki/account/security/otp/
+umbrella.com	s	https://docs.umbrella.com/deployment-umbrella/docs/enable-two-step-verification
+umich.edu	achsu	https://www.safecomputing.umich.edu/two-factor-authentication
+umpquabank.com	cs	https://www.umpquabank.com/personal-banking/online-banking-and-billpay/security-faqs/
+unbounce.com	t	https://documentation.unbounce.com/hc/en-us/articles/360001372503
+unfuddle.com	t	https://unfuddle.com/stack/docs/help/two-factor-authentication/
+uni-marburg.de	ht	https://www.uni-marburg.de/de/hrz/dienste/2fa
+unifyfcu.com	ces	https://www.unifyfcu.com/multi-factor-authentication-keep-bad-guys-out
+unimelb.edu.au	at	https://studentit.unimelb.edu.au/cybersecurity/multifactor-authentication-mfa
+uniregistry.com	t	https://www.uniregistry.help/hc/en-us/articles/115001729308
+unisuper.com.au	es	
+united-domains.de	t	https://help.united-domains.de/faq-article/wie-aktiviere-ich-die-zweistufige-verifizierung-und-mache-mein-portfolio-login-sicherer
+united.com	aces	
+uniteddomains.com	t	https://www.uniteddomains.com/twofactorauth/
+unity.com	st	https://support.unity.com/hc/en-us/articles/208764976
+unity3d.com	st	https://support.unity.com/hc/en-us/articles/208764976
+unleashedsoftware.com	t	https://support.unleashedsoftware.com/hc/en-us/articles/4402216271001
+unstoppabledomains.com	t	https://support.unstoppabledomains.com/support/solutions/articles/48001185664
+unsw.edu.au	at	https://www.myit.unsw.edu.au/cyber-security/multi-factor-authentication-mfa
+uottawa.ca	ah	https://it.uottawa.ca/security/mfa
+up.com.au	s	
+up.me	s	
+upcloud.com	t	https://upcloud.com/resources/tutorials/two-factor-authentication
+updraftplus.com	t	https://updraftplus.com/my-account/two-factor-login-security-settings/
+upenn.edu	achst	https://www.isc.upenn.edu/how-to/two-step-verification-getting-started
+uphold.com	t	https://support.uphold.com/hc/en-us/articles/360023791072
+ups.com	et	https://www.ups.com/us/en/support/manage-your-profile#faq
+uptimerobot.com	t	https://blog.uptimerobot.com/introducing-two-factor-authentication-2fa/
+upwork.com	est	https://support.upwork.com/hc/en-us/articles/360009491414
+uq.edu.au	ahtu	https://my.uq.edu.au/information-and-services/information-technology/uq-accounts-and-passwords/multi-factor-authentication-mfa
+usaa.com	aes	https://www.usaa.com/inet/pages/security_token_logon_options
+usabilla.com	t	https://support.usabilla.com/hc/en-us/articles/115003081611
+usbank.com	s	
+uscis.gov	est	
+usefathom.com	t	https://usefathom.com/support/two-factor-authentication
+userway.org	et	https://help.userway.org/articles/6661204
+usmobile.com	est	https://usmobile.frontkb.com/en/articles/237760
+usps.com	est	https://faq.usps.com/s/article/Multifactor-Authentication-MFA
+uspto.gov	cest	https://www.uspto.gov/learning-and-resources/account-faqs#type-managing-my-account-two-step-authentication
+utoronto.ca	ah	https://isea.utoronto.ca/services/utormfa/
+uts.edu.au	as	https://www.uts.edu.au/current-students/managing-your-course/using-uts-systems/student-forms-apps-and-systems/multi-factor-authentication
+uvic.ca	ah	https://www.uvic.ca/systems/services/loginspasswords/uvicmfa/
+uwaterloo.ca	achsu	https://uwaterloo.ca/two-factor-authentication/
+uwcu.org	cst	https://help.uwcu.org/kb/Help/content/Prod-3486/
+va.gov	acstu	https://www.va.gov/resources/verifying-your-identity-on-vagov
+vagaro.com	e	https://support.vagaro.com/hc/en-us/articles/115005413687
+valr.com	st	https://support.valr.com/hc/en-us/articles/360013860012
+vancity.com	cst	https://support.vancity.com/what-is-multi-factor-authentication-and-how-does-it-work/
+vanguard.com	chsu	https://investor.vanguard.com/security/security-keys
+vanguard.com.au	s	https://www.vanguard.com.au/personal/en/faq-details/what-is-two-factor-authentication-2-fa
+vapor.laravel.com	t	
+vaultcord.com	etu	https://docs.vaultcord.com/misc/multi-factor-authentication
+vcu.edu	ahu	https://ts.vcu.edu/askit/essential-computing/information-security/2factor/
+veeam.com	t	https://helpcenter.veeam.com/docs/backup/vsphere/mfa.html
+veem.com	st	https://help.veem.com/hc/en-us/articles/360033419474-two-factor-authentication-2fa-
+vend.com	st	https://account.vend.no/faq#how-to-activate-and-deactivate-2fa
+vend.dk	st	https://account.vend.no/faq#how-to-activate-and-deactivate-2fa
+vend.fi	st	https://account.vend.no/faq#how-to-activate-and-deactivate-2fa
+vend.no	st	https://account.vend.no/faq#how-to-activate-and-deactivate-2fa
+vend.se	st	https://account.vend.no/faq#how-to-activate-and-deactivate-2fa
+venmo.com	s	https://help.venmo.com/hc/en-us/articles/217532397
+ventraip.com.au	est	https://ventraip.com.au/faq/article/two-factor-authentication-faq-vipcontrol/
+veracode.com	tu	https://help.veracode.com/r/t_configure_mfa
+verizon.com	aes	https://www.verizon.com/support/keeping-your-account-safe-faqs/
+verpex.com	t	
+versio.nl	t	https://www.versio.nl/nieuws/twofactor-authenticatie-nu-beschikbaar-voor-uw-klantenaccount-205
+vg.no	st	https://payment.schibsted.no/profile-pages/faq#how-to-activate-and-deactivate-2fa
+vgen.co	t	https://help.vgen.co/hc/articles/26006496658199
+viabtc.com	st	https://support.viabtc.com/hc/en-us/articles/900001693343
+vicroads.vic.gov.au	st	https://www.vicroads.vic.gov.au/online-services/help-centre/two-step-verification
+vimeo.com	et	https://vimeo.zendesk.com/hc/en-us/articles/4856243815693
+vimla.se	a	
+vinted.at	es	https://www.vinted.com/help/15/537
+vinted.be	es	https://www.vinted.com/help/15/537
+vinted.co.uk	es	https://www.vinted.com/help/15/537
+vinted.com	es	https://www.vinted.com/help/15/537
+vinted.cz	es	https://www.vinted.com/help/15/537
+vinted.de	es	https://www.vinted.com/help/15/537
+vinted.dk	es	https://www.vinted.com/help/15/537
+vinted.es	es	https://www.vinted.com/help/15/537
+vinted.fi	es	https://www.vinted.com/help/15/537
+vinted.fr	es	https://www.vinted.com/help/15/537
+vinted.gr	es	https://www.vinted.com/help/15/537
+vinted.hr	es	https://www.vinted.com/help/15/537
+vinted.hu	es	https://www.vinted.com/help/15/537
+vinted.ie	es	https://www.vinted.com/help/15/537
+vinted.it	es	https://www.vinted.com/help/15/537
+vinted.lt	es	https://www.vinted.com/help/15/537
+vinted.lu	es	https://www.vinted.com/help/15/537
+vinted.nl	es	https://www.vinted.com/help/15/537
+vinted.pl	es	https://www.vinted.com/help/15/537
+vinted.ro	es	https://www.vinted.com/help/15/537
+vinted.se	es	https://www.vinted.com/help/15/537
+vinted.sk	es	https://www.vinted.com/help/15/537
+virginmoney.com	as	https://uk.virginmoney.com/sca
+virginplus.ca	es	https://www.virginplus.ca/en/support/myaccount-mfa.html
+virustotal.com	t	
+visualstudio.microsoft.com	aest	https://support.microsoft.com/en-us/help/12408/
+vivaldi.com	tu	https://help.vivaldi.com/services/account/two-factor-authentication/
+vivaldi.net	tu	https://help.vivaldi.com/services/account/two-factor-authentication/
+vivup.co.uk	et	
+vk.com	st	https://vk.com/page-777107_53677752
+vmware.com	acst	https://knowledge.broadcom.com/external/article?articleId=216428
+vodafone.co.uk	s	
+vodafone.nl	s	https://www.vodafone.nl/support/my-vodafone/tweestapsverificatie
+voip.ms	et	https://wiki.voip.ms/article/TOTP_Authentication
+vpsserver.com	t	https://github.com/2factorauth/twofactorauth/pull/2311#issuecomment-273424695
+vr.de	ah	https://www.vr.de/privatkunden/unsere-produkte/was-ist-ein-girokonto/tan-verfahren.html
+vrbo.com	cs	https://help.vrbo.com/articles/How-do-I-set-up-two-factor-authentication
+vse.cz	astu	https://ci.vse.cz/english/support/procedures/multi-factor-authentication-in-microsoft-365/
+vt.edu	achs	https://www.tech.it.vt.edu/2factor/
+vultr.com	ht	https://www.vultr.com/docs/using-two-factor-authentication-to-login-to-vultr-control-panel
+vwfs.de	ah	https://www.vwfs.de/online-banking/phototan.html
+vystarcu.org	cs	https://vystarcu.org/Online-Services/Internet-Banking-Access/Internet-Mobile-Banking-New-User-Enrollment
+wageworks.com	es	
+wallapop.com	es	https://ayuda.wallapop.com/hc/articles/7727995450129
+walmart.ca	s	https://www.walmart.ca/en/help/article/managing-profile/7942aa05313d4fcb9ca491a78d463349
+warframe.com	e	https://www.warframe.com/2fa-faq
+wargaming.net	t	https://eu.wargaming.net/support/en/products/wot/article/10568/
+warnerbrosgames.com	t	
+wasabi.com	t	https://wasabi-support.zendesk.com/hc/en-us/articles/360055164891
+washington.edu	ach	https://itconnect.uw.edu/security/uw-netids/2fa/
+watchguard.com	a	https://www.watchguard.com/help/docs/help-center/en-US/Content/en-US/my_products/portal_users-manage-mfa.html
+waveapps.com	t	https://support.waveapps.com/hc/articles/26445936336660
+wazirx.com	est	https://support.wazirx.com/hc/en-us/articles/360014633494
+wbgames.com	t	
+wealthfront.com	st	https://support.wealthfront.com/hc/en-us/articles/211004563
+wealthify.com	t	https://www.wealthify.com/faq#security
+wealthsimple.com	st	https://help.wealthsimple.com/hc/en-ca/articles/360056584134
+web.de	t	https://hilfe.web.de/sicherheit/2fa/index.html
+web.mit.edu	achs	https://kb.mit.edu/confluence/display/istcontrib/Duo+Authentication+Landing+Page
+webcentral.com.au	t	https://support.webcentral.com.au/s/article/Multi-Factor-Authentication-Guide
+webflow.com	t	https://university.webflow.com/lesson/two-factor-authentication-2fa
+webgate.ec.europa.eu	ahsu	https://webgate.ec.europa.eu/cas/manuals/EU_Login_Tutorial.pdf
+webmail.pt.lu	st	https://support.pt.lu/2fa-two-factor-authentication/
+webroot.com	t	https://answers.webroot.com/Webroot/ukp.aspx?vw=1&solid=3476
+weclapp.com	tu	https://doc.weclapp.com/en/documentation/dein-start-mit-weclapp/2-my-weclapp-personal-master-and-contact-data/2-4-security/2-factor-authentication/
+wedos.com	t	https://kb.wedos.com/cs/zakaznik/otp.html
+weebly.com	st	https://squareup.com/help/us/en/article/5593
+wefunder.com	stu	https://help.wefunder.com/getting-started-for-investors/how-secure-is-my-account
+wellfound.com	st	https://help.wellfound.com/article/1064--
+wellsfargo.com	achs	https://www.wellsfargo.com/privacy-security/advanced-access
+wellsfargoadvisors.com	achs	https://www.wellsfargo.com/privacy-security/advanced-access
+weltsparen.at	cst	
+weltsparen.de	cst	
+westernunion.com	acs	https://business.westernunion.com/en-pl/product-documents/psd2-overview/Set-up-two-Factor
+wetransfer.com	t	https://help.wetransfer.com/hc/en-us/articles/360056666872
+wetravel.com	st	https://help.wetravel.com/articles/3601445
+wf.com	achs	https://www.wellsfargo.com/privacy-security/advanced-access
+whalefin.com	t	https://support.whalefin.com/hc/en-us/articles/8911053323417
+whatsapp.com	ces	https://www.whatsapp.com/faq/en/general/26000021
+whc.ca	t	https://clients.whc.ca/en/knowledgebase/1430
+wheniwork.com	st	https://help.wheniwork.com/articles/log-in-with-two-step-verification-computer/
+whimsical.com	t	https://help.whimsical.com/article/664--
+whois.com	st	https://manage.whois.com/kb/node/2690
+wiggle.cn	t	https://wiggle.egain.cloud/kb/Wiggle_EN/content/Prod-13378/
+wiggle.co.nz	t	https://wiggle.egain.cloud/kb/Wiggle_EN/content/Prod-13378/
+wiggle.co.uk	t	https://wiggle.egain.cloud/kb/Wiggle_EN/content/Prod-13378/
+wiggle.com	t	https://wiggle.egain.cloud/kb/Wiggle_EN/content/Prod-13378/
+wiggle.com.au	t	https://wiggle.egain.cloud/kb/Wiggle_EN/content/Prod-13378/
+wiggle.dk	t	https://wiggle.egain.cloud/kb/Wiggle_EN/content/Prod-13378/
+wiggle.es	t	https://wiggle.egain.cloud/kb/Wiggle_EN/content/Prod-13378/
+wiggle.fr	t	https://wiggle.egain.cloud/kb/Wiggle_EN/content/Prod-13378/
+wiggle.jp	t	https://wiggle.egain.cloud/kb/Wiggle_EN/content/Prod-13378/
+wiggle.nl	t	https://wiggle.egain.cloud/kb/Wiggle_EN/content/Prod-13378/
+wiggle.ru	t	https://wiggle.egain.cloud/kb/Wiggle_EN/content/Prod-13378/
+wiggle.se	t	https://wiggle.egain.cloud/kb/Wiggle_EN/content/Prod-13378/
+wigglesport.de	t	https://wiggle.egain.cloud/kb/Wiggle_EN/content/Prod-13378/
+wigglesport.it	t	https://wiggle.egain.cloud/kb/Wiggle_EN/content/Prod-13378/
+wikimedia.org	tu	https://meta.wikimedia.org/wiki/Help:Two-factor_authentication
+wikipedia.org	tu	https://meta.wikimedia.org/wiki/Help:Two-factor_authentication
+win2day.at	s	https://www.win2day.at/suche?faqId=331
+windscribe.com	t	https://windscribe.com/knowledge-base/articles/how-do-i-enable-2-factor-authentication-on-my-account
+wirexapp.com	t	https://wirexapp.com/hc/articles/207160259
+wisc.edu	ahu	https://it.wisc.edu/services/duo-multi-factor-authentication-mfa/
+wise.com	acst	https://wise.com/help/articles/2932125
+withings.com	st	https://support.withings.com/hc/articles/21866853734545
+wix.com	est	https://support.wix.com/en/article/using-2-step-verification-for-your-wix-account
+wolf.bet	t	https://www.youtube.com/watch?v=3B_zlGVldRY
+woltlab.com	etu	
+woodforest.com	st	https://www.woodforest.com/Personal/Services/Online-Banking/Online-Banking-Security
+woolworths.com.au	es	
+woolworthsrewards.com.au	es	
+wordfence.com	t	https://www.wordfence.com/help/central/2fa/
+wordpress.com	stu	https://en.support.wordpress.com/security/two-step-authentication/
+workato.com	t	https://docs.workato.com/security/two-factor-authentication.html
+workflowy.com	t	https://workflowy.zendesk.com/hc/en-us/articles/4401923146516
+world4you.com	t	https://www.world4you.com/faq/en/w4y-app/faq.zwei-faktor-authentifizierung-world4you-app.html
+wp.pl	au	https://pomoc.wp.pl/1login/jak-wlaczyc-i-wylaczyc-logowanie-dwustopniowe
+wpengine.com	ast	https://wpengine.com/support/2-factor-authentication/
+wrike.com	t	https://help.wrike.com/hc/en-us/articles/210324445
+wykop.pl	t	
+wyze.com	est	https://support.wyze.com/hc/en-us/articles/360024402052
+x.com	stu	https://help.x.com/en/managing-your-account/two-factor-authentication
+xapo.com	s	https://customersupport.xapo.com/en_us/r1aIYObOd
+xbox.com	acest	https://support.microsoft.com/en-us/help/12408/
+xero.com	at	https://help.xero.com/nz/MyXero_Two-Step_About
+xfinity.com	aes	https://www.xfinity.com/support/articles/two-step-verification-xfinity-app-setup/
+xing.com	st	https://faq.xing.com/en/settings-security/two-factor-login-two-factor-authentication
+xink.io	t	https://support.xink.io/support/solutions/articles/1000271422
+xplenty.com	t	https://www.xplenty.com/docs/2-factor-authentication/
+yahoo.co.jp	es	https://id.yahoo.co.jp/security/otp.html
+yahoo.com	cstu	https://help.yahoo.com/kb/SLN5013.html
+yammer.com	acest	https://support.microsoft.com/account-billing/c7910146-672f-01e9-50a0-93b4585e7eb4
+yclas.com	t	https://docs.yclas.com/2-step-authentication/
+yeah.net	st	https://help.mail.163.com/faq.do?m=list&categoryID=297
+ynab.com	t	https://support.ynab.com/rkKHuLlRc
+yoomoney.ru	s	https://yoomoney.ru/page?id=536116
+yorku.ca	achsu	https://infosec.yorku.ca/2FA
+youhodler.com	st	https://help.youhodler.com/en/articles/3787039
+youi.com.au	s	
+youinvest.co.uk	t	https://www.youinvest.co.uk/faq/how-do-i-set-two-factor-authentication
+youneedabudget.com	t	https://support.ynab.com/rkKHuLlRc
+youtube.com	acstu	https://safety.google/authentication/
+yoyogames.com	et	https://help.yoyogames.com/hc/en-us/articles/216757288
+zaba.hr	a	https://www.zaba.hr/home/token#pan3
+zapier.com	t	https://zapier.com/help/two-factor-authentication/
+zapsplat.com	t	
+zendesk.com	st	https://support.zendesk.com/hc/en-us/articles/4408829277466
+zeplin.io	t	https://support.zeplin.io/en/articles/7189128
+zerodha.com	t	https://support.zerodha.com/category/your-zerodha-account/login-credentials/login-credentials-of-trading-platforms/articles/time-based-otp-setup
+zerotier.com	tu	
+zillow.com	cs	https://zillow.zendesk.com/hc/articles/360057432754
+zimbra.com	t	https://blog.zimbra.com/2016/02/zimbra-collaboration-8-7-two-factor-authentication-2fa-technical-preview/
+zip.co	s	https://help.zip.co/hc/en-us/articles/360004059836
+zkb.ch	ah	https://www.zkb.ch/de/pr/pk/efinance/ebanking/login-verfahren.html
+zoho.com	astu	https://help.zoho.com/portal/kb/articles/mfa-introduction
+zola.com	es	
+zondaglobal.com	et	https://zondaglobal.com/en/helpdesk/zonda-exchange/my-account/how-to-use-two-factor-authentication-provided-by-google-authenticator
+zoom.us	st	https://support.zoom.com/hc/article?id=zm_kb&sysparm_article=KB0066054

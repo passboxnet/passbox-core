@@ -11,11 +11,13 @@ import {
   type AuditQuery,
   type ChainCheck,
   type ClientKind,
+  type EmailMonitoring,
   type InvitationPreview,
   isTwoFactorChallenge,
   type KdfParams,
   type LoginFinishResult,
   type MailLocale,
+  type MonitoredEmail,
   type MoveItemUpload,
   type OrgAdminApi,
   type OrgInvitationInfo,
@@ -47,6 +49,28 @@ import {
   PolicyViolationError,
   securityAggregate,
 } from "./admin";
+import {
+  ALIAS_FIELD,
+  ALIAS_PROVIDER_NAMES,
+  ALIAS_TAG,
+  type AliasProvider,
+  type AliasSettings,
+  createAlias,
+  isAliasProvider,
+} from "./aliases";
+import {
+  type AnalysisCore,
+  analyzeSecurity,
+  type BreachMode,
+  checkLookalike,
+  DEFAULT_REPORT_OPTIONS,
+  type ExposedEmail,
+  type FindingKind,
+  type Lookalike,
+  type ReportOptions,
+  type SecurityReport,
+  withDismissed,
+} from "./analysis";
 import {
   type AgentEventRecord,
   type AgentRequest,
@@ -90,7 +114,15 @@ import {
   type RecoveryResult,
   RecoveryVerificationError,
 } from "./recovery";
-import { analyzeVault, breachCount, estimateStrength, type Strength, type VaultHealth } from "./security";
+import {
+  analyzeVault,
+  breachHashParts,
+  countInRange,
+  estimateStrength,
+  fetchPwnedRange,
+  type Strength,
+  type VaultHealth,
+} from "./security";
 import { type ShareLink, type ShareSnapshot, shareLinkUrl } from "./shareLinks";
 import {
   type Invitation,
@@ -481,6 +513,15 @@ export class PassboxClient {
   private icons = new Map<string, Promise<string | null>>();
   /** Breach counts by password from `checkBreachedItems`; cleared on lock. */
   private breachCounts = new Map<string, number>();
+  /** A full breach check ran since unlocking. */
+  private breachChecked = false;
+  /** The last email monitoring results, for the security report; cleared on lock. */
+  private exposedEmails: ExposedEmail[] = [];
+  /**
+   * How breach checks reach Have I Been Pwned: `auto` (through the Passbox
+   * server when it offers it, otherwise directly), `server` or `direct`.
+   */
+  breachMode: BreachMode = "auto";
   private listeners = new Set<() => void>();
   private snapshot: ClientSnapshot;
   /** A recovery by code waiting for its second factor. */
@@ -1038,6 +1079,8 @@ export class PassboxClient {
     this.items.clear();
     this.errors.clear();
     this.breachCounts.clear();
+    this.breachChecked = false;
+    this.exposedEmails = [];
     this.sharingView = EMPTY_SHARING;
     this.passwordScore = undefined;
     if (this.usageTimer) clearTimeout(this.usageTimer);
@@ -1565,22 +1608,199 @@ export class PassboxClient {
    * ones, most breached first. Results stay in memory until the vault locks
    * and feed `itemHealth`. Opt-in only.
    */
-  async checkBreachedItems(fetchImpl?: typeof globalThis.fetch): Promise<BreachedItem[]> {
+  async checkBreachedItems(
+    fetchImpl?: typeof globalThis.fetch,
+    onProgress?: (done: number, total: number) => void,
+  ): Promise<BreachedItem[]> {
     const byPassword = new Map<string, string[]>();
     for (const item of this.snapshot.items) {
       const password = item.data.category === "login" ? fieldValue(item.data, FIELD.password) : undefined;
       if (password) byPassword.set(password, [...(byPassword.get(password) ?? []), item.id]);
     }
+    const ranges = new Map<string, Promise<string>>();
     const found: BreachedItem[] = [];
+    let done = 0;
+    onProgress?.(0, byPassword.size);
     for (const [password, ids] of byPassword) {
       let count = this.breachCounts.get(password);
       if (count === undefined) {
-        count = await breachCount(password, fetchImpl);
+        const { prefix, suffix } = await breachHashParts(password);
+        let range = ranges.get(prefix);
+        if (!range) {
+          range = this.breachRange(prefix, fetchImpl);
+          ranges.set(prefix, range);
+        }
+        count = countInRange(await range, suffix);
         this.breachCounts.set(password, count);
       }
-      if (count > 0) found.push(...ids.map((itemId) => ({ itemId, count })));
+      const times = count;
+      if (times > 0) found.push(...ids.map((itemId) => ({ itemId, count: times })));
+      onProgress?.(++done, byPassword.size);
     }
+    this.breachChecked = true;
+    this.emit();
     return found.sort((a, b) => b.count - a.count || a.itemId.localeCompare(b.itemId));
+  }
+
+  /** Whether a full breach check ran since unlocking. */
+  get breachCheckDone(): boolean {
+    return this.breachChecked;
+  }
+
+  /** One padded range, through the server or directly (see `breachMode`). */
+  private async breachRange(prefix: string, fetchImpl?: typeof globalThis.fetch): Promise<string> {
+    if (fetchImpl || this.breachMode === "direct") return fetchPwnedRange(prefix, fetchImpl);
+    const body = await this.api.breach.range(prefix);
+    if (body !== null) return body;
+    if (this.breachMode === "auto") return fetchPwnedRange(prefix);
+    throw new Error("your Passbox server does not offer breach checks");
+  }
+
+  // --- Security analysis ----------------------------------------------------------
+
+  /**
+   * The vault security analysis: score, findings with fixes and the "fix
+   * these first" list, computed locally in the shared core. Breach findings
+   * appear after `checkBreachedItems`, email exposures after `emailMonitoring`.
+   */
+  securityReport(options: ReportOptions = DEFAULT_REPORT_OPTIONS, now = Date.now()): SecurityReport {
+    const items = this.snapshot.items;
+    let breachCounts: Record<string, number> | undefined;
+    if (this.breachChecked) {
+      breachCounts = {};
+      for (const item of items) {
+        const password = fieldValue(item.data, FIELD.password);
+        const count = password ? this.breachCounts.get(password) : undefined;
+        if (count !== undefined) breachCounts[item.id] = count;
+      }
+    }
+    return analyzeSecurity(this.core as unknown as AnalysisCore, items, {
+      ...options,
+      now,
+      userInputs: this.strengthContext(),
+      breachCounts,
+      exposedEmails: this.exposedEmails,
+    });
+  }
+
+  /** Dismisses (or restores) one finding of one item; stored encrypted in the item and synced. */
+  async dismissFinding(itemId: string, kind: FindingKind, dismissed: boolean): Promise<void> {
+    const item = this.items.get(itemId);
+    if (!item) throw new Error("unknown item");
+    const data = withDismissed(item.data, kind, dismissed);
+    if (data) await this.updateItem(itemId, data);
+  }
+
+  /** Whether `host` looks like a saved login domain or a well-known site (phishing). Local. */
+  checkLookalike(host: string): Lookalike | null {
+    const saved: string[] = [];
+    for (const item of this.snapshot.items) {
+      if (item.data.category !== "login") continue;
+      const url = fieldValue(item.data, FIELD.url);
+      if (!url) continue;
+      try {
+        saved.push(new URL(/^[a-z][a-z0-9+.-]*:\/\//i.test(url) ? url : `https://${url}`).hostname);
+      } catch {
+        // Not a URL.
+      }
+    }
+    return checkLookalike(this.core as unknown as AnalysisCore, host, saved);
+  }
+
+  // --- Email breach monitoring (server) ---------------------------------------------
+
+  /** The server's email breach monitoring and its results (also used by `securityReport`). */
+  async emailMonitoring(): Promise<EmailMonitoring> {
+    const monitoring = await this.api.breach.emails();
+    this.exposedEmails = monitoring.emails
+      .filter((e) => e.verified)
+      .map((e) => ({
+        email: e.email,
+        breaches: e.breaches.map((b) => ({
+          name: b.name,
+          title: b.title,
+          domain: b.domain,
+          breachDate: b.breachDate,
+          dataClasses: b.dataClasses,
+        })),
+      }));
+    this.emit();
+    return monitoring;
+  }
+
+  /**
+   * Starts monitoring an address; the server mails a confirmation code to
+   * it. Once confirmed, the address (never a password) is sent to Have I
+   * Been Pwned. Tell the user before calling this.
+   */
+  addMonitoredEmail(email: string, locale?: string): Promise<MonitoredEmail> {
+    return this.api.breach.addEmail(email, locale);
+  }
+
+  async verifyMonitoredEmail(id: string, code: string): Promise<MonitoredEmail> {
+    const email = await this.api.breach.verifyEmail(id, code);
+    await this.emailMonitoring().catch(() => undefined);
+    return email;
+  }
+
+  async checkMonitoredEmail(id: string): Promise<MonitoredEmail> {
+    const email = await this.api.breach.checkEmail(id);
+    await this.emailMonitoring().catch(() => undefined);
+    return email;
+  }
+
+  async removeMonitoredEmail(id: string): Promise<void> {
+    await this.api.breach.removeEmail(id);
+    await this.emailMonitoring().catch(() => undefined);
+  }
+
+  // --- Email aliases ---------------------------------------------------------------
+
+  /** Alias services set up in the vault (items tagged `alias-service` with a provider and key). */
+  aliasServices(): { itemId: string; provider: AliasProvider; providerName: string; title: string }[] {
+    return this.snapshot.items.flatMap((item) => {
+      const provider = fieldValue(item.data, ALIAS_FIELD.provider);
+      if (!isAliasProvider(provider) || !fieldValue(item.data, ALIAS_FIELD.apiKey)) return [];
+      return [{ itemId: item.id, provider, providerName: ALIAS_PROVIDER_NAMES[provider], title: item.data.title }];
+    });
+  }
+
+  /** Saves an alias service's API key as a vault item; returns its ID. */
+  addAliasService(vaultId: string, settings: AliasSettings): Promise<string> {
+    const fields: ItemData["fields"] = [
+      { id: ALIAS_FIELD.provider, label: "Provider", type: "text", value: settings.provider },
+      { id: ALIAS_FIELD.apiKey, label: "API key", type: "concealed", value: settings.apiKey.trim() },
+    ];
+    if (settings.baseUrl?.trim())
+      fields.push({ id: ALIAS_FIELD.baseUrl, label: "Server", type: "url", value: settings.baseUrl.trim() });
+    if (settings.aliasDomain?.trim())
+      fields.push({ id: ALIAS_FIELD.domain, label: "Alias domain", type: "text", value: settings.aliasDomain.trim() });
+    return this.createItem(vaultId, {
+      v: 1,
+      category: "other",
+      title: ALIAS_PROVIDER_NAMES[settings.provider],
+      fields,
+      notes: "",
+      tags: [ALIAS_TAG],
+      favorite: false,
+    });
+  }
+
+  /** Creates an email alias for `forDomain` with the service in `serviceItemId`, directly with the provider. */
+  async createAlias(serviceItemId: string, forDomain: string, fetchImpl?: typeof globalThis.fetch): Promise<string> {
+    const item = this.items.get(serviceItemId);
+    const provider = item ? fieldValue(item.data, ALIAS_FIELD.provider) : undefined;
+    if (!item || !isAliasProvider(provider)) throw new Error("not an alias service");
+    return createAlias(
+      {
+        provider,
+        apiKey: fieldValue(item.data, ALIAS_FIELD.apiKey) ?? "",
+        baseUrl: fieldValue(item.data, ALIAS_FIELD.baseUrl),
+        aliasDomain: fieldValue(item.data, ALIAS_FIELD.domain),
+      },
+      forDomain,
+      fetchImpl,
+    );
   }
 
   /** The problems of one item for its security check card. */

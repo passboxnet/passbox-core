@@ -9,6 +9,7 @@
 
 pub mod aead;
 pub mod agent_grant;
+pub mod analysis;
 pub mod audit;
 pub mod breach;
 pub mod canon;

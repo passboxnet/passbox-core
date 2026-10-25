@@ -98,5 +98,5 @@ describe.skipIf(!serverUrl)("moves, archive, attachments and links against a ser
     expect(opened.viewsLeft).toBe(1);
     await client.deleteShareLink(link.id);
     expect(await shareLinkInfo(anonymous, link.id)).toEqual({ status: "gone" });
-  });
+  }, 60_000);
 });

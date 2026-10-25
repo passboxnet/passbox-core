@@ -82,6 +82,13 @@ matching happens on the device (`passbox_core::breach`).
 | FFI | `breachCheck(password)`, `breachedItems()` | `UInt64`, `[BreachedItem { itemId, count }]` |
 | TS | `breachCount(password)`, `client.checkBreachedItems()` | `Promise<number>`, `Promise<{ itemId, count }[]>` |
 
+By default the range requests go through the user's Passbox server
+(`GET /api/v1/breach/range/{prefix}`), so Have I Been Pwned never sees the
+device's IP address; `set_breach_mode` / `breachMode` choose `auto`,
+`server` or `direct`. The vault-wide security analysis (score, findings,
+"fix these first", dismissals, email monitoring) is described in
+[security-analysis.md](security-analysis.md).
+
 `check_breached_items` covers logins outside the trash, sends one request per
 hash prefix and keeps the results in memory until the vault locks. It is slow
 for large vaults: run it in the background. Offline it fails with

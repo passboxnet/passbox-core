@@ -4,6 +4,7 @@
 //! All methods take `&self`; an internal lock serializes operations.
 
 mod agent;
+pub mod analysis;
 pub mod comfort;
 pub mod developer;
 pub mod item_tools;

@@ -15,6 +15,7 @@ use passbox_core::totp::Totp;
 uniffi::setup_scaffolding!();
 
 mod admin;
+mod analysis;
 mod comfort;
 mod recovery;
 mod sharing;

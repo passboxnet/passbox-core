@@ -1,3 +1,4 @@
+export type { EmailBreach, EmailMonitoring, MonitoredEmail } from "@passbox/api-client";
 export {
   AUDIT_CATEGORIES,
   type AuditRecord,
@@ -17,6 +18,42 @@ export {
   type SecurityAggregate,
   securityAggregate,
 } from "./admin";
+export {
+  ALIAS_DEFAULT_URLS,
+  ALIAS_FIELD,
+  ALIAS_KEY_HELP,
+  ALIAS_PROVIDER_NAMES,
+  ALIAS_PROVIDERS,
+  ALIAS_TAG,
+  AliasError,
+  type AliasProvider,
+  type AliasSettings,
+  createAlias,
+  isAliasProvider,
+} from "./aliases";
+export {
+  type AnalysisCore,
+  analyzeSecurity,
+  type BreachMode,
+  type CategorySummary,
+  checkLookalike,
+  DEFAULT_REPORT_OPTIONS,
+  type ExposedEmail,
+  FINDING_KINDS,
+  type Finding,
+  type FindingKind,
+  type FixAction,
+  type Lookalike,
+  type LookalikeReason,
+  type Priority,
+  type ReportOptions,
+  SECURITY_IGNORE_KEY,
+  type SecurityReport,
+  type Severity,
+  type SiteSupport,
+  siteSupport,
+  withDismissed,
+} from "./analysis";
 export type { MoveAudienceMember, MovePreview } from "./client";
 export {
   type BreachedItem,
@@ -104,7 +141,10 @@ export { looksLikeRecoveryCode, secondFactorFromInput } from "./secondFactor";
 export {
   analyzeVault,
   breachCount,
+  breachHashParts,
+  countInRange,
   estimateStrength,
+  fetchPwnedRange,
   type ItemLike,
   type Strength,
   type StrengthCore,
