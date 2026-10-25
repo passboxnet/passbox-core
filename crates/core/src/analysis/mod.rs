@@ -513,7 +513,7 @@ pub struct SecurityReport {
     /// Snapshot dates of the bundled 2FA and passkey lists.
     pub directory_dates: (String, String),
     /// Breaches of sites with saved logins (affected, possibly affected or
-    /// fixed), open ones first, newest first.
+    /// fixed), open ones first, then those that exposed passwords, newest first.
     pub breached_sites: Vec<breaches::BreachedSite>,
     /// The breach catalogue the report used.
     pub breach_catalog: CatalogInfo,
@@ -999,6 +999,7 @@ pub fn analyze(items: &[AnalysisItem], options: &AnalysisOptions) -> SecurityRep
     breached_sites.sort_by(|a, b| {
         b.is_open()
             .cmp(&a.is_open())
+            .then(b.exposes_credentials.cmp(&a.exposes_credentials))
             .then(b.added_date.cmp(&a.added_date))
             .then(a.name.cmp(&b.name))
     });
