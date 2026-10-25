@@ -61,6 +61,11 @@ client (web, desktop, extension, iOS, Android) and on the website.
 | AI agent | KI-Agent |
 | Approve / Deny (agent request) | Freigeben / Ablehnen |
 | Revoke | Widerrufen |
+| AI features / Model | KI-Funktionen / Modell |
+| On this device / Your own server / Cloud provider (where a model runs) | Auf diesem Gerät / Eigener Server / Cloud-Anbieter |
+| AI log | KI-Protokoll |
+| Your plan (security copilot) | Ihr Plan |
+| Urgent / Important / Recommended / When you have time | Dringend / Wichtig / Empfohlen / Wenn Sie Zeit haben |
 
 Plain language first: no "OPAQUE", "ciphertext", "revision", "account ID"
 or "otpauth://" in default screens. Technical details go behind a
