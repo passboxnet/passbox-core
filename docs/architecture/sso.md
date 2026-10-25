@@ -108,7 +108,7 @@ What a user resource does in Passbox:
 
 ## Server storage and limits
 
-Migration `0001_baseline.sql`: `org_sso`, `sso_domains`, `sso_identities`, `sso_flows` (10 minutes), `sso_tickets` (5 minutes), `sso_proofs` (10 minutes), `device_tokens.sso_until`, `trusted_devices`, `trusted_device_requests`, `scim_tokens`, `scim_users`, `scim_groups`, `scim_group_members`. Secrets in flight (state, tickets, proofs, request tokens, SCIM tokens) are stored as SHA-256 hashes. SQL is portable (PostgreSQL with row level security).
+Migration `0001_baseline.sql`: `org_sso`, `sso_domains`, `sso_identities`, `sso_flows` (10 minutes), `sso_tickets` (5 minutes), `sso_proofs` (10 minutes), `device_tokens.sso_until`, `trusted_devices`, `trusted_device_requests`, `scim_tokens`, `scim_users`, `scim_groups`, `scim_group_members`. Secrets in flight (state, tickets, proofs, request tokens, SCIM tokens) are stored as SHA-256 hashes. The tables have forced row level security ([database-security.md](database-security.md)).
 
 Talking to the provider: `ureq` with rustls and the platform certificate store on the blocking pool, 10 second timeout, no redirects, 256 KiB response limit. Only `https://` URLs (plus `http://` on `localhost`/`127.0.0.1`/`[::1]` when `PASSBOX_SSO_ALLOW_HTTP_LOOPBACK=1`, for development). Because organization admins choose the issuer URL, the server makes outbound requests on their behalf; it never returns response bodies, and the connection check is rate limited. On shared instances, restrict outbound traffic of the server at the network level if internal https services must not be probed.
 

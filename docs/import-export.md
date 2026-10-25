@@ -59,14 +59,14 @@ An imported login is a duplicate of an existing one when the normalized host (lo
 
 `PassboxClient.importItems` uploads items with up to six requests in flight, refreshes the item list every 200 items, yields to the event loop between batches and syncs once at the end. Server errors and dropped connections are retried with backoff, and the number of parallel requests halves while the server reports errors, then grows again. The wizard shows a progress bar and can stop the import.
 
-Measured with a synthetic Chrome CSV against a local debug build of the server (`packages/client/src/import/import.integration.test.ts`, `PASSBOX_IMPORT_BENCH=10000`):
+Measured with a synthetic Chrome CSV against a local debug build of the server (`packages/client/src/import/import.integration.test.ts`, `PASSBOX_IMPORT_BENCH=10000`). These numbers are from the SQLite server before [ADR 0007](adr/0007-postgresql-only.md) and have not been repeated on PostgreSQL yet:
 
 | Items | Server database | Parse | Duplicate check | Upload |
 | --- | --- | --- | --- | --- |
-| 10,000 | SQLite in memory | 0.18 s | 0.02 s | 17.8 s (≈560 items/s) |
-| 10,000 | SQLite file | 0.18 s | 0.02 s | 47 s (≈210 items/s) |
+| 10,000 | SQLite in memory (former) | 0.18 s | 0.02 s | 17.8 s (≈560 items/s) |
+| 10,000 | SQLite file (former) | 0.18 s | 0.02 s | 47 s (≈210 items/s) |
 
-The longest pause between two progress callbacks stayed below 30 ms on the in-memory database (no frozen UI); 40,000 items take a few minutes. With a SQLite file, parallel writes regularly fail with "database is locked" on the server; the client's retries absorb this, but the server should set a busy timeout and WAL mode.
+The longest pause between two progress callbacks stayed below 30 ms (no frozen UI); 40,000 items take a few minutes. When the server reports errors, the client's retries absorb them.
 
 ## Export
 

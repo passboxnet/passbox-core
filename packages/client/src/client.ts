@@ -1430,7 +1430,8 @@ export class PassboxClient {
     const result: ImportItemsResult = { created: 0, updated: 0, failed: [] };
     const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
     // Fewer requests run in parallel while the server is struggling (for
-    // example "database is locked" on SQLite), more again once it recovers.
+    // example 503 responses while its connection pool is exhausted), more
+    // again once it recovers.
     let limit = maxConcurrency;
     let streak = 0;
     let next = 0;

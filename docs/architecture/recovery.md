@@ -145,7 +145,7 @@ Trust that remains by design:
 
 ## Server storage and limits
 
-Migration [`0001_baseline.sql`](../../crates/server/migrations/0001_baseline.sql): `account_recovery` (second OPAQUE record and wrap), `recovery_attempts`, `recovery_sessions` (token hashes, single use, 15 minutes), `org_recovery_keys`, `org_recovery_grants`, `org_recovery_escrows`, `org_recovery_requests` (token hashes, 48 hours), `emergency_grants`, `device_links` (claim token hashes, 10 minutes). All writes run in `db::begin_write` transactions; SQL is portable (PostgreSQL with row level security).
+Migration [`0001_baseline.sql`](../../crates/server/migrations/0001_baseline.sql): `account_recovery` (second OPAQUE record and wrap), `recovery_attempts`, `recovery_sessions` (token hashes, single use, 15 minutes), `org_recovery_keys`, `org_recovery_grants`, `org_recovery_escrows`, `org_recovery_requests` (token hashes, 48 hours), `emergency_grants`, `device_links` (claim token hashes, 10 minutes). Every request runs in a transaction that names its context first (`crate::db::Db`), and the tables have forced row level security ([database-security.md](database-security.md)).
 
 Rate limits (in memory, per server process): recovery-code logins share the per-IP authentication limit and count failures per (email, IP) (10), per email (20) and per IP (100) in 15 minutes; the second factor uses the two-factor limits; organization recovery requests are limited to 10 per IP and 3 per email per hour; emergency invitations to 20 per account per hour and 20 contacts per account; device link claims to 10 per IP per minute and 5 open links per account.
 
