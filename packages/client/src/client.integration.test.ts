@@ -2,7 +2,8 @@
  * Runs the full client against a real Passbox server. Start one and set
  * PASSBOX_TEST_SERVER_URL, for example:
  *
- *   PASSBOX_DATABASE_URL=sqlite::memory: cargo run -p passbox-server &
+ *   PASSBOX_DATABASE_URL=postgres://postgres:postgres@localhost:5432/passbox \
+ *     PASSBOX_AUTH_RATE_LIMIT=1000 cargo run -p passbox-server &
  *   PASSBOX_TEST_SERVER_URL=http://127.0.0.1:8080 pnpm --filter @passbox/client test
  *
  * The administration test also needs an admin: start the server with

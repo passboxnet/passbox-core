@@ -13,6 +13,7 @@
       "!**/out",
       "!**/pkg",
       "!**/target",
+      "!.sqlx",
       "!**/next-env.d.ts",
       "!**/*.md",
       "!**/pnpm-lock.yaml"
