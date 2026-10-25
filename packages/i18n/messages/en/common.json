@@ -96,8 +96,6 @@
   "error.rateLimited": "Too many sign-in attempts. Try again in {minutes, plural, one {# minute} other {# minutes}}. If this wasn't you, someone may be guessing – your Secret Key keeps the account safe.",
   "error.conflict": "This item was changed on another device. The latest version has been loaded.",
   "error.capsLock": "Caps Lock is on.",
-  "notice.preview": "Passbox is in early development and has not been independently audited. Don't store secrets you can't afford to lose yet.",
-  "notice.previewBadge": "Preview",
   "term.twoFactor": "Two-factor sign-in",
   "term.recoveryCode": "Recovery code",
   "term.securityKey": "Security key",

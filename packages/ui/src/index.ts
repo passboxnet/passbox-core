@@ -1,4 +1,5 @@
 export { AlertCard, type AlertCardProps, type AlertTone } from "./AlertCard";
+export { Avatar, type AvatarProps, type AvatarSize, Fab, type FabProps, initials } from "./Avatar";
 export { Badge, type BadgeProps, type BadgeTone, type BadgeVariant, Kbd, Pill, type PillProps } from "./Badge";
 export {
   Button,

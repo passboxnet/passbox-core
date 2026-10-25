@@ -2,7 +2,8 @@ import { type ButtonHTMLAttributes, forwardRef, type ReactNode } from "react";
 import { cn } from "./cn";
 import { Spinner } from "./Spinner";
 
-export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "subtle" | "soft";
+/** `onAccent`: icon buttons on a solid accent surface (the selected list row). */
+export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "subtle" | "soft" | "onAccent";
 export type ButtonSize = "xs" | "sm" | "md" | "lg" | "icon" | "icon-sm" | "icon-lg";
 /** `rounded` (default) for app chrome, `pill` for calls to action and marketing. */
 export type ButtonShape = "rounded" | "pill";
@@ -23,6 +24,7 @@ const variants: Record<ButtonVariant, string> = {
   subtle: "bg-surface-raised text-text hover:bg-border active:bg-border-strong",
   soft: "bg-accent-soft text-accent hover:bg-accent hover:text-accent-contrast active:bg-accent-pressed",
   danger: "bg-danger text-danger-contrast shadow-xs hover:brightness-110 active:brightness-95",
+  onAccent: "text-accent-contrast hover:bg-accent-hover active:bg-accent-pressed",
 };
 
 const sizes: Record<ButtonSize, string> = {
