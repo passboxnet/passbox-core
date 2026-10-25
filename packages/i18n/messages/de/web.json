@@ -1686,5 +1686,15 @@
   "settings.websiteIcons": "Website-Icons anzeigen",
   "settings.websiteIconsDescription": "Lädt die Icons der Websites in Ihrem Tresor über Ihren Passbox-Server, sodass die Websites dieses Gerät nie sehen. Ihr Server erfährt dabei, welche Websites Sie gespeichert haben; die Inhalte bleiben verschlüsselt.",
   "settings.websiteIconsOff": "Ihr Passbox-Server lädt keine Website-Icons, daher zeigt Passbox stattdessen Initialen.",
-  "security.dataSource": "Daten: {name}"
+  "security.dataSource": "Daten: {name}",
+  "admin.console.eyebrow": "Dieser Server",
+  "admin.console.sections": "Bereiche der Administration",
+  "admin.overview.accounts": "Konten",
+  "admin.overview.accountsDetail": "Alle, die sich anmelden können",
+  "admin.overview.organizations": "Organisationen",
+  "admin.overview.organizationsDetail": "Teams und Familien",
+  "admin.overview.members": "Mitglieder",
+  "admin.overview.membersDetail": "{guests, plural, one {# Gast} other {# Gäste}} · {serviceAccounts, plural, one {# Dienstkonto} other {# Dienstkonten}} (kostenlos)",
+  "admin.overview.mailQueue": "Wartende E-Mails",
+  "admin.overview.mailQueueDetail": "{failed, plural, =0 {Keine fehlgeschlagen} one {# fehlgeschlagen} other {# fehlgeschlagen}}"
 }

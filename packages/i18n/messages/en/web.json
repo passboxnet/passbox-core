@@ -1686,5 +1686,15 @@
   "settings.websiteIcons": "Show website icons",
   "settings.websiteIconsDescription": "Loads the icons of the websites in your vault through your Passbox server, so the websites never see this device. Your server learns which websites you saved; the contents stay encrypted.",
   "settings.websiteIconsOff": "Your Passbox server doesn't load website icons, so Passbox shows initials instead.",
-  "security.dataSource": "Data: {name}"
+  "security.dataSource": "Data: {name}",
+  "admin.console.eyebrow": "This server",
+  "admin.console.sections": "Administration sections",
+  "admin.overview.accounts": "Accounts",
+  "admin.overview.accountsDetail": "Everyone who can sign in",
+  "admin.overview.organizations": "Organizations",
+  "admin.overview.organizationsDetail": "Teams and families",
+  "admin.overview.members": "Members",
+  "admin.overview.membersDetail": "{guests, plural, one {# guest} other {# guests}} · {serviceAccounts, plural, one {# service account} other {# service accounts}} (free)",
+  "admin.overview.mailQueue": "Emails waiting",
+  "admin.overview.mailQueueDetail": "{failed, plural, =0 {None failed} one {# failed} other {# failed}}"
 }
