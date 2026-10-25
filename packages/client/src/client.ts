@@ -10,6 +10,7 @@ import {
   type AttachmentUsageResponse,
   type AuditExport,
   type AuditQuery,
+  type BreachCatalog,
   type ChainCheck,
   type ClientKind,
   type EmailMonitoring,
@@ -63,7 +64,10 @@ import {
 import {
   type AnalysisCore,
   analyzeSecurity,
+  type BreachedSite,
   type BreachMode,
+  bundledBreachCatalog,
+  type CatalogInfo,
   checkLookalike,
   DEFAULT_REPORT_OPTIONS,
   type ExposedEmail,
@@ -71,6 +75,7 @@ import {
   type Lookalike,
   type ReportOptions,
   type SecurityReport,
+  siteBreachCounts,
   withDismissed,
 } from "./analysis";
 import {
@@ -412,6 +417,23 @@ const USAGE_FLUSH_DELAY_MS = 5000;
 /** When the security aggregate was last reported, per account and organization (wave D6). */
 const SECURITY_REPORT_KEY = "passbox.securityReport";
 const SECURITY_REPORT_INTERVAL_MS = 24 * 60 * 60 * 1000;
+/** The breach catalogue from the server (public data, the same for everyone): `{ etag, catalog }`. */
+const BREACH_CATALOG_KEY = "passbox.breachCatalog";
+/** Per account: the newest catalogue date the user was alerted about (Unix ms). */
+const BREACH_SEEN_KEY = "passbox.breachSeen";
+
+/** What `refreshBreachCatalog` found. */
+export interface BreachCatalogStatus {
+  /** The server offers the catalogue (otherwise the bundled snapshot is used). */
+  available: boolean;
+  /** A newer catalogue was downloaded just now. */
+  changed: boolean;
+  version: string;
+  /** Newest added or modified date of its entries (Unix ms). */
+  updatedAt: number;
+  entries: number;
+  bundled: boolean;
+}
 
 /** What a client reports about an item of an organization's vault. */
 export type ClientAuditAction = "item_viewed" | "secret_revealed" | "item_copied" | "item_filled";
@@ -1683,7 +1705,121 @@ export class PassboxClient {
       userInputs: this.strengthContext(),
       breachCounts,
       exposedEmails: this.exposedEmails,
+      siteBreaches: this.storedBreachCatalog()?.catalog,
     });
+  }
+
+  // --- Breach catalogue ("compromised websites") ------------------------------------
+
+  private cachedCatalog: { raw: string; value: { etag: string | null; catalog: BreachCatalog } } | undefined;
+
+  private storedBreachCatalog(): { etag: string | null; catalog: BreachCatalog } | undefined {
+    const raw = this.storage.getItem(BREACH_CATALOG_KEY);
+    if (!raw) return undefined;
+    if (this.cachedCatalog?.raw === raw) return this.cachedCatalog.value;
+    try {
+      const value = JSON.parse(raw) as { etag: string | null; catalog: BreachCatalog };
+      if (!Array.isArray(value.catalog?.breaches)) return undefined;
+      this.cachedCatalog = { raw, value };
+      return value;
+    } catch {
+      return undefined;
+    }
+  }
+
+  private bundledCatalogInfo(): Omit<CatalogInfo, "bundled"> {
+    return (
+      bundledBreachCatalog(this.core as unknown as AnalysisCore) ?? {
+        version: "bundled",
+        updatedAt: 0,
+        entries: 0,
+        source: "Have I Been Pwned",
+        sourceUrl: "https://haveibeenpwned.com/",
+        license: "CC BY 4.0",
+      }
+    );
+  }
+
+  /** The breach catalogue in use on this device: from the server, or the bundled snapshot. */
+  breachCatalogStatus(available = true, changed = false): BreachCatalogStatus {
+    const stored = this.storedBreachCatalog()?.catalog;
+    if (stored) {
+      return {
+        available,
+        changed,
+        version: stored.version,
+        updatedAt: stored.updatedAt,
+        entries: stored.breaches.length,
+        bundled: false,
+      };
+    }
+    const bundled = this.bundledCatalogInfo();
+    return {
+      available,
+      changed,
+      version: bundled.version,
+      updatedAt: bundled.updatedAt,
+      entries: bundled.entries,
+      bundled: true,
+    };
+  }
+
+  /**
+   * Checks the server's breach catalogue and downloads it (conditionally,
+   * with the stored `ETag`) when it is newer than the one on this device.
+   * One document for everyone, no session needed: the server never learns
+   * which sites the user has. Matching happens in `securityReport`.
+   */
+  async refreshBreachCatalog(): Promise<BreachCatalogStatus> {
+    const version = await this.api.breach.catalogVersion();
+    if (!version) return this.breachCatalogStatus(false);
+    const stored = this.storedBreachCatalog();
+    const local = this.breachCatalogStatus();
+    // An older catalogue than ours (a server that has not fetched yet) is not worth downloading.
+    if (stored?.catalog.version === version.version || version.updatedAt < local.updatedAt) {
+      return local;
+    }
+    const response = await this.api.breach.catalog(stored?.etag ?? null);
+    if (response.status === "unavailable") return this.breachCatalogStatus(false);
+    if (response.status === "not_modified") return local;
+    this.storage.setItem(BREACH_CATALOG_KEY, JSON.stringify({ etag: response.etag, catalog: response.catalog }));
+    this.emit();
+    return this.breachCatalogStatus(true, true);
+  }
+
+  private breachSeenKey(): string | undefined {
+    const account = this.keyring?.accountId ?? this.deviceAccount?.accountId;
+    return account ? `${BREACH_SEEN_KEY}.${account}` : undefined;
+  }
+
+  /**
+   * Breached websites with open, not dismissed findings that were published
+   * (or changed) after the last `acknowledgeBreachAlerts`: notify the user
+   * about these, then acknowledge. Breaches already in the bundled snapshot
+   * show in the security check but are not announced.
+   */
+  breachAlerts(options: ReportOptions = DEFAULT_REPORT_OPTIONS, now = Date.now()): BreachedSite[] {
+    const catalog = this.storedBreachCatalog()?.catalog;
+    const key = this.breachSeenKey();
+    if (!catalog || !key) return [];
+    const seen = Number(this.storage.getItem(key) ?? this.bundledCatalogInfo().updatedAt) || 0;
+    const changedAt = new Map(
+      catalog.breaches.map((b) => [b.name, Math.max(Date.parse(b.addedDate) || 0, Date.parse(b.modifiedDate) || 0)]),
+    );
+    const report = this.securityReport(options, now);
+    const dismissed = new Set(
+      report.findings.filter((f) => f.kind === "breached_site" && f.dismissed).map((f) => f.itemId),
+    );
+    return report.breachedSites.filter(
+      (site) =>
+        (changedAt.get(site.name) ?? 0) > seen && [...site.affected, ...site.possibly].some((id) => !dismissed.has(id)),
+    );
+  }
+
+  /** Marks the current catalogue as announced. */
+  acknowledgeBreachAlerts(): void {
+    const key = this.breachSeenKey();
+    if (key) this.storage.setItem(key, String(this.breachCatalogStatus().updatedAt));
   }
 
   /** Dismisses (or restores) one finding of one item; stored encrypted in the item and synced. */
@@ -3531,13 +3667,22 @@ export class PassboxClient {
         ? undefined
         : this.passwordScore >= policy.minPasswordScore;
     const aggregate = securityAggregate(this.health(), meets);
+    let report: SecurityReport | undefined;
     let reported = 0;
     for (const org of this.orgs()) {
       if (org.kind !== "team" || org.status !== "confirmed") continue;
       const key = `${SECURITY_REPORT_KEY}.${keyring.accountId}.${org.id}`;
       const last = Number(this.storage.getItem(key) ?? 0);
       if (now - last < SECURITY_REPORT_INTERVAL_MS) continue;
-      await this.api.orgAdmin.putSecurityReport(org.id, aggregate);
+      // Breached websites: counts for the logins in this organization's vaults only.
+      report ??= this.securityReport(DEFAULT_REPORT_OPTIONS, now);
+      const orgItems = new Set(
+        this.snapshot.items.filter((i) => this.vaults.get(i.vaultId)?.orgId === org.id).map((i) => i.id),
+      );
+      await this.api.orgAdmin.putSecurityReport(org.id, {
+        ...aggregate,
+        siteBreaches: siteBreachCounts(report, orgItems),
+      });
       this.storage.setItem(key, String(now));
       reported++;
     }

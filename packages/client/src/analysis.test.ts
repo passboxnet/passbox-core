@@ -3,7 +3,17 @@ import { createRequire } from "node:module";
 import * as core from "@passbox/core-wasm";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import { ALIAS_PROVIDERS, AliasError, createAlias } from "./aliases";
-import { analyzeSecurity, checkLookalike, DEFAULT_REPORT_OPTIONS, siteSupport, withDismissed } from "./analysis";
+import {
+  analyzeSecurity,
+  bundledBreachCatalog,
+  checkLookalike,
+  DEFAULT_REPORT_OPTIONS,
+  dataClassKey,
+  type SecurityReport,
+  siteBreachCounts,
+  siteSupport,
+  withDismissed,
+} from "./analysis";
 import { FIELD, newItemData } from "./items";
 
 beforeAll(async () => {
@@ -47,7 +57,7 @@ describe("analyzeSecurity", () => {
     expect(kinds("gh")).toEqual(expect.arrayContaining(["missing_two_factor", "passkey_available"]));
     const twoFactor = report.findings.find((f) => f.kind === "missing_two_factor");
     expect(twoFactor?.documentationUrl).toMatch(/^https:\/\//);
-    expect(report.categories).toHaveLength(16);
+    expect(report.categories).toHaveLength(17);
     expect(report.directoryDates[0]).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
 
@@ -60,6 +70,82 @@ describe("analyzeSecurity", () => {
     expect(report.findings.find((f) => f.kind === "weak")?.dismissed).toBe(true);
     expect(report.score).toBe(100);
     expect(withDismissed(dismissed ?? item.data, "weak", false)).not.toHaveProperty("securityIgnore");
+  });
+});
+
+describe("breached websites", () => {
+  const breach = (name: string, domain: string, addedAt: number, dataClasses: string[], sensitive = false) => ({
+    name,
+    title: name,
+    domain,
+    breachDate: new Date(addedAt).toISOString().slice(0, 10),
+    addedDate: new Date(addedAt).toISOString().replace(/\.\d{3}Z$/, "Z"),
+    modifiedDate: new Date(addedAt).toISOString().replace(/\.\d{3}Z$/, "Z"),
+    pwnCount: 1000,
+    dataClasses,
+    verified: true,
+    sensitive,
+  });
+  const catalog = (breaches: ReturnType<typeof breach>[]) => ({
+    version: "test",
+    updatedAt: Math.max(...breaches.map((b) => Date.parse(b.addedDate))),
+    source: "Have I Been Pwned",
+    sourceUrl: "https://haveibeenpwned.com/",
+    license: "CC BY 4.0",
+    breaches,
+  });
+
+  it("flags logins whose password is older than the breach", () => {
+    const old = {
+      ...login("old", "x9$Lq!2vR#pW7zK@", "https://www.netflix.com/login"),
+      createdAt: NOW - 400 * 86_400_000,
+    };
+    const changed = {
+      ...login("changed", "G7#kP2!mQ9$wX4&z", "https://netflix.com", "other"),
+      createdAt: NOW - 400 * 86_400_000,
+    };
+    changed.data.passwordHistory = [{ value: "before", replacedAt: NOW - 86_400_000 }];
+    const report = analyzeSecurity(core, [old, changed], {
+      ...input,
+      siteBreaches: catalog([breach("Netflix", "netflix.com", NOW - 5 * 86_400_000, ["Email addresses", "Passwords"])]),
+    });
+    const finding = report.findings.find((f) => f.kind === "breached_site");
+    expect(finding).toMatchObject({
+      itemId: "old",
+      severity: "high",
+      fix: "change_password",
+      breaches: ["Netflix"],
+      breachNames: ["Netflix"],
+      dataClasses: ["Email addresses", "Passwords"],
+      documentationUrl: "https://www.netflix.com/.well-known/change-password",
+    });
+    expect(report.findings.some((f) => f.kind === "breached_site" && f.itemId === "changed")).toBe(false);
+    expect(report.breachedSites[0]).toMatchObject({ name: "Netflix", affected: ["old"], fixed: ["changed"] });
+    expect(report.breachCatalog).toMatchObject({ version: "test", bundled: false, source: "Have I Been Pwned" });
+    expect(report.fixFirst.some((p) => p.kinds.includes("breached_site"))).toBe(true);
+    expect(dataClassKey("Passwords")).toBe("passwords");
+    expect(dataClassKey("Something new")).toBeUndefined();
+  });
+
+  it("uses the bundled snapshot without a catalogue", () => {
+    const adobe = { ...login("adobe", "x9$Lq!2vR#pW7zK@", "https://adobe.com"), createdAt: 1_000_000_000_000 };
+    const report = analyzeSecurity(core, [adobe], input);
+    expect(report.breachCatalog.bundled).toBe(true);
+    expect(report.findings.find((f) => f.kind === "breached_site")?.breachNames).toContain("Adobe");
+    const bundled = bundledBreachCatalog(core);
+    expect(bundled?.entries).toBeGreaterThan(500);
+    expect(bundled?.version).toMatch(/^bundled-\d{4}-\d{2}-\d{2}$/);
+  });
+
+  it("counts an organization's logins per breach, without sensitive breaches", () => {
+    const report = {
+      breachedSites: [
+        { name: "A", title: "A", sensitive: false, affected: ["1", "x"], possibly: [], fixed: ["2"] },
+        { name: "S", title: "S", sensitive: true, affected: ["1"], possibly: [], fixed: [] },
+        { name: "B", title: "B", sensitive: false, affected: ["x"], possibly: [], fixed: [] },
+      ],
+    } as unknown as SecurityReport;
+    expect(siteBreachCounts(report, new Set(["1", "2"]))).toEqual([{ name: "A", title: "A", open: 1, fixed: 1 }]);
   });
 });
 

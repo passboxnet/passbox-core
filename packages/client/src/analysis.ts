@@ -6,9 +6,12 @@
  * for what leaves the device.
  */
 
+import type { BreachCatalog } from "@passbox/api-client";
+
 export type FindingKind =
   | "breached"
   | "exposed_email"
+  | "breached_site"
   | "lookalike"
   | "reused"
   | "weak"
@@ -28,6 +31,7 @@ export type FindingKind =
 export const FINDING_KINDS: readonly FindingKind[] = [
   "breached",
   "exposed_email",
+  "breached_site",
   "lookalike",
   "reused",
   "weak",
@@ -79,8 +83,53 @@ export interface Finding {
   expires?: string;
   daysLeft?: number;
   email?: string;
+  /** ExposedEmail, BreachedSite: breach titles. */
   breaches?: string[];
   similarToPrevious?: boolean;
+  /** BreachedSite: Have I Been Pwned names of the breaches (details in `SecurityReport.breachedSites`). */
+  breachNames?: string[];
+  /** BreachedSite: date of the most recent breach (`YYYY-MM-DD`). */
+  breachDate?: string;
+  /** BreachedSite: kinds of exposed data (Have I Been Pwned's names). */
+  dataClasses?: string[];
+  /** BreachedSite: when the password was set is unknown. */
+  possibly?: boolean;
+}
+
+/** A breached website that concerns saved logins. */
+export interface BreachedSite {
+  name: string;
+  title: string;
+  domain: string;
+  /** `YYYY-MM-DD`. */
+  breachDate: string;
+  /** When the breach was published (ISO 8601). */
+  addedDate: string;
+  pwnCount: number;
+  dataClasses: string[];
+  verified: boolean;
+  /** Keep the name off lock screens and notifications. */
+  sensitive: boolean;
+  exposesCredentials: boolean;
+  /** Item IDs whose password is older than the breach. */
+  affected: string[];
+  /** Item IDs where it is unknown when the password was set. */
+  possibly: string[];
+  /** Item IDs whose password was changed after the breach. */
+  fixed: string[];
+}
+
+/** The breach catalogue a report used. */
+export interface CatalogInfo {
+  version: string;
+  /** Newest added or modified date of its entries (Unix ms). */
+  updatedAt: number;
+  entries: number;
+  /** The snapshot bundled with the app (no catalogue from the server yet). */
+  bundled: boolean;
+  source: string;
+  sourceUrl: string;
+  license: string;
 }
 
 export interface CategorySummary {
@@ -119,6 +168,9 @@ export interface SecurityReport {
   duplicateGroups: string[][];
   /** Snapshot dates of the bundled 2FA and passkey site lists. */
   directoryDates: [string, string];
+  /** Breached websites of saved logins, open ones first, newest first. */
+  breachedSites: BreachedSite[];
+  breachCatalog: CatalogInfo;
 }
 
 /** The user's report settings (device-local). */
@@ -163,6 +215,8 @@ export interface SiteSupport {
 /** The part of `@passbox/core-wasm` the analysis needs. */
 export interface AnalysisCore {
   analyzeSecurity(itemsJson: string, optionsJson: string): string;
+  /** Present in builds with the breach catalogue. */
+  bundledBreachCatalog?(): string;
   checkLookalike(host: string, savedJson: string): string | undefined;
   siteSupport(host: string): string | undefined;
 }
@@ -179,6 +233,8 @@ export interface AnalysisInput extends ReportOptions {
   /** Breach counts by item ID; omit when no breach check ran. */
   breachCounts?: Record<string, number> | undefined;
   exposedEmails?: ExposedEmail[] | undefined;
+  /** The breach catalogue from the server; omit to use the bundled snapshot. */
+  siteBreaches?: BreachCatalog | undefined;
 }
 
 /** Runs the analysis in the shared core. */
@@ -189,7 +245,12 @@ export function analyzeSecurity(
 ): SecurityReport {
   const json = core.analyzeSecurity(
     JSON.stringify(items.map((item) => ({ id: item.id, createdAt: item.createdAt ?? 0, data: item.data }))),
-    JSON.stringify({ ...input, breachCounts: input.breachCounts ?? null, exposedEmails: input.exposedEmails ?? [] }),
+    JSON.stringify({
+      ...input,
+      breachCounts: input.breachCounts ?? null,
+      exposedEmails: input.exposedEmails ?? [],
+      siteBreaches: input.siteBreaches ?? null,
+    }),
   );
   return JSON.parse(json) as SecurityReport;
 }
@@ -222,6 +283,84 @@ export function withDismissed<T extends object>(data: T, kind: FindingKind, dism
   if (next.length === 0) delete copy[SECURITY_IGNORE_KEY];
   else copy[SECURITY_IGNORE_KEY] = next;
   return copy as T;
+}
+
+/** The catalogue bundled with the WebAssembly core (without entries). */
+export function bundledBreachCatalog(core: AnalysisCore): Omit<CatalogInfo, "bundled"> | null {
+  return core.bundledBreachCatalog ? (JSON.parse(core.bundledBreachCatalog()) as Omit<CatalogInfo, "bundled">) : null;
+}
+
+/** Data classes that let an attacker sign in (as in the core). */
+export const CREDENTIAL_CLASSES: readonly string[] = [
+  "Passwords",
+  "Password hints",
+  "Historical passwords",
+  "Auth tokens",
+  "Security questions and answers",
+  "PINs",
+];
+
+/** Have I Been Pwned's data classes with their own translation (`dataClass.<key>`). */
+export const DATA_CLASS_KEYS: Readonly<Record<string, string>> = {
+  Passwords: "passwords",
+  "Password hints": "passwordHints",
+  "Historical passwords": "historicalPasswords",
+  "Auth tokens": "authTokens",
+  "Security questions and answers": "securityQuestions",
+  PINs: "pins",
+  "Email addresses": "emailAddresses",
+  Usernames: "usernames",
+  Names: "names",
+  "Phone numbers": "phoneNumbers",
+  "Physical addresses": "physicalAddresses",
+  "Dates of birth": "datesOfBirth",
+  "IP addresses": "ipAddresses",
+  Genders: "genders",
+  "Geographic locations": "geographicLocations",
+  "Credit cards": "creditCards",
+  "Partial credit card data": "partialCreditCards",
+  "Bank account numbers": "bankAccounts",
+  "Government issued IDs": "governmentIds",
+  "Passport numbers": "passportNumbers",
+  "Social security numbers": "socialSecurityNumbers",
+  "Private messages": "privateMessages",
+  Purchases: "purchases",
+  "Job titles": "jobTitles",
+  Employers: "employers",
+  "Social media profiles": "socialMediaProfiles",
+  "Website activity": "websiteActivity",
+  "Device information": "deviceInformation",
+};
+
+/** The `dataClass.*` translation key of a data class, or `undefined` (show Have I Been Pwned's English name). */
+export function dataClassKey(dataClass: string): string | undefined {
+  return DATA_CLASS_KEYS[dataClass];
+}
+
+/** Counts of one breach in an organization's aggregate (no item details). */
+export interface SiteBreachCount {
+  name: string;
+  title: string;
+  /** Logins still affected or possibly affected. */
+  open: number;
+  /** Logins whose password was changed after the breach. */
+  fixed: number;
+}
+
+/**
+ * Per-breach counts of the items in `itemIds` (an organization's vaults).
+ * Sensitive breaches are left out: the organization learns nothing about
+ * what kind of sites its members use beyond the shared logins.
+ */
+export function siteBreachCounts(report: SecurityReport, itemIds: ReadonlySet<string>): SiteBreachCount[] {
+  const counts: SiteBreachCount[] = [];
+  for (const site of report.breachedSites) {
+    if (site.sensitive) continue;
+    const open = [...site.affected, ...site.possibly].filter((id) => itemIds.has(id)).length;
+    const fixed = site.fixed.filter((id) => itemIds.has(id)).length;
+    if (open + fixed > 0) counts.push({ name: site.name, title: site.title, open, fixed });
+  }
+  return counts.slice(0, 500);
 }
 
 /** How breach checks reach Have I Been Pwned. */
