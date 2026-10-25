@@ -254,8 +254,10 @@ focus ring (`focus` token, 2 px, offset 2 px), a 44 px (iOS, touch web) or
 
 | Component | Anatomy | States and rules |
 | --- | --- | --- |
-| `Button` | label, optional leading icon or spinner; `variant` primary / secondary / soft / ghost / subtle / danger; `size` xs–lg, icon sizes; `shape="pill"` | Hover darkens the fill and adds `shadow-glow` (primary); pressed uses `accent-pressed`; `loading` disables and shows a spinner. Pill shape for calls to action and marketing; rounded (12 px) in app chrome. One primary button per view. |
-| `IconButton` | icon only, required `label` (accessible name) | Ghost by default; `shape="circle"` + primary + `lg` = the floating “+”. |
+| `Button` | label, optional leading icon or spinner; `variant` primary / secondary / soft / ghost / subtle / danger / onAccent (icon buttons on a solid accent row); `size` xs–lg, icon sizes; `shape="pill"` | Hover darkens the fill and adds `shadow-glow` (primary); pressed uses `accent-pressed`; `loading` disables and shows a spinner. Pill shape for calls to action and marketing; rounded (12 px) in app chrome. One primary button per view. |
+| `IconButton` | icon only, required `label` (accessible name) | Ghost by default. |
+| `Fab` | the raised round “+”: 56 px circle on the signature gradient, glow, a 4 px canvas-colored ring | One per screen, bottom right of the desktop/web item list (opens “Neuer Eintrag”); the mobile bottom bar uses the same anatomy. Required `label`. |
+| `Avatar` | round tile with up to two initials; `tone` tint (a hue per person) or signature (the signed-in account, on the gradient); sizes xs 24 / sm 32 / md 36 / lg 44 / xl 64 | People only (account card, unlock, “Geteilt mit”, members); items use favicon tiles. Decorative: the name is always next to it. |
 | `Input`, `PasswordInput`, `Textarea` | label, field (12 px radius, `field` background), hint or error below, leading/trailing slots | Focus: accent border + 4 px focus halo; error: danger border and `danger-text` message that says what happened and what to do. Password fields: mono, reveal toggle, Caps Lock hint. |
 | `Field` | read-only item field: caption label, value, actions (reveal, copy, open) | Hairline divider; secrets in mono; actions are `IconButton`s with labels. |
 | `SegmentedControl` | pill track (`surface-sunken`), selected pill on `surface-overlay` | Native radio inputs; arrow keys work. |
@@ -271,7 +273,7 @@ focus ring (`focus` token, 2 px, offset 2 px), a 44 px (iOS, touch web) or
 | `Monogram`, `SiteIcon` (`ItemIcon`) | tile with favicon on a light tile, or a tinted initial | Sizes sm 24 / md 32 / lg 40 / xl 56 / 2xl 72; radius 28 % of the size. Always a real favicon or brand icon when available. |
 | `StatTile` | tone chip (icon) or dot, big tabular number, label, optional detail | Security report: Gefährdet (danger), Mehrfach (warning), Schwach (warning), Sicher (success). Tone only in the chip, the number stays `text`. `interactive` makes it a filter button. |
 | `AlertCard` | `card`: icon tile, title, description, action; `banner`: solid strip with action (the orange “Zeit, Ihr Passwort zu ändern · Jetzt ändern”) | Danger and warning use `role="alert"`, others `role="status"`; optional dismiss. |
-| `EmptyState` | accent-soft icon tile, title, description, action | Every list has one; it says what to do next. |
+| `EmptyState` | `brand` (default): the icon on the signature gradient inside two dotted rings with corner dots (the panel motif in miniature) and a soft glow; `quiet`: an accent-soft tile; title, description, action | Every list has one; it says what to do next. `quiet` for searches without results and small inline lists. |
 | `Skeleton` | shimmering placeholder shape | Hidden from screen readers; the region sets `aria-busy`. Shimmer stops with reduced motion. |
 | `SidebarItem` | icon or colored category dot (`tag-*`), label, count | Active: `surface-raised` with accent icon, `aria-current="page"`. `sidebarItemClassName` for router links. |
 | `ListRow` | icon tile, title (service), subtitle (username), trailing (shield badge, time) | Selected = solid `accent` fill with white text and glow; hover = `surface-raised`. `listRowClassName` for router links. |
@@ -289,12 +291,31 @@ focus ring (`focus` token, 2 px, offset 2 px), a 44 px (iOS, touch web) or
 
 ### Desktop and web vault
 
-Three columns on a glass window (desktop app) or the canvas (web): sidebar
-(account, sections, vaults with colored dots, full-width “Neuer Eintrag”
-button at the bottom), item list (search with ⌘K hint, rows with 40 px icon
-tiles, selected row solid blue, shield badge on risky rows), detail (56 px
-icon tile, title, category pill, actions; inline warning banner; fields with
-reveal and copy; one-time password with countdown ring; “Geteilt mit”).
+Three columns on the app canvas (`bg-app`: the canvas with two soft glows in
+the signature hues). The sidebar (`surface` at 70 % with backdrop blur) has
+the account card (gradient avatar, email, family or team), the sections
+Alle Einträge / Favoriten / Sicherheits-Check / Familie & Team / Papierkorb
+with counts, categories, vaults with colored dots (`vaultColor`: the personal
+vault blue, others a stable color per vault), tools, the sync state and the
+full-width “Neuer Eintrag +” pill at the bottom. The item list (glass) has a
+44 px search field, rows with 40 px favicon tiles, the selected row in solid
+accent with glow (on phones only once the user opened an item), a shield
+badge on rows with findings, and the raised round “+” (`Fab`). The detail
+(`surface` at 85 %) shows the 56 px icon tile, the title with a category
+pill and a vault chip, the actions favourite / edit / share / more, the
+orange banner “Zeit, Ihr Passwort zu ändern · Jetzt ändern” with the
+reasons below it, field cards with always visible reveal and copy buttons,
+the one-time password with its countdown ring, “Geteilt mit” with avatars
+and the metadata. Pages without a list (settings, security check,
+generator, sharing, developer tools, import) use `Page` and `Panel` in
+`apps/web/src/views/PageHeader.tsx`: an eyebrow, the `title` step, cards
+with icon tiles; the same anatomy as the admin consoles. Sign-up, sign-in,
+unlock and the Emergency Kit sit on the backdrop gradient with grain in a
+bezelled `Panel` (dark brand half with `GridFrame` next to the form).
+
+In the desktop app on Windows 11 the window uses the Mica material and the
+canvas becomes translucent (`html[data-window-material="mica"]`); elsewhere
+the canvas stays solid (see docs/desktop.md).
 
 ## Iconography
 
