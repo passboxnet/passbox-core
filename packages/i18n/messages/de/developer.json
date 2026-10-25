@@ -93,9 +93,9 @@
   "agent.setup.title": "KI-Agenten verbinden",
   "agent.setup.description": "Agenten sehen Titel und Feldnamen, nie geheime Werte, und brauchen für jede Verwendung Ihre Freigabe hier.",
   "agent.setup.step1": "Erstellen Sie ein Dienstkonto mit Lesezugriff auf einen Tresor, der nur enthält, was der Agent braucht.",
-  "agent.setup.step2": "Installieren Sie pbx und fügen Sie es Ihrem Agenten als MCP-Server hinzu, zum Beispiel in Claude Code:",
+  "agent.setup.step2": "Installieren Sie pbx und fügen Sie es Ihrem Agenten als MCP-Server hinzu:",
   "agent.setup.step3": "Lassen Sie Passbox auf diesem oder einem anderen Gerät geöffnet: Freigaben erscheinen hier.",
-  "agent.setup.more": "Cursor, VS Code, Claude Desktop und Codex: siehe docs/architecture/ai-agents.md.",
+  "agent.setup.more": "Details und weitere Agenten: docs/architecture/ai-agents.md.",
 
   "serviceAccount.title": "Dienstkonten",
   "serviceAccount.description": "Maschinen-Identitäten für CI-Pipelines, Server und KI-Agenten. Jedes hat einen eigenen Schlüssel, Zugriff auf die Tresore Ihrer Wahl und nie mehr Zugriff als Sie selbst.",
@@ -161,5 +161,13 @@
   "serviceAccount.event.access_removed": "Zugriff auf Tresor entfernt",
   "serviceAccount.event.updated": "Geändert",
   "serviceAccount.event.revoked": "Widerrufen",
-  "serviceAccount.event.other": "Sonstige Aktivität"
+  "serviceAccount.event.other": "Sonstige Aktivität",
+  "agent.setup.client": "Ihr Agent",
+  "agent.setup.where.claudeCode": "Im Terminal (Benutzerbereich, nicht in einer eingecheckten .mcp.json):",
+  "agent.setup.where.claudeDesktop": "In claude_desktop_config.json (Settings → Developer → Edit Config):",
+  "agent.setup.where.cursor": "In ~/.cursor/mcp.json (global, nicht im Projekt):",
+  "agent.setup.where.vscode": "In Ihrer Benutzer-mcp.json (Befehlspalette → „MCP: Open User Configuration“). VS Code fragt nach dem Token, er steht also nicht in der Datei:",
+  "agent.setup.where.codex": "In ~/.codex/config.toml:",
+  "agent.setup.copy": "Konfiguration kopieren",
+  "agent.setup.configuration": "Konfiguration"
 }

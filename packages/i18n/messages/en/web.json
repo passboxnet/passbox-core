@@ -1659,5 +1659,9 @@
   "alias.error.no_key": "The service item has no API key.",
   "alias.error.network": "{provider} couldn't be reached. Some services block requests from web pages; then use the browser extension or the desktop app.",
   "alias.serverPlaceholder": "https://aliases.example.com",
-  "alias.domainPlaceholder": "anonaddy.me"
+  "alias.domainPlaceholder": "anonaddy.me",
+  "settings.websiteIcons": "Show website icons",
+  "settings.websiteIconsDescription": "Loads the icons of the websites in your vault through your Passbox server, so the websites never see this device. Your server learns which websites you saved; the contents stay encrypted.",
+  "settings.websiteIconsOff": "Your Passbox server doesn't load website icons, so Passbox shows initials instead.",
+  "security.dataSource": "Data: {name}"
 }

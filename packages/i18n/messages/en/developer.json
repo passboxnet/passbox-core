@@ -93,9 +93,9 @@
   "agent.setup.title": "Connect an AI agent",
   "agent.setup.description": "Agents see titles and field names, never secret values, and need your approval here for every use.",
   "agent.setup.step1": "Create a service account with read access to a vault that holds only what the agent needs.",
-  "agent.setup.step2": "Install pbx and add it to your agent as an MCP server, for example in Claude Code:",
+  "agent.setup.step2": "Install pbx and add it to your agent as an MCP server:",
   "agent.setup.step3": "Keep Passbox open on this or another device: approvals appear here.",
-  "agent.setup.more": "Cursor, VS Code, Claude Desktop and Codex: see docs/architecture/ai-agents.md.",
+  "agent.setup.more": "Details and other agents: docs/architecture/ai-agents.md.",
 
   "serviceAccount.title": "Service accounts",
   "serviceAccount.description": "Machine identities for CI pipelines, servers and AI agents. Each has its own key, access to the vaults you choose, and never more access than you.",
@@ -161,5 +161,13 @@
   "serviceAccount.event.access_removed": "Vault access removed",
   "serviceAccount.event.updated": "Changed",
   "serviceAccount.event.revoked": "Revoked",
-  "serviceAccount.event.other": "Other activity"
+  "serviceAccount.event.other": "Other activity",
+  "agent.setup.client": "Your agent",
+  "agent.setup.where.claudeCode": "In a terminal (user scope, not a committed .mcp.json):",
+  "agent.setup.where.claudeDesktop": "In claude_desktop_config.json (Settings → Developer → Edit Config):",
+  "agent.setup.where.cursor": "In ~/.cursor/mcp.json (global, not in the project):",
+  "agent.setup.where.vscode": "In your user mcp.json (Command Palette → “MCP: Open User Configuration”). VS Code asks for the token, so it isn't stored in the file:",
+  "agent.setup.where.codex": "In ~/.codex/config.toml:",
+  "agent.setup.copy": "Copy configuration",
+  "agent.setup.configuration": "Configuration"
 }
