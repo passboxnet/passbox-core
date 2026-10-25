@@ -502,6 +502,22 @@
   background: var(--pb-gradient-signature);
 }
 
+/*
+ * The app canvas behind the vault window (web and desktop): the canvas with
+ * two soft glows in the signature hues, so the glass columns have something
+ * to sit on. Never behind long text without a surface in between.
+ */
+@utility bg-app {
+  background:
+    radial-gradient(55% 45% at 0% 0%, color-mix(in oklch, var(--pb-accent) 16%, transparent), transparent 70%),
+    radial-gradient(
+      45% 55% at 100% 100%,
+      color-mix(in oklch, var(--color-tag-violet) 11%, transparent),
+      transparent 70%
+    ),
+    var(--pb-canvas);
+}
+
 /* Alias kept for existing markup. */
 @utility bg-accent-gradient {
   background: var(--pb-gradient-signature);
