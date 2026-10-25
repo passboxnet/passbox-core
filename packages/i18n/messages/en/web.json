@@ -1788,5 +1788,7 @@
   "security.alert.details": "Details",
   "settings.transparency": "Security design",
   "settings.transparencyDescription": "How Passbox protects your data, and how to report a vulnerability.",
-  "settings.sections": "Settings sections"
+  "settings.sections": "Settings sections",
+  "desktop.tray.open": "Open Passbox",
+  "desktop.tray.quit": "Quit Passbox"
 }
