@@ -57,9 +57,13 @@ request code    = 4 groups of 5 digits from SHA-256("passbox/v1/recovery-request
 
 All objects use the canonical encoding and signatures of [sharing.md](sharing.md#canonical-encoding-and-domain-separation) (own type tags, so a signature over one type never verifies as another); sealing is the X-Wing sealing described there.
 
-**Setup.** An owner or admin turns recovery on for the organization (Settings → Recovery → "Set up recovery"). Their client creates the recovery key pair, signs the public bundle and seals the private seed to itself. Admins who hold the key can seal it for other verified admins (`grant_org_recovery`); the server checks that the target is a confirmed owner or admin. Demoting or removing an admin deletes their copy on the server.
+**On by default (since 25.10.2026).** Every organization created from now on, family or team, gets recovery set up right away: the creating client creates the recovery key (below), signs the organization's first policy with `require_recovery_enrollment = true` (`PolicyRules::new_org_defaults`, otherwise restricting nothing) and enrolls the creator. Members are enrolled automatically: the client seals the escrow as part of joining, as soon as an admin confirmed the membership (the server accepts escrows only from confirmed members), at the latest on the next unlock (`enrollRequiredOrgRecovery` / `enroll_required_org_recovery`, called after accepting, from the policy banner and after unlock). **Consent is explicit and honest:** the invitation preview carries `recovery: true` when the organization has recovery set up and its policy requires it, and the web app shows before "Accept invitation" that the organization's admins can restore the member's access, that the approving admin's device briefly holds the account key and could technically read the member's data, and that every recovery is logged and mailed. The create dialog tells the creator the same. **Guests are never enrolled** and policies that require recovery do not apply to them (an organization must not be able to take over an external person's account); the preview says `recovery: false` for them.
 
-**Opt-in per member.** A member turns on "Allow recovery through {organization}". Their client verifies the recovery bundle against the organization's verified roster (signed by a verified owner or admin, right organization and version), seals the account key to it and signs the escrow. The confirmation dialog says honestly that an approving admin could technically read the member's data. Turning it off deletes the escrow (and cancels open requests). Removing a member from the organization deletes their escrow. A policy that makes it mandatory is not implemented yet.
+**Setup.** An owner or admin turns recovery on for an organization that does not have it yet (Settings → Recovery → "Set up recovery"; organizations created before 25.10.2026 keep the opt-in flow). Their client creates the recovery key pair, signs the public bundle and seals the private seed to itself. Admins who hold the key can seal it for other verified admins (`grant_org_recovery`); the server checks that the target is a confirmed owner or admin. Demoting or removing an admin deletes their copy on the server.
+
+**Per member.** A member turns on "Allow recovery through {organization}" (or is enrolled automatically, above). Their client verifies the recovery bundle against the organization's verified roster (signed by a verified owner or admin, right organization and version), seals the account key to it and signs the escrow. The confirmation dialog says honestly that an approving admin could technically read the member's data. Where the policy requires recovery, the switch cannot be turned off; otherwise turning it off deletes the escrow (and cancels open requests). Removing a member from the organization deletes their escrow.
+
+**Turning it off org-wide.** Admins can turn recovery off for everyone (`DELETE /api/v1/orgs/{id}/recovery`, `turnOffOrgRecovery`, Administration → Recovery): the recovery key, every admin's copy and every member's escrow are deleted and open requests cancelled. The server refuses with 403 `recovery_required` while the policy requires recovery, so admins first turn off "Require recovery" in the policy (a signed change members can see). Setting recovery up again later creates a new key; members then enroll again.
 
 **Flow.**
 
@@ -71,7 +75,7 @@ All objects use the canonical encoding and signatures of [sharing.md](sharing.md
 
 **Why the request code.** The server forwards the ephemeral public key from the device to the admin. A malicious server could substitute its own key and receive the account key. The request code is derived from the ephemeral key alone (not from server-chosen data), so to make the codes match the server would have to find a key pair whose code collides with the member's: about 2⁶⁶ attempts within the request's lifetime. The admin's client computes the code from the key it is about to seal to; the member's device from its own key.
 
-**Families** use the same mechanism: the organizer is the owner and sets up recovery; family members opt in.
+**Families** use the same mechanism: the organizer is the owner; recovery is on from the start and family members are enrolled when they join (guests excepted).
 
 ## Emergency access (C3)
 
@@ -135,7 +139,7 @@ What it **can** still do (honest list):
 
 Trust that remains by design:
 
-- **An approving admin can read the member's data.** Their client holds the member's account key while it re-seals it; a malicious admin client could keep it. This is the price of any admin recovery (1Password and Bitwarden are the same). Mitigations: recovery is opt-in per member, every approval needs an out-of-band check and the code comparison, every recovery is logged and mailed to the member and all recovery admins. Multi-admin approval (Shamir k-of-n) is not implemented yet.
+- **An approving admin can read the member's data.** Their client holds the member's account key while it re-seals it; a malicious admin client could keep it. This is the price of any admin recovery (1Password and Bitwarden are the same). Mitigations: members are told before they join (and can decline the invitation), guests are never enrolled, admins can turn recovery off org-wide, every approval needs an out-of-band check and the code comparison, every recovery is logged and mailed to the member and all recovery admins. Multi-admin approval (Shamir k-of-n) is not implemented yet.
 - **A former recovery admin keeps what they had.** Demoting or removing an admin deletes their copy on the server, but they could have kept the recovery private key. The recovery key must then be rotated and members must escrow again; rotation exists in the protocol (key versions) but has no UI yet.
 - **Whoever has the Emergency Kit with a recovery code** (and the second factor, if 2FA is on) can recover the account.
 
@@ -170,7 +174,8 @@ Endpoints are listed in [docs/api/openapi.yaml](../api/openapi.yaml) under the t
 
 ## Open issues
 
-- Multi-admin approval (Shamir k-of-n of the recovery key) and a policy that makes the escrow mandatory.
+- Multi-admin approval (Shamir k-of-n of the recovery key). (A policy that makes the escrow mandatory exists, `require_recovery_enrollment`, and is on for new organizations.)
+- The mobile apps do not call `enroll_required_org_recovery` yet (the FFI has it); members using only a mobile app are enrolled on their next web or desktop unlock.
 - Rotating the organization recovery key (protocol supports key versions; no UI) after a recovery admin leaves.
 - Security keys as the second factor of a recovery by code.
 - Emergency "full takeover" (deliberately not implemented, see above), reminder mails during the waiting period, and a mail when the waiting period ends without action.

@@ -4,6 +4,8 @@
 
 This document describes the first AI-native wave as implemented, following the concept in [docs/planning/ai-native.md](../planning/ai-native.md) (German; principles §3, data classes §4, architecture §6). Agent access (`pbx mcp`, K1) and the agent audit (K12) are a separate building block: see [ai-agents.md](ai-agents.md). `pbx scan` (K10) uses no AI and is documented in [cli.md](../cli.md#finding-leaked-secrets-pbx-scan).
 
+The binding rules are in [ADR 0006: AI principles](../adr/0006-ai-principles.md): secrets never reach a model (local or remote), the only exception being the explicit per-grant `passbox_reveal` for agents; AI off by default and opt-in per feature; bring your own model, no Passbox-hosted inference; members' names and emails pseudonymised by default for a future admin assistant (K9).
+
 ## Principles in code
 
 - **AI is off by default and opt-in per feature.** Settings start with `enabled: false` and no features. Every feature has its own switch and states what it sends.
@@ -13,7 +15,7 @@ This document describes the first AI-native wave as implemented, following the c
   - `packages/ai` (`@passbox/ai`): `src/boundary.test.ts` fails if `package.json` depends on `@passbox/core-wasm`, `@passbox/client` or `@passbox/api-client`, or if a source file imports them (or reaches into other packages with `../../`); `biome.json` has a `noRestrictedImports` rule for `packages/ai/**` so `pnpm lint` fails too.
 - **Only the redaction layer builds model input.** `Redacted<T>` has no public constructor: a newtype with a `pub(crate)` constructor in Rust, a class with a private constructor and a module-private seal in TypeScript (which also throws at run time). Providers accept only `Redacted` input. The feature modules are the redaction layer: they take raw data and keep only what their data classes allow.
 - **Secrets (D4) are not representable.** There is no data class for passwords, TOTP seeds, card numbers, private keys or hidden fields. Additionally a `SecretGuard` (memory only, per request) holds values that must never leave the device; every string a redaction function lets through is checked against it (equality ignoring case, or containment, for values of 4+ characters).
-- **Your model, your key.** Providers: the browser's built-in model (Chrome Prompt API, `LanguageModel`) or a model server on `localhost` (on-device), a self-hosted OpenAI-compatible endpoint (Ollama, vLLM, LocalAI, LiteLLM), or a cloud provider with an OpenAI-compatible API and your own key (Mistral, OpenAI, EU hosters). There is no Passbox-operated inference service. Self-hosted instances get every feature.
+- **Your model, your key.** Providers: the browser's built-in model (Chrome Prompt API, `LanguageModel`) or a model server on `localhost` (on-device), a self-hosted OpenAI-compatible endpoint (Ollama, vLLM, LocalAI, LiteLLM), or a cloud provider with your own key: an OpenAI-compatible API (presets for Mistral, IONOS, STACKIT, Scaleway, Langdock, OpenAI) or Anthropic's native Messages API. There is no Passbox-operated inference service, also no "EU-hosted" one ([ADR 0006](../adr/0006-ai-principles.md)). Self-hosted instances get every feature.
 
 ## Components
 
@@ -32,7 +34,8 @@ JSON answer ──▶ feature validates it (schema, allowed values, local counts
 
 | Piece | Rust (`crates/ai`) | TypeScript (`packages/ai`) |
 | --- | --- | --- |
-| Types, provider trait | `provider.rs` (`AiProvider`, `AiRequest`, `ModelLocation`, `OpenAiCompatible`, `HttpPost`) | `types.ts`, `providers.ts` (`openAiCompatibleProvider`, `promptApiProvider`, `providerFromSettings`, `recordingProvider`) |
+| Types, provider trait | `provider.rs` (`AiProvider`, `AiRequest`, `ModelLocation`, `OpenAiCompatible`, `Anthropic`, `provider_from_settings`, `HttpPost`) | `types.ts`, `providers.ts` (`openAiCompatibleProvider`, `anthropicProvider`, `promptApiProvider`, `providerFromSettings`, `recordingProvider`) |
+| Provider presets | `presets.rs` (`PROVIDER_PRESETS`; a test checks it matches the TypeScript list) | `presets.ts` (`PROVIDER_PRESETS`, `presetById`, `presetForEndpoint`) |
 | Redaction | `redact.rs` (`Redacted`, `DataClass`, `SecretGuard`) | `redacted.ts` |
 | Gateway, settings, policy, log | `gateway.rs` | `gateway.ts`, `settings.ts` |
 | K6 import mapping | `import_mapping.rs` | `importMapping.ts` |
@@ -52,7 +55,9 @@ Stored per account **in this browser** (`localStorage`, key `passbox.ai.<account
     "endpoint": "http://gpu.lan:11434/v1",
     "model": "llama3.2",
     "apiKeyItemId": "…",
-    "jurisdiction": "EU"
+    "jurisdiction": "EU",
+    "api": "openai",
+    "preset": "ionos"
   },
   "features": ["import-mapping", "security-copilot"]
 }
@@ -61,7 +66,24 @@ Stored per account **in this browser** (`localStorage`, key `passbox.ai.<account
 - `location` is `on-device`, `self-hosted` or `cloud`. On-device endpoints must be loopback (`localhost`, `127.0.0.0/8`, `::1`); an empty endpoint means the browser's built-in model.
 - Endpoint rules (same in Rust and TypeScript): `https://` always; `http://` only for loopback, private IPv4 ranges, IPv6 unique local addresses and `.local`/`.internal`/`.lan` names, and never for cloud providers; no user name or password in the URL.
 - **API keys are vault items.** Settings hold the item ID only. The app reads the item's password (or first hidden field) when it creates the provider and sends it as the `Authorization: Bearer` header. It is never part of the prompt. Requests are sent with `credentials: "omit"` and `referrerPolicy: "no-referrer"`.
+- `api` is `openai` (default, `POST {endpoint}/chat/completions` with `Authorization: Bearer`) or `anthropic` (`POST {endpoint}/messages` with `x-api-key`, `anthropic-version: 2023-06-01` and, in the browser, `anthropic-dangerous-direct-browser-access: true`, which Anthropic requires for calls from a web page; the key is the user's own). `preset` names the preset the settings came from; typing another endpoint clears it.
 - The endpoint must allow cross-origin requests from the web app's origin (for Ollama: `OLLAMA_ORIGINS`).
+
+### Provider presets (cloud, your own key)
+
+Settings → AI → "Provider" fills in endpoint, API, region and a suggested model. Base URLs were checked in each provider's official documentation on 25.10.2026; model names change more often, so the suggestion is only a start (the UI says when a suggested model was not confirmed in the docs). The data classes the features send (D1 structure, D2 metadata; never D4 secrets) are the same for every provider, and the cloud confirmation names provider and region.
+
+| Preset | API | Base URL | Region | Suggested model | Notes |
+| --- | --- | --- | --- | --- | --- |
+| Mistral AI | OpenAI-compatible | `https://api.mistral.ai/v1` | EU (France) | `mistral-small-latest` (not confirmed in the docs) | |
+| IONOS AI Model Hub | OpenAI-compatible | `https://openai.inference.de-txl.ionos.com/v1` | EU (Germany, Berlin) | `meta-llama/Meta-Llama-3.1-8B-Instruct` | Bearer token from the IONOS DCD |
+| STACKIT AI Model Serving | OpenAI-compatible | `https://api.openai-compat.model-serving.eu01.onstackit.cloud/v1` | EU (Germany, `eu01`) | none: choose a chat model from the STACKIT portal | auth token from the STACKIT portal |
+| Scaleway Generative APIs | OpenAI-compatible | `https://api.scaleway.ai/v1` | EU (France, Paris) | `llama-3.3-70b-instruct` | IAM secret key |
+| Langdock | OpenAI-compatible | `https://api.langdock.com/openai/eu/v1` | EU region (company in Germany) | none: models depend on the workspace | API key with the Completion API scope; requests go to the model deployment configured for the workspace; the docs name the `eu` region but give no further residency guarantee |
+| OpenAI | OpenAI-compatible | `https://api.openai.com/v1` | USA | `gpt-4.1-mini` (not confirmed in the docs) | |
+| Anthropic | Anthropic Messages API | `https://api.anthropic.com/v1` | USA (inference can be limited to the US; no EU option documented) | `claude-opus-5-5` (also `claude-sonnet-5-5`, `claude-haiku-5-5`) | native API, not the OpenAI compatibility layer |
+
+Each preset has an optional `domain` (for example `ionos.de`) for a favicon. Sources: the providers' API documentation linked in `presets.ts`.
 - **Opt-in disclosure:** each feature switch says what it sends; the panel shows where it goes ("Goes to your server gpu.lan:11434"); switching a feature on with a cloud provider asks for confirmation and names the host and the country or region.
 - **Organization policy** (`AiPolicy`: allowed locations, forbidden data classes, required endpoint prefix) is enforced by the gateway. It is not yet delivered by the server or the extension's managed storage; that comes with the organization policies (D-wave).
 

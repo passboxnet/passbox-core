@@ -92,6 +92,17 @@ Every account has an X-Wing (hybrid X25519 + ML-KEM-768) encryption key pair and
 
 Code: [`crates/core/src/identity.rs`](../../crates/core/src/identity.rs), [`crates/core/src/directory.rs`](../../crates/core/src/directory.rs), [`crates/core/src/sharing`](../../crates/core/src/sharing).
 
+### Decision: hybrid post-quantum encryption stays (25.10.2026)
+
+The owner decided to keep the hybrid post-quantum key exchange for everything that is sealed to a public key: X-Wing (X25519 + ML-KEM-768 with a SHA3-256 combiner) for account, group, organization, recovery, service account, device link and trusted-device keys. Reasons:
+
+- **Harvest now, decrypt later.** Sealed vault keys are long-lived and sit on the server; an attacker who records them today could open them once a large quantum computer exists. Symmetric encryption (XChaCha20-Poly1305, 256-bit keys) is not affected in the same way, but whoever opens a sealed key gets the vault.
+- **No loss against classical attacks.** X-Wing is secure as long as either X25519 or ML-KEM-768 holds, so a weakness in the young ML-KEM implementation does not make sharing weaker than X25519 alone.
+- **Changing later would be expensive.** Moving from a classical to a hybrid KEM afterwards means re-sealing every grant and asking every member to publish new keys; starting hybrid avoids that migration.
+- **Cost is acceptable.** Public keys are 1216 bytes and ciphertexts 1120 bytes per sealing, which matters only for the size of sync responses of very large organizations; the WebAssembly build stays within budget.
+
+Signatures stay Ed25519 for now (they need to be unforgeable now, not in the future); hybrid ML-DSA signatures are planned with account key version 2 (see Planned).
+
 ## Extension sessions (implemented)
 
 Manifest V3 service workers are stopped when idle, which would drop the unlocked keyring. `Keyring::export_session` serializes the account key, vault keys (all epochs), group and organization keys and the account key pairs (format version 2; version 1 still imports) and encrypts them with XChaCha20-Poly1305 under a fresh random 256-bit session key, bound to `passbox/v1/session|{account_id}`; `Keyring::import_session` restores them. Every export uses a new session key.
