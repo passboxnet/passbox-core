@@ -68,9 +68,10 @@ Rules are string pairs, so new rules do not need a new object format: a client t
 | `forbid_external_sharing` | bool | no app function takes items out of an organization's vaults today ("Share" only copies personal items into shared vaults); `canMoveBetween` in the TS client is the check for moving and copying (B5) and share links (B7) when they arrive |
 | `share_links` | `allowed`/`restricted`/`forbidden` | `PolicyRules::check_share_link` (core, wasm `shareLinkProblem`) for share links (B7); the share link implementation calls it before creating a link |
 | `share_link_max_days`, `share_link_max_views` | `1`–`365`, `0` = unlimited (only with `restricted`) | as above |
-| `require_recovery_enrollment` | bool | banner with one-click enrollment; reports and the recovery section list who is missing |
+| `require_recovery_enrollment` | bool (`true` in the first policy of every organization created since 25.10.2026, see [recovery.md](recovery.md)) | banner with one-click enrollment; reports and the recovery section list who is missing |
 | `allow_personal_vault` | bool, default `true` | apps do not create personal vaults or new items in them; **server** refuses both (`403 policy_violation`); existing items stay readable so they can be moved |
 | `report_item_usage` | bool, default `false` | members' apps sign and upload "viewed", "revealed", "copied" and "filled" events for this organization's vaults; members see that it is on ("Policy" on the organization page) |
+| `allow_agent_reveal` | bool, default `false` | members may let AI agents see values of this organization's items (`passbox_reveal`), each time with an explicit tick in the approval; checked by the approving app's core, the agent broker and the server (403 `policy_violation` / `agent_reveal_not_allowed`). Policies signed before the rule existed, and organizations without a policy, forbid it ([ADR 0006](../adr/0006-ai-principles.md)) |
 
 ### Verification and pinning
 
@@ -157,6 +158,7 @@ The web app reports opening an item, revealing a hidden field, copying (username
 - **Members:** role, status, joined, two-factor (TOTP, security keys), recovery enrollment (escrow for the current recovery key), last sign-in, groups, number of vaults they can open, and the last security aggregate.
 - **Vaults:** creation, key epoch, rotation pending, item count, last write, last logged use, members and managers, and `unused` (no writes and no logged use for 90 days).
 - **Access:** the effective role per person and vault with the path (`direct` and/or group IDs).
+- **Counts:** `memberCount` (confirmed members who are not guests, the billable members of the hosted service), `guestCount` (confirmed guests: free and view-only), `serviceAccountCount` (active service accounts of the members: free, fair use) and `agentLimitPerMember` (0 = unlimited). The overview shows members, guests and agents as separate tiles; the members list says "n members · m guests (free, view-only, not counted as members)". Recovery enrollment shares are computed over members, not guests.
 
 **Security aggregates.** Once a day after unlocking, each member's app sends every team organization it is a confirmed member of `PUT /orgs/{id}/security-report { score, total, weak, reused, unsecured, passwordMeetsPolicy }`, computed by the Watchtower analysis over the logins the member can see in personal vaults and the organization's vaults. Only numbers leave the device; the server checks ranges. The web console shows a security table with "only problems", an access matrix (view/edit/manage, through groups), unused vaults and a CSV export of the security table.
 

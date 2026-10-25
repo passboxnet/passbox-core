@@ -166,7 +166,16 @@ Snapshots never contain passkeys, password history, attachments or one-time pass
 
 ## Guests (B8)
 
-Guests are organization members with the role `guest`: they see only the vaults shared with them (directly or through a group), and the roster shows them only themselves and the owners and admins. They do not see groups. Pricing (whether guests count as members) is open.
+Guests are organization members with the role `guest`, for external people (clients of an agency, a babysitter in a family). Decided on 25.10.2026: **guests are unlimited, always free and view-only.**
+
+- **What they see:** only the vaults shared with them (directly; they do not see groups), and the roster shows them only themselves and the owners and admins. In a family they do not get the family vault.
+- **What they can do:** open, copy and fill items of those vaults, nothing else. They cannot create or change items, vaults, attachments, share links or invitations, ask for more than `view`, or give service accounts access to those vaults.
+- **Server enforcement:** `access::shared_role` caps a guest's role at `view` whatever the signed manifest says (for example after a member was made a guest), so every write path that requires write access answers 403 with the code **`guest_view_only`** and a message that says what to do (ask an admin to become a member). The same code is returned for share links for the organization's vaults, access requests above `view`, service account grants on them, and for sharing a vault with a guest with more than `view` (`POST /vaults/{id}/members`). Invitations, groups and shared vaults already need an admin.
+- **Client enforcement:** the core caps the verified role at `OrgRole::max_vault_role()` (no `role_mismatch` warning for capped guests) and `share_vault` refuses more than `view` for a guest. The web app replaces edit, share and link actions with "You are a guest" and an explanation, and the sharing dialog only offers `view` for guests.
+- **Not billable:** guests never count as members. The organization report has `memberCount` (confirmed, not guests) and `guestCount`; the admin overview and members list show both separately, and the instance admin settings show members and guests (accounts that are only guests) separately.
+- **Recovery:** guests are never enrolled in organization recovery, and a policy that requires recovery does not apply to them (an organization must not be able to take over an external person's account).
+
+As with other roles, this is enforced by honest servers and clients; a guest holds the vault key and could produce valid ciphertexts, which other clients would accept (see "Server-side authorization" above).
 
 ## Access requests (B9)
 
