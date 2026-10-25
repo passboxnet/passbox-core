@@ -632,6 +632,23 @@ impl<B: Backend> Broker<B> {
     /// Finds a usable grant for `action` on `items` that allows `target`
     /// (a command line or output path). Rechecks it with the server.
     fn find_grant(&self, action: &str, items: &[&Item], target: &str) -> Result<Option<String>> {
+        // Requests the person may have answered since the agent last asked
+        // (for example when it calls the same tool again instead of
+        // passbox_check_access): fetch their decisions first.
+        let waiting: Vec<String> = self
+            .lock_grants()
+            .iter()
+            .filter(|g| {
+                g.closed.is_none()
+                    && g.decision.is_none()
+                    && g.request.actions.iter().any(|a| a == action)
+                    && g.covers_items(items)
+            })
+            .map(|g| g.request.id.clone())
+            .collect();
+        for id in waiting {
+            self.check(&id)?;
+        }
         let now = now_ms();
         let candidates: Vec<String> = self
             .lock_grants()
