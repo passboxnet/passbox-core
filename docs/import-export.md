@@ -49,6 +49,8 @@ Only Bitwarden JSON and KeePassXC XML export passkeys with their private key. Pa
 
 `detectColumns(headers)` suggests a target for each column from English and German header names (for example *Bezeichnung*, *Benutzername*, *Kennwort*, *Webseite*, *Bemerkung*, *Ordner*). Exact names win over partial matches, each target is used once, a lone email column becomes the username, and columns that look secret (*PIN*, *Code*, *Geheim*) become hidden fields. Everything else becomes a visible extra field. The user can change every column in the mapping step; `mappingProblem` blocks mappings without any useful column or with a target used twice.
 
+Columns the header rules do not recognize can get a suggestion in the mapping step (K6): **Suggest fields** uses value patterns on the device (URLs → website, email addresses → username, `otpauth://`/Base32 → one-time password, random strings → hidden field); with the AI feature switched on, **Suggest with AI** asks the configured model and sends only the headers and a pattern profile per column, never cell values. Suggestions are marked and can be undone. See [architecture/ai-gateway.md](architecture/ai-gateway.md#k6-smart-import-mapping-import-mapping-d1).
+
 ### Duplicates
 
 An imported login is a duplicate of an existing one when the normalized host (lower case, without `www.`, ignoring path and scheme) and the username (case-insensitive) match. Other items match on category and title. Items in the trash are ignored. For each duplicate the user chooses **Skip** (default), **Update existing** (imported values replace existing ones, new fields are added, tags and passkeys are merged, a different note is appended, and the old password goes into the password history) or **Keep both**.
