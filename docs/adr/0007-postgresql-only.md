@@ -29,4 +29,3 @@ Passbox was not released yet, so no installation has data to convert.
 - A new table is not finished until it has a policy and grants (checklist in database-security.md); the RLS tests fail for a table without forced row level security.
 - Changing a query that a macro checks needs a database to refresh `.sqlx/` (see CONTRIBUTING.md).
 - Migrations from before this ADR cannot be applied to the new baseline; development databases have to be recreated.
-- The mobile apps' host tests (`apps/android/ffi-test`, `apps/ios`) still start the server with `sqlite::memory:` and need a PostgreSQL URL before they run again.
