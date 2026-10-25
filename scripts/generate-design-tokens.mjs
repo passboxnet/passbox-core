@@ -144,13 +144,6 @@ function cssTheme() {
   lines.push("");
   for (const [k, v] of Object.entries(tokens.tag)) lines.push(`--color-tag-${k}: ${v};`);
   lines.push("");
-  for (const name of colorNames) lines.push(`--color-${name}: var(--pb-${name});`);
-  for (const [alias, target] of Object.entries(colorAliases)) lines.push(`--color-${alias}: var(--pb-${target});`);
-  lines.push("");
-  lines.push("/* `text-accent`, `text-danger`, …: the text-safe variant; `bg-*` keeps the fill. */");
-  for (const [name, target] of Object.entries(textColorOverrides))
-    lines.push(`--text-color-${name}: var(--pb-${target});`);
-  lines.push("");
   lines.push("--text-2xs: 0.75rem;");
   lines.push("--text-2xs--line-height: 1rem;");
   for (const [name, t] of Object.entries(tokens.type)) {
@@ -166,6 +159,22 @@ function cssTheme() {
   }
   lines.push("");
   for (const [name, p] of Object.entries(tokens.motion.easing)) lines.push(`--ease-${name}: ${bezier(p)};`);
+  return lines;
+}
+
+/**
+ * Semantic colors, emitted in `@theme inline`: utilities then read `var(--pb-*)`
+ * where they are used, so a subtree with data-theme="dark"/"light" gets its own
+ * colors (a plain `@theme` would resolve the variables once at :root).
+ */
+function cssThemeInline() {
+  const lines = [];
+  for (const name of colorNames) lines.push(`--color-${name}: var(--pb-${name});`);
+  for (const [alias, target] of Object.entries(colorAliases)) lines.push(`--color-${alias}: var(--pb-${target});`);
+  lines.push("");
+  lines.push("/* `text-accent`, `text-danger`, …: the text-safe variant; `bg-*` keeps the fill. */");
+  for (const [name, target] of Object.entries(textColorOverrides))
+    lines.push(`--text-color-${name}: var(--pb-${target});`);
   return lines;
 }
 
@@ -811,7 +820,19 @@ function output(path, produce) {
 }
 
 output("packages/ui/src/tokens.css", (text) =>
-  replaceRegion(replaceRegion(text, "theme", cssTheme(), "tokens.css", "  "), "vars", cssVars(), "tokens.css", "  "),
+  replaceRegion(
+    replaceRegion(
+      replaceRegion(text, "theme", cssTheme(), "tokens.css", "  "),
+      "theme-inline",
+      cssThemeInline(),
+      "tokens.css",
+      "  ",
+    ),
+    "vars",
+    cssVars(),
+    "tokens.css",
+    "  ",
+  ),
 );
 output("docs/design/board.html", (text) => replaceRegion(text, "vars", cssVars(), "board.html", "      "));
 output("apps/ios/Shared/DesignTokens.swift", () => swiftFile());

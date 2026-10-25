@@ -74,7 +74,10 @@ color utility (`bg-surface`, `text-text-muted`, `border-hairline`,
   off-white canvas with soft shadows.
 
 `data-theme="light"` or `data-theme="dark"` works on `<html>` (forced theme)
-and on any element (a light website panel on a dark page).
+and on any element (a light website panel on a dark page). This works because
+the semantic colors and shadows are declared `@theme inline`: `bg-surface`
+compiles to `var(--pb-surface)` and resolves on the element itself
+(`apps/web/src/themeTokens.test.ts` guards it).
 
 ## Shape, space and elevation
 
