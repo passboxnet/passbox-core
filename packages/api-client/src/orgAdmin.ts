@@ -177,6 +177,21 @@ export interface OrgReport {
   serviceAccountCount?: number;
   /** Fair-use limit of agents and service accounts per member; 0 = unlimited. */
   agentLimitPerMember?: number;
+  /**
+   * Breached websites (Have I Been Pwned) of logins in this organization's
+   * vaults, from the members' reports. Older servers omit it.
+   */
+  siteBreaches?: OrgSiteBreach[];
+}
+
+/** One breached website across the members' reports. */
+export interface OrgSiteBreach {
+  name: string;
+  title: string;
+  /** Members who still have affected logins. */
+  affectedMembers: number;
+  /** Members who changed all their affected logins. */
+  fixedMembers: number;
 }
 
 export interface OrgSettings {
@@ -222,6 +237,8 @@ export interface OrgAdminApi {
       reused: number;
       unsecured: number;
       passwordMeetsPolicy?: boolean;
+      /** Per breached website: logins still open and fixed (counts only). */
+      siteBreaches?: { name: string; title: string; open: number; fixed: number }[];
     },
   ): Promise<void>;
   settings(orgId: string): Promise<OrgSettings>;

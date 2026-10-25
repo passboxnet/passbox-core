@@ -66,6 +66,8 @@ export interface ServerMeta {
   breachProxy?: boolean;
   /** Whether email breach monitoring is available. Missing on older servers. */
   emailMonitoring?: boolean;
+  /** Whether `/api/v1/breaches/catalog` serves the breach catalogue. Missing on older servers. */
+  breachCatalog?: boolean;
 }
 
 export interface PreloginResponse {
@@ -834,23 +836,42 @@ export function createClient(options: ClientOptions = {}): PassboxApi {
     deviceLinks: deviceLinkApi(call),
     sso: ssoApi(call),
     orgAdmin: orgAdminApi(call),
-    breach: breachApi(call, async (path) => {
-      const headers: Record<string, string> = { accept: "text/plain" };
-      const token = options.getToken?.();
-      if (token) headers.authorization = `Bearer ${token}`;
-      const response = await doFetch(`${baseUrl}${path}`, { method: "GET", headers });
-      if (response.status === 404) return null;
-      if (!response.ok) {
-        let errorBody: ErrorBody | undefined;
-        try {
-          errorBody = (await response.json()) as ErrorBody;
-        } catch {
-          errorBody = undefined;
+    breach: breachApi(
+      call,
+      async (path) => {
+        const headers: Record<string, string> = { accept: "text/plain" };
+        const token = options.getToken?.();
+        if (token) headers.authorization = `Bearer ${token}`;
+        const response = await doFetch(`${baseUrl}${path}`, { method: "GET", headers });
+        if (response.status === 404) return null;
+        if (!response.ok) {
+          let errorBody: ErrorBody | undefined;
+          try {
+            errorBody = (await response.json()) as ErrorBody;
+          } catch {
+            errorBody = undefined;
+          }
+          throw new ApiError(response.status, path, errorBody);
         }
-        throw new ApiError(response.status, path, errorBody);
-      }
-      return response.text();
-    }),
+        return response.text();
+      },
+      async (path, headers) => {
+        const response = await doFetch(`${baseUrl}${path}`, { method: "GET", headers });
+        if (response.status === 304 || response.status === 404) {
+          return { status: response.status, etag: response.headers.get("etag"), body: null };
+        }
+        if (!response.ok) {
+          let errorBody: ErrorBody | undefined;
+          try {
+            errorBody = (await response.json()) as ErrorBody;
+          } catch {
+            errorBody = undefined;
+          }
+          throw new ApiError(response.status, path, errorBody);
+        }
+        return { status: response.status, etag: response.headers.get("etag"), body: await response.json() };
+      },
+    ),
     developer: developerApi(call),
     comfort: comfortApi(call, raw),
   };

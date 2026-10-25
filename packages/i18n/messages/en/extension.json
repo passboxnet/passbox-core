@@ -244,5 +244,22 @@
   "category.environment": "Environment",
   "settings.appearance": "Appearance",
   "settings.websiteIcons": "Show website icons",
-  "settings.websiteIconsText": "Icons of your saved websites come through your Passbox server, so the websites never see this browser. Your server learns which websites you saved; the contents stay encrypted."
+  "settings.websiteIconsText": "Icons of your saved websites come through your Passbox server, so the websites never see this browser. Your server learns which websites you saved; the contents stay encrypted.",
+  "breach.titleOne": "New data breach at {site}",
+  "breach.titleMany": "{count, plural, one {# new data breach} other {# new data breaches}} of your websites",
+  "breach.body": "{count, plural, one {# of your logins is affected.} other {# of your logins are affected.}} Change the passwords in the security check.",
+  "breach.badgeTitle": "{count, plural, one {# new data breach} other {# new data breaches}} of your websites",
+  "breach.open": "Open the security check",
+  "breach.dismiss": "Got it",
+  "breach.item.affected": "{site} had a data breach on {date} ({data}). This password is older. Change it now.",
+  "breach.item.possibly": "{site} had a data breach on {date} ({data}). It is not known when this password was set – change it to be safe.",
+  "breach.item.affectedUndated": "{site} had a data breach ({data}). This password is older. Change it now.",
+  "breach.item.possiblyUndated": "{site} had a data breach ({data}). It is not known when this password was set – change it to be safe.",
+  "breach.item.change": "Change the password on the website",
+  "breach.source": "Source: Have I Been Pwned (CC BY 4.0). Checked on this device.",
+  "breach.data.passwords": "passwords",
+  "breach.data.emailAddresses": "email addresses",
+  "breach.data.usernames": "usernames",
+  "breach.data.names": "names",
+  "breach.data.phoneNumbers": "phone numbers"
 }

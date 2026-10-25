@@ -24,7 +24,8 @@ pub struct SecurityReportOptions {
 
 #[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
 pub struct SecurityFinding {
-    /// `breached`, `exposed_email`, `lookalike`, `reused`, `weak`, `similar`,
+    /// `breached`, `exposed_email`, `breached_site`, `lookalike`, `reused`,
+    /// `weak`, `similar`,
     /// `insecure_url`, `missing_two_factor`, `expired`, `expiring`, `old`,
     /// `passkey_available`, `duplicate`, `missing_url`, `missing_username`,
     /// `totp_in_same_item`.
@@ -148,6 +149,81 @@ pub struct AliasService {
     pub title: String,
 }
 
+/// The breach catalogue on this device ("compromised websites").
+#[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
+pub struct BreachCatalogStatus {
+    /// The server offers the catalogue; otherwise the bundled snapshot is used.
+    pub available: bool,
+    /// A newer catalogue was downloaded by this call.
+    pub changed: bool,
+    pub version: String,
+    /// Newest added or modified date of the entries (Unix ms).
+    pub updated_at: i64,
+    pub entries: u32,
+    pub bundled: bool,
+    /// Attribution to show with breach data: "Have I Been Pwned".
+    pub source: String,
+    pub source_url: String,
+    pub license: String,
+}
+
+/// A breached website that concerns saved logins (`breached_site` findings).
+#[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
+pub struct BreachedSiteInfo {
+    /// Have I Been Pwned's name (matches `SecurityFinding.breaches` titles).
+    pub name: String,
+    pub title: String,
+    pub domain: String,
+    /// `YYYY-MM-DD`.
+    pub breach_date: String,
+    /// ISO 8601: when the breach was published.
+    pub added_date: String,
+    pub pwn_count: u64,
+    /// Have I Been Pwned's names (`Passwords`, `Email addresses`, …).
+    pub data_classes: Vec<String>,
+    pub verified: bool,
+    /// Keep the name off the lock screen.
+    pub sensitive: bool,
+    /// Passwords or other sign-in secrets were exposed.
+    pub exposes_credentials: bool,
+    /// Item IDs: password older than the breach.
+    pub affected: Vec<String>,
+    /// Item IDs: unknown when the password was set.
+    pub possibly: Vec<String>,
+    /// Item IDs: password changed after the breach.
+    pub fixed: Vec<String>,
+}
+
+fn site_info(site: client::BreachedSite) -> BreachedSiteInfo {
+    BreachedSiteInfo {
+        name: site.name,
+        title: site.title,
+        domain: site.domain,
+        breach_date: site.breach_date,
+        added_date: site.added_date,
+        pwn_count: site.pwn_count,
+        data_classes: site.data_classes,
+        verified: site.verified,
+        sensitive: site.sensitive,
+        exposes_credentials: site.exposes_credentials,
+        affected: site.affected,
+        possibly: site.possibly,
+        fixed: site.fixed,
+    }
+}
+
+fn report_options(options: &SecurityReportOptions) -> client::ReportOptions {
+    client::ReportOptions {
+        old_after_days: options.old_after_days,
+        expiring_within_days: options.expiring_within_days,
+        disabled: options
+            .disabled
+            .iter()
+            .filter_map(|c| client::FindingKind::parse(c))
+            .collect(),
+    }
+}
+
 fn rating(rating: client::Rating) -> String {
     match rating {
         client::Rating::Excellent => "excellent",
@@ -269,6 +345,49 @@ impl PassboxClient {
             two_factor_list_date: report.directory_dates.0,
             passkey_list_date: report.directory_dates.1,
         })
+    }
+
+    /// Checks the server's breach catalogue and downloads it when it is
+    /// newer than the one on this device (one document for everyone; the
+    /// server never learns which sites the user has). Works while locked.
+    /// Blocking; call it at start, on refresh and from background refresh.
+    pub fn refresh_breach_catalog(&self) -> Result<BreachCatalogStatus> {
+        let status = self.inner.refresh_breach_catalog()?;
+        Ok(BreachCatalogStatus {
+            available: status.available,
+            changed: status.changed,
+            version: status.version,
+            updated_at: status.updated_at,
+            entries: status.entries,
+            bundled: status.bundled,
+            source: "Have I Been Pwned".into(),
+            source_url: "https://haveibeenpwned.com/".into(),
+            license: "CC BY 4.0".into(),
+        })
+    }
+
+    /// Breached websites of saved logins (affected, possibly affected and
+    /// fixed), open ones first. Needs an unlocked vault. Blocking.
+    pub fn breached_sites(&self, options: SecurityReportOptions) -> Result<Vec<BreachedSiteInfo>> {
+        let report = self.inner.security_report(&report_options(&options))?;
+        Ok(report.breached_sites.into_iter().map(site_info).collect())
+    }
+
+    /// Breached websites with open findings that were published after the
+    /// last `acknowledge_breach_alerts()`: show a local notification for
+    /// them (only when the list is not empty), then acknowledge.
+    pub fn breach_alerts(&self, options: SecurityReportOptions) -> Result<Vec<BreachedSiteInfo>> {
+        Ok(self
+            .inner
+            .breach_alerts(&report_options(&options))?
+            .into_iter()
+            .map(site_info)
+            .collect())
+    }
+
+    /// Marks the current catalogue as announced.
+    pub fn acknowledge_breach_alerts(&self) -> Result<()> {
+        Ok(self.inner.acknowledge_breach_alerts()?)
     }
 
     /// Dismisses or restores one finding of one item (stored encrypted in

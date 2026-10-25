@@ -1,4 +1,11 @@
-export type { EmailBreach, EmailMonitoring, MonitoredEmail } from "@passbox/api-client";
+export type {
+  BreachCatalog,
+  BreachCatalogVersion,
+  EmailBreach,
+  EmailMonitoring,
+  MonitoredEmail,
+  SiteBreach,
+} from "@passbox/api-client";
 export {
   AUDIT_CATEGORIES,
   type AuditRecord,
@@ -36,10 +43,16 @@ export {
 export {
   type AnalysisCore,
   analyzeSecurity,
+  type BreachedSite,
   type BreachMode,
+  bundledBreachCatalog,
+  type CatalogInfo,
   type CategorySummary,
+  CREDENTIAL_CLASSES,
   checkLookalike,
+  DATA_CLASS_KEYS,
   DEFAULT_REPORT_OPTIONS,
+  dataClassKey,
   type ExposedEmail,
   FINDING_KINDS,
   type Finding,
@@ -52,7 +65,9 @@ export {
   SECURITY_IGNORE_KEY,
   type SecurityReport,
   type Severity,
+  type SiteBreachCount,
   type SiteSupport,
+  siteBreachCounts,
   siteSupport,
   withDismissed,
 } from "./analysis";

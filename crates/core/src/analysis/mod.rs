@@ -5,13 +5,15 @@
 //! Pure logic over decrypted items, shared by every client: natively by
 //! `passbox-client` (CLI, desktop, iOS and Android through FFI) and through
 //! WebAssembly by the web vault and the extension. Nothing here talks to
-//! the network: breach counts (Have I Been Pwned, k-anonymity) and email
-//! exposures (server-side monitoring) are passed in by the caller, and the
-//! 2FA/passkey site lists are bundled snapshots ([`sites`]).
+//! the network: breach counts (Have I Been Pwned, k-anonymity), email
+//! exposures (server-side monitoring) and the public breach catalogue are
+//! passed in by the caller; the 2FA/passkey site lists and a snapshot of the
+//! breach catalogue are bundled ([`sites`], [`breaches`]).
 //!
 //! Dismissals are stored in the item itself (`securityIgnore`, a list of
 //! finding codes), so they are encrypted and synced like the item.
 
+pub mod breaches;
 pub mod domain;
 pub mod expiry;
 pub mod lookalike;
@@ -129,6 +131,9 @@ pub struct AnalysisOptions {
     pub breach_counts: Option<BTreeMap<String, u64>>,
     /// Results of server-side email monitoring.
     pub exposed_emails: Vec<ExposedEmail>,
+    /// The public breach catalogue (from the server); `None` uses the
+    /// bundled snapshot ([`breaches::bundled`]).
+    pub site_breaches: Option<breaches::BreachCatalog>,
 }
 
 impl Default for AnalysisOptions {
@@ -141,6 +146,7 @@ impl Default for AnalysisOptions {
             disabled: Vec::new(),
             breach_counts: None,
             exposed_emails: Vec::new(),
+            site_breaches: None,
         }
     }
 }
@@ -189,6 +195,8 @@ pub enum FindingKind {
     Breached,
     /// The login's site was breached and its email address was in it.
     ExposedEmail,
+    /// The login's website had a data breach after its password was set.
+    BreachedSite,
     /// The website address looks like another domain (phishing).
     Lookalike,
     /// Other logins use the same password.
@@ -221,9 +229,10 @@ pub enum FindingKind {
 }
 
 impl FindingKind {
-    pub const ALL: [FindingKind; 16] = [
+    pub const ALL: [FindingKind; 17] = [
         Self::Breached,
         Self::ExposedEmail,
+        Self::BreachedSite,
         Self::Lookalike,
         Self::Reused,
         Self::Weak,
@@ -245,6 +254,7 @@ impl FindingKind {
         match self {
             Self::Breached => "breached",
             Self::ExposedEmail => "exposed_email",
+            Self::BreachedSite => "breached_site",
             Self::Lookalike => "lookalike",
             Self::Reused => "reused",
             Self::Weak => "weak",
@@ -269,7 +279,11 @@ impl FindingKind {
     pub fn severity(self) -> Severity {
         match self {
             Self::Breached => Severity::Critical,
-            Self::ExposedEmail | Self::Lookalike | Self::Reused | Self::Weak => Severity::High,
+            Self::ExposedEmail
+            | Self::BreachedSite
+            | Self::Lookalike
+            | Self::Reused
+            | Self::Weak => Severity::High,
             Self::Similar | Self::InsecureUrl | Self::MissingTwoFactor | Self::Expired => {
                 Severity::Medium
             }
@@ -284,7 +298,7 @@ impl FindingKind {
             Self::Breached | Self::Reused | Self::Weak | Self::Similar | Self::Old => {
                 FixAction::ChangePassword
             }
-            Self::ExposedEmail => FixAction::ChangePassword,
+            Self::ExposedEmail | Self::BreachedSite => FixAction::ChangePassword,
             Self::Lookalike => FixAction::CheckWebsite,
             Self::InsecureUrl => FixAction::UseHttps,
             Self::MissingTwoFactor => FixAction::EnableTwoFactor,
@@ -387,6 +401,20 @@ pub struct Finding {
     /// Similar: the password resembles an earlier password of this item.
     #[serde(skip_serializing_if = "std::ops::Not::not", default)]
     pub similar_to_previous: bool,
+    /// BreachedSite: Have I Been Pwned names of the breaches (details in
+    /// [`SecurityReport::breached_sites`]); their titles are in `breaches`.
+    #[serde(skip_serializing_if = "Vec::is_empty", default)]
+    pub breach_names: Vec<String>,
+    /// BreachedSite: date of the most recent of these breaches (`YYYY-MM-DD`).
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub breach_date: Option<String>,
+    /// BreachedSite: kinds of data exposed (Have I Been Pwned's names).
+    #[serde(skip_serializing_if = "Vec::is_empty", default)]
+    pub data_classes: Vec<String>,
+    /// BreachedSite: it is unknown when the password was set, so the login
+    /// is possibly affected.
+    #[serde(skip_serializing_if = "std::ops::Not::not", default)]
+    pub possibly: bool,
 }
 
 impl Finding {
@@ -410,6 +438,10 @@ impl Finding {
             email: None,
             breaches: Vec::new(),
             similar_to_previous: false,
+            breach_names: Vec::new(),
+            breach_date: None,
+            data_classes: Vec::new(),
+            possibly: false,
         }
     }
 }
@@ -480,6 +512,26 @@ pub struct SecurityReport {
     pub duplicate_groups: Vec<Vec<String>>,
     /// Snapshot dates of the bundled 2FA and passkey lists.
     pub directory_dates: (String, String),
+    /// Breaches of sites with saved logins (affected, possibly affected or
+    /// fixed), open ones first, then those that exposed passwords, newest first.
+    pub breached_sites: Vec<breaches::BreachedSite>,
+    /// The breach catalogue the report used.
+    pub breach_catalog: CatalogInfo,
+}
+
+/// Which breach catalogue a report used.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CatalogInfo {
+    pub version: String,
+    /// Newest added or modified date of its entries (Unix ms).
+    pub updated_at: i64,
+    pub entries: u32,
+    /// The snapshot bundled with the app (no catalogue from the server).
+    pub bundled: bool,
+    pub source: String,
+    pub source_url: String,
+    pub license: String,
 }
 
 // --- Analysis -----------------------------------------------------------------------
@@ -616,6 +668,13 @@ pub fn analyze(items: &[AnalysisItem], options: &AnalysisOptions) -> SecurityRep
         }
     }
     let lookalikes = own_lookalikes(&domain_use);
+
+    let catalog = options
+        .site_breaches
+        .as_ref()
+        .unwrap_or_else(|| breaches::bundled());
+    let breach_index = breaches::BreachIndex::new(&catalog.breaches);
+    let mut breached_sites: BTreeMap<String, breaches::BreachedSite> = BTreeMap::new();
 
     let exposures: Vec<(&str, &BreachInfo)> = options
         .exposed_emails
@@ -763,6 +822,14 @@ pub fn analyze(items: &[AnalysisItem], options: &AnalysisOptions) -> SecurityRep
                 f.domain = Some(site_name.clone());
                 f.breaches = matched.iter().map(|b| b.title.clone()).collect();
                 push(f);
+            }
+        }
+        if let (Some(_), Some(url)) = (login.password, &login.url) {
+            if matches!(url.scheme.as_str(), "http" | "https") {
+                if let Some(f) = site_breach_finding(login, url, &breach_index, &mut breached_sites)
+                {
+                    push(f);
+                }
             }
         }
         if duplicate_groups.iter().flatten().any(|m| m == id) {
@@ -924,6 +991,18 @@ pub fn analyze(items: &[AnalysisItem], options: &AnalysisOptions) -> SecurityRep
     fix_first.truncate(FIX_FIRST_LEN);
 
     let (two_factor_date, passkey_date) = sites::snapshot_dates();
+    let mut breached_sites: Vec<breaches::BreachedSite> = if enabled(FindingKind::BreachedSite) {
+        breached_sites.into_values().collect()
+    } else {
+        Vec::new()
+    };
+    breached_sites.sort_by(|a, b| {
+        b.is_open()
+            .cmp(&a.is_open())
+            .then(b.exposes_credentials.cmp(&a.exposes_credentials))
+            .then(b.added_date.cmp(&a.added_date))
+            .then(a.name.cmp(&b.name))
+    });
     SecurityReport {
         score,
         rating,
@@ -938,7 +1017,89 @@ pub fn analyze(items: &[AnalysisItem], options: &AnalysisOptions) -> SecurityRep
         similar_groups,
         duplicate_groups,
         directory_dates: (two_factor_date.to_owned(), passkey_date.to_owned()),
+        breached_sites,
+        breach_catalog: CatalogInfo {
+            version: catalog.version.clone(),
+            updated_at: catalog.updated_at,
+            entries: catalog.breaches.len() as u32,
+            bundled: options.site_breaches.is_none(),
+            source: breaches::SOURCE_NAME.into(),
+            source_url: breaches::SOURCE_URL.into(),
+            license: breaches::SOURCE_LICENSE.into(),
+        },
     }
+}
+
+/// When the login's current password was set: the newest password-history
+/// entry, else when the item was created; 0 when unknown.
+fn password_set_at(item: &AnalysisItem) -> i64 {
+    item.data
+        .password_history
+        .iter()
+        .map(|h| h.replaced_at)
+        .max()
+        .filter(|t| *t > 0)
+        .unwrap_or(item.created_at.max(0))
+}
+
+/// The `breached_site` finding of a login with a password and a web
+/// address, if a breach of its site concerns its current password. Records
+/// every matching breach (also fixed ones) in `sites`.
+fn site_breach_finding(
+    login: &Login,
+    url: &domain::ParsedUrl,
+    index: &breaches::BreachIndex,
+    sites: &mut BTreeMap<String, breaches::BreachedSite>,
+) -> Option<Finding> {
+    use breaches::Exposure;
+    let id = login.item.id.as_str();
+    let set_at = password_set_at(login.item);
+    let mut open: Vec<(&breaches::SiteBreach, bool)> = Vec::new();
+    for breach in index.for_host(&url.host) {
+        let exposure = breaches::exposure(breach, set_at, login.item.created_at);
+        if exposure == Exposure::NotAffected {
+            continue;
+        }
+        let site = sites
+            .entry(breach.name.clone())
+            .or_insert_with(|| breaches::BreachedSite::new(breach));
+        let list = match exposure {
+            Exposure::Affected => &mut site.affected,
+            Exposure::Possibly => &mut site.possibly,
+            _ => &mut site.fixed,
+        };
+        list.push(id.to_owned());
+        if matches!(exposure, Exposure::Affected | Exposure::Possibly) {
+            open.push((breach, exposure == Exposure::Possibly));
+        }
+    }
+    if open.is_empty() {
+        return None;
+    }
+    let possibly = open.iter().all(|(_, possibly)| *possibly);
+    let credentials = open.iter().any(|(b, _)| b.exposes_credentials());
+    let mut f = Finding::new(FindingKind::BreachedSite, id);
+    f.severity = match (credentials, possibly) {
+        (true, false) => Severity::High,
+        (true, true) => Severity::Medium,
+        (false, false) => Severity::Low,
+        (false, true) => Severity::Info,
+    };
+    f.possibly = possibly;
+    f.domain = login.registrable.clone();
+    f.documentation_url = Some(format!("https://{}/.well-known/change-password", url.host));
+    // The index lists the newest breach first.
+    f.breach_date = Some(open[0].0.breach_date.clone()).filter(|d| !d.is_empty());
+    for (breach, _) in &open {
+        f.breaches.push(breach.display_title().to_owned());
+        f.breach_names.push(breach.name.clone());
+        for class in &breach.data_classes {
+            if !f.data_classes.contains(class) {
+                f.data_classes.push(class.clone());
+            }
+        }
+    }
+    Some(f)
 }
 
 /// Lookalikes among the user's own login domains (registrable, Unicode,

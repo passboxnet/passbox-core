@@ -93,7 +93,7 @@ All popup, frame and error strings come from `@passbox/i18n` (`common` plus the 
 
 ## Permissions
 
-`storage`, `activeTab`, `alarms` (auto-lock, periodic sync, clipboard clearing), `idle` (lock when the screen locks), `offscreen` and `clipboardWrite` (clipboard clearing), content scripts on all http(s) pages (autofill), and optional host permissions for the server. When the server is chosen and at sign-in, the popup requests access to the server's host unless granted access already covers it.
+`storage`, `activeTab`, `alarms` (auto-lock, periodic sync, clipboard clearing, the breach catalogue every six hours), `notifications` (one notification when a newly published breach concerns saved logins; the toolbar badge shows "!" until the popup alert is acknowledged), `idle` (lock when the screen locks), `offscreen` and `clipboardWrite` (clipboard clearing), content scripts on all http(s) pages (autofill), and optional host permissions for the server. When the server is chosen and at sign-in, the popup requests access to the server's host unless granted access already covers it.
 
 ## Tests
 

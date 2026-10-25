@@ -103,6 +103,24 @@ pub fn analyze_security(items_json: &str, options_json: &str) -> Result<String, 
     serde_json::to_string(&analysis::analyze(&items, &options)).map_err(json_error)
 }
 
+/// The breach catalogue snapshot bundled with this build, without its
+/// entries: `{ version, updatedAt, entries, source, sourceUrl, license }`
+/// as JSON. `analyzeSecurity` uses the snapshot when the options carry no
+/// `siteBreaches`.
+#[wasm_bindgen(js_name = bundledBreachCatalog)]
+pub fn bundled_breach_catalog() -> Result<String, JsValue> {
+    let catalog = passbox_core::analysis::breaches::bundled();
+    serde_json::to_string(&serde_json::json!({
+        "version": catalog.version,
+        "updatedAt": catalog.updated_at,
+        "entries": catalog.breaches.len(),
+        "source": catalog.source,
+        "sourceUrl": catalog.source_url,
+        "license": catalog.license,
+    }))
+    .map_err(json_error)
+}
+
 /// Checks a page host against the user's saved login hosts (JSON array)
 /// and well-known sites before filling or saving. Returns a `Lookalike`
 /// as JSON (`{ domain, looksLike, reason, saved }`) or `undefined`.

@@ -70,7 +70,7 @@ Policies use the same kind of functions for membership (`passbox.my_orgs()`, `pa
 
 ## Coverage
 
-All 68 tenant tables have `ENABLE` and `FORCE ROW LEVEL SECURITY`. `counters` (the global change sequences) has no tenant data and no policy; `_sqlx_migrations` belongs to sqlx. `site_icons` (migration 0003, the website icons shared by all users) has no tenant data either: no account, session or address column, and none may be added. It has forced row level security anyway, so every table follows the same rules: every named context reads it, only the `icons` context (request handlers, which look icons up there instead of as the account) and the `worker:icons` refresh job write it, and only the job deletes. The policies, grouped:
+All 68 tenant tables and the two global breach catalogue tables (`site_breaches`, `site_breach_catalog`, below) have `ENABLE` and `FORCE ROW LEVEL SECURITY`. `counters` (the global change sequences) has no tenant data and no policy; `_sqlx_migrations` belongs to sqlx. `site_icons` (migration 0003, the website icons shared by all users) has no tenant data either: no account, session or address column, and none may be added. It has forced row level security anyway, so every table follows the same rules: every named context reads it, only the `icons` context (request handlers, which look icons up there instead of as the account) and the `worker:icons` refresh job write it, and only the job deletes. The policies, grouped:
 
 | Tables | Who sees and changes rows |
 | --- | --- |
@@ -85,6 +85,7 @@ All 68 tenant tables have `ENABLE` and `FORCE ROW LEVEL SECURITY`. `counters` (t
 | `emergency_grants`, `access_requests` | the two parties |
 | `share_links` | the owner; the viewer only through definer functions |
 | `breach_monitor_emails`, `breach_monitor_results` | the account itself; the breach monitoring job |
+| `site_breaches`, `site_breach_catalog` | global public data (Have I Been Pwned's breach list): every named context reads; only the `worker:breach_catalog` job writes; `passbox_app` has `SELECT` only |
 | `instance_state`, `instance_invites`, `admin_events` | instance admins; the meta context reads settings, the auth context reads and uses invitations; an account may append admin events it is the actor of |
 | `mail_outbox` | every transaction with a context queues; instance admins read the status; the mail job delivers |
 | `server_secrets` | the `secrets` system context at start only |

@@ -446,3 +446,160 @@ fn reads_the_item_json_format() {
         assert_eq!(FindingKind::parse(kind.as_str()), Some(kind));
     }
 }
+
+fn catalog(breaches: Vec<breaches::SiteBreach>) -> breaches::BreachCatalog {
+    breaches::BreachCatalog {
+        version: "test".into(),
+        updated_at: breaches::BreachCatalog::newest_change(&breaches),
+        breaches,
+        ..breaches::BreachCatalog::default()
+    }
+}
+
+fn site_breach(name: &str, domain: &str, added_ms: i64, classes: &[&str]) -> breaches::SiteBreach {
+    let date = breaches::date_string(added_ms);
+    breaches::SiteBreach {
+        name: name.into(),
+        title: name.into(),
+        domain: domain.into(),
+        breach_date: date.clone(),
+        added_date: format!("{date}T00:00:00Z"),
+        pwn_count: 1000,
+        data_classes: classes.iter().map(|c| (*c).to_owned()).collect(),
+        verified: true,
+        ..breaches::SiteBreach::default()
+    }
+}
+
+fn breached_site<'a>(report: &'a SecurityReport, id: &str) -> Option<&'a Finding> {
+    report
+        .findings
+        .iter()
+        .find(|f| f.item_id == id && f.kind == FindingKind::BreachedSite)
+}
+
+#[test]
+fn breached_site_matches_older_passwords() {
+    let breach_at = NOW - 5 * DAY_MS;
+    let mut old = login("old", STRONG, "https://www.netflix.com/login", "me");
+    old.created_at = NOW - 400 * DAY_MS;
+    let mut changed = login("changed", "G7#kP2!mQ9$wX4&z", "https://netflix.com", "me2");
+    changed.created_at = NOW - 400 * DAY_MS;
+    changed.data.password_history = vec![HistoryView {
+        value: "previous".into(),
+        replaced_at: NOW - DAY_MS,
+    }];
+    let mut newer = login("newer", "Zq8!rT4#vB6$nM2&", "https://netflix.com", "me3");
+    newer.created_at = NOW - DAY_MS;
+    let mut unknown = login("unknown", "Hw3!kL9#pS5$dF7&", "https://netflix.com", "me4");
+    unknown.created_at = 0;
+    let other = login("other", "Yt6!gH2#jK8$lP4&", "https://netflix.de", "me5");
+    let mut opts = options();
+    opts.site_breaches = Some(catalog(vec![site_breach(
+        "Netflix",
+        "netflix.com",
+        breach_at,
+        &["Email addresses", "Passwords"],
+    )]));
+    let report = analyze(&[old, changed, newer, unknown, other], &opts);
+
+    let f = breached_site(&report, "old").unwrap();
+    assert_eq!(f.severity, Severity::High);
+    assert_eq!(f.fix, FixAction::ChangePassword);
+    assert_eq!(f.breaches, ["Netflix"]);
+    assert_eq!(f.breach_names, ["Netflix"]);
+    assert_eq!(f.data_classes, ["Email addresses", "Passwords"]);
+    assert_eq!(
+        f.breach_date.as_deref(),
+        Some(breaches::date_string(breach_at).as_str())
+    );
+    assert!(!f.possibly);
+    assert_eq!(f.domain.as_deref(), Some("netflix.com"));
+    assert_eq!(
+        f.documentation_url.as_deref(),
+        Some("https://www.netflix.com/.well-known/change-password")
+    );
+    assert!(breached_site(&report, "changed").is_none());
+    assert!(breached_site(&report, "newer").is_none());
+    assert!(breached_site(&report, "other").is_none());
+    let possibly = breached_site(&report, "unknown").unwrap();
+    assert!(possibly.possibly);
+    assert_eq!(possibly.severity, Severity::Medium);
+
+    assert_eq!(report.breached_sites.len(), 1);
+    let site = &report.breached_sites[0];
+    assert_eq!(site.affected, ["old"]);
+    assert_eq!(site.possibly, ["unknown"]);
+    assert_eq!(site.fixed, ["changed"]);
+    assert!(site.exposes_credentials);
+    assert!(!report.breach_catalog.bundled);
+    assert_eq!(report.breach_catalog.version, "test");
+    assert_eq!(category(&report, FindingKind::BreachedSite).count, 2);
+    assert!(
+        report
+            .fix_first
+            .iter()
+            .any(|p| p.item_id == "old" && p.kinds.contains(&FindingKind::BreachedSite))
+    );
+    assert!(report.score < 100);
+}
+
+#[test]
+fn breached_site_severity_follows_the_data_classes() {
+    let mut item = login("i", STRONG, "https://forum.example.org", "me");
+    item.created_at = NOW - 400 * DAY_MS;
+    let mut opts = options();
+    opts.site_breaches = Some(catalog(vec![
+        site_breach(
+            "Forum",
+            "forum.example.org",
+            NOW - 30 * DAY_MS,
+            &["Email addresses"],
+        ),
+        site_breach(
+            "Shop",
+            "shop.example.org",
+            NOW - 30 * DAY_MS,
+            &["Passwords"],
+        ),
+    ]));
+    let report = analyze(std::slice::from_ref(&item), &opts);
+    let f = breached_site(&report, "i").unwrap();
+    assert_eq!(f.severity, Severity::Low);
+    assert_eq!(f.breaches, ["Forum"]);
+
+    // Dismissed like every other finding.
+    item.data.security_ignore = vec!["breached_site".into()];
+    let report = analyze(std::slice::from_ref(&item), &opts);
+    assert!(breached_site(&report, "i").unwrap().dismissed);
+    assert_eq!(category(&report, FindingKind::BreachedSite).dismissed, 1);
+
+    // Turned off: neither findings nor the breach list.
+    let mut off = opts.clone();
+    off.disabled = vec![FindingKind::BreachedSite];
+    let report = analyze(&[item], &off);
+    assert!(report.breached_sites.is_empty());
+    assert!(!category(&report, FindingKind::BreachedSite).checked);
+}
+
+#[test]
+fn breached_site_uses_the_bundled_catalogue_by_default() {
+    let mut item = login("adobe", STRONG, "https://adobe.com", "me");
+    item.created_at = 1_000_000_000_000; // 2001
+    let report = analyze(&[item], &options());
+    assert!(report.breach_catalog.bundled);
+    assert!(report.breach_catalog.entries > 500);
+    let f = breached_site(&report, "adobe").unwrap();
+    assert!(f.breach_names.contains(&"Adobe".to_owned()));
+    let json = serde_json::to_value(&report).unwrap();
+    assert_eq!(json["breachCatalog"]["source"], "Have I Been Pwned");
+    assert!(json["breachedSites"][0]["affected"].is_array());
+    let finding = json["findings"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|f| f["kind"] == "breached_site")
+        .unwrap();
+    assert!(finding["breachNames"].is_array());
+    assert!(finding["dataClasses"].is_array());
+}

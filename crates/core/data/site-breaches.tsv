@@ -1,0 +1,982 @@
+# Have I Been Pwned breach catalogue, snapshot of 2026-10-25
+# Source: https://haveibeenpwned.com/api/v3/breaches (CC BY 4.0, https://haveibeenpwned.com/)
+# name	title	domain	breach date	added	modified	accounts	flags (v verified, s sensitive)	data classes
+000webhost	000webhost	000webhost.com	2015-03-01	2015-10-26T23:35:45Z	2017-12-10T21:44:27Z	14936670	v	Email addresses;IP addresses;Names;Passwords
+123RF	123RF	123rf.com	2020-03-22	2020-11-15T00:59:50Z	2020-11-15T01:07:10Z	8661578	v	Email addresses;IP addresses;Names;Passwords;Phone numbers;Physical addresses;Usernames
+126	126	126.com	2012-01-01	2016-10-08T07:46:05Z	2016-10-08T07:46:05Z	6414191		Email addresses;Passwords
+17173	17173	17173.com	2011-12-28	2018-04-28T04:53:15Z	2018-04-28T04:53:15Z	7485802		Email addresses;Passwords;Usernames
+17Media	17	17app.co	2016-04-19	2016-07-08T01:55:03Z	2016-07-08T01:55:03Z	4009640	v	Device information;Email addresses;IP addresses;Passwords;Usernames
+1win	1win	1win.com	2024-11-02	2025-02-03T17:37:55Z	2025-02-06T04:30:27Z	96166543	v	Dates of birth;Email addresses;Geographic locations;IP addresses;Passwords;Phone numbers
+2fast4u	2fast4u	2fast4u.be	2017-12-20	2018-01-07T08:19:39Z	2018-01-07T08:19:39Z	17706	v	Email addresses;Passwords;Usernames
+500px	500px	500px.com	2018-07-05	2019-03-25T08:01:09Z	2019-03-25T08:01:09Z	14867999	v	Dates of birth;Email addresses;Genders;Geographic locations;Names;Passwords;Usernames
+7-Eleven	7-Eleven	7-eleven.com	2026-04-08	2026-05-24T05:15:22Z	2026-05-24T05:15:22Z	185256	v	Dates of birth;Email addresses;Names;Phone numbers;Physical addresses
+7k7k	7k7k	7k7k.com	2011-01-01	2017-09-26T21:54:01Z	2017-09-26T21:54:01Z	9121434		Email addresses;Passwords;Usernames
+8fit	8fit	8fit.com	2018-07-01	2019-03-21T18:50:00Z	2019-03-21T18:50:00Z	15025407	v	Email addresses;Genders;Geographic locations;IP addresses;Names;Passwords
+8tracks	8tracks	8tracks.com	2017-06-27	2018-02-16T07:09:30Z	2019-08-25T08:52:21Z	17979961	v	Email addresses;Passwords
+9Lives	9Lives	9lives.be	2014-10-01	2025-02-02T02:04:44Z	2025-02-06T04:29:24Z	109515	v	Email addresses;Passwords;Usernames
+Abandonia	Abandonia (2015)	abandonia.com	2015-11-01	2017-06-05T05:56:47Z	2022-12-07T05:56:07Z	776125	v	Email addresses;IP addresses;Passwords;Usernames
+Abandonia2022	Abandonia (2022)	abandonia.com	2022-11-15	2022-12-07T06:04:17Z	2022-12-11T12:25:07Z	919790	v	Email addresses;IP addresses;Passwords;Usernames
+ABFRL	Aditya Birla Fashion and Retail	abfrl.com	2021-12-01	2022-01-15T02:58:39Z	2022-01-15T03:02:43Z	5470063	v	Email addresses;Genders;Income levels;Job titles;Marital statuses;Names;Passwords;Phone numbers;Physical addresses;Purchases;Religions;Salutations
+Abrigo	Abrigo	abrigo.com	2026-04-14	2026-05-14T03:37:50Z	2026-05-14T03:37:50Z	711099	v	Email addresses;Employers;Job titles;Names;Phone numbers;Physical addresses
+AbuseWithUs	AbuseWith.Us	abusewith.us	2016-07-01	2017-10-09T11:08:45Z	2017-10-09T11:08:45Z	1372550	v	Email addresses;IP addresses;Passwords;Usernames
+AcneOrg	Acne.org	acne.org	2014-11-25	2016-03-06T11:07:41Z	2016-03-06T11:07:41Z	432943	v	Dates of birth;Email addresses;IP addresses;Passwords;Usernames
+Activision	Activision	activision.com	2022-12-04	2023-10-03T07:09:49Z	2023-10-03T07:09:49Z	16006	v	Email addresses;Geographic locations;Job titles;Names;Phone numbers
+ActMobile	ActMobile	actmobile.com	2021-10-08	2021-11-09T07:55:03Z	2021-11-09T07:55:03Z	1583193		Email addresses;IP addresses
+Adapt	Adapt	adapt.io	2018-11-05	2018-11-22T19:43:06Z	2018-11-22T19:43:06Z	9363740	v	Email addresses;Employers;Job titles;Names;Phone numbers;Physical addresses;Social media profiles
+ADDA	ADDA	adda.io	2025-03-24	2025-11-23T01:16:58Z	2025-11-23T23:04:58Z	1829314	v	Email addresses;Names;Passwords;Phone numbers
+ADDI	Addi	addi.com	2026-03-25	2026-05-18T20:55:51Z	2026-05-18T21:00:33Z	34532941	v	Age groups;Credit scores;Device information;Email addresses;Government issued IDs;Income levels;IP addresses;Latitude and longitude pairs;Names;Phone numbers;Physical addresses;Purchases;Socioeconomic levels
+Adecco	Adecco	adecco.com	2021-01-03	2022-05-31T06:33:24Z	2022-05-31T06:37:53Z	4284538	v	Email addresses;Genders;Geographic locations;Marital statuses;Names;Passwords;Phone numbers
+Adobe	Adobe	adobe.com	2013-10-04	2013-12-04T00:00:00Z	2022-05-15T23:52:49Z	152445165	v	Email addresses;Password hints;Passwords;Usernames
+AdoptMeTradingValues	Adopt Me Trading Values	adoptmetradingvalues.com	2022-07-01	2025-02-10T02:58:18Z	2025-02-10T02:58:18Z	86136	v	Email addresses;IP addresses;Passwords;Usernames
+Adpost	Adpost	adpost.com	2025-02-14	2025-10-07T00:15:09Z	2025-12-17T23:27:30Z	3339512	v	Email addresses;Names;Usernames
+ADT	ADT	adt.com	2026-04-20	2026-04-27T07:36:42Z	2026-04-27T07:36:42Z	5488888	v	Dates of birth;Email addresses;Names;Partial government issued IDs;Phone numbers;Physical addresses
+AdultFanFiction	Adult-FanFiction.Org	adult-fanfiction.org	2018-05-30	2018-08-06T08:56:03Z	2018-08-06T08:56:03Z	186082	vs	Dates of birth;Email addresses;Names;Passwords
+AdultFriendFinder	Adult FriendFinder (2015)	adultfriendfinder.com	2015-05-21	2015-05-22T06:03:44Z	2020-02-07T01:11:13Z	3867997	vs	Dates of birth;Email addresses;Genders;Geographic locations;IP addresses;Races;Relationship statuses;Sexual orientations;Spoken languages;Usernames
+AdultFriendFinder2016	Adult FriendFinder (2016)	adultfriendfinder.com	2016-10-16	2020-02-06T23:53:53Z	2020-02-07T01:11:28Z	169746810	vs	Email addresses;Passwords;Spoken languages;Usernames
+AdvanceAutoParts	Advance Auto Parts	advanceautoparts.com	2024-06-05	2024-06-24T09:51:11Z	2024-06-24T09:51:11Z	79243727	v	Email addresses;Names;Phone numbers;Physical addresses
+AerServ	AerServ	aerserv.com	2018-04-01	2018-12-06T02:58:12Z	2018-12-06T02:58:12Z	66308	v	Email addresses;Employers;Job titles;Names;Passwords;Phone numbers;Physical addresses
+AgusiQTorrents	AgusiQ-Torrents.pl	agusiq-torrents.pl	2019-09-24	2019-12-04T21:54:50Z	2019-12-04T21:54:50Z	90478	v	Email addresses;IP addresses;Passwords;Usernames
+AhaShare	AhaShare.com	ahashare.com	2013-05-30	2014-11-06T21:47:52Z	2014-11-06T21:47:52Z	180468	v	Email addresses;Genders;Geographic locations;IP addresses;Partial dates of birth;Passwords;Usernames;Website activity
+Aimware	Aimware	aimware.net	2019-04-28	2022-05-02T02:13:41Z	2022-05-02T02:23:27Z	305470	v	Email addresses;IP addresses;Passwords;Private messages;Usernames;Website activity
+Aipai	Aipai.com	aipai.com	2016-09-27	2016-11-07T21:55:29Z	2016-11-07T21:55:29Z	6496778		Email addresses;Passwords
+AIType	ai.type	aitype.com	2017-12-05	2017-12-08T21:31:25Z	2017-12-08T21:31:25Z	20580060	v	Address book contacts;Apps installed on devices;Cellular network names;Dates of birth;Device information;Email addresses;Genders;Geographic locations;IMEI numbers;IMSI numbers;IP addresses;Names;Phone numbers;Profile photos;Social media profiles
+Ajarn	Ajarn	ajarn.com	2018-12-13	2021-09-26T03:45:38Z	2021-09-26T03:45:38Z	266399	v	Dates of birth;Education levels;Email addresses;Genders;Geographic locations;Job applications;Marital statuses;Names;Nationalities;Passwords;Phone numbers;Profile photos
+AKP	AKP Emails	akparti.org.tr	2016-07-19	2017-10-01T03:52:37Z	2017-10-01T03:52:37Z	917461	v	Email addresses;Email messages
+Alcon	Alcon	alcon.com	2026-08-01	2026-08-09T10:04:34Z	2026-08-09T10:04:34Z	218395	v	Email addresses;Names;Phone numbers;Physical addresses
+AllianzLife	Allianz Life	allianzlife.com	2025-07-16	2025-08-18T20:20:19Z	2025-08-18T20:20:19Z	1115061	v	Dates of birth;Email addresses;Genders;Names;Phone numbers;Physical addresses
+AlpineReplay	AlpineReplay	traceup.com	2019-08-27	2024-10-17T04:01:13Z	2024-10-17T04:01:13Z	898681	v	Dates of birth;Email addresses;Genders;Names;Passwords;Physical attributes;Usernames
+Altenen	Altenen	altenens.is	2022-06-24	2024-11-05T06:20:27Z	2024-11-05T06:20:27Z	1267701	v	Cryptocurrency wallet addresses;Email addresses;Passwords;Usernames
+Aman	Aman	aman.com	2026-04-20	2026-05-01T03:34:30Z	2026-05-01T03:34:30Z	215563	v	Dates of birth;Email addresses;Genders;Language preferences;Names;Nationalities;Phone numbers;Physical addresses;Spouses names;VIP statuses
+AmartFurniture	Amart Furniture	amartfurniture.com.au	2022-05-16	2022-05-25T23:43:23Z	2022-05-25T23:43:23Z	108940	v	Email addresses;Names;Passwords;Phone numbers;Physical addresses
+AmericanTower	American Tower	americantower.com	2026-06-12	2026-06-26T07:17:23Z	2026-06-26T07:22:10Z	216601	v	Email addresses;Job titles;Names;Phone numbers;Physical addresses
+Ameriprise	Ameriprise	ameriprise.com	2026-03-02	2026-05-26T22:03:42Z	2026-05-26T22:03:42Z	502597	v	Email addresses;Employers;Financial transactions;Job titles;Names;Phone numbers;Physical addresses
+Amtrak	Amtrak	amtrak.com	2026-04-03	2026-04-17T04:54:48Z	2026-04-17T04:57:56Z	2147679	v	Email addresses;Names;Physical addresses;Support tickets
+Ancestry	Ancestry	ancestry.com	2015-11-07	2017-12-24T04:28:45Z	2017-12-24T04:28:45Z	297806	v	Email addresses;Passwords
+AndroidForums	Android Forums	androidforums.com	2011-10-30	2015-12-20T06:47:19Z	2020-08-07T23:29:01Z	745355	v	Dates of birth;Email addresses;Homepage URLs;Instant messenger identities;IP addresses;Passwords
+AndroidLista	AndroidLista	androidlista.com	2021-07-28	2023-10-17T21:15:55Z	2023-10-17T21:18:24Z	6640643	v	Email addresses;Names;Passwords;Usernames
+AngelOne	Angel One	angelone.in	2023-04-01	2026-10-07T03:45:31Z	2026-10-08T21:55:00Z	6765054	v	Bank account numbers;Dates of birth;Email addresses;Financial investments;Government issued IDs;Names;Phone numbers;Physical addresses
+AnimalJam	Animal Jam	animaljam.com	2020-10-12	2020-11-12T01:18:50Z	2020-11-12T01:18:50Z	7104998	v	Dates of birth;Email addresses;Genders;IP addresses;Names;Passwords;Physical addresses;Usernames
+AnimeGame	AnimeGame	animegame.me	2020-02-27	2020-03-09T05:52:08Z	2020-03-09T05:52:08Z	1431378	v	Email addresses;Passwords;Usernames
+Animeify	Animeify	animeify.net	2021-10-14	2025-09-21T07:48:38Z	2025-09-21T07:48:38Z	808034	v	Email addresses;Genders;Names;Passwords;Usernames
+AnimeLeague	AnimeLeague	animeleague.net	2024-07-04	2024-07-31T07:57:48Z	2024-07-31T07:57:48Z	192134	v	Dates of birth;Email addresses;IP addresses;Passwords;Phone numbers;Private messages;Purchases;Usernames
+AnimePlanet	Anime-Planet	anime-planet.com	2016-01-01	2019-07-28T00:35:07Z	2019-07-28T00:35:07Z	368507	v	Dates of birth;Email addresses;IP addresses;Passwords;Usernames
+Animoto	Animoto	animoto.com	2018-07-10	2019-07-18T05:04:08Z	2019-07-18T05:04:08Z	22437749	v	Dates of birth;Email addresses;Geographic locations;Names;Passwords
+ANPS	Association Nationale des Premiers Secours	anps.fr	2026-01-30	2026-02-10T01:27:25Z	2026-02-10T01:27:25Z	5600	v	Dates of birth;Email addresses;Names;Places of birth;Salutations
+APKTW	APK.TW	apk.tw	2022-09-03	2024-03-09T00:17:54Z	2024-03-09T00:17:54Z	2451197	v	Email addresses;IP addresses;Passwords;Usernames
+APOIAse	APOIA.se	apoia.se	2025-12-16	2026-02-16T07:31:43Z	2026-02-16T07:31:43Z	450764	v	Email addresses;Names;Physical addresses
+Apollo	Apollo	apollo.io	2018-07-23	2018-10-05T19:14:11Z	2018-10-23T04:01:48Z	125929660	v	Email addresses;Employers;Geographic locations;Job titles;Names;Phone numbers;Salutations;Social media profiles
+Appartoo	Appartoo	appartoo.com	2017-03-25	2019-05-02T07:07:24Z	2019-05-02T07:07:24Z	49681	v	Ages;Auth tokens;Email addresses;Employment statuses;Genders;IP addresses;Marital statuses;Names;Passwords;Physical addresses;Private messages;Social media profiles
+Appen	Appen	appen.com	2020-06-22	2020-07-30T07:00:21Z	2020-07-30T07:00:21Z	5888405	v	Email addresses;Employers;IP addresses;Names;Passwords;Phone numbers
+Aptoide	Aptoide	aptoide.com	2020-04-13	2020-04-19T03:07:42Z	2020-04-19T03:07:42Z	20012235	v	Browser user agent details;Email addresses;IP addresses;Names;Passwords
+ArmorGames	Armor Games	armorgames.com	2019-01-01	2019-07-20T06:03:31Z	2021-04-07T06:28:50Z	10604307	v	Bios;Dates of birth;Email addresses;Genders;Geographic locations;IP addresses;Passwords;Usernames
+ArmyForceOnline	Army Force Online	armyforceonline.com	2016-05-18	2016-11-10T03:24:38Z	2020-08-07T03:19:40Z	1531235	v	Avatars;Email addresses;Geographic locations;IP addresses;Names;Passwords;Usernames;Website activity
+ArtistsNClients	Artists&Clients	artistsnclients.com	2025-08-31	2025-10-04T01:05:43Z	2025-10-04T01:05:43Z	95351	v	Email addresses;IP addresses;Passwords;Usernames
+Artsy	Artsy	artsy.net	2018-04-01	2020-05-25T20:59:10Z	2020-05-25T21:08:08Z	1079970	v	Email addresses;IP addresses;Names;Passwords
+Artvalue	Artvalue.com	artvalue.com	2019-06-19	2019-07-19T13:16:52Z	2026-09-06T22:53:07Z	157692	v	Email addresses;Names;Passwords;Salutations;Usernames
+AshleyMadison	Ashley Madison	ashleymadison.com	2015-07-19	2015-08-18T20:55:05Z	2015-08-18T20:55:05Z	30811934	vs	Dates of birth;Email addresses;Ethnicities;Genders;Names;Passwords;Payment histories;Phone numbers;Physical addresses;Security questions and answers;Sexual orientations;Usernames;Website activity
+AssuranceRetraite	Assurance Retraite	lassuranceretraite.fr	2024-09-01	2026-10-20T02:29:36Z	2026-10-20T02:29:36Z	70372	v	Dates of birth;Email addresses;Family members' names;Government issued IDs;Income levels;Marital statuses;Names;Phone numbers;Physical addresses
+Astoria	Unverified Data Source	astoriacompany.com	2021-01-26	2021-03-24T01:47:35Z	2021-04-12T22:58:35Z	11498146		Bank account numbers;Credit status information;Dates of birth;Email addresses;Employers;Health insurance information;Income levels;IP addresses;Names;Personal health data;Phone numbers;Physical addresses;Smoking habits;Social security numbers
+AstroPID	Astropid	astropid.com	2013-12-19	2014-07-06T03:49:45Z	2014-07-06T03:49:45Z	5788	v	Email addresses;Instant messenger identities;IP addresses;Names;Passwords;Private messages;Usernames;Website activity
+Aternos	Aternos	aternos.org	2015-12-06	2016-10-01T23:42:56Z	2016-10-01T23:42:56Z	1436486	v	Email addresses;IP addresses;Passwords;Usernames;Website activity
+AtlasMenu	Atlas Menu	atlasmenu.net	2026-05-30	2026-05-30T23:35:29Z	2026-05-30T23:35:29Z	63926	v	Email addresses;IP addresses;Passwords;Support tickets;Usernames
+AtlasQuantum	Atlas Quantum	atlasquantum.com	2018-08-25	2018-08-27T01:42:34Z	2018-08-28T21:17:47Z	261463	v	Account balances;Email addresses;Names;Phone numbers
+Atmeltomo	Atmeltomo	atmeltomo.com	2021-04-16	2023-08-22T01:29:29Z	2023-08-22T01:29:29Z	580177	v	Email addresses;IP addresses;Passwords;Usernames
+Audi	Audi	audiusa.com	2019-08-14	2021-07-23T06:31:33Z	2021-07-23T21:57:33Z	2743539	v	Dates of birth;Driver's licenses;Email addresses;Names;Phone numbers;Physical addresses;Social security numbers;Vehicle details
+Aura	Aura	aura.com	2026-03-06	2026-03-18T05:29:58Z	2026-03-18T05:34:44Z	903080	v	Customer service records;Email addresses;IP addresses;Names;Phone numbers;Physical addresses
+Autocentrum	Autocentrum.pl	autocentrum.pl	2018-02-04	2018-02-09T00:55:26Z	2018-02-09T00:55:26Z	143717	v	Email addresses;Passwords
+AUTOSUR	AUTOSUR	autosur.fr	2025-03-16	2025-12-18T05:09:04Z	2025-12-18T05:10:18Z	487226	v	Email addresses;Names;Phone numbers;Physical addresses;Vehicle details;Vehicle identification numbers (VINs);Vehicle registration plates
+Autotrader	Autotrader	autotrader.com	2023-01-06	2023-01-23T06:24:21Z	2023-01-23T06:24:21Z	20032	v	Email addresses;Phone numbers;Physical addresses;Vehicle details;Vehicle identification numbers (VINs)
+Avast	Avast	avast.com	2014-05-26	2016-03-12T22:08:58Z	2016-03-12T22:08:58Z	422959	v	Email addresses;Passwords;Usernames
+Avito	Avito	avito.ma	2022-11-18	2023-11-14T06:51:25Z	2023-11-14T06:51:25Z	2721835	v	Email addresses;Geographic locations;IP addresses;Names;Phone numbers
+Avvo	Avvo	avvo.com	2019-12-17	2022-04-15T03:39:42Z	2022-04-15T03:45:01Z	4101101	v	Email addresses;Passwords
+BabyNames	Baby Names	babynames.com	2008-10-24	2018-10-24T06:27:03Z	2018-10-24T06:27:30Z	846742	v	Email addresses;Passwords
+Badoo	Badoo	badoo.com	2013-06-01	2016-07-06T08:16:03Z	2016-07-06T08:16:03Z	112005531	s	Dates of birth;Email addresses;Genders;Names;Passwords;Usernames
+BakerDistributing	Baker Distributing	bakerdist.com	2026-05-23	2026-06-07T06:16:36Z	2026-06-07T06:16:36Z	102935	v	Email addresses;Names;Phone numbers;Physical addresses;Support tickets
+BannerBit	BannerBit	bannerbit.com	2018-12-29	2019-01-08T10:56:34Z	2019-01-08T10:56:34Z	213415	v	Email addresses;Passwords
+Banorte	Banorte	banorte.com	2014-08-18	2022-08-18T23:36:24Z	2022-08-18T23:36:24Z	2107000	v	Account balances;Email addresses;Genders;Government issued IDs;Names;Phone numbers;Physical addresses
+BattlefieldHeroes	Battlefield Heroes	battlefieldheroes.com	2011-06-26	2014-01-23T13:10:29Z	2014-01-23T13:10:29Z	530270	v	Passwords;Usernames
+Battlefy	Battlefy	battlefy.com	2016-01-11	2022-07-29T00:24:33Z	2022-07-29T00:24:33Z	83610	v	Email addresses;Passwords;Usernames
+Baydoner	Baydöner	baydoner.com	2026-03-08	2026-03-15T03:36:43Z	2026-03-15T03:36:43Z	1266822	v	Dates of birth;Email addresses;Genders;Geographic locations;Government issued IDs;Names;Passwords;Phone numbers;Purchases
+BCDTravel	BCD Travel	bcdtravel.com	2026-05-29	2026-06-05T06:53:15Z	2026-06-05T06:53:15Z	396313	v	Email addresses;Employers;Job titles;Names;Phone numbers;Physical addresses;Support tickets
+BeautifulPeople	Beautiful People	beautifulpeople.com	2015-11-11	2016-04-25T10:05:34Z	2016-04-25T10:05:34Z	1100089	vs	Beauty ratings;Car ownership statuses;Dates of birth;Drinking habits;Education levels;Email addresses;Genders;Geographic locations;Home ownership statuses;Income levels;IP addresses;Job titles;Names;Passwords;Personal descriptions;Personal interests;Physical attributes;Sexual orientations;Smoking habits;Website activity
+Beckett	Beckett Collectibles	beckett.com	2025-11-09	2025-11-20T05:41:12Z	2025-12-02T20:57:33Z	1041238	v	Email addresses;Names;Phone numbers;Physical addresses;Usernames
+Bell	Bell (2014 breach)	bell.ca	2014-02-01	2014-02-01T23:57:10Z	2014-02-01T23:57:10Z	20902	v	Credit cards;Genders;Passwords;Usernames
+Bell2017	Bell (2017 breach)	bell.ca	2017-05-15	2017-05-16T01:49:31Z	2017-05-16T01:49:31Z	2231256	v	Email addresses;Geographic locations;IP addresses;Job titles;Names;Passwords;Phone numbers;Spoken languages;Survey results;Usernames
+Benchmark	Benchmark	benchmark.rs	2019-11-01	2023-01-01T01:50:43Z	2023-01-01T01:52:21Z	93343	v	Email addresses;IP addresses;Passwords;Usernames
+Berkadia	Berkadia	berkadia.com	2026-03-19	2026-06-15T04:09:04Z	2026-06-15T04:09:04Z	305216	v	Email addresses;Employers;Names;Phone numbers;Physical addresses
+Bestialitysextaboo	Bestialitysextaboo	bestialitysextaboo.com	2018-03-19	2018-03-29T06:10:06Z	2018-03-29T06:10:06Z	3204	vs	Dates of birth;Email addresses;Genders;Geographic locations;IP addresses;Passwords;Private messages;Usernames
+Betterment	Betterment	betterment.com	2026-01-09	2026-02-05T00:29:45Z	2026-02-05T00:29:45Z	1435174	v	Dates of birth;Device information;Email addresses;Employers;Geographic locations;Job titles;Names;Phone numbers;Physical addresses
+Bhinneka	Bhinneka	bhinneka.com	2020-01-27	2022-10-06T05:11:47Z	2022-10-06T05:11:47Z	1274340	v	Dates of birth;Email addresses;Genders;Names;Passwords;Phone numbers;Physical addresses
+bigbasket	bigbasket	bigbasket.com	2020-10-14	2021-04-26T04:00:10Z	2021-04-26T06:15:01Z	24500011	v	Dates of birth;Email addresses;IP addresses;Names;Passwords;Phone numbers;Physical addresses
+BigMoneyJobs	BigMoneyJobs	bigmoneyjobs.com	2014-04-03	2014-04-08T05:44:10Z	2014-04-08T05:44:10Z	36789	v	Career levels;Education levels;Email addresses;Names;Passwords;Phone numbers;Physical addresses;Salutations;User website URLs;Website activity
+BinWeevils	Bin Weevils	binweevils.com	2014-09-01	2017-08-18T07:10:57Z	2017-08-18T07:10:57Z	1287073	v	Ages;Email addresses;Genders;IP addresses;Passwords;Usernames
+BiohackMe	Biohack.me	biohack.me	2016-12-02	2017-08-23T20:47:39Z	2017-08-23T20:47:39Z	3402	v	Email addresses;Passwords;Private messages;Usernames
+BitcoinTalk	Bitcoin Talk	bitcointalk.org	2015-05-22	2017-03-27T23:45:41Z	2017-03-27T23:45:41Z	501407	v	Dates of birth;Email addresses;Genders;IP addresses;Passwords;Security questions and answers;Usernames;Website activity
+Bitly	Bitly	bitly.com	2014-05-08	2017-10-06T06:31:50Z	2017-10-06T08:05:10Z	9313136	v	Email addresses;Passwords;Usernames
+BitTorrent	BitTorrent	bittorrent.com	2016-01-01	2016-06-08T10:49:24Z	2016-06-08T10:49:24Z	34235	v	Email addresses;IP addresses;Passwords;Usernames
+BitView	BitView	bitview.net	2024-12-14	2024-12-19T07:46:30Z	2024-12-19T07:46:30Z	63127	v	Bios;Comments;Dates of birth;Email addresses;Genders;Geographic locations;IP addresses;Passwords;Private messages;Usernames
+BlackBerryFans	BlackBerry Fans	blackberryfans.org	2022-05-06	2022-05-16T02:15:13Z	2022-05-16T02:16:15Z	174168	v	Email addresses;IP addresses;Passwords;Usernames
+BlackHatWorld	Black Hat World	blackhatworld.com	2014-06-23	2015-11-03T22:20:17Z	2015-11-03T22:20:17Z	777387	v	Dates of birth;Email addresses;Instant messenger identities;IP addresses;Passwords;Usernames;Website activity
+BlackSpigotMC	BlackSpigotMC	blackspigot.com	2019-07-14	2019-07-17T18:44:17Z	2019-07-17T18:44:17Z	140029	v	Device information;Email addresses;Genders;Geographic locations;IP addresses;Passwords;Usernames
+BlankMediaGames	BlankMediaGames	blankmediagames.com	2018-12-28	2019-01-02T05:52:56Z	2019-01-02T06:03:19Z	7633234	v	Browser user agent details;Email addresses;IP addresses;Passwords;Purchases;Usernames;Website activity
+BleachAnime	Bleach Anime Forum	bleachanime.org	2015-01-01	2023-11-29T06:22:50Z	2023-11-29T06:22:50Z	143711	v	Email addresses;Passwords;Usernames
+BloomsToday	Blooms Today	bloomstoday.com	2023-11-11	2024-09-03T07:06:36Z	2024-09-03T07:06:36Z	3184010	v	Email addresses;Names;Partial credit card data;Phone numbers;Physical addresses
+BlueSnapRegpack	Regpack	bluesnap.com	2016-05-20	2016-09-13T04:35:05Z	2016-09-13T04:35:05Z	104977	v	Browser user agent details;Credit card CVV;Email addresses;IP addresses;Names;Partial credit card data;Phone numbers;Physical addresses;Purchases
+boAt	boAt	boat-lifestyle.com	2024-03-25	2024-04-08T08:33:44Z	2024-04-09T04:17:09Z	7528985	v	Email addresses;Names;Phone numbers;Physical addresses
+Bolt	Bolt	bolt.cd	2017-03-01	2017-11-24T08:15:24Z	2017-11-24T08:16:45Z	995274	v	Email addresses;IP addresses;Passwords;Usernames
+BombujEu	Bombuj.eu	bombuj.eu	2018-12-07	2018-12-10T14:04:47Z	2018-12-10T14:04:47Z	575437	v	Email addresses;Passwords
+Bonobos	Bonobos	bonobos.com	2020-08-14	2021-01-31T00:09:25Z	2021-01-31T00:12:58Z	2811929	v	Email addresses;Historical passwords;IP addresses;Names;Partial credit card data;Passwords;Phone numbers;Physical addresses;Purchases
+Bookchor	Bookchor	bookchor.com	2021-01-28	2022-07-03T23:41:38Z	2022-07-03T23:41:38Z	498297	v	Dates of birth;Email addresses;Genders;IP addresses;Names;Passwords;Phone numbers;Social media profiles
+BookCrossing	BookCrossing	bookcrossing.com	2012-11-05	2023-07-25T02:24:52Z	2023-07-25T03:53:37Z	1582323	v	Dates of birth;Email addresses;Geographic locations;IP addresses;Names;Passwords;Usernames
+Bookmate	Bookmate	bookmate.com	2018-07-08	2019-03-22T16:25:58Z	2019-03-22T16:25:58Z	3830916	v	Dates of birth;Email addresses;Genders;Geographic locations;Names;Passwords;Usernames
+BotOfLegends	Bot of Legends	botoflegends.com	2014-11-13	2016-12-27T08:24:52Z	2016-12-27T08:24:52Z	238373	v	Email addresses;IP addresses;Passwords;Usernames;Website activity
+Boulanger	Boulanger	boulanger.com	2024-09-06	2025-04-08T16:55:02Z	2025-04-10T08:28:20Z	2077078	v	Email addresses;Geographic locations;Latitude and longitude pairs;Names;Phone numbers;Physical addresses
+BourseDesVols	Bourse des Vols	bourse-des-vols.com	2021-01-12	2022-07-03T05:17:56Z	2022-07-03T05:17:56Z	1460130	v	Dates of birth;Email addresses;Flights taken;IP addresses;Names;Phone numbers;Physical addresses;Purchases
+BouyguesTelecom	Bouygues Telecom	bouyguestelecom.fr	2025-08-04	2025-09-24T06:37:56Z	2025-09-24T06:37:56Z	5685771	v	Bank account numbers;Dates of birth;Email addresses;Names;Phone numbers;Physical addresses
+Boxee	Boxee	forums.boxee.com	2014-03-29	2014-03-30T13:07:16Z	2014-03-30T13:07:16Z	158093	v	Dates of birth;Email addresses;Geographic locations;Historical passwords;Instant messenger identities;IP addresses;Passwords;Private messages;User website URLs;Usernames
+BrandNewTube	Brand New Tube	brandnewtube.com	2022-08-14	2022-09-08T08:00:37Z	2022-09-08T08:00:37Z	349627	v	Email addresses;Genders;IP addresses;Passwords;Private messages;Usernames
+Brazzers	Brazzers	brazzers.com	2013-04-01	2016-09-05T10:02:23Z	2016-09-05T10:02:23Z	790724	vs	Email addresses;Passwords;Usernames
+BreachForums	BreachForums	breached.vc	2022-11-29	2023-07-26T21:08:55Z	2023-07-26T21:08:55Z	212156	v	Email addresses;IP addresses;Passwords;Private messages;Usernames
+BreachForums2025	BreachForums (2025)	breachforums.hn	2025-08-11	2026-01-10T11:06:03Z	2026-01-11T08:24:05Z	672247	v	Email addresses;Forum posts;Passwords;Private messages;Usernames
+BreachForumsClone	BreachForums Clone	breachforums.vc	2023-06-17	2023-06-25T05:47:36Z	2023-06-25T05:52:08Z	4204	v	Email addresses;IP addresses;Passwords;Usernames
+BreachForumsV5	BreachForums Version 5	breachforums.bf	2026-03-26	2026-03-27T02:19:23Z	2026-03-27T02:29:05Z	339778	v	Email addresses;Passwords;Usernames
+BrinksHome	Brinks Home	brinkshome.com	2026-07-13	2026-08-08T10:44:52Z	2026-08-08T10:44:52Z	732162	v	Dates of birth;Email addresses;Names;Partial credit card data;Phone numbers;Physical addresses;Purchases
+BTCAlpha	BTC-Alpha	btc-alpha.com	2021-11-02	2022-01-27T23:39:18Z	2022-01-27T23:39:18Z	362426	v	Email addresses;IP addresses;Passwords;Usernames
+BTCE	BTC-E	btc-e.com	2014-10-01	2017-03-12T03:21:52Z	2017-03-12T03:21:52Z	568340	v	Account balances;Email addresses;IP addresses;Passwords;Usernames;Website activity
+BtoBet	BtoBet	btobet.com	2019-12-26	2020-01-11T20:16:42Z	2020-01-11T20:28:06Z	444241	v	Dates of birth;Email addresses;Financial transactions;Geographic locations;IP addresses;Names;Usernames
+BTSec	Bitcoin Security Forum Gmail Dump	forum.btcsec.com	2014-01-09	2014-09-10T20:30:11Z	2014-09-10T20:30:11Z	4789599	v	Email addresses;Passwords
+BudTrader	BudTrader	budtrader.com	2024-06-27	2024-10-01T13:51:19Z	2024-10-01T13:51:19Z	2721185	vs	Email addresses;Passwords;Usernames
+Bukalapak	Bukalapak	bukalapak.com	2017-10-23	2019-04-18T01:57:35Z	2019-04-18T02:10:15Z	13369666	v	Email addresses;IP addresses;Names;Passwords;Usernames
+BulgarianNationalRevenueAgency	Bulgarian National Revenue Agency	nap.bg	2019-07-15	2019-07-18T18:38:49Z	2019-07-18T18:38:49Z	471167	v	Email addresses;Names;Phone numbers;Physical addresses;Taxation records
+BurgerKingRussia	Burger King Russia	burgerkingrus.ru	2024-08-25	2026-09-21T13:54:00Z	2026-09-21T13:54:00Z	3155792	v	Dates of birth;Email addresses;Genders;Geographic locations;Names;Phone numbers
+BusinessAcumen	Business Acumen Magazine	businessacumen.biz	2014-04-25	2014-05-11T04:25:48Z	2014-05-11T04:25:48Z	26596	v	Email addresses;Names;Passwords;Usernames;Website activity
+BVD	Public Business Data	bvdinfo.com	2021-08-19	2023-10-09T07:05:10Z	2023-12-06T22:45:20Z	27917714	v	Dates of birth;Email addresses;Job titles;Names;Phone numbers;Physical addresses
+CafeMom	CafeMom	cafemom.com	2014-04-10	2017-11-09T19:54:20Z	2017-11-09T19:55:00Z	2628148	v	Email addresses;Passwords
+CafePress	CafePress	cafepress.com	2019-02-20	2019-08-05T01:18:43Z	2019-08-05T20:02:32Z	23205290	v	Email addresses;Names;Passwords;Phone numbers;Physical addresses
+CanadaGoose	Canada Goose	canadagoose.com	2025-07-04	2026-02-17T00:19:51Z	2026-02-17T00:19:51Z	581877	v	Device information;Email addresses;IP addresses;Names;Partial credit card data;Phone numbers;Physical addresses;Purchases
+CanadaLife	Canada Life	canadalife.com	2026-04-20	2026-05-13T06:51:17Z	2026-05-13T06:51:17Z	237810	v	Email addresses;Job titles;Names;Phone numbers;Physical addresses;Salutations;Support tickets
+CanadianTire	Canadian Tire	canadiantire.ca	2025-10-02	2026-02-25T06:53:25Z	2026-02-25T06:54:20Z	38306562	v	Dates of birth;Email addresses;Genders;Names;Partial credit card data;Passwords;Phone numbers;Physical addresses
+CannabisForum	Cannabis.com	cannabis.com	2014-02-05	2014-06-01T07:55:24Z	2014-06-01T07:55:24Z	227746	v	Dates of birth;Email addresses;Geographic locations;Historical passwords;Instant messenger identities;IP addresses;Passwords;Private messages;Usernames;Website activity
+Canva	Canva	canva.com	2019-05-24	2019-08-09T14:24:01Z	2019-08-09T14:24:01Z	137272116	v	Email addresses;Geographic locations;Names;Passwords;Usernames
+CapialEconomics	Capital Economics	capitaleconomics.com	2020-12-12	2022-07-04T08:16:36Z	2022-07-04T08:16:36Z	263829	v	Email addresses;Employers;Job titles;Names;Phone numbers;Physical addresses
+CardingMafia	Carding Mafia (March 2021)	cardmafia.cc	2021-03-18	2021-03-23T05:00:29Z	2022-01-15T23:30:24Z	297744	vs	Email addresses;IP addresses;Passwords;Usernames
+CardingMafiaDec2021	Carding Mafia (December 2021)	cardmafia.cc	2021-12-28	2022-01-16T00:04:04Z	2022-01-16T00:04:04Z	303877	vs	Email addresses;IP addresses;Passwords;Usernames
+CarGurus	CarGurus	cargurus.com	2026-02-14	2026-02-22T04:43:54Z	2026-02-22T04:43:54Z	12461887	v	Email addresses;IP addresses;Names;Phone numbers;Physical addresses
+Carhartt	Carhartt	carhartt.com	2026-08-13	2026-08-25T21:34:25Z	2026-08-25T21:34:25Z	12933413	v	Email addresses;Names;Phone numbers;Physical addresses
+CarMax	CarMax	carmax.com	2026-01-24	2026-02-20T03:48:30Z	2026-02-20T03:48:30Z	431371	v	Email addresses;Names;Phone numbers;Physical addresses
+Carnival	Carnival	carnivalcorp.com	2026-04-18	2026-04-24T01:58:19Z	2026-04-24T01:58:19Z	7531359	v	Dates of birth;Email addresses;Genders;Geographic locations;Loyalty program details;Names;Salutations
+CashCrate	CashCrate	cashcrate.com	2016-11-17	2018-04-20T21:40:38Z	2018-04-20T21:40:38Z	6844490	v	Email addresses;Names;Passwords;Physical addresses
+Catho	Catho	catho.com.br	2020-03-01	2020-08-18T22:52:39Z	2020-08-18T22:52:39Z	1173012	v	Email addresses;Names;Passwords;Usernames
+Catwatchful	Catwatchful	catwatchful.com	2025-06-09	2025-07-03T23:04:01Z	2025-07-03T23:04:01Z	61641	vs	Email addresses;Passwords
+CDEK	CDEK	cdek.ru	2022-03-09	2022-03-17T06:19:02Z	2022-03-17T06:19:02Z	19218203		Email addresses;Names;Phone numbers
+CDProjektRed	CD Projekt RED	cdprojektred.com	2016-03-01	2017-01-31T06:40:09Z	2017-01-31T06:40:09Z	1871373	v	Email addresses;Passwords;Usernames
+CentralTickets	Central Tickets	centraltickets.co.uk	2024-07-01	2024-09-30T15:57:13Z	2024-09-30T15:57:13Z	722860	v	Device information;Email addresses;IP addresses;Names;Passwords;Phone numbers;Purchases
+CFGI	CFGI	cfgi.com	2026-03-06	2026-06-18T03:22:51Z	2026-06-18T03:25:47Z	248235	v	Email addresses;Employers;Job titles;Names;Phone numbers;Physical addresses
+Charter	Charter	charter.com	2026-05-23	2026-05-28T20:00:34Z	2026-05-28T20:01:50Z	4851517	v	Email addresses;Job titles;Names;Phone numbers;Physical addresses
+Chatbooks	Chatbooks	chatbooks.com	2020-03-26	2020-07-29T21:21:46Z	2020-07-29T21:21:46Z	2520441	v	Email addresses;Names;Passwords;Phone numbers;Social media profiles
+CheapAssGamer	CheapAssGamer.com	cheapassgamer.com	2015-07-01	2016-11-08T01:58:39Z	2016-11-08T01:58:39Z	444767	v	Email addresses;IP addresses;Passwords;Usernames
+Chegg	Chegg	chegg.com	2018-04-28	2019-08-16T07:24:58Z	2024-04-27T05:34:09Z	39721127	v	Email addresses;Names;Passwords;Phone numbers;Physical addresses;Usernames
+Chess	Chess.com (2023)	chess.com	2023-11-08	2023-11-10T02:02:26Z	2026-09-13T13:01:21Z	1274077	v	Email addresses;Geographic locations;Names;Usernames
+Chess2026	Chess.com (2026)	chess.com	2026-08-03	2026-09-13T13:09:11Z	2026-09-13T13:09:11Z	4653212	v	Email addresses;Geographic locations;Names;Usernames
+Chowbus	Chowbus	chowbus.com	2020-10-05	2020-10-06T06:07:45Z	2020-10-06T06:07:45Z	444224	v	Email addresses;Names;Phone numbers;Physical addresses
+ChrisLeong	Chris Leong	chrisleong.com	2024-08-10	2024-08-13T22:16:41Z	2024-08-13T22:16:41Z	27096	v	Dates of birth;Email addresses;Genders;Names;Nationalities;Phone numbers;Physical addresses;Purchases;Social media profiles
+Cit0day	Cit0day	cit0day.in	2020-11-04	2020-11-19T08:07:33Z	2020-11-19T08:07:33Z	226883414		Email addresses;Passwords
+CityBee	CityBee	citybee.lt	2021-02-05	2021-02-17T00:52:52Z	2021-02-17T00:52:52Z	110156	v	Email addresses;Government issued IDs;Names;Passwords
+CityJerks	CityJerks	cityjerks.com	2023-02-27	2023-04-27T21:50:05Z	2023-04-27T21:50:05Z	177554	vs	Bios;Dates of birth;Email addresses;Geographic locations;IP addresses;Passwords;Private messages;Profile photos;Sexual orientations;Usernames
+CivilOnline	Civil Online	co188.com	2011-07-10	2016-11-07T20:41:52Z	2016-11-07T20:41:52Z	7830195		Email addresses;IP addresses;Passwords;Usernames;Website activity
+ClashOfKings	Clash of Kings	f.elex.com	2016-07-14	2019-07-27T22:03:03Z	2019-07-27T22:03:03Z	1604957	v	Email addresses;IP addresses;Passwords;Usernames
+ClearVoiceSurveys	ClearVoice Surveys	clearvoicesurveys.com	2015-08-23	2021-04-23T05:00:19Z	2021-04-23T05:00:19Z	15074786	v	Dates of birth;Email addresses;Genders;IP addresses;Names;Passwords;Phone numbers;Physical addresses
+ClickASnap	ClickASnap	clickasnap.com	2022-09-24	2024-03-13T03:47:22Z	2024-03-13T03:47:22Z	3262980	v	Email addresses;Names;Passwords;Physical addresses;Purchases;Social media profiles;Usernames
+ClixSense	ClixSense	clixsense.com	2016-09-04	2016-09-11T06:37:25Z	2016-09-11T06:37:25Z	2424784	v	Account balances;Dates of birth;Email addresses;Genders;IP addresses;Names;Passwords;Payment histories;Payment methods;Physical addresses;Usernames;Website activity
+CloudPets	CloudPets	cloudpets.com	2017-01-01	2017-02-27T20:57:29Z	2017-02-27T20:57:29Z	583503	v	Email addresses;Family members' names;Passwords
+ClubPenguinRewritten	Club Penguin Rewritten (January 2018)	cprewritten.net	2018-01-21	2019-04-23T05:05:16Z	2019-07-30T14:05:55Z	1688176	v	Email addresses;IP addresses;Passwords;Usernames
+ClubPenguinRewrittenJul2019	Club Penguin Rewritten (July 2019)	cprewritten.net	2019-07-27	2019-07-30T14:05:10Z	2019-07-30T14:05:10Z	4007909	v	Email addresses;IP addresses;Passwords;Usernames
+Coachella	Coachella	coachella.com	2017-02-22	2017-06-27T10:57:03Z	2017-06-27T10:57:03Z	599802	v	Email addresses;IP addresses;Passwords;Usernames
+Cocospy	Cocospy	cocospy.com	2025-02-14	2025-02-20T22:36:16Z	2025-02-20T22:36:16Z	1798059	vs	Email addresses
+CodeStepByStep	CodeStepByStep	codestepbystep.com	2025-11-15	2025-11-23T05:54:02Z	2025-12-02T21:59:17Z	103077	v	Email addresses;Names;Usernames
+Coinmama	Coinmama	coinmama.com	2017-08-03	2019-08-30T20:53:29Z	2019-08-30T20:53:29Z	478824	v	Email addresses;Passwords;Usernames
+CoinMarketCap	CoinMarketCap	coinmarketcap.com	2021-10-12	2021-10-22T20:32:53Z	2021-10-22T20:32:53Z	3117548	v	Email addresses
+CoinTracker	CoinTracker	cointracker.io	2022-12-01	2022-12-12T08:55:48Z	2023-01-01T07:04:48Z	1557153	v	Email addresses;Partial phone numbers
+ColoCrossing	ColoCrossing	colocrossing.com	2025-05-24	2025-06-03T05:09:53Z	2025-06-03T05:09:53Z	7183	v	Email addresses;Names;Passwords
+ColorDating	Color Dating	colordatingapp.com	2018-09-05	2025-03-03T05:03:18Z	2025-03-03T05:03:18Z	220503	vs	Bios;Dates of birth;Email addresses;Geographic locations;Names;Passwords;Profile photos
+Comcast	Comcast	comcast.net	2015-11-08	2016-02-08T21:41:43Z	2016-02-08T21:41:43Z	616882	v	Email addresses;Passwords;Physical addresses
+COMELEC	COMELEC (Philippines Voters)	comelec.gov.ph	2016-03-27	2016-04-14T02:24:32Z	2016-04-14T02:24:32Z	228605	v	Biometric data;Dates of birth;Email addresses;Family members' names;Genders;Job titles;Marital statuses;Names;Passport numbers;Phone numbers;Physical addresses;Physical attributes
+CondoCom	Condo.com	condo.com	2019-06-01	2024-07-25T04:12:07Z	2024-07-25T04:12:07Z	1481555	v	Email addresses;Names;Phone numbers;Physical addresses
+Convex	Convex	convex.ru	2023-02-01	2023-02-26T06:51:44Z	2023-02-26T06:51:44Z	150129	v	Email addresses;IP addresses;Names;Phone numbers
+CrackCommunity	Crack Community	crackcommunity.com	2013-09-09	2015-02-03T06:30:05Z	2015-02-03T06:30:05Z	19210	v	Email addresses;IP addresses;Passwords;Usernames;Website activity
+CrackedTO	Cracked.to	cracked.to	2019-07-21	2019-08-12T11:18:56Z	2019-08-12T11:18:56Z	749161	v	Email addresses;IP addresses;Passwords;Private messages;Usernames
+CrackingForum	CrackingForum	crackingforum.com	2016-07-01	2017-12-10T20:08:30Z	2017-12-10T20:08:30Z	660305	v	Email addresses;IP addresses;Passwords;Usernames
+CraftRise	CraftRise	craftrise.com.tr	2022-03-05	2023-08-08T07:57:30Z	2023-08-08T08:00:39Z	2532527	v	Email addresses;Geographic locations;Passwords;Usernames
+CreamsCafe	Creams Cafe	creamscafe.com	2025-05-01	2025-07-23T04:31:05Z	2025-07-23T04:31:05Z	159652	v	Email addresses;Names;Phone numbers;Physical addresses
+Creative	Creative	creative.com	2018-05-01	2018-06-07T21:00:31Z	2018-06-07T21:00:31Z	483015	v	Email addresses;IP addresses;Passwords;Usernames
+CrossFire	Cross Fire	cfire.mail.ru	2016-08-08	2016-12-28T00:29:28Z	2016-12-28T00:29:28Z	12865609	v	Email addresses;Passwords;Usernames
+Crunchbase	Crunchbase	crunchbase.com	2026-01-22	2026-10-14T06:01:26Z	2026-10-14T06:01:26Z	559908	v	Email addresses;Employers;Job titles;Names;Phone numbers;Physical addresses;Social media profiles
+Crunchyroll	Crunchyroll	crunchyroll.com	2026-03-12	2026-04-04T04:47:29Z	2026-04-27T20:33:31Z	1195684	v	Email addresses
+CSDN	China Software Developer Network	csdn.net	2011-12-21	2025-11-27T05:49:56Z	2025-11-27T05:49:56Z	6414990	v	Email addresses;Passwords;Usernames
+CTARS	CTARS	ctars.com.au	2021-05-21	2022-05-31T22:58:15Z	2022-05-31T23:02:54Z	12314	vs	Dates of birth;Email addresses;Genders;Names;Passwords;Personal health data;Phone numbers;Physical addresses;Salutations;Usernames
+CTT	CTT	ctt.pt	2026-04-26	2026-05-19T00:28:54Z	2026-05-19T00:28:54Z	468124	v	Email addresses;Names;Phone numbers
+Cultura	Cultura	cultura.com	2024-09-06	2025-09-25T01:50:55Z	2025-09-25T01:50:55Z	1462025	v	Email addresses;Names;Phone numbers;Physical addresses;Purchases
+CushmanWakefield	Cushman & Wakefield	cushmanwakefield.com	2026-05-05	2026-05-12T06:58:16Z	2026-05-12T06:58:16Z	310431	v	Email addresses;Job titles;Names;Phone numbers;Physical addresses;Salutations
+CutiesAI	Cuties AI	cuties.ai	2025-03-21	2026-03-31T06:52:52Z	2026-03-31T06:52:52Z	144250	vs	Avatars;Display names;Email addresses
+CutoutPro	Cutout.Pro	cutout.pro	2024-02-26	2024-02-28T22:16:27Z	2024-02-28T22:16:27Z	19972829	v	Email addresses;IP addresses;Names;Passwords
+CyberServe	CyberServe	cyberserve.co.il	2021-10-29	2021-11-04T09:58:03Z	2021-11-04T10:28:56Z	1107034	vs	Dates of birth;Drinking habits;Email addresses;Family structure;Genders;Geographic locations;HIV statuses;IP addresses;Names;Passwords;Personal health data;Phone numbers;Physical attributes;Private messages;Profile photos;Religions;Sexual orientations;Smoking habits;Usernames
+CyrusOne	CyrusOne	cyrusone.com	2026-08-05	2026-10-07T23:19:16Z	2026-10-07T23:21:00Z	373460	v	Email addresses;Employers;Job titles;Names;Phone numbers;Physical addresses;Support tickets
+D3scene	D3Scene	d3scene.com	2016-01-01	2019-06-15T15:19:11Z	2019-06-15T15:19:11Z	568827	v	Email addresses;IP addresses;Passwords;Usernames
+DaFont	DaFont	dafont.com	2017-05-16	2017-05-18T20:05:28Z	2017-05-18T20:05:28Z	637340	v	Email addresses;Passwords;Usernames
+Dailymotion	Dailymotion	dailymotion.com	2016-10-20	2017-08-07T02:51:12Z	2017-08-07T02:51:12Z	85176234	v	Email addresses;Passwords;Usernames
+DailyObjects	DailyObjects	dailyobjects.com	2018-01-01	2020-01-28T10:50:00Z	2020-01-28T10:50:00Z	464260	v	Email addresses;Names;Passwords;Phone numbers;Physical addresses
+DailyQuiz	Daily Quiz	dailyquiz.me	2021-01-13	2021-05-21T05:15:39Z	2021-05-21T11:44:38Z	8032404	v	Email addresses;IP addresses;Passwords;Usernames
+Dangdang	Dangdang	dangdang.com	2011-06-01	2019-01-10T11:15:51Z	2019-01-10T11:24:06Z	4848734	v	Email addresses
+DaniWeb	DaniWeb	daniweb.com	2015-12-01	2016-12-28T23:12:16Z	2016-12-28T23:12:16Z	1131636	v	Email addresses;IP addresses;Passwords
+DataAndLeads	Data & Leads	datanleads.com	2018-11-14	2018-11-28T19:32:19Z	2018-11-28T19:32:19Z	44320330	v	Email addresses;Employers;IP addresses;Job titles;Names;Phone numbers;Physical addresses
+DataCamp	DataCamp	datacamp.com	2017-01-30	2019-04-09T04:29:55Z	2019-04-09T21:12:53Z	760561	v	Email addresses;Geographic locations;IP addresses;Names;Passwords
+DateHotBrunettes	Date Hot Brunettes	datehotbrunettes.com	2021-01-12	2024-07-04T05:08:43Z	2024-07-04T05:08:43Z	1494078	vs	Bios;Email addresses;IP addresses;Passwords;Usernames
+DatPiff	DatPiff	datpiff.com	2021-08-25	2022-01-04T07:42:27Z	2022-01-04T07:42:27Z	7476940	v	Email addresses;Passwords;Security questions and answers;Usernames
+Dave	Dave	dave.com	2020-06-28	2020-07-27T02:38:41Z	2020-07-27T02:38:41Z	2964182	v	Dates of birth;Email addresses;Names;Passwords;Phone numbers;Physical addresses;Social security numbers
+db8151dd	Covve	covve.com	2020-02-20	2020-05-15T08:06:11Z	2020-05-19T20:25:18Z	22802117	v	Email addresses;Job titles;Names;Phone numbers;Physical addresses;Social media profiles
+dBforums	dBforums	dbforums.com	2016-07-04	2023-09-20T07:26:28Z	2023-09-20T07:26:28Z	363468	v	Dates of birth;Email addresses;IP addresses;Passwords;Usernames
+DCHealth	DC Health Link	dchealthlink.com	2023-03-06	2023-12-14T19:11:43Z	2023-12-14T23:34:44Z	48145	vs	Citizenship statuses;Dates of birth;Email addresses;Employers;Ethnicities;Genders;Names;Phone numbers;Physical addresses;Purchases;Social security numbers
+DDO	Dungeons & Dragons Online	ddo.com	2013-04-02	2016-03-12T10:59:56Z	2016-03-12T10:59:56Z	1580933	v	Dates of birth;Email addresses;IP addresses;Passwords;Usernames;Website activity
+DecoratingTheHouse	집꾸미기	ggumim.co.kr	2020-03-27	2020-08-02T05:34:42Z	2020-08-02T05:34:42Z	1298651	v	Email addresses;Names;Phone numbers;Usernames
+Deezer	Deezer	deezer.com	2019-04-22	2023-01-02T03:10:50Z	2025-12-09T03:35:26Z	229037936	v	Dates of birth;Email addresses;Genders;Geographic locations;IP addresses;Names;Spoken languages;Usernames
+DemandScience	DemandScience by Pure Incubation	demandscience.com	2024-02-28	2024-11-13T09:53:35Z	2024-11-13T10:00:34Z	121796165	v	Email addresses;Employers;Job titles;Names;Phone numbers;Physical addresses;Social media profiles
+DemonForums	Demon Forums	demonforums.net	2019-02-20	2019-04-04T07:14:34Z	2019-04-04T07:14:34Z	52623	v	Email addresses;Passwords;Usernames
+DennisKirk	Dennis Kirk	denniskirk.com	2021-09-04	2024-11-05T22:11:58Z	2024-11-06T04:39:38Z	1356026	v	Email addresses;Geographic locations;Names;Phone numbers;Purchases
+DentaQuest	DentaQuest	dentaquest.com	2026-05-23	2026-06-03T22:56:30Z	2026-06-03T23:02:26Z	2553599	v	Dates of birth;Email addresses;Genders;Government issued IDs;Health insurance information;Names;Phone numbers;Physical addresses
+Descomplica	Descomplica	descomplica.com.br	2021-03-14	2021-04-28T08:37:04Z	2021-04-28T08:37:04Z	4845378	v	Email addresses;Names;Partial credit card data;Passwords;Purchases
+DevilTorrents	Devil-Torrents.pl	devil-torrents.pl	2021-01-04	2022-05-01T23:56:34Z	2022-05-01T23:56:34Z	63451	v	Email addresses;Passwords
+devkitPro	devkitPro	devkitpro.org	2019-02-03	2019-02-11T07:21:44Z	2019-02-11T07:21:44Z	1508	v	Email addresses;Passwords;Private messages
+DietCom	diet.com	diet.com	2014-08-10	2017-10-13T21:37:10Z	2017-10-13T21:37:10Z	1383759	v	Dates of birth;Eating habits;Email addresses;IP addresses;Names;Passwords;Physical attributes;Usernames
+digiDirect	digiDirect	digidirect.com.au	2024-09-29	2024-10-25T02:01:08Z	2024-10-25T02:01:08Z	304337	v	Dates of birth;Email addresses;Names;Phone numbers;Physical addresses
+DiskUnion	Disk Union	diskunion.net	2022-06-24	2025-06-07T07:08:28Z	2025-06-07T07:08:28Z	690667	v	Email addresses;Geographic locations;Names;Passwords;Phone numbers;Usernames
+Disqus	Disqus	disqus.com	2012-07-01	2017-10-06T23:03:51Z	2017-10-06T23:03:51Z	17551044	v	Email addresses;Passwords;Usernames
+DivineSkins	Divine Skins	divineskins.gg	2026-03-13	2026-03-15T05:18:40Z	2026-03-15T05:18:40Z	105814	v	Email addresses;Purchases;Usernames
+DivXSubTitles	DivX SubTitles	divxsubtitles.net	2010-01-01	2022-06-14T02:57:46Z	2022-06-14T04:55:40Z	783058	v	Email addresses;Passwords;Usernames
+DLH	DLH.net	dlh.net	2016-07-31	2016-09-07T13:29:25Z	2016-09-07T13:29:25Z	3264710	v	Dates of birth;Email addresses;Names;Passwords;Usernames;Website activity
+Dodonew	Dodonew.com	dodonew.com	2011-12-01	2016-11-10T00:26:01Z	2016-11-10T00:26:01Z	8718404		Email addresses;Usernames
+Dominos	Domino's	pizza.dominos.be	2014-06-13	2015-01-04T03:03:34Z	2015-01-04T03:03:34Z	648231	v	Email addresses;Names;Passwords;Phone numbers;Physical addresses
+DominosIndia	Domino's India	dominos.co.in	2021-03-24	2021-06-03T02:18:39Z	2021-06-20T03:20:56Z	22527655	v	Email addresses;Names;Phone numbers;Physical addresses;Purchases
+Doomworld	Doomworld	doomworld.com	2022-10-12	2022-10-24T06:10:24Z	2022-10-24T06:10:24Z	34478	v	Email addresses;IP addresses;Passwords;Usernames
+DoorDash	DoorDash	doordash.com	2022-08-02	2023-01-07T03:59:32Z	2023-01-07T03:59:32Z	367476	v	Email addresses;Geographic locations;Names;Partial credit card data
+Dota2	Dota2	dev.dota2.com	2016-07-10	2024-05-23T06:44:21Z	2024-05-23T06:44:21Z	1907205	v	Email addresses;IP addresses;Passwords;Usernames
+DoubleCounter	Double Counter	doublecounter.gg	2026-10-04	2026-10-07T05:42:24Z	2026-10-07T05:44:50Z	274922	v	Email addresses;Geographic locations;Names;Usernames
+Doxbin	Doxbin	doxbin.com	2022-01-05	2022-01-08T05:51:48Z	2022-01-09T06:23:56Z	370794	vs	Browser user agent details;Email addresses;Passwords;Usernames
+DoxbinScrape	Doxbin Scrape	doxbin.com	2025-01-24	2025-01-28T02:09:58Z	2025-01-28T02:09:58Z	435784	vs	Email addresses
+DoxbinTOoDA	Doxbin (TOoDA)	doxbin.com	2024-02-12	2025-02-13T07:18:47Z	2025-02-13T07:21:04Z	136461	vs	Email addresses;Usernames
+Dragonica	Dragonica Lunaris	playdragonica.eu	2025-12-06	2026-05-21T04:41:32Z	2026-05-21T04:44:28Z	126293	v	Dates of birth;Email addresses;Names;Passwords;Spoken languages;Usernames
+DragonNest	DragonNest	dragonnest.com	2013-08-23	2025-02-03T04:29:37Z	2025-02-03T04:29:37Z	511290	v	Email addresses;IP addresses;Passwords;Usernames
+DriveSure	DriveSure	drivesure.com	2020-12-19	2021-05-10T08:02:29Z	2021-05-10T08:02:29Z	3675099	v	Email addresses;Names;Passwords;Phone numbers;Physical addresses;Vehicle details
+Drizly	Drizly	drizly.com	2020-07-02	2020-07-28T21:45:05Z	2020-07-28T21:45:05Z	2479044	v	Dates of birth;Device information;Email addresses;IP addresses;Names;Passwords;Phone numbers;Physical addresses
+Dropbox	Dropbox	dropbox.com	2012-07-01	2016-08-31T00:19:19Z	2016-08-31T00:19:19Z	68648009	v	Email addresses;Passwords
+Dubsmash	Dubsmash	dubsmash.com	2018-12-01	2019-02-25T08:35:58Z	2019-02-25T08:35:58Z	161749950	v	Email addresses;Geographic locations;Names;Passwords;Phone numbers;Spoken languages;Usernames
+DucksUnlimited	Ducks Unlimited	ducks.org	2021-01-29	2021-11-16T01:24:35Z	2021-11-16T05:39:28Z	1324364	v	Dates of birth;Email addresses;Names;Passwords;Phone numbers;Physical addresses
+DuelingNetwork	Dueling Network	duelingnetwork.com	2017-03-29	2020-03-30T00:44:49Z	2020-03-31T07:18:51Z	6486626	v	Email addresses;IP addresses;Passwords;Usernames
+Dunzo	Dunzo	dunzo.com	2020-06-19	2020-07-29T04:38:23Z	2020-07-29T04:38:23Z	3465259	v	Device information;Email addresses;Geographic locations;IP addresses;Names;Phone numbers
+Duolingo	Duolingo	duolingo.com	2023-01-24	2023-08-23T04:31:08Z	2023-08-23T04:31:08Z	2676696	v	Email addresses;Names;Spoken languages;Usernames
+Duowan	Duowan.com	duowan.com	2011-01-01	2016-11-07T12:53:19Z	2016-11-07T12:53:19Z	2639894		Email addresses;Passwords;Usernames
+DVDShopCH	dvd-shop.ch	dvd-shop.ch	2017-12-05	2017-12-10T04:58:09Z	2017-12-10T04:58:09Z	67973	v	Email addresses;Passwords
+Dymocks	Dymocks	dymocks.com.au	2023-06-20	2023-09-08T07:35:22Z	2023-09-08T07:46:30Z	836120	v	Dates of birth;Email addresses;Genders;Names;Phone numbers;Physical addresses
+Earth2	Earth 2	earth2.io	2024-10-16	2024-11-07T04:49:02Z	2024-11-07T04:49:02Z	420961	v	Email addresses;Usernames
+Eatigo	Eatigo	eatigo.com	2018-10-16	2021-08-25T03:42:31Z	2021-08-25T03:42:31Z	2789609	v	Email addresses;Genders;Names;Passwords;Phone numbers;Social media profiles
+EatStreet	EatStreet	eatstreet.com	2019-05-03	2019-07-19T11:29:35Z	2019-07-19T11:29:35Z	6353564	v	Dates of birth;Email addresses;Genders;Names;Partial credit card data;Passwords;Phone numbers;Physical addresses;Social media profiles
+ECB	England Cricket	ecb.co.uk	2024-03-23	2024-03-29T01:10:19Z	2024-03-29T01:15:59Z	43299	v	Email addresses;Passwords
+ECCIE	ECCIE	eccie.net	2021-07-01	2023-08-21T23:19:18Z	2023-08-21T23:19:18Z	536923	vs	Dates of birth;Email addresses;IP addresses;Passwords;Usernames
+Edmodo	Edmodo	edmodo.com	2017-05-11	2017-06-01T05:59:24Z	2017-06-01T05:59:24Z	43423561	v	Email addresses;Passwords;Usernames
+Edmunds	Edmunds	edmunds.com	2026-01-24	2026-06-01T07:39:02Z	2026-06-01T07:42:03Z	177860	v	Device information;Email addresses;IP addresses;Passwords;Phone numbers;Usernames
+Elance	Elance	elance.com	2009-01-01	2017-02-18T02:54:48Z	2017-02-18T02:54:48Z	1291178	v	Email addresses;Employers;Geographic locations;Passwords;Phone numbers;Usernames
+Elanic	Elanic	elanic.in	2018-01-01	2020-05-04T23:25:28Z	2020-05-04T23:25:28Z	2325283	v	Email addresses;Geographic locations;Usernames
+Emuparadise	Emuparadise	emuparadise.me	2018-04-01	2019-06-09T06:23:35Z	2019-06-15T15:19:53Z	1131229	v	Email addresses;IP addresses;Passwords;Usernames
+EPal	E-Pal	epal.gg	2022-04-15	2022-10-24T04:54:30Z	2022-10-24T04:56:02Z	108887	v	Email addresses;Purchases;Usernames
+EpicBot	EpicBot	epicbot.com	2019-09-01	2019-11-19T23:29:42Z	2019-11-19T23:33:02Z	816662	v	Email addresses;IP addresses;Passwords;Usernames
+EpicGames	Epic Games	epicgames.com	2016-08-11	2016-11-07T10:19:34Z	2016-11-07T10:19:34Z	251661	v	Email addresses;Passwords;Usernames
+EpicNPC	EpicNPC	epicnpc.com	2016-01-02	2019-07-27T23:11:30Z	2019-07-27T23:20:02Z	408795	v	Email addresses;IP addresses;Passwords;Usernames
+Epik	Epik	epik.com	2021-09-13	2021-09-19T21:27:17Z	2021-09-19T21:27:17Z	15003961	v	Email addresses;Names;Phone numbers;Physical addresses;Purchases
+Eroticy	Eroticy	eroticy.com	2015-06-01	2017-01-10T02:19:56Z	2017-01-10T02:19:56Z	1370175	s	Email addresses;IP addresses;Names;Passwords;Payment histories;Phone numbers;Physical addresses;Usernames;Website activity
+Eskimi	Eskimi	eskimi.com	2020-09-25	2022-07-16T07:51:26Z	2022-07-16T07:51:26Z	1197620	v	Dates of birth;Email addresses;Genders;Geographic locations;Passwords;Usernames
+EstanteVirtual	Estante Virtual	estantevirtual.com.br	2019-02-28	2023-11-29T22:13:34Z	2023-11-29T22:13:34Z	5412603	v	Dates of birth;Email addresses;Names;Passwords;Phone numbers;Physical addresses;Usernames
+eThekwiniMunicipality	eThekwini Municipality	eservices.durban.gov.za	2016-09-07	2016-09-15T00:01:47Z	2016-09-15T00:01:47Z	81830	v	Dates of birth;Deceased date;Email addresses;Genders;Government issued IDs;Names;Passport numbers;Passwords;Phone numbers;Physical addresses;Utility bills
+Ethereum	Ethereum	ethereum.org	2016-12-16	2016-12-20T23:56:26Z	2016-12-20T23:56:26Z	16431	v	Email addresses;IP addresses;Passwords;Private messages;Usernames;Website activity
+Eurofiber	Eurofiber	eurofiber.com	2025-11-13	2025-11-20T02:44:14Z	2025-11-20T02:44:14Z	10003	v	Email addresses;Names;Phone numbers
+EuropaJobs	europa.jobs	europa.jobs	2019-08-11	2020-01-15T08:51:05Z	2020-01-15T08:51:05Z	226095	v	Dates of birth;Email addresses;Geographic locations;Job applications;Names;Passwords;Phone numbers;Spoken languages
+Evermotion	Evermotion	evermotion.org	2015-05-07	2017-07-02T13:49:09Z	2017-07-02T13:49:09Z	435510	v	Dates of birth;Email addresses;Passwords;Usernames
+EverybodyEdits	Everybody Edits	everybodyedits.com	2019-03-23	2019-04-03T10:50:16Z	2019-04-03T10:55:58Z	871190	v	Email addresses;IP addresses;Usernames
+Evite	Evite	evite.com	2013-08-11	2019-07-14T14:51:51Z	2019-07-14T14:51:51Z	100985047	v	Dates of birth;Email addresses;Genders;Names;Passwords;Phone numbers;Physical addresses
+Evony	Evony	evony.com	2016-06-01	2017-03-25T23:43:45Z	2017-03-25T23:43:45Z	29396116	v	Email addresses;IP addresses;Passwords;Usernames
+Exactis	Exactis	exactis.com	2018-06-01	2018-07-25T20:00:44Z	2018-07-25T20:00:44Z	131577763	v	Credit status information;Dates of birth;Education levels;Email addresses;Ethnicities;Family structure;Financial investments;Genders;Home ownership statuses;Income levels;IP addresses;Marital statuses;Names;Net worths;Occupations;Personal interests;Phone numbers;Physical addresses;Religions;Spoken languages
+ExactSciences	Exact Sciences	exactsciences.com	2026-07-15	2026-08-07T06:27:29Z	2026-08-07T06:27:29Z	10869543	vs	Dates of birth;Email addresses;Genders;Names;Personal health data;Phone numbers;Physical addresses
+Experian	Experian (2015)	experian.com	2015-09-16	2016-09-06T23:49:00Z	2020-11-22T05:42:00Z	7196890		Credit status information;Dates of birth;Email addresses;Ethnicities;Family structure;Genders;Home ownership statuses;Income levels;IP addresses;Names;Phone numbers;Physical addresses;Purchasing habits
+ExploreTalent	Explore Talent (July 2024)	exploretalent.com	2022-02-28	2024-07-25T03:21:40Z	2024-08-19T05:52:35Z	5371574	v	Email addresses;Names;Phone numbers;Physical addresses
+ExploreTalentAug2024	Explore Talent (August 2024)	exploretalent.com	2024-08-15	2024-08-19T05:52:35Z	2024-08-19T05:52:35Z	8929384	v	Email addresses
+Exvagos	Exvagos	exvagos.org	2022-07-21	2024-03-28T06:28:55Z	2024-03-28T06:28:55Z	2121789	v	Dates of birth;Email addresses;IP addresses;Passwords;Usernames
+Eye4Fraud	Eye4Fraud	eye4fraud.com	2023-01-25	2023-03-06T04:46:58Z	2023-03-06T06:04:28Z	16000591	v	Email addresses;IP addresses;Names;Partial credit card data;Passwords;Phone numbers;Physical addresses
+EyeEm	EyeEm	eyeem.com	2018-02-28	2019-02-16T07:17:45Z	2019-02-16T07:17:45Z	19611022	v	Bios;Email addresses;Names;Passwords;Usernames
+Facebook	Facebook	facebook.com	2019-08-01	2021-04-04T03:20:45Z	2021-04-06T09:09:21Z	509458528	v	Dates of birth;Email addresses;Employers;Genders;Geographic locations;Names;Phone numbers;Relationship statuses
+FacebookMarketplace	Facebook Marketplace	facebook.com	2023-10-01	2024-02-22T00:53:37Z	2024-02-22T00:55:02Z	77267	v	Email addresses;Geographic locations;Names;Passwords;Phone numbers;Social media profiles
+Facepunch	Facepunch	facepunch.com	2016-06-03	2018-10-17T13:15:39Z	2018-10-17T13:31:23Z	342913	v	Dates of birth;Email addresses;IP addresses;Passwords;Usernames
+FaceUP	FaceUP	faceup.dk	2013-01-01	2019-01-13T09:50:41Z	2019-01-13T09:50:41Z	87633	v	Dates of birth;Email addresses;Genders;Names;Passwords;Phone numbers;Usernames
+Factual	Factual	factual.com	2017-03-22	2019-12-24T10:56:18Z	2019-12-24T10:56:18Z	2461696	v	Email addresses;Employers;Phone numbers;Physical addresses
+FairVoteCanada	Fair Vote Canada	fairvote.ca	2024-03-02	2024-10-21T05:04:21Z	2024-10-21T05:06:43Z	134336	v	Email addresses;Names;Phone numbers;Physical addresses;Political donations
+Famm	Famm	famm.us	2020-10-08	2022-07-16T09:57:48Z	2022-07-16T09:57:48Z	535240	v	Dates of birth;Email addresses;Genders;Names;Passwords
+Fanlore	Fanlore	fanlore.org	2026-08-06	2026-08-19T02:09:16Z	2026-08-19T02:09:16Z	144520	v	Email addresses;Names;Passwords;Usernames
+Fanpass	Fanpass	fanpass.co.uk	2022-04-30	2022-05-24T03:55:30Z	2022-05-24T23:28:33Z	112251	v	Email addresses;Genders;Names;Partial dates of birth;Passwords;Phone numbers;Physical addresses;Purchases;Social media profiles
+FantasyFootballHub	Fantasy Football Hub	fantasyfootballhub.co.uk	2021-10-02	2021-10-07T06:32:57Z	2021-10-07T06:32:57Z	66479	v	Email addresses;IP addresses;Names;Passwords;Purchases;Usernames
+FashionFantasyGame	FashionFantasyGame	fashionfantasygame.com	2016-12-01	2017-04-20T10:33:38Z	2017-04-20T10:33:38Z	2357872	v	Email addresses;Passwords
+FFR	Fédération Francaise de Rugby	ffr.fr	2023-07-06	2025-05-22T22:28:19Z	2025-05-24T01:55:38Z	281977	v	Dates of birth;Email addresses;Names;Phone numbers
+FFShrine	Final Fantasy Shrine	ffshrine.org	2015-09-18	2015-10-31T12:43:58Z	2015-10-31T12:43:58Z	620677	v	Email addresses;Passwords;Usernames;Website activity
+Figure	Figure	figure.com	2026-01-28	2026-02-18T01:11:11Z	2026-02-18T01:11:11Z	967178	v	Dates of birth;Email addresses;Names;Phone numbers;Physical addresses
+FilmaiIn	Filmai.in	filmai.in	2020-01-01	2021-02-23T08:52:26Z	2021-02-23T08:52:26Z	645786	v	Email addresses;Passwords;Usernames
+Finsure	Finsure	finsure.com.au	2024-10-15	2024-11-19T04:25:18Z	2024-11-19T04:25:18Z	296124	v	Email addresses;Names;Phone numbers;Physical addresses
+Fitmart	Fitmart	fitmart.de	2021-10-01	2023-11-03T05:57:10Z	2023-11-03T05:57:10Z	214492	v	Email addresses;Passwords
+Flashback	Flashback	flashback.se	2015-02-11	2015-02-12T05:42:12Z	2015-02-12T05:42:12Z	40256	v	Email addresses;Government issued IDs;Physical addresses
+FlashFlashRevolution	Flash Flash Revolution (2016 breach)	flashflashrevolution.com	2016-02-01	2016-09-06T08:08:29Z	2019-07-21T16:28:59Z	1771845	v	Email addresses;Passwords;Usernames
+FlashFlashRevolution2019	Flash Flash Revolution (2019 breach)	flashflashrevolution.com	2019-07-16	2019-07-21T20:31:54Z	2019-07-21T20:31:54Z	1858124	v	Dates of birth;Email addresses;IP addresses;Passwords;Usernames
+FlatEarthDave	Flat Earth Sun, Moon and Zodiac App	flatearthdave.com	2024-10-15	2025-03-02T05:12:30Z	2025-03-02T05:31:09Z	33294	v	Dates of birth;Email addresses;Genders;Geographic locations;Latitude and longitude pairs;Names;Passwords;Usernames
+FlexBooker	FlexBooker	flexbooker.com	2021-12-23	2022-01-06T06:11:10Z	2022-01-06T06:34:26Z	3756794	v	Email addresses;Names;Partial credit card data;Passwords;Phone numbers
+Fling	Fling	fling.com	2011-03-10	2016-05-28T23:08:07Z	2016-05-28T23:08:07Z	40767652	vs	Dates of birth;Email addresses;Genders;Geographic locations;IP addresses;Passwords;Phone numbers;Sexual fetishes;Sexual orientations;Usernames;Website activity
+FlipaClip	FlipaClip	flipaclip.com	2024-11-18	2024-11-20T22:37:58Z	2024-11-20T22:42:16Z	892854	v	Dates of birth;Email addresses;Geographic locations;Names
+Fluke	Fluke	fluke.com	2026-07-01	2026-07-15T08:01:04Z	2026-07-15T08:01:04Z	821100	v	Email addresses;Employers;Job titles;Names;Physical addresses;Support tickets
+FLVS	Florida Virtual School	flvs.net	2018-02-12	2018-03-18T01:40:31Z	2018-03-18T01:40:31Z	542902	vs	Dates of birth;Email addresses;Names;Passwords;School grades (class levels);Usernames
+Foodora	Foodora	foodora.com	2016-04-22	2020-06-16T02:09:33Z	2020-06-16T02:09:33Z	582578	v	Email addresses;Names;Passwords;Phone numbers;Physical addresses
+Forbes	Forbes	forbes.com	2014-02-15	2014-02-15T11:24:42Z	2014-02-15T11:24:42Z	1057819	v	Email addresses;Passwords;User website URLs;Usernames
+ForumCommunity	ForumCommunity	forumcommunity.net	2016-06-01	2018-12-05T05:04:45Z	2018-12-05T07:29:20Z	776648	v	Email addresses;Passwords;Usernames
+Fotolog	Fotolog	fotolog.com	2018-12-01	2021-06-15T03:20:43Z	2021-06-15T03:20:43Z	16717854	v	Email addresses;Passwords;Usernames
+FoxyBingo	Foxy Bingo	foxybingo.com	2008-04-04	2015-11-22T01:05:05Z	2015-11-22T01:05:05Z	252216	v	Account balances;Browser user agent details;Dates of birth;Email addresses;Genders;Names;Passwords;Phone numbers;Physical addresses;Usernames;Website activity
+FrameAndOptic	Frame & Optic	frameandoptic.com	2025-01-16	2025-01-22T08:46:16Z	2025-01-22T08:46:58Z	15678	v	Email addresses;Geographic locations;Names;Phone numbers
+FreedomHostingII	Freedom Hosting II	fhostingesps6bly.onion	2017-01-31	2017-02-05T10:06:58Z	2017-02-05T10:06:58Z	380830	vs	Email addresses;Passwords;Usernames
+FreeMobile	Free	free.fr	2024-10-17	2025-05-27T07:03:21Z	2025-05-27T07:03:21Z	13926173	v	Bank account numbers;Dates of birth;Genders;Names;Phone numbers;Physical addresses
+FreeOnes	FreeOnes	freeones.com	2017-02-16	2025-09-18T03:09:54Z	2025-09-18T03:09:54Z	960213	vs	Email addresses;IP addresses;Passwords;Usernames
+FreshMenu	FreshMenu	freshmenu.com	2016-07-01	2018-09-10T12:27:19Z	2018-09-10T12:27:19Z	110355	v	Device information;Email addresses;Names;Phone numbers;Physical addresses;Purchases
+Fridae	Fridae	fridae.asia	2014-05-02	2014-05-06T02:48:35Z	2014-05-06T02:48:35Z	35368	vs	Email addresses;Passwords;Usernames;Website activity
+Funimation	Funimation	funimation.com	2016-07-01	2017-02-20T00:43:26Z	2017-02-20T00:43:26Z	2491103	v	Dates of birth;Email addresses;Passwords;Usernames
+FunnyGames	Funny Games	funny-games.biz	2018-04-28	2018-07-24T03:01:35Z	2018-07-24T03:01:35Z	764357	v	Email addresses;IP addresses;Passwords;Usernames
+FurAffinity	Fur Affinity	furaffinity.net	2016-05-17	2016-05-27T09:36:18Z	2016-05-27T09:36:18Z	1270564	vs	Email addresses;Passwords;Usernames
+Gaadi	Gaadi	gaadi.com	2015-05-14	2018-07-01T07:17:02Z	2018-07-01T07:17:02Z	4261179	v	Email addresses;Genders;Geographic locations;IP addresses;Names;Passwords;Phone numbers;Usernames
+Gab	Gab	gab.com	2021-02-26	2021-03-03T23:03:30Z	2021-03-03T23:03:30Z	66521	vs	Avatars;Email addresses;Names;Passwords;Private messages;Usernames
+GamerzPlanet	Gamerzplanet	gamerzplanet.net	2015-10-23	2016-02-05T20:12:26Z	2016-02-05T20:12:26Z	1217166	v	Email addresses;IP addresses;Passwords;Usernames
+GameSalad	GameSalad	gamesalad.com	2019-02-24	2019-07-21T14:18:46Z	2019-07-21T14:23:46Z	1506242	v	Email addresses;IP addresses;Passwords;Usernames
+GamesBox	Games Box	gamesbox.com	2020-09-21	2024-09-15T02:41:52Z	2024-09-15T02:41:52Z	1439354	v	Ages;Email addresses;Genders;Passwords;Usernames
+GameSprite	GameSprite	gamesprite.me	2019-12-17	2023-10-30T02:32:54Z	2023-10-30T07:06:29Z	6164643	v	Email addresses;IP addresses;Passwords;Usernames
+GameTuts	GameTuts	game-tuts.com	2015-03-01	2016-09-23T23:59:38Z	2016-09-23T23:59:38Z	2064274	v	Email addresses;IP addresses;Passwords;Usernames
+GameVN	GameVN	gamevn.com	2016-05-01	2024-09-23T01:39:12Z	2024-09-23T01:39:12Z	1369485	v	Email addresses;IP addresses;Passwords;Usernames
+Gamigo	Gamigo	gamigo.com	2012-03-01	2016-01-18T16:26:24Z	2016-01-18T16:26:24Z	8243604	v	Email addresses;Passwords
+GamingMonk	GamingMonk	gamingmonk.com	2020-12-02	2023-11-05T23:05:37Z	2023-11-05T23:05:37Z	654510	v	Dates of birth;Email addresses;Names;Passwords;Phone numbers;Usernames
+GateHub	GateHub	gatehub.net	2019-06-04	2019-11-20T00:29:29Z	2019-12-24T13:09:23Z	1408078	v	Email addresses;Encrypted keys;Mnemonic phrases;Passwords
+Gawker	Gawker	gawker.com	2010-12-11	2013-12-04T00:00:00Z	2013-12-04T00:00:00Z	1247574	v	Email addresses;Passwords;Usernames
+GeekedIn	GeekedIn	geekedin.net	2016-08-15	2016-11-17T19:44:24Z	2022-03-06T05:21:27Z	1073164	v	Email addresses;Geographic locations;Names;Professional skills;Usernames;Years of professional experience
+Gemini	Gemini	gemini.com	2022-12-13	2022-12-16T16:47:43Z	2025-08-13T03:18:03Z	5274214	v	Email addresses;Partial phone numbers
+Gemotest	Медицинская лаборатория Гемотест (Gemotest)	gemotest.ru	2022-04-22	2025-12-24T02:40:40Z	2025-12-24T02:40:40Z	6341495	vs	Dates of birth;Email addresses;Genders;Government issued IDs;Health insurance information;Names;Passport numbers;Physical addresses
+Gemplex	Gemplex	gemplex.tv	2021-02-18	2023-12-09T02:19:40Z	2023-12-09T02:19:40Z	4563166	v	Device information;Email addresses;Names;Passwords;Phone numbers
+GenesisMarket	Genesis Market	genesis.market	2023-04-05	2023-04-05T12:00:00Z	2023-04-05T12:00:00Z	8000000	vs	Browser user agent details;Credit card CVV;Credit cards;Dates of birth;Email addresses;Names;Passwords;Phone numbers;Physical addresses;Usernames
+GeniusU	GeniusU	geniusu.com	2020-10-02	2021-01-08T21:49:21Z	2021-01-10T00:45:52Z	1301460	v	Email addresses;Genders;IP addresses;Names;Passwords;Social media profiles
+GermanDonerKebab	German Doner Kebab	germandonerkebab.com	2025-03-27	2025-03-30T17:33:35Z	2025-03-30T17:33:35Z	162373	v	Email addresses;Names;Phone numbers;Physical addresses
+GetRevengeOnYourEx	Get Revenge On Your Ex	getrevengeonyourex.com	2022-09-09	2022-11-15T01:57:17Z	2022-12-11T12:24:54Z	79195	vs	Email addresses;IP addresses;Names;Passwords;Phone numbers;Physical addresses;Purchases
+Gett	Ge.tt	ge.tt	2017-05-04	2021-02-16T06:22:20Z	2021-02-22T12:16:44Z	2481121	v	Email addresses;Names;Passwords;Social media profiles
+GFAN	GFAN	gfan.com	2016-10-10	2016-10-10T16:32:34Z	2016-10-10T16:32:34Z	22526334		Email addresses;IP addresses;Passwords;Usernames
+GGCorp	GGCorp	ggcorp.me	2022-08-11	2022-11-08T07:35:13Z	2022-11-08T07:35:13Z	2376330	v	Email addresses;IP addresses;Passwords;Usernames
+GiantTiger	Giant Tiger	gianttiger.com	2024-03-04	2024-04-12T22:31:29Z	2024-04-12T22:57:56Z	2842669	v	Email addresses;Names;Phone numbers;Physical addresses
+Giglio	Giglio	giglio.com	2025-08-09	2025-09-01T09:51:11Z	2025-09-01T09:51:11Z	1026468	v	Email addresses;Names;Phone numbers;Physical addresses
+GitesDeFrance	Gîtes de France	gites-de-france.com	2026-05-16	2026-10-18T04:50:13Z	2026-10-18T04:50:13Z	117574	v	Booking details;Email addresses;Names;Phone numbers;Physical addresses
+GiveSendGo	GiveSendGo	givesendgo.com	2022-02-07	2022-02-15T00:01:14Z	2022-02-15T00:01:14Z	89966	v	Email addresses;Geographic locations;Names;Purchases
+GLAMIRA	GLAMIRA	glamira.com	2023-12-16	2025-01-03T07:55:22Z	2025-01-11T00:32:23Z	874594	v	Email addresses;Names;Phone numbers;Purchases
+GlendaleCommunityCollege	Glendale Community College	glendale.edu	2026-06-15	2026-07-11T10:40:09Z	2026-07-11T10:40:09Z	793925	v	Academic records;Dates of birth;Email addresses;Genders;Government issued IDs;Names;Phone numbers;Physical addresses
+Glofox	Glofox	glofox.com	2020-03-27	2021-01-10T01:30:48Z	2021-01-10T01:30:48Z	2330735	v	Dates of birth;Email addresses;Genders;Names;Passwords;Phone numbers
+GoGames	Go Games	gogames.me	2015-10-24	2020-01-11T00:06:33Z	2020-01-11T00:06:33Z	3430083	v	Email addresses;IP addresses;Passwords;Usernames
+GoldSilver	GoldSilver	goldsilver.com	2018-10-21	2018-12-27T08:49:18Z	2018-12-27T08:51:50Z	242715	v	Bank account numbers;Email addresses;IP addresses;Names;Partial credit card data;Passport numbers;Phone numbers;Physical addresses;Purchases;Security questions and answers;Social security numbers
+GolfCanada	Golf Canada	golfcanada.ca	2026-05-14	2026-08-22T07:17:23Z	2026-09-05T20:02:16Z	568972	v	Dates of birth;Email addresses;Genders;Geographic locations;Names;Usernames
+GoNinja	Go Ninja	goninja.de	2019-12-17	2023-11-30T07:18:59Z	2023-11-30T07:18:59Z	4999001	v	Email addresses;IP addresses;Passwords;Usernames
+GooseCreek	Goose Creek	goosecreek.com	2026-06-09	2026-07-15T05:03:14Z	2026-07-15T05:13:10Z	6574121	v	Email addresses;Names;Phone numbers;Physical addresses;Purchases
+gPotato	gPotato	gpotato.com	2007-07-12	2016-09-24T21:37:43Z	2016-09-24T21:37:43Z	2136520	v	Dates of birth;Email addresses;Genders;IP addresses;Names;Passwords;Physical addresses;Security questions and answers;Usernames;Website activity
+GPSUnderground	GPS Underground	gpsunderground.com	2016-07-01	2019-11-19T06:13:42Z	2019-11-19T06:13:42Z	669584	v	Dates of birth;Email addresses;IP addresses;Passwords;Usernames
+Gravatar	Gravatar	gravatar.com	2020-10-03	2021-12-05T22:45:58Z	2021-12-08T01:47:02Z	113990759	v	Email addresses;Names;Usernames
+GSMHosting	GSM Hosting	gsmhosting.com	2016-08-01	2024-03-27T06:23:58Z	2024-03-27T06:29:15Z	2607440	v	Email addresses;IP addresses;Passwords;Usernames
+GTAGaming	GTAGaming	gtagaming.com	2016-08-01	2016-08-23T20:41:17Z	2016-08-23T20:41:17Z	197184	v	Dates of birth;Email addresses;IP addresses;Passwords;Usernames;Website activity
+GunAuction	GunAuction.com	gunauction.com	2022-12-03	2023-03-02T19:43:51Z	2023-03-05T03:13:20Z	565470	v	Browser user agent details;Email addresses;Genders;IP addresses;Partial credit card data;Partial dates of birth;Passwords;Phone numbers;Physical addresses;Usernames
+GunsDotCom	Guns.com	guns.com	2021-01-12	2022-01-13T05:14:53Z	2022-01-13T06:32:48Z	375928	vs	Dates of birth;Email addresses;Names;Partial credit card data;Passwords;Phone numbers;Physical addresses;Purchases
+Guntrader	Guntrader	guntrader.uk	2021-07-17	2021-07-21T20:24:24Z	2021-07-21T20:24:24Z	112031	v	Browser user agent details;Email addresses;Geographic locations;IP addresses;Names;Passwords;Phone numbers;Physical addresses;Salutations
+Habibs	Misattributed Habib's Data	habibs.com.br	2021-08-05	2024-03-10T03:31:15Z	2024-05-25T21:24:28Z	3517679		Dates of birth;Email addresses;IP addresses;Names;Phone numbers;Social media profiles
+HackForums	hackforums.net	hackforums.net	2011-06-25	2014-05-11T10:30:43Z	2014-05-11T10:30:43Z	191540	v	Dates of birth;Email addresses;Instant messenger identities;IP addresses;Passwords;Social connections;Spoken languages;Time zones;User website URLs;Usernames;Website activity
+HackingTeam	Hacking Team	hackingteam.com	2015-07-06	2015-07-12T23:52:27Z	2015-07-12T23:52:27Z	32310	v	Email addresses;Email messages
+Hakko	Hakko Corporation	hakko.com	2019-03-28	2025-02-06T01:58:47Z	2025-02-06T01:58:47Z	9665	v	Dates of birth;Email addresses;Genders;Names;Passwords;Phone numbers;Physical addresses;Usernames
+Hallmark	Hallmark	hallmark.com	2026-03-31	2026-04-12T02:01:11Z	2026-04-12T02:01:11Z	1736520	v	Email addresses;Names;Phone numbers;Physical addresses;Support tickets
+HalloweenSpot	The Halloween Spot	thehalloweenspot.com	2019-09-27	2020-03-16T05:20:32Z	2020-03-16T22:07:11Z	10653	v	Email addresses;IP addresses;Names;Phone numbers;Physical addresses;Purchases
+Hathway	Hathway	hathway.com	2023-12-17	2024-01-12T09:34:25Z	2024-01-12T09:34:25Z	4670080	v	Device information;Email addresses;IP addresses;Names;Passwords;Phone numbers;Physical addresses;Salutations;Support tickets
+HauteLook	HauteLook	hautelook.com	2018-08-07	2019-03-21T21:57:32Z	2019-03-21T21:57:32Z	28510459	v	Dates of birth;Email addresses;Genders;Geographic locations;Names;Passwords
+HaveFunTeaching	Have Fun Teaching	havefunteaching.com	2021-08-15	2025-06-25T06:54:45Z	2025-06-25T06:54:45Z	27126	v	Browser user agent details;Email addresses;IP addresses;Names;Payment methods;Physical addresses;Purchases
+Havenly	Havenly	havenly.com	2020-06-25	2020-08-01T01:53:40Z	2020-08-01T01:53:40Z	1369180	v	Email addresses;Geographic locations;Names;Passwords;Phone numbers
+HDBFinancialServices	HDB Financial Services	hdbfs.com	2023-02-22	2023-03-11T03:00:06Z	2023-03-11T03:04:29Z	1658750	v	Dates of birth;Email addresses;Genders;Geographic locations;Loan information;Names;Phone numbers
+HealthNowNetworks	Health Now Networks	healthnow.co	2017-03-25	2017-04-07T18:37:15Z	2017-04-07T18:37:15Z	321920	v	Dates of birth;Email addresses;Genders;Health insurance information;IP addresses;Names;Personal health data;Phone numbers;Physical addresses;Security questions and answers;Social connections
+HeatGames	HeatGames	heatgames.me	2021-06-12	2025-01-28T07:40:43Z	2025-01-28T07:40:43Z	647896	v	Email addresses;Geographic locations;IP addresses;Passwords
+HelloCake	Hello Cake	hellocake.com	2025-07-25	2025-10-15T03:16:37Z	2025-10-15T03:16:37Z	22907	vs	Dates of birth;Email addresses;Names;Phone numbers;Physical addresses;Purchases
+Hemmakvall	Hemmakväll	hemmakvall.se	2015-07-08	2015-07-09T09:23:52Z	2015-07-09T09:23:52Z	47297	v	Email addresses;Names;Passwords;Phone numbers;Physical addresses
+Hemmelig	hemmelig.com	hemmelig.com	2011-12-21	2014-03-25T07:23:52Z	2014-03-25T07:23:52Z	28641	vs	Email addresses;Genders;Nicknames;Partial dates of birth;Passwords;Usernames
+HeroesOfGaia	Heroes of Gaia	heroesofgaia.com	2013-01-04	2016-11-07T08:11:03Z	2016-11-07T08:11:03Z	179967	v	Browser user agent details;Email addresses;IP addresses;Usernames;Website activity
+HeroesOfNewerth	Heroes of Newerth	heroesofnewerth.com	2012-12-17	2016-01-24T16:27:23Z	2016-01-24T16:27:23Z	8089103	v	Email addresses;Passwords;Usernames
+HIAPK	HiAPK	hiapk.com	2014-01-01	2018-04-01T07:13:44Z	2018-04-01T07:13:44Z	13873674		Email addresses;Passwords;Usernames
+Hjedd	Hjedd	hjedd.com	2022-07-18	2023-10-05T03:41:42Z	2023-10-05T03:41:42Z	13204029	vs	Email addresses;IP addresses;Passwords;Usernames
+HLTV	HLTV	hltv.org	2016-06-19	2017-03-22T08:58:10Z	2017-03-22T08:58:10Z	611070	v	Email addresses;Names;Passwords;Usernames;Website activity
+HomeChef	Home Chef	homechef.com	2020-02-10	2020-11-13T03:41:24Z	2020-11-13T03:41:24Z	8815692	v	Email addresses;Geographic locations;IP addresses;Names;Partial credit card data;Passwords;Phone numbers
+HomeRefill	HomeRefill	homerefill.com.br	2020-04-02	2025-10-03T05:25:36Z	2025-10-03T05:31:01Z	187457	v	Dates of birth;Email addresses;Names;Passwords;Phone numbers
+HongFire	HongFire	hongfire.com	2015-03-01	2017-02-05T20:36:21Z	2017-02-05T20:36:21Z	999991	vs	Dates of birth;Email addresses;IP addresses;Passwords;Usernames
+HookersNL	Hookers.nl	hookers.nl	2019-10-10	2019-10-23T09:51:59Z	2019-10-23T09:56:08Z	290955	vs	Email addresses;IP addresses;Passwords;Usernames
+HorseIsle	Horse Isle	horseisle.com	2020-09-19	2023-10-02T06:47:11Z	2023-10-02T06:48:42Z	27786	v	Email addresses;Genders;IP addresses;Names;Passwords;Purchases;Usernames
+HotTopic	Hot Topic	hottopic.com	2024-10-19	2024-11-11T07:50:58Z	2024-11-11T07:50:58Z	56904909	v	Dates of birth;Email addresses;Genders;Names;Partial credit card data;Phone numbers;Physical addresses;Purchases;Salutations
+HoundDawgs	HoundDawgs	hounddawgs.org	2017-12-30	2018-01-03T12:48:10Z	2018-01-03T12:48:10Z	45701	v	Email addresses;IP addresses;Passwords;Website activity
+HoustonCityCollege	Houston City College	hccs.edu	2026-06-16	2026-07-28T06:05:24Z	2026-07-28T06:05:24Z	831642	v	Academic records;Citizenship statuses;Dates of birth;Email addresses;Genders;Names;Phone numbers;Physical addresses
+Houzz	Houzz	houzz.com	2018-05-23	2019-03-12T20:57:35Z	2019-03-12T20:57:35Z	48881308	v	Email addresses;Geographic locations;IP addresses;Names;Passwords;Social media profiles;Usernames
+HTCMania	HTC Mania	htcmania.com	2020-01-04	2020-04-06T04:16:53Z	2020-04-06T04:25:18Z	1488089	v	Dates of birth;Email addresses;Historical passwords;IP addresses;Passwords;Usernames
+HTHStudios	HTH Studios	hthstudios.com	2018-08-24	2018-11-20T21:22:09Z	2020-08-07T03:20:56Z	411755	vs	Browser user agent details;Dates of birth;Email addresses;IP addresses;Names;Phone numbers;Physical addresses;Purchases;Usernames
+Hub4Tech	Hub4Tech	hub4tech.com	2017-01-01	2018-12-09T22:40:51Z	2018-12-09T22:43:38Z	36916	v	Email addresses;Passwords
+HuntStand	HuntStand	huntstand.com	2024-03-08	2024-09-19T07:31:13Z	2024-09-19T07:31:13Z	2795947	v	Dates of birth;Email addresses;Geographic locations;Names
+Hurb	Hurb	hurb.com	2019-03-14	2020-07-27T21:46:20Z	2020-07-27T21:46:20Z	20727771	v	Dates of birth;Email addresses;IP addresses;Names;Passwords;Phone numbers;Social media profiles
+HuskyOwners	Husky Owners	husky-owners.com	2024-07-04	2024-07-07T20:40:12Z	2024-07-07T20:40:12Z	16502	v	Dates of birth;Email addresses;Time zones;Usernames
+IDCGames	IDC Games	idcgames.com	2021-03-15	2021-11-17T06:41:24Z	2021-11-17T06:55:42Z	3966871	v	Email addresses;Passwords;Usernames
+iDressup	i-Dressup	i-dressup.com	2016-07-15	2016-09-26T20:14:51Z	2016-09-26T20:14:51Z	2191565	v	Email addresses;Passwords
+iDTech	iD Tech	idtech.com	2023-01-03	2023-03-06T02:31:18Z	2023-03-06T02:31:18Z	415121	v	Dates of birth;Email addresses;Names;Passwords
+IGF	UN Internet Governance Forum	intgovforum.org	2014-02-20	2014-02-23T04:32:08Z	2014-02-23T04:32:08Z	3200	v	Email addresses;Names;Passwords;Usernames
+IIMJobs	IIMJobs	iimjobs.com	2018-12-31	2021-05-21T04:44:18Z	2021-05-21T04:45:09Z	4216063	v	Dates of birth;Email addresses;Geographic locations;IP addresses;Job applications;Job titles;Names;Passwords;Phone numbers
+IKO	International Kiteboarding Organization	ikointl.com	2025-11-11	2025-11-20T22:24:10Z	2025-11-20T22:24:10Z	340349	v	Email addresses;Geographic locations;Names;Usernames
+ILikeCheats	ILikeCheats	ilikecheats.net	2014-10-18	2018-04-22T08:18:28Z	2018-04-22T08:27:56Z	188847	v	Email addresses;IP addresses;Passwords;Usernames
+Imavex	Imavex	imavex.com	2021-08-20	2021-08-26T05:48:29Z	2024-10-23T22:06:40Z	878209	v	Email addresses;Genders;Names;Partial credit card data;Passwords;Phone numbers;Physical addresses;Purchases;Usernames
+iMenu360	iMenu360	imenu360.com	2022-08-11	2023-08-17T20:55:07Z	2023-08-17T20:55:07Z	3425860	v	Email addresses;Latitude and longitude pairs;Names;Phone numbers;Physical addresses
+iMesh	iMesh	imesh.com	2013-09-22	2016-07-02T05:42:13Z	2016-07-02T05:42:13Z	49467477	v	Email addresses;IP addresses;Passwords;Usernames
+imgur	imgur	imgur.com	2013-09-01	2017-11-25T00:00:33Z	2017-11-25T00:00:33Z	1749806	v	Email addresses;Passwords
+IndiaMART	IndiaMART	indiamart.com	2021-05-23	2021-08-27T05:33:29Z	2021-08-27T05:33:29Z	20154583	v	Email addresses;Names;Phone numbers;Physical addresses
+IndianRailways	Indian Railways	indianrails.in	2019-10-28	2020-01-10T19:13:39Z	2020-01-10T19:13:39Z	583377	v	Email addresses;Passwords;Usernames
+IndiHome	IndiHome	indihome.co.id	2019-11-01	2023-11-27T07:02:10Z	2023-11-27T21:36:59Z	12629245	v	Device information;Email addresses;Genders;Geographic locations;IP addresses;Names
+InfiniteCampus	Infinite Campus	infinitecampus.com	2026-03-18	2026-06-15T01:03:42Z	2026-06-15T01:03:42Z	137123	v	Email addresses;Employers;Job titles;Names;Phone numbers;Physical addresses;Support tickets;Usernames
+InflateVids	InflateVids	tube.inflatevids.xyz	2023-12-12	2023-12-12T00:13:41Z	2023-12-12T00:13:41Z	13405	vs	Email addresses;Genders;IP addresses;Passwords;Usernames
+Insanelyi	Insanelyi	insanelyi.com	2014-07-22	2014-07-22T22:56:15Z	2014-07-22T22:56:15Z	104097	v	Email addresses;Passwords;Usernames;Website activity
+Instagram	Instagram	instagram.com	2026-01-07	2026-01-11T16:59:02Z	2026-01-11T16:59:02Z	6215150	v	Display names;Email addresses;Geographic locations;Phone numbers;Usernames
+InstantCheckmate	Instant Checkmate	instantcheckmate.com	2019-04-12	2023-02-04T00:26:28Z	2023-02-04T00:26:28Z	11943887	v	Email addresses;Names;Passwords;Phone numbers
+InstitutoNacionalDeDeportesDeChile	Instituto Nacional de Deportes de Chile	ind.cl	2024-09-12	2024-09-16T22:04:06Z	2024-09-16T22:04:06Z	319613	v	Dates of birth;Email addresses;Genders;Names;Passwords;Usernames
+InterConSecurity	Inter-Con Security	icsecurity.com	2026-06-18	2026-08-05T23:39:01Z	2026-08-05T23:39:01Z	276114	v	Email addresses;Employers;Job titles;Names;Phone numbers;Physical addresses
+InternetArchive	Internet Archive	archive.org	2024-09-28	2024-10-09T22:31:53Z	2024-10-09T22:31:53Z	31081179	v	Email addresses;Passwords;Usernames
+Interpals	InterPals	interpals.net	2015-11-04	2016-08-30T11:22:42Z	2016-08-30T11:22:42Z	3439414	v	Dates of birth;Email addresses;Geographic locations;Names;Passwords;Usernames
+iPmart	iPmart	ipmart-forum.com	2015-07-01	2016-02-23T10:13:22Z	2016-02-23T10:13:22Z	2460787	v	Dates of birth;Email addresses;Passwords;Usernames
+ixigo	ixigo	ixigo.com	2019-01-03	2019-03-17T13:27:11Z	2019-03-17T13:27:11Z	17204697	v	Auth tokens;Device information;Email addresses;Genders;Names;Passwords;Phone numbers;Salutations;Social media profiles;Usernames
+James	James	jamesdelivery.com.br	2020-03-25	2020-11-05T04:34:51Z	2020-11-05T04:34:51Z	1541284	v	Email addresses;Geographic locations;Latitude and longitude pairs;Passwords
+JamTangan	Jam Tangan	jamtangan.com	2021-07-06	2023-11-27T03:49:33Z	2023-11-27T03:49:33Z	434784	v	Email addresses;IP addresses;Names;Passwords;Phone numbers;Physical addresses
+JCPenney	JCPenney	jcpenny.com	2026-06-12	2026-06-20T03:02:45Z	2026-06-20T03:02:45Z	368418	v	Dates of birth;Email addresses;Government issued IDs;Job titles;Names;Phone numbers;Physical addresses;Usernames
+JD	JD	jd.com	2013-01-01	2021-06-02T07:06:02Z	2021-06-02T07:06:02Z	77449341	v	Email addresses;Passwords;Phone numbers;Usernames
+JDGroup	JD Group	jdgroup.co.za	2023-05-31	2023-06-05T19:47:51Z	2023-06-05T19:47:51Z	521878	v	Email addresses;Government issued IDs;Names;Phone numbers;Physical addresses
+Jefit	Jefit	jefit.com	2020-08-11	2021-04-27T23:29:31Z	2021-04-27T23:29:31Z	9052457	v	Email addresses;IP addresses;Passwords;Usernames
+JobAndTalent	Jobandtalent	jobandtalent.com	2018-02-01	2021-01-17T22:31:00Z	2021-01-17T22:31:00Z	10981207	v	Email addresses;IP addresses;Names;Passwords
+JobStreet	JobStreet	jobstreet.com	2012-03-07	2017-10-30T01:12:14Z	2017-10-30T01:12:14Z	3883455	v	Dates of birth;Email addresses;Genders;Geographic locations;Government issued IDs;Marital statuses;Names;Nationalities;Passwords;Phone numbers;Physical addresses;Usernames
+Jobzone	Jobzone	jobzone.co.il	2023-04-15	2023-08-15T02:43:10Z	2023-08-15T02:43:10Z	29708	v	Dates of birth;Email addresses;Family members' names;Genders;Government issued IDs;Names;Phone numbers;Physical addresses
+JoomlArt	JoomlArt	joomlart.com	2018-01-30	2018-11-01T03:27:26Z	2020-08-07T03:20:30Z	22477	v	Email addresses;Names;Passwords;Payment histories;Usernames
+JoyGames	JoyGames	joygames.me	2019-12-14	2023-12-07T05:52:24Z	2023-12-07T05:52:24Z	4461787	v	Email addresses;IP addresses;Passwords;Usernames
+JukinMedia	JukinMedia	jukinmedia.com	2021-10-28	2022-07-17T04:50:13Z	2022-07-17T04:55:21Z	314290	v	Email addresses;Employers;IP addresses;Names;Occupations;Passwords;Phone numbers
+Kaneva	Kaneva	kaneva.com	2016-07-01	2023-12-09T07:00:29Z	2023-12-09T07:00:29Z	3901179	v	Dates of birth;Email addresses;Passwords;Usernames
+KasperskyClub	Kaspersky Club	kasperskyclub.ru	2024-03-24	2024-04-09T06:22:14Z	2024-04-09T06:22:14Z	55971	v	Email addresses;IP addresses;Passwords;Usernames
+Kemper	Kemper	kemper.com	2026-04-15	2026-05-28T07:22:18Z	2026-05-28T07:22:18Z	269299	v	Email addresses;Names;Partial credit card data;Phone numbers;Physical addresses;Purchases
+Kickstarter	Kickstarter	kickstarter.com	2014-02-16	2017-10-06T07:29:07Z	2017-10-06T07:29:07Z	5176463	v	Email addresses;Passwords
+Kimsufi	Kimsufi	kimsufi.com	2015-05-01	2016-12-27T07:05:43Z	2016-12-27T07:05:43Z	504565	v	Email addresses;IP addresses;Passwords;Usernames
+KinoKong	KinoKong	kinokong.org	2021-03-25	2025-12-06T08:13:57Z	2025-12-06T08:13:57Z	817808	v	Email addresses;IP addresses;Names;Passwords;Usernames
+KitchenPal	KitchenPal	kitchenpalapp.com	2023-11-14	2023-11-24T20:42:36Z	2023-11-24T20:42:36Z	98726	v	Dates of birth;Email addresses;Genders;Geographic locations;Names;Passwords;Physical attributes;Social media profiles
+KiwiFarms	KiwiFarms	kiwifarms.net	2019-09-10	2019-09-17T09:48:25Z	2019-09-17T09:54:23Z	4606	v	Avatars;Dates of birth;Email addresses;IP addresses;Website activity
+KMRU	KM.RU	km.ru	2016-02-29	2016-03-03T06:12:04Z	2016-03-03T06:12:04Z	1476783	v	Dates of birth;Email addresses;Genders;Geographic locations;Recovery email addresses;Security questions and answers;Usernames
+KnownCircle	KnownCircle	knowncircle.com	2016-04-12	2018-11-17T02:33:54Z	2018-11-17T02:38:15Z	1957600	v	Email addresses;Email messages;Genders;Names;Passwords;Phone numbers;Physical addresses
+Knuddels	Knuddels	knuddels.de	2018-09-05	2019-04-08T21:11:56Z	2019-04-08T21:11:56Z	808330	v	Email addresses;Geographic locations;Names;Passwords;Usernames
+KodiFoundation	The Kodi Foundation	kodi.tv	2023-02-16	2023-04-13T05:01:41Z	2023-04-13T05:01:41Z	400635	v	Browser user agent details;Dates of birth;Email addresses;IP addresses;Passwords;Private messages;Usernames
+KomikoAI	KomikoAI	komiko.app	2026-02-25	2026-03-02T01:31:29Z	2026-03-02T01:31:29Z	1060191	v	AI prompts;Email addresses;Forum posts;Names
+KomplettFritid	KomplettFritid	komplettfritid.no	2021-02-01	2023-01-23T22:24:47Z	2023-01-23T22:24:47Z	139401	v	Email addresses;IP addresses;Names;Passwords;Phone numbers;Physical addresses
+Kreditplus	Kreditplus	kreditplus.com	2020-06-23	2020-08-03T03:52:51Z	2020-08-07T03:47:45Z	768890	v	Dates of birth;Email addresses;Employers;Family structure;Genders;Income levels;Living costs;Marital statuses;Mothers maiden names;Names;Phone numbers;Physical addresses;Places of birth;Religions;Spouses names
+Ladies	Ladies.com	ladies.com	2024-07-03	2024-12-09T11:45:16Z	2024-12-09T12:35:33Z	118809	vs	Bios;Dates of birth;Drinking habits;Education levels;Email addresses;Family structure;Genders;Geographic locations;Latitude and longitude pairs;Photos;Profile photos;Relationship statuses;Sexual orientations;Smoking habits;Tattoo status;Usernames
+LandAirSea	LandAirSea	landairsea.com	2025-01-12	2025-02-11T02:35:40Z	2025-02-13T06:38:02Z	337373	v	Email addresses;Names;Partial credit card data;Passwords;Physical addresses;Usernames
+Lanwar	Lanwar	lanwar.com	2018-07-28	2018-08-08T02:57:06Z	2018-08-08T02:57:06Z	45120	v	Email addresses;Names;Passwords;Physical addresses;Usernames
+LaPosteMobile	La Poste Mobile	lapostemobile.fr	2022-07-04	2022-07-14T00:29:21Z	2022-07-14T00:57:52Z	533886	v	Bank account numbers;Dates of birth;Email addresses;Genders;Names;Phone numbers;Physical addresses
+Lastfm	Last.fm	last.fm	2012-03-22	2016-09-20T20:00:49Z	2016-09-20T20:00:49Z	37217682	v	Email addresses;Passwords;Usernames;Website activity
+LatestPilotJobs	Latest Pilot Jobs	latestpilotjobs.com	2022-08-14	2025-10-03T01:07:11Z	2025-10-03T01:07:11Z	118864	v	Email addresses;Names;Passwords;Usernames
+Lazada	Lazada RedMart	redmart.lazada.sg	2020-07-30	2020-11-10T00:58:49Z	2020-11-10T01:01:56Z	1107789	v	Email addresses;Names;Partial credit card data;Passwords;Phone numbers;Physical addresses
+LBB	LBB	lbb.in	2019-02-14	2023-03-05T07:35:48Z	2023-03-05T07:35:48Z	39288	v	Browser user agent details;Email addresses;IP addresses;Names;Physical addresses
+LDLC	LDLC	ldlc.com	2024-02-28	2024-08-13T21:05:38Z	2024-08-13T21:23:54Z	1266026	v	Email addresses;Names;Phone numbers;Physical addresses;Salutations
+LeagueOfLegends	League of Legends	leagueoflegends.com	2012-06-11	2018-07-28T21:52:12Z	2018-07-28T21:52:12Z	339487	v	Email addresses;Passwords;Usernames
+LeakedReality	Leaked Reality	leakedreality.com	2022-01-31	2023-03-31T01:38:59Z	2023-03-31T01:38:59Z	114907	v	Email addresses;IP addresses;Passwords;Usernames
+LeCoqSportif	Le Coq Sportif Columbia	lecoqsportif.com.co	2023-05-01	2025-01-16T01:40:33Z	2025-01-16T01:40:33Z	79712	v	Dates of birth;Device information;Email addresses;Genders;IP addresses;Names;Passwords;Physical addresses;Purchases
+Ledger	Ledger	ledger.com	2020-06-25	2020-12-20T21:14:56Z	2020-12-20T21:14:56Z	1075241	v	Email addresses;Names;Phone numbers;Physical addresses
+Leet	Leet	leet.cc	2016-09-10	2016-09-30T22:00:48Z	2016-09-30T22:00:48Z	5081689	v	Email addresses;IP addresses;Passwords;Usernames;Website activity
+LegendasTV	Legendas.TV	legendas.tv	2017-10-01	2024-01-04T17:10:04Z	2024-01-04T17:10:04Z	3869181	v	Email addresses;IP addresses;Names;Passwords;Usernames
+LegionProxy	LegionProxy	legionproxy.io	2026-04-06	2026-05-06T10:11:25Z	2026-05-06T10:11:25Z	10144	v	Email addresses;Names;Passwords;Purchases
+LeSlipFrancais	Le Slip Français	leslipfrancais.fr	2024-04-13	2024-04-18T07:44:32Z	2024-04-18T07:44:32Z	1495127	v	Email addresses;Names;Phone numbers;Physical addresses
+Lexipol	Lexipol	lexipol.com	2025-02-11	2025-03-19T01:07:39Z	2025-03-19T01:07:39Z	672546	vs	Email addresses;Names;Passwords;Phone numbers;Usernames
+Life360	Life360	life360.com	2024-03-01	2024-07-20T21:40:31Z	2024-07-22T20:46:04Z	442519	v	Email addresses;Names;Phone numbers
+Lifebear	Lifebear	lifebear.com	2019-02-28	2020-05-25T04:02:18Z	2020-05-25T04:02:18Z	3670561	v	Email addresses;Passwords;Usernames
+Lifeboat	Lifeboat	lbsg.net	2016-01-01	2016-04-25T21:51:50Z	2016-04-25T21:51:50Z	7089395	v	Email addresses;Passwords;Usernames
+LightsHope	Light's Hope	lightshope.org	2018-06-25	2018-07-04T13:32:01Z	2018-07-04T13:32:01Z	30484	v	Dates of birth;Email addresses;Geographic locations;IP addresses;Passwords;Private messages;Usernames
+Liker	Liker	liker.com	2021-03-08	2021-03-13T04:15:16Z	2021-03-24T01:57:46Z	465141	v	Auth tokens;Dates of birth;Education levels;Email addresses;Geographic locations;IP addresses;Names;Passwords;Phone numbers;Private messages;Security questions and answers;Social media profiles;Usernames
+LimeLeads	LimeLeads	limeleads.com	2019-08-01	2026-09-22T08:02:37Z	2026-09-22T08:02:37Z	17838396	v	Email addresses;Employers;Geographic locations;Job titles;Phone numbers
+LimeVPN	LimeVPN	limevpn.com	2020-10-08	2023-02-06T21:42:01Z	2023-02-06T21:42:01Z	23348	v	Email addresses;IP addresses;Names;Passwords;Phone numbers;Physical addresses;Purchases
+LinkedIn	LinkedIn	linkedin.com	2012-05-05	2016-05-21T21:35:40Z	2016-05-21T21:35:40Z	164611595	v	Email addresses;Passwords
+LinkedInScrape	LinkedIn Scraped Data (2021)	linkedin.com	2021-04-08	2021-10-02T21:39:21Z	2023-11-07T06:51:33Z	125698496	v	Education levels;Email addresses;Genders;Geographic locations;Job titles;Names;Social media profiles
+LinuxForums	Linux Forums	linuxforums.org	2018-05-01	2018-06-07T12:55:25Z	2024-09-04T23:38:20Z	275785	v	Email addresses;IP addresses;Passwords;Usernames
+LinuxMint	Linux Mint	linuxmint.com	2016-02-21	2016-02-22T01:28:08Z	2016-02-22T01:28:08Z	144989	v	Avatars;Dates of birth;Email addresses;Geographic locations;IP addresses;Passwords;Time zones;Website activity
+LittleMonsters	Little Monsters	littlemonsters.com	2017-01-01	2017-03-07T20:39:08Z	2017-03-07T20:39:08Z	995698	v	Dates of birth;Email addresses;Passwords;Usernames
+LiveAuctioneers	LiveAuctioneers	liveauctioneers.com	2020-06-19	2020-08-22T04:38:40Z	2020-08-22T04:54:52Z	3385862	v	Email addresses;IP addresses;Names;Passwords;Phone numbers;Physical addresses;Usernames
+LiveJournal	LiveJournal	livejournal.com	2017-01-01	2020-05-26T22:05:10Z	2020-05-26T23:08:58Z	26372781	v	Email addresses;Passwords;Usernames
+Livpure	Livpure	livpure.com	2020-08-29	2021-05-22T01:46:59Z	2021-05-23T00:18:00Z	269552	v	Email addresses;Names;Phone numbers;Physical addresses;Purchases;Salutations
+LizardSquad	Lizard Squad	lizardstresser.su	2015-01-16	2015-01-18T01:24:24Z	2015-01-18T01:24:24Z	13451	v	Email addresses;Passwords;Usernames
+Locally	Locally	locally.com	2022-10-01	2023-07-10T11:09:43Z	2023-07-10T11:12:48Z	362619	v	Email addresses;Partial credit card data;Passwords;Phone numbers;Physical addresses;Purchases
+Lolzteam	Lolzteam	lolzteam.net	2018-05-13	2022-11-06T02:58:23Z	2022-11-06T02:58:23Z	398011	v	Email addresses;Usernames
+Lookbook	Lookbook	lookbook.nu	2012-08-24	2016-11-08T09:03:44Z	2016-11-08T09:03:44Z	1074948	v	Dates of birth;Email addresses;IP addresses;Names;Passwords;Usernames;Website activity
+Lookiero	Lookiero	lookiero.com	2024-03-27	2024-08-30T05:23:12Z	2024-08-30T05:23:12Z	4981760	v	Email addresses;Names;Phone numbers;Physical addresses
+LOTR	Lord of the Rings Online	lotro.com	2013-08-01	2016-03-12T12:46:03Z	2016-03-12T12:46:03Z	1141278	v	Dates of birth;Email addresses;IP addresses;Passwords;Usernames;Website activity
+LoungeBoard	Lounge Board	loungeboard.net	2013-08-01	2014-07-06T10:22:01Z	2014-07-06T10:22:01Z	45018	v	Email addresses;IP addresses;Names;Passwords;Private messages;Usernames;Website activity
+LuLu	LuLu	luluhypermarket.com	2024-07-06	2024-08-02T02:59:07Z	2024-08-10T07:06:17Z	2796835	v	Email addresses;Names;Passwords;Phone numbers;Physical addresses;Purchases
+LuminPDF	Lumin PDF	luminpdf.com	2019-04-01	2019-09-18T05:00:15Z	2019-09-18T05:00:15Z	15453048	v	Auth tokens;Email addresses;Genders;Names;Passwords;Spoken languages;Usernames
+Luxottica	Luxottica	luxottica.com	2021-03-16	2023-05-19T20:24:45Z	2023-05-19T20:24:45Z	77093812	v	Dates of birth;Email addresses;Genders;Names;Phone numbers;Physical addresses
+LyricsMania	Lyrics Mania	lyricsmania.com	2017-12-21	2018-01-15T06:32:46Z	2018-01-15T06:32:46Z	109202	v	Email addresses;Passwords;Usernames
+Mac-Torrents	Mac-Torrents	mac-torrents.com	2015-10-31	2015-10-31T23:54:26Z	2015-10-31T23:54:26Z	93992	v	Email addresses;Passwords;Usernames
+MacForums	Mac Forums	mac-forums.com	2016-07-03	2018-10-29T23:47:44Z	2018-10-29T23:50:37Z	326714	v	Dates of birth;Email addresses;IP addresses;Passwords;Usernames
+MacGeneration	MacGeneration	macg.co	2022-01-29	2022-03-03T03:07:19Z	2022-03-03T03:24:04Z	101004	v	Email addresses;Passwords;Usernames
+MadisonSquareGardenSports	Madison Square Garden Sports	msgsports.com	2026-06-05	2026-06-24T13:02:33Z	2026-06-24T13:02:33Z	9796738	v	Customer service records;Email addresses;Names;Phone numbers;Physical addresses
+MagicDuel	MagicDuel	magicduel.com	2023-08-02	2023-08-02T23:22:58Z	2023-08-02T23:22:58Z	138443	v	Email addresses;IP addresses;Nicknames;Passwords
+MailRu	mail.ru Dump	mail.ru	2014-09-10	2014-09-12T04:50:22Z	2018-01-09T03:38:56Z	16630988		Email addresses;Passwords
+MajorGeeks	MajorGeeks	majorgeeks.com	2015-11-15	2016-03-03T02:45:09Z	2016-03-03T02:45:09Z	269548	v	Email addresses;IP addresses;Passwords;Usernames
+MalindoAir	MalindoAir	malindoair.com	2019-03-01	2023-09-14T08:52:38Z	2023-09-14T08:52:38Z	4328232	v	Dates of birth;Email addresses;Genders;Loyalty program details;Names;Nationalities;Passport numbers;Phone numbers;Physical addresses;Salutations
+MallCZ	MALL.cz	mall.cz	2017-07-27	2017-09-04T12:46:39Z	2017-09-04T12:46:39Z	735405	v	Email addresses;Names;Passwords;Phone numbers
+Malwarebytes	Malwarebytes	malwarebytes.org	2014-11-15	2016-03-09T11:15:43Z	2016-03-09T11:15:43Z	111623	v	Dates of birth;Email addresses;IP addresses;Passwords;Usernames;Website activity
+ManchesterAirportsGroup	Manchester Airports Group	magairports.com	2026-08-27	2026-09-02T07:36:59Z	2026-09-02T23:59:05Z	8849657	v	Browser user agent details;Email addresses;Geographic locations;IP addresses;Names;Phone numbers;Purchases;Vehicle registration plates
+MangaDex	MangaDex	mangadex.org	2021-03-22	2021-04-25T21:38:51Z	2021-04-25T21:41:24Z	2987329	v	Email addresses;IP addresses;Passwords;Usernames
+MangaFox	MangaFox.me	mangafox.me	2016-06-01	2018-03-17T01:43:24Z	2018-03-17T01:43:24Z	1311610	v	Dates of birth;Email addresses;IP addresses;Passwords;Usernames
+Mangatoon	Mangatoon	mangatoon.mobi	2022-05-13	2022-07-06T21:04:25Z	2022-07-06T21:04:25Z	23040238	v	Auth tokens;Avatars;Email addresses;Genders;Names;Passwords;Social media profiles;Usernames
+MangaTraders	Manga Traders	mangatraders.com	2014-06-09	2014-06-10T03:49:45Z	2019-05-13T12:24:00Z	855249	v	Email addresses;Passwords
+Mappery	Mappery	mappery.com	2018-12-11	2018-12-18T16:19:50Z	2018-12-18T16:19:50Z	205242	v	Email addresses;Geographic locations;Passwords;Usernames
+MarcusMillichap	Marcus & Millichap	marcusmillichap.com	2026-04-12	2026-05-03T22:53:12Z	2026-05-03T22:53:12Z	1837078	v	Email addresses;Employers;Job titles;Names;Phone numbers;Physical addresses
+MaReads	MaReads	mareads.com	2025-06-22	2025-07-15T07:13:20Z	2025-07-15T07:13:20Z	74453	v	Dates of birth;Email addresses;Phone numbers;Usernames
+MarketMoveis	Market Moveis	marketmoveis.pt	2023-08-30	2024-09-01T07:22:42Z	2024-09-01T07:35:32Z	28220	v	Email addresses;Names
+Mashable	Mashable	mashable.com	2020-06-01	2020-11-10T04:33:56Z	2020-11-10T04:56:58Z	1414677	v	Auth tokens;Email addresses;Genders;Geographic locations;IP addresses;Names;Partial dates of birth;Social media profiles
+MastercardPricelessSpecials	Mastercard Priceless Specials	specials.mastercard.de	2019-08-20	2019-09-01T20:37:49Z	2019-09-01T20:37:49Z	89388	v	Email addresses;IP addresses;Names;Partial credit card data;Phone numbers;Salutations
+Mate1	Mate1.com	mate1.com	2016-02-29	2016-04-14T23:37:15Z	2016-04-14T23:37:15Z	27393015	vs	Astrological signs;Dates of birth;Drinking habits;Drug habits;Education levels;Email addresses;Ethnicities;Fitness levels;Genders;Geographic locations;Income levels;Job titles;Names;Parenting plans;Passwords;Personal descriptions;Physical attributes;Political views;Relationship statuses;Religions;Sexual fetishes;Travel habits;Usernames;Website activity;Work habits
+Mathway	Mathway	mathway.com	2020-01-13	2020-06-05T23:59:45Z	2020-06-05T23:59:45Z	25692862	v	Device information;Email addresses;Names;Passwords;Social media profiles
+MCBans	MCBans	mcbans.com	2016-10-27	2017-07-23T05:34:55Z	2017-07-23T05:34:55Z	119948	v	Email addresses;IP addresses;Passwords;Usernames;Website activity
+McGrawHill	McGraw Hill	mheducation.com	2026-04-10	2026-04-16T01:31:14Z	2026-04-16T01:38:51Z	13500136	v	Email addresses;Names;Phone numbers;Physical addresses
+McKesson	McKesson	mckesson.com	2026-08-21	2026-09-10T05:45:39Z	2026-09-10T05:45:39Z	6404340	vs	Dates of birth;Email addresses;Employers;Genders;Names;Personal health data;Phone numbers;Physical addresses
+MDPI	MDPI	mdpi.com	2016-08-30	2018-03-25T22:50:36Z	2018-03-25T22:50:36Z	845012	v	Email addresses;Email messages;IP addresses;Names
+MechoDownload	Mecho Download	mechodownload.com	2013-10-31	2022-08-02T04:04:59Z	2022-08-02T04:10:06Z	437928	v	Email addresses;IP addresses;Passwords;Usernames
+Medela	Medela	medela.com	2026-09-07	2026-09-30T11:48:28Z	2026-09-30T11:48:28Z	423947	vs	Email addresses;Employers;Job titles;Names;Phone numbers;Physical addresses;Salutations;Support tickets
+MediaWorks	MediaWorks	mediaworks.co.nz	2023-03-15	2024-03-22T06:43:09Z	2024-03-22T06:43:09Z	162710	v	Dates of birth;Email addresses;Genders;Phone numbers;Physical addresses
+MeetMindful	MeetMindful	meetmindful.com	2020-01-26	2021-01-31T02:59:06Z	2021-01-31T02:59:06Z	1422717	vs	Dates of birth;Drinking habits;Drug habits;Email addresses;Genders;Geographic locations;IP addresses;Marital statuses;Names;Passwords;Physical attributes;Religions;Sexual orientations;Smoking habits;Social media profiles;Usernames
+MemeChat	MemeChat	memechat.app	2022-06-01	2023-10-29T05:02:56Z	2023-10-29T05:02:56Z	4348570	v	Email addresses;Usernames
+MEO	MEO	meoair.com	2020-12-24	2023-04-24T02:39:49Z	2023-04-24T02:39:49Z	8227	v	Email addresses;Names;Passwords;Phone numbers;Physical addresses;Purchases;Usernames
+MGM	MGM Resorts	mgmresorts.com	2019-07-25	2020-02-20T00:52:55Z	2020-02-20T01:00:57Z	3081321	v	Dates of birth;Email addresses;Names;Phone numbers;Physical addresses
+MGM2022Update	MGM Resorts (2022 Update)	mgmresorts.com	2019-07-25	2022-05-29T01:43:46Z	2022-05-29T01:43:46Z	24842001	v	Dates of birth;Email addresses;Names;Phone numbers;Physical addresses
+Miljodata	Miljödata	miljodata.se	2025-08-25	2025-09-16T00:10:29Z	2025-09-16T00:10:29Z	870108	v	Dates of birth;Email addresses;Genders;Government issued IDs;Names;Phone numbers;Physical addresses
+MindJolt	Mindjolt	mindjolt.com	2019-03-18	2019-07-13T19:21:12Z	2023-10-04T08:17:42Z	28364826	v	Dates of birth;Email addresses;Names
+MinecraftPocketEditionForum	Minecraft Pocket Edition Forum	minecraftpeforum.net	2015-05-24	2015-06-30T09:19:43Z	2015-06-30T09:19:43Z	16034	v	Email addresses;IP addresses;Passwords;Usernames
+MinecraftWorldMap	Minecraft World Map	minecraftworldmap.com	2016-01-15	2016-08-29T01:07:38Z	2016-08-29T01:07:38Z	71081	v	Email addresses;IP addresses;Passwords;Usernames
+Minefield	Minefield	minefield.fr	2015-06-28	2016-03-09T08:18:43Z	2016-03-09T08:18:43Z	188343	v	Dates of birth;Email addresses;IP addresses;Passwords;Usernames;Website activity
+Minehut	Minehut	minehut.com	2019-05-17	2019-09-17T08:27:31Z	2019-11-17T23:14:18Z	396533	v	Email addresses;Passwords
+Minted	Minted	minted.com	2020-05-06	2020-11-03T06:21:01Z	2020-11-03T06:21:01Z	4418182	v	Email addresses;Names;Passwords;Phone numbers;Physical addresses
+MMGFusion	MMG Fusion	mmgfusion.com	2020-12-20	2021-08-07T23:46:32Z	2021-08-07T23:46:32Z	2660295	v	Appointments;Dates of birth;Email addresses;Genders;Marital statuses;Names;Passwords;Phone numbers;Physical addresses
+MobiFriends	MobiFriends	mobifriends.com	2020-01-06	2021-05-23T03:16:52Z	2021-05-23T03:16:52Z	3512952	vs	Dates of birth;Email addresses;Genders;Passwords;Usernames
+MoDaCo	MoDaCo	modaco.com	2016-01-01	2016-09-20T07:32:50Z	2016-09-20T07:32:50Z	879703	v	Email addresses;IP addresses;Passwords;Usernames
+ModernBusinessSolutions	Modern Business Solutions	modbsolutions.com	2016-10-08	2016-10-12T09:09:11Z	2016-10-12T09:09:11Z	58843488	v	Dates of birth;Email addresses;Genders;IP addresses;Job titles;Names;Phone numbers;Physical addresses
+MoneyBookers	Money Bookers	moneybookers.com	2009-01-01	2015-11-30T09:21:55Z	2015-11-30T09:21:55Z	4483605	v	Dates of birth;Email addresses;IP addresses;Names;Phone numbers;Physical addresses
+Moneycontrol	Moneycontrol	moneycontrol.com	2017-09-07	2021-05-22T22:37:30Z	2021-05-22T22:37:30Z	762874	v	Email addresses;Genders;Geographic locations;Passwords;Phone numbers
+MoodyBibleInstitute	Moody Bible Institute	moody.edu	2026-06-15	2026-07-03T16:03:25Z	2026-07-03T16:03:25Z	2303416	v	Dates of birth;Email addresses;Genders;Marital statuses;Names;Phone numbers;Physical addresses
+MoreleNet	Morele.net	morele.net	2018-10-10	2019-04-20T22:57:28Z	2019-04-20T22:57:28Z	2467304	v	Email addresses;Names;Passwords;Phone numbers
+MortalOnline	Mortal Online	mortalonline.com	2018-06-17	2018-08-31T05:38:46Z	2018-09-24T21:05:18Z	606637	v	Email addresses;Names;Passwords;Physical addresses;Usernames
+MovieBoxPro	MovieBoxPro	movieboxpro.app	2024-04-15	2024-04-30T01:54:06Z	2024-04-30T01:54:06Z	6009014	v	Email addresses;Usernames
+MovieForums	Movie Forums	movieforums.com	2022-11-24	2023-12-08T02:45:49Z	2023-12-08T02:45:49Z	39914	v	Dates of birth;Email addresses;IP addresses;Passwords;Usernames
+MPGH	MPGH	mpgh.net	2015-10-22	2015-10-26T03:20:20Z	2015-10-26T03:20:20Z	3122898	v	Email addresses;IP addresses;Passwords;Usernames
+MrExcel	MrExcel	mrexcel.com	2016-12-05	2017-01-22T07:39:17Z	2017-01-22T07:39:17Z	366140	v	Dates of birth;Email addresses;IP addresses;Passwords;Social connections;Usernames;Website activity
+MrGreenGaming	Mr. Green Gaming	mrgreengaming.com	2024-03-01	2024-03-03T06:28:42Z	2024-03-03T06:41:04Z	27123	v	Dates of birth;Email addresses;Geographic locations;IP addresses;Usernames
+MSI	MSI	msi.com	2024-07-07	2025-01-17T01:14:17Z	2025-01-17T01:14:17Z	249990	v	Email addresses;Names;Phone numbers;Physical addresses;Warranty claims
+mSpy	mSpy	mspy.com	2015-05-14	2015-05-28T18:09:16Z	2024-07-11T19:29:17Z	699793	vs	Device usage tracking data
+mSpy2024	mSpy (2024)	mspy.com	2024-06-09	2024-07-11T19:29:21Z	2024-07-12T23:43:02Z	2394179	vs	Email addresses;IP addresses;Names;Photos
+Muah	Muah.AI	muah.ai	2024-09-17	2024-10-08T22:05:01Z	2026-03-02T00:56:29Z	1910261	vs	AI prompts;Email addresses;Sexual fetishes
+MultiplayerIt	Multiplayer.it	multiplayer.it	2018-09-01	2024-08-01T08:55:16Z	2024-08-01T19:28:20Z	503957	v	Email addresses;Passwords
+MuslimDirectory	Muslim Directory	muslimdirectory.co.uk	2014-02-17	2014-02-23T03:09:38Z	2014-02-23T03:09:38Z	37784	v	Age groups;Email addresses;Employers;Names;Passwords;Phone numbers;Physical addresses;Website activity
+MuslimMatch	Muslim Match	muslimmatch.com	2016-06-24	2016-06-29T19:08:15Z	2020-08-07T23:29:01Z	149830	vs	Chat logs;Email addresses;Geographic locations;IP addresses;Passwords;Private messages;User statuses;Usernames
+MyFHA	MyFHA	myfha.net	2015-02-18	2018-08-09T20:26:35Z	2018-08-09T20:26:35Z	972629	v	Credit status information;Email addresses;Income levels;IP addresses;Loan information;Names;Passwords;Personal descriptions;Physical addresses
+MyFitnessPal	MyFitnessPal	myfitnesspal.com	2018-02-01	2019-02-21T19:28:46Z	2019-02-21T20:00:56Z	143606147	v	Email addresses;IP addresses;Passwords;Usernames
+MyHeritage	MyHeritage	myheritage.com	2017-10-26	2019-02-20T21:04:04Z	2019-02-20T21:04:04Z	91991358	v	Email addresses;Passwords
+MyLovelyAI	My Lovely AI	mylovely.ai	2026-04-07	2026-04-08T03:40:14Z	2026-04-08T03:40:14Z	106271	vs	Email addresses;Social media profiles
+MyPertamina	MyPertamina	mypertamina.id	2022-11-01	2024-01-27T05:19:27Z	2024-01-27T05:19:27Z	5970416	v	Dates of birth;Email addresses;Genders;Names;Phone numbers;Physical addresses;Purchases
+myRepoSpace	myRepoSpace	myrepospace.com	2015-07-06	2015-07-08T08:44:51Z	2015-07-08T08:44:51Z	252751	v	Email addresses;IP addresses;Passwords;Usernames
+MySpace	MySpace	myspace.com	2008-07-01	2016-05-31T00:12:29Z	2016-05-31T00:12:29Z	359420698	v	Email addresses;Passwords;Usernames
+Mytheresa	Mytheresa	mytheresa.com	2026-04-12	2026-05-27T05:17:45Z	2026-05-27T05:17:45Z	84108	v	Email addresses;Names;Partial credit card data;Phone numbers;Physical addresses;Purchases;Salutations
+MyVidster	MyVidster (2015)	myvidster.com	2015-08-15	2015-10-10T07:06:17Z	2025-10-27T02:28:12Z	19863	v	Email addresses;Passwords;Usernames
+MyVidster2025	MyVidster (2025)	myvidster.com	2025-10-24	2025-10-27T02:40:29Z	2025-10-27T02:40:29Z	3864364	v	Email addresses;Profile photos;Usernames
+NapsGear	NapsGear	napsgear.org	2015-10-21	2018-09-10T11:07:00Z	2018-09-10T11:07:00Z	287071	vs	Dates of birth;Email addresses;Genders;Names;Passwords;Phone numbers;Physical addresses;Purchases
+NaughtyAmerica	Naughty America	naughtyamerica.com	2016-03-14	2016-04-24T06:14:42Z	2016-04-24T06:14:42Z	1398630	vs	Dates of birth;Email addresses;IP addresses;Passwords;Usernames;Website activity
+NeimanMarcus	Neiman Marcus	neimanmarcus.com	2024-04-14	2024-07-09T19:27:32Z	2024-07-09T19:27:32Z	31152842	v	Dates of birth;Email addresses;IP addresses;Names;Partial credit card data;Phone numbers;Physical addresses;Purchases
+Neogen	Neogen	neogen.com	2026-08-29	2026-10-09T07:06:25Z	2026-10-09T07:06:25Z	435963	v	Email addresses;Employers;Job titles;Names;Phone numbers;Physical addresses;Salutations
+Neopets	Neopets	neopets.com	2013-05-05	2016-07-07T23:00:10Z	2016-07-07T23:00:10Z	26892897	v	Dates of birth;Email addresses;Genders;Geographic locations;IP addresses;Names;Passwords;Usernames
+NetEase	NetEase	163.com	2015-10-19	2016-10-09T06:13:31Z	2016-10-09T06:13:31Z	234842089		Email addresses;Passwords
+Neteller	Neteller	neteller.com	2010-05-17	2015-11-30T10:26:47Z	2015-11-30T10:26:47Z	3619948	v	Account balances;Dates of birth;Email addresses;Genders;IP addresses;Names;Phone numbers;Physical addresses;Security questions and answers;Website activity
+NetGalley	NetGalley	netgalley.com	2020-12-21	2021-02-23T01:38:21Z	2021-11-25T22:08:12Z	1436435	v	Dates of birth;Email addresses;IP addresses;Names;Passwords;Phone numbers;Physical addresses;Usernames
+Netlog	Netlog	netlog.com	2012-11-01	2019-07-15T10:25:07Z	2019-07-15T10:25:07Z	49038354	v	Email addresses;Passwords
+Netshoes	Netshoes	netshoes.com.br	2017-12-07	2017-12-10T04:01:03Z	2017-12-10T04:01:03Z	499836	v	Dates of birth;Email addresses;Names;Purchases
+NextGenUpdate	NextGenUpdate	nextgenupdate.com	2014-04-22	2015-06-05T04:12:29Z	2015-06-05T04:12:29Z	1194597	v	Email addresses;IP addresses;Passwords;Usernames
+NexusMods	Nexus Mods	nexusmods.com	2013-07-22	2016-01-17T17:18:47Z	2016-01-17T17:18:47Z	5915013	v	Email addresses;Passwords;Usernames
+Nihonomaru	Nihonomaru	nihonomaru.net	2015-12-01	2016-08-30T09:54:55Z	2016-08-30T09:54:55Z	1697282	v	Email addresses;IP addresses;Passwords;Usernames
+Nitro	Nitro	gonitro.com	2020-09-28	2021-01-19T10:45:32Z	2021-01-19T10:45:32Z	77159696	v	Email addresses;Names;Passwords
+NIUS	NIUS	nius.de	2025-07-13	2026-08-23T22:25:44Z	2026-08-23T22:25:44Z	6090	vs	Bank account numbers;Email addresses;Names;Partial credit card data;Physical addresses;Purchases
+Nival	Nival	nival.com	2016-02-29	2016-03-03T00:32:49Z	2016-03-03T00:32:49Z	1535473	v	Avatars;Dates of birth;Email addresses;Genders;Names;Spoken languages;Usernames;Website activity
+NonNudeGirls	Non Nude Girls	nonnudegirls.org	2013-05-21	2017-01-25T06:38:36Z	2017-01-25T06:38:36Z	75383	vs	Email addresses;IP addresses;Names;Passwords;Usernames;Website activity
+Nulled	Nulled.cr	nulled.cr	2016-05-06	2016-05-09T11:28:01Z	2020-05-24T07:00:23Z	599080	v	Dates of birth;Email addresses;IP addresses;Passwords;Private messages;Usernames;Website activity
+NulledCH	Nulled.ch	nulled.ch	2020-05-20	2020-05-24T07:05:43Z	2020-05-24T07:05:43Z	43491	v	Email addresses;IP addresses;Passwords;Private messages;Usernames
+NurseryCam	NurseryCam	nurserycam.co.uk	2021-02-12	2021-02-23T07:58:02Z	2021-02-23T07:58:02Z	10585	v	Email addresses
+NVIDIA	NVIDIA	nvidia.com	2022-02-23	2022-03-02T23:50:10Z	2022-03-02T23:51:53Z	71335	v	Email addresses;Passwords
+Odido	Odido	odido.nl	2026-02-12	2026-02-26T23:25:29Z	2026-03-01T05:34:14Z	6077025	v	Bank account numbers;Customer service records;Dates of birth;Driver's licenses;Email addresses;Genders;Government issued IDs;Names;Passport numbers;Phone numbers;Physical addresses
+OGUsers	OGUsers (2019 breach)	ogusers.com	2018-12-26	2019-05-19T22:45:45Z	2020-04-04T08:21:10Z	161143	v	Email addresses;IP addresses;Passwords;Private messages;Usernames
+OGUsers2020	OGUsers (2020 breach)	ogusers.com	2020-04-02	2020-04-04T08:27:13Z	2020-04-04T08:27:13Z	263189	v	Email addresses;IP addresses;Passwords;Private messages;Usernames
+OGUsers2021	OGUsers (2021 breach)	ogusers.com	2021-04-11	2022-05-16T00:40:46Z	2022-05-16T00:40:46Z	348302	v	Email addresses;IP addresses;Passwords;Usernames
+OGUsers2022	OGUsers (2022 breach)	ogusers.com	2022-07-13	2023-04-14T01:51:23Z	2023-04-14T01:51:23Z	529020	v	Email addresses;IP addresses;Passwords;Usernames
+OMGPOP	OMGPOP	omgpop.com	2013-01-01	2023-11-20T21:20:28Z	2023-11-20T21:20:28Z	7071293	v	Email addresses;Passwords
+Omnicuris	Omnicuris	omnicuris.com	2025-06-08	2025-07-13T06:00:49Z	2025-07-13T06:00:49Z	215298	v	Email addresses;Geographic locations;Names;Phone numbers
+OnlineTrade	Online Trade (Онлайн Трейд)	onlinetrade.ru	2022-09-19	2024-03-07T06:51:12Z	2024-03-07T07:01:28Z	3805265	v	Dates of birth;Email addresses;IP addresses;Names;Passwords;Phone numbers
+OnRPG	OnRPG	onrpg.com	2016-07-01	2025-05-08T06:29:49Z	2025-05-08T06:31:37Z	1047640	v	Email addresses;IP addresses;Passwords;Usernames
+Onverse	Onverse	onverse.com	2016-01-01	2016-09-06T06:28:30Z	2016-09-06T06:28:30Z	800157	v	Email addresses;IP addresses;Passwords;Usernames
+OpenCSGO	Open CS:GO	opencsgo.com	2017-11-28	2018-01-15T06:14:55Z	2018-01-15T06:14:55Z	512311	v	Avatars;Email addresses;IP addresses;Phone numbers;Physical addresses;Purchases;Social media profiles;Usernames
+OpenSubtitles	Open Subtitles	opensubtitles.org	2021-08-01	2022-01-19T04:51:36Z	2022-01-19T04:51:36Z	6783158	v	Email addresses;Geographic locations;IP addresses;Passwords;Usernames
+OrangeRomania	Orange Romania	orange.ro	2025-02-24	2025-02-27T05:39:42Z	2025-02-27T05:39:42Z	556557	v	Email addresses;Partial credit card data;Phone numbers
+OrderSnapp	OrderSnapp	ordersnapp.com	2020-06-29	2021-08-08T01:53:33Z	2021-08-08T02:11:56Z	1304447	v	Dates of birth;Email addresses;Names;Passwords;Phone numbers
+OrdineAvvocatiDiRoma	Ordine Avvocati di Roma	ordineavvocatiroma.it	2019-05-07	2019-05-26T23:24:11Z	2019-05-26T23:24:11Z	41960	v	Email addresses;Email messages;Geographic locations;Passwords;Phone numbers
+Otelier	Otelier	otelier.com	2024-07-01	2025-01-18T06:47:39Z	2025-01-18T06:53:51Z	436855	v	Email addresses;Names;Partial credit card data;Phone numbers;Physical addresses;Purchases;Travel plans
+OVH	OVH	ovh.com	2015-05-01	2016-12-27T07:49:12Z	2016-12-27T07:49:12Z	452899	v	Email addresses;IP addresses;Passwords;Usernames
+OwnedCore	OwnedCore	ownedcore.com	2013-08-01	2016-02-06T02:53:13Z	2016-02-06T02:53:13Z	880331	v	Email addresses;IP addresses;Passwords;Usernames
+Oxfam	Oxfam	oxfam.org.au	2021-01-20	2021-03-02T07:07:00Z	2021-03-02T07:07:00Z	1834006	v	Bank account numbers;Dates of birth;Email addresses;Genders;Names;Partial credit card data;Payment histories;Phone numbers;Physical addresses
+OzHairAndBeauty	Oz Hair and Beauty	ozhairandbeauty.com	2026-08-15	2026-08-19T03:15:00Z	2026-08-19T03:15:00Z	1988331	v	Email addresses;Geographic locations;Names;Phone numbers;Purchases
+PaddyPower	Paddy Power	paddypower.com	2010-10-25	2015-10-11T01:26:05Z	2015-10-11T01:26:05Z	590954	v	Account balances;Dates of birth;Email addresses;IP addresses;Names;Phone numbers;Physical addresses;Security questions and answers;Usernames;Website activity
+Paidwork	Paidwork	paidwork.com	2026-03-29	2026-07-19T22:57:18Z	2026-07-19T22:57:18Z	23272765	v	Bank account numbers;Dates of birth;Device information;Education levels;Email addresses;Financial transactions;Genders;IP addresses;Names;Passwords;Personal interests;Phone numbers;Physical addresses;Profile photos
+Pampling	Pampling	pampling.com	2020-01-04	2023-08-31T05:09:24Z	2023-09-03T06:23:38Z	383468	v	Email addresses;Names;Passwords;Usernames
+Pandabuy	Pandabuy	pandabuy.com	2024-03-31	2024-04-01T08:34:24Z	2024-04-01T08:34:24Z	1348407	v	Email addresses;IP addresses;Names;Phone numbers;Physical addresses
+PaneraBread	Panera Bread	panerabread.com	2026-01-07	2026-01-31T03:19:30Z	2026-01-31T03:19:30Z	5112502	v	Email addresses;Names;Phone numbers;Physical addresses
+ParagonCheats	Paragon Cheats	paragoncheats.com	2021-05-22	2022-05-14T02:26:40Z	2022-05-14T02:32:52Z	188089	v	Browser user agent details;Email addresses;IP addresses;Usernames
+Parapa	Пара Па	parapa.mail.ru	2016-08-08	2016-12-28T07:03:17Z	2016-12-28T07:03:17Z	4946850	v	Email addresses;Passwords;Usernames
+ParkMobile	ParkMobile	parkmobile.io	2021-03-21	2021-04-30T03:07:24Z	2021-04-30T03:07:24Z	20949825	v	Email addresses;Licence plates;Names;Passwords;Phone numbers
+PassSport	Pass'Sport	pass.sports.gouv.fr	2025-12-17	2026-01-18T16:26:12Z	2026-01-18T16:26:12Z	6366133	v	Email addresses;Genders;Names;Phone numbers;Physical addresses
+Patreon	Patreon	patreon.com	2015-10-01	2015-10-02T02:29:20Z	2021-08-10T06:52:47Z	2330382	v	Email addresses;Passwords;Payment histories;Physical addresses;Private messages;Website activity
+PayAsUGym	PayAsUGym	payasugym.com	2016-12-15	2016-12-17T06:45:44Z	2016-12-17T06:45:44Z	400260	v	Browser user agent details;Email addresses;IP addresses;Names;Partial credit card data;Passwords;Phone numbers;Website activity
+PayHere	PayHere	payhere.lk	2022-03-27	2022-05-02T05:26:25Z	2022-05-02T08:27:23Z	1580249	v	Email addresses;IP addresses;Names;Partial credit card data;Phone numbers;Physical addresses;Purchases
+PaySystemTech	PaySystem.tech	paysystem.tech	2022-04-29	2023-10-08T23:07:02Z	2023-10-08T23:07:02Z	1410764		Credit cards;Email addresses;Purchases
+pcTattletale	pcTattletale	pctattletale.com	2024-05-25	2024-05-25T21:38:18Z	2024-07-11T19:29:17Z	138751	vs	Device information;Email addresses;IP addresses;Names;Passwords;Phone numbers;Physical addresses;SMS messages;Usernames
+Peatix	Peatix	peatix.com	2019-01-20	2020-12-06T22:53:53Z	2020-12-06T22:53:53Z	4227907	v	Email addresses;Names;Passwords
+Pemiblanc	Pemiblanc	pemiblanc.com	2018-04-02	2018-07-09T22:16:26Z	2018-07-09T22:16:26Z	110964206		Email addresses;Passwords
+PeoplesEnergy	People's Energy	peoplesenergy.co.uk	2020-12-16	2021-02-23T03:25:44Z	2021-11-25T22:08:12Z	358822	v	Dates of birth;Email addresses;Names;Passwords;Phone numbers;Physical addresses
+PetFlow	PetFlow	petflow.com	2017-12-09	2020-05-26T02:48:24Z	2020-05-26T02:48:24Z	990919	v	Email addresses;Passwords
+Phoenix	Phoenix	phoenixim.ddns.net	2021-06-05	2023-10-17T02:27:58Z	2023-10-17T02:27:58Z	74776	v	Email addresses;IP addresses;Passwords;Usernames
+PhoneHouse	Phone House España	phonehouse.es	2021-04-08	2021-04-22T05:59:07Z	2021-04-22T05:59:07Z	5223350	v	Dates of birth;Email addresses;Genders;Names;Nationalities;Phone numbers;Physical addresses
+PHPFreaks	PHP Freaks	phpfreaks.com	2015-10-27	2015-10-30T14:19:52Z	2015-10-30T14:19:52Z	173891	v	Dates of birth;Email addresses;IP addresses;Passwords;Usernames;Website activity
+PipingRock	Piping Rock	pipingrock.com	2024-04-24	2024-04-26T01:13:39Z	2024-04-26T01:13:39Z	2103100	v	Email addresses;Names;Phone numbers;Physical addresses
+PitneyBowes	Pitney Bowes	pitneybowes.com	2026-04-20	2026-04-27T22:52:07Z	2026-04-27T22:52:07Z	8243989	v	Email addresses;Job titles;Names;Phone numbers;Physical addresses
+PixelFederation	Pixel Federation	pixelfederation.com	2013-12-04	2013-12-06T00:00:00Z	2013-12-06T00:00:00Z	38108	v	Email addresses;Passwords
+Pixlr	Pixlr	pixlr.com	2020-10-07	2021-02-01T03:40:29Z	2021-02-01T03:40:29Z	1906808	v	Email addresses;Geographic locations;Names;Passwords;Social media profiles
+piZap	piZap	pizap.com	2017-12-07	2019-07-16T05:43:27Z	2019-07-16T05:43:27Z	41817893	v	Email addresses;Genders;Geographic locations;Names;Passwords;Social media profiles;Usernames;Website activity
+PlanetCalypso	Planet Calypso	planetcalypsoforum.com	2019-07-01	2020-01-12T09:48:57Z	2020-01-12T09:48:57Z	62261	v	Email addresses;IP addresses;Passwords;Usernames
+PlanetIce	Planet Ice	planet-ice.co.uk	2023-01-14	2023-01-31T02:00:53Z	2023-01-31T02:00:53Z	240488	v	Dates of birth;Email addresses;Genders;IP addresses;Names;Passwords;Phone numbers;Physical addresses;Purchases
+Playbook	Playbook	playbook.vc	2020-10-19	2021-10-11T23:39:05Z	2021-10-11T23:39:05Z	50538	v	Email addresses;Job titles;Names;Passwords;Phone numbers;Social media profiles
+PlayCyberGames	PlayCyberGames	playcybergames.com	2023-08-09	2023-08-31T02:22:55Z	2023-08-31T02:22:55Z	3681753	v	Email addresses;Passwords;Usernames
+Playgar	Guns and Robots	play-gar.com	2016-04-01	2018-02-14T22:32:25Z	2018-02-14T22:32:25Z	143569	v	Email addresses;IP addresses;Passwords;Usernames
+Plex	Plex	plex.tv	2015-07-02	2016-02-08T01:35:48Z	2016-02-08T01:35:48Z	327314	v	Email addresses;IP addresses;Passwords;Usernames
+PlutoTV	Pluto TV	pluto.tv	2018-10-12	2020-12-05T22:27:36Z	2020-12-05T22:36:02Z	3225080	v	Dates of birth;Device information;Email addresses;Genders;IP addresses;Names;Passwords;Social media profiles;Usernames
+PoinCampus	PoinCampus	poincampus.com	2024-11-14	2025-02-04T00:29:41Z	2025-02-04T00:29:41Z	89116	v	Dates of birth;Email addresses;Names;Phone numbers
+Pokebip	Pokébip	pokebip.com	2015-07-28	2016-09-09T04:43:00Z	2016-09-09T04:43:00Z	657001	v	Email addresses;IP addresses;Passwords;Time zones;Usernames;Website activity
+PokemonCreed	Pokémon Creed	pokemoncreed.net	2014-08-08	2014-08-10T00:03:59Z	2014-08-10T00:03:59Z	116465	v	Email addresses;Genders;IP addresses;Passwords;Usernames;Website activity
+PokemonNegro	Pokémon Negro	pokemonnegro.com	2016-10-01	2017-01-03T20:45:24Z	2017-01-03T20:45:24Z	830155	v	Email addresses;IP addresses;Passwords
+PoliceOne	PoliceOne	policeone.com	2014-07-01	2017-11-15T07:57:11Z	2017-11-15T07:57:11Z	709926	v	Email addresses;IP addresses;Passwords;Usernames
+Poshmark	Poshmark	poshmark.com	2018-05-16	2019-09-02T03:36:05Z	2019-09-02T03:44:37Z	36395491	v	Email addresses;Genders;Geographic locations;Names;Passwords;Usernames
+Powerbot	Powerbot	powerbot.org	2014-09-01	2017-07-01T16:12:37Z	2017-07-01T16:12:37Z	503501	v	Email addresses;IP addresses;Passwords;Usernames
+PPCGeeks	PPCGeeks	ppcgeeks.com	2016-08-19	2022-07-18T22:20:50Z	2022-07-18T22:20:50Z	492518	v	Dates of birth;Email addresses;IP addresses;Passwords;Usernames
+PreenMe	Preen.Me	preen.me	2020-05-25	2022-05-26T00:58:43Z	2022-05-26T00:58:43Z	236105	v	Email addresses;Names;Social media profiles;Usernames
+ProctorU	ProctorU	proctoru.com	2020-06-26	2020-08-06T09:37:17Z	2020-08-06T09:37:17Z	444453	v	Email addresses;Names;Passwords;Phone numbers;Physical addresses;Usernames
+ProgrammingForums	Programming Forums	programmingforums.org	2015-12-01	2017-07-01T16:42:46Z	2017-07-01T16:42:46Z	707432	v	Email addresses;IP addresses;Passwords;Usernames
+Promo	Promo	promo.com	2020-06-22	2020-07-26T02:44:11Z	2020-07-26T02:44:11Z	14610585	v	Email addresses;Genders;IP addresses;Names;Passwords
+Promofarma	Promofarma	promofarma.com	2019-08-03	2020-11-01T07:11:46Z	2020-11-03T10:19:52Z	1277761	v	Email addresses;Names
+PropTiger	PropTiger	proptiger.com	2018-01-30	2020-03-24T07:21:44Z	2020-03-24T07:30:36Z	2156921	v	Dates of birth;Device information;Email addresses;Genders;IP addresses;Names;Passwords
+Prosper	Prosper	prosper.com	2025-09-01	2025-10-16T00:03:21Z	2025-10-16T00:03:21Z	17605276	v	Browser user agent details;Credit status information;Dates of birth;Email addresses;Employment statuses;Government issued IDs;Income levels;IP addresses;Names;Physical addresses
+Protemps	Protemps	protemps.com.sg	2021-10-04	2021-12-20T02:36:08Z	2021-12-20T02:57:50Z	49591	v	Email addresses;Genders;Job applications;Marital statuses;Names;Nationalities;Passport numbers;Passwords;Phone numbers;Physical addresses;Religions;Salutations
+Provecho	Provecho	provecho.bio	2026-01-30	2026-03-03T06:40:50Z	2026-03-03T06:40:50Z	712904	v	Email addresses;Usernames
+PS3Hax	PS3Hax	ps3hax.net	2015-07-01	2016-02-07T04:44:49Z	2016-02-07T04:44:49Z	447410	v	Email addresses;IP addresses;Passwords;Usernames
+PSPISO	PSP ISO	pspiso.com	2015-09-25	2017-01-29T07:28:23Z	2017-01-29T07:28:23Z	1274070	v	Email addresses;IP addresses;Passwords;Usernames
+PSX-Scene	PSX-Scene	psx-scene.com	2015-02-01	2016-02-07T03:46:46Z	2016-02-07T03:46:46Z	341118	v	Email addresses;IP addresses;Passwords;Usernames
+QatarNationalBank	Qatar National Bank	qnb.com	2015-07-01	2016-05-01T01:06:35Z	2016-05-01T01:06:35Z	88678	v	Bank account numbers;Customer feedback;Dates of birth;Financial transactions;Genders;Geographic locations;Government issued IDs;IP addresses;Marital statuses;Names;Passwords;Phone numbers;Physical addresses;PINs;Security questions and answers;Spoken languages
+QIP	QIP	qip.ru	2011-06-01	2017-01-08T22:23:19Z	2017-01-08T22:23:19Z	26183992	v	Email addresses;Passwords;Usernames;Website activity
+Qraved	Qraved	qraved.com	2021-07-09	2025-04-09T15:43:51Z	2025-04-09T15:43:51Z	984519	v	Dates of birth;Email addresses;Names;Passwords;Phone numbers
+QuantumBooter	Quantum Booter	quantumbooter.net	2014-03-18	2015-04-04T06:40:05Z	2015-04-04T06:40:05Z	48592	v	Email addresses;IP addresses;Passwords;Private messages;Usernames;Website activity
+Questel	Questel	questel.com	2026-08-01	2026-09-01T04:49:35Z	2026-09-01T04:55:05Z	1226209	v	Email addresses;Employers;Job titles;Names;Phone numbers;Physical addresses;Support tickets
+QuestionPro	QuestionPro	questionpro.com	2022-05-21	2022-08-05T00:05:34Z	2022-08-05T23:24:27Z	22229637	v	Browser user agent details;Email addresses;IP addresses;Survey results
+Quidd	Quidd	quidd.co	2019-07-01	2020-06-24T11:05:34Z	2020-06-24T11:05:34Z	3805863	v	Email addresses;Passwords;Usernames
+QuinStreet	QuinStreet	quinstreet.com	2015-12-14	2016-12-17T07:44:31Z	2016-12-17T07:44:31Z	4907802	v	Dates of birth;Email addresses;IP addresses;Passwords;Usernames;Website activity
+Quitbro	Quitbro	quitbro.app	2026-02-17	2026-03-02T05:27:11Z	2026-03-02T05:27:11Z	22874	vs	Email addresses;Partial dates of birth;Usernames
+R2-2017	R2 (2017 forum breach)	r2games.com	2017-01-01	2017-04-25T11:04:29Z	2017-04-25T11:04:29Z	1023466	v	Email addresses;Passwords;Usernames;Website activity
+R2Games	R2Games	r2games.com	2015-11-01	2016-02-09T12:20:35Z	2016-02-09T12:20:35Z	22281337	v	Email addresses;IP addresses;Passwords;Usernames
+Raaga	Raaga	raaga.com	2025-12-15	2026-01-19T17:33:46Z	2026-01-19T17:33:46Z	10225145	v	Ages;Dates of birth;Email addresses;Genders;Geographic locations;Names;Passwords
+RaidForums	RaidForums	raidforums.com	2020-09-24	2023-05-31T01:43:34Z	2023-05-31T02:12:05Z	478604	v	Dates of birth;Email addresses;IP addresses;Passwords;Usernames
+RailYatri	RailYatri	railyatri.in	2022-12-26	2023-12-05T07:17:53Z	2023-12-05T07:17:53Z	23209732	v	Email addresses;Genders;Names;Phone numbers;Purchases
+RalphLauren	Ralph Lauren	ralphlauren.com	2026-06-11	2026-06-18T22:48:34Z	2026-06-18T22:48:34Z	139903	v	Age groups;Email addresses;Genders;Names;Phone numbers
+Rambler	Rambler	rambler.ru	2014-03-01	2016-11-01T09:33:34Z	2016-11-01T09:33:34Z	91436280	v	Email addresses;Passwords;Usernames
+Raychat	Raychat	raychat.ir	2021-01-31	2021-07-04T00:52:38Z	2021-07-04T00:52:38Z	938981	v	Browser user agent details;Email addresses;IP addresses;Names;Passwords
+RbxRocks	Rbx.Rocks	rbx.rocks	2018-08-06	2018-11-07T13:26:42Z	2019-07-27T14:58:29Z	149958	v	Email addresses;Names;Passwords
+ReadNovel	Read Novel	readnovel.com	2019-05-01	2022-05-16T08:41:14Z	2022-05-16T08:41:14Z	22424472		Email addresses;Genders;Passwords;Phone numbers;Usernames
+RealDudesInc	RealDudesInc	realdudesinc.com	2022-10-22	2023-02-19T04:52:21Z	2023-02-19T04:52:21Z	101543	v	Email addresses;Passwords;Usernames
+RealEstateMogul	Real Estate Mogul	realestatemogul.com	2016-09-06	2018-09-24T05:08:57Z	2018-09-24T05:08:57Z	307768	v	Email addresses;Names;Phone numbers;Physical addresses
+RebornGaming	Reborn Gaming	reborngaming.net	2026-04-30	2026-05-04T03:43:06Z	2026-05-04T03:43:06Z	126	v	Email addresses;IP addresses
+RedDoorz	RedDoorz	reddoorz.com	2020-09-04	2022-01-28T03:44:12Z	2022-01-28T03:44:12Z	5890277	v	Dates of birth;Email addresses;Genders;Names;Occupations;Passwords;Phone numbers
+Reincubate	Reincubate	reincubate.com	2017-05-11	2020-10-29T06:01:21Z	2020-10-29T06:06:15Z	616146	v	Email addresses;Names;Passwords
+RentoMojo	RentoMojo	rentomojo.com	2023-04-15	2023-05-10T22:36:01Z	2023-05-10T22:36:01Z	2185697	v	Dates of birth;Email addresses;Genders;Government issued IDs;Names;Passport numbers;Passwords;Phone numbers;Purchases;Social media profiles
+RepublicanPartyOfTexas	Republican Party of Texas	texasgop.org	2021-09-11	2021-10-06T07:44:39Z	2021-10-06T07:44:39Z	72596	v	Browser user agent details;Email addresses;Geographic locations;IP addresses;Names
+RetinaX	Retina-X	retinax.com	2017-02-23	2017-04-30T01:51:55Z	2024-07-11T19:29:17Z	71153	vs	Email addresses;Passwords
+Reverb-Nation	ReverbNation	reverbnation.com	2014-01-01	2017-10-05T06:56:23Z	2017-10-05T06:56:23Z	7040725	v	Email addresses;Passwords
+Rightbiz	Rightbiz	rightdev.co.uk	2023-07-09	2023-08-10T22:11:35Z	2023-08-10T22:43:06Z	65376	v	Email addresses;Names;Phone numbers;Physical addresses
+RingCentral	RingCentral	ringcentral.com	2026-07-27	2026-08-13T10:54:40Z	2026-10-08T21:55:00Z	1596490	v	Email addresses;Names;Phone numbers;Physical addresses
+Robinhood	Robinhood	robinhood.com	2021-11-03	2022-03-03T22:47:32Z	2022-03-03T22:47:32Z	5003937	v	Email addresses
+RobinsonsMalls	Robinsons Malls	robinsonsmalls.com	2024-06-01	2025-06-25T14:22:15Z	2025-06-25T14:22:15Z	195597	v	Dates of birth;Email addresses;Genders;Geographic locations;Names;Phone numbers
+Roblox	Roblox	roblox.com	2016-07-31	2023-07-23T03:51:55Z	2023-07-23T04:01:44Z	52458	v	Account balances;Email addresses;IP addresses;Purchases;Usernames
+RobloxDeveloperConference	Roblox Developer Conference (2023)	rdcglobal.com	2020-12-18	2023-07-18T21:06:48Z	2024-07-06T00:37:32Z	3943	v	Clothing sizes;Dates of birth;Email addresses;IP addresses;Names;Phone numbers;Physical addresses;Usernames
+RobloxDeveloperConference2024	FNTECH	fntech.com	2024-07-04	2024-07-06T01:21:29Z	2024-07-10T06:59:15Z	10386	v	Email addresses;IP addresses;Names
+Roll20	Roll20	roll20.net	2018-12-26	2019-07-19T14:26:05Z	2019-07-19T14:26:05Z	3994436	v	Email addresses;IP addresses;Names;Partial credit card data;Passwords
+Romwe	Romwe	romwe.com	2018-06-01	2021-01-18T09:15:42Z	2021-01-18T09:15:42Z	19531820	v	Geographic locations;IP addresses;Names;Passwords;Phone numbers;Physical addresses
+RosebuttBoard	Rosebutt Board	rosebuttboard.com	2016-05-09	2016-05-10T07:37:46Z	2016-05-10T07:37:46Z	107303	vs	Email addresses;IP addresses;Passwords;Usernames
+RoyalEnfield	Royal Enfield	royalenfield.com	2019-01-01	2022-03-31T21:13:58Z	2022-03-31T21:13:58Z	420873	v	Dates of birth;Email addresses;Genders;Names;Passwords;Phone numbers;Physical addresses;Social media profiles;Vehicle details
+RSBoards	RuneScape Boards	rsboards.com	2011-12-26	2026-03-23T21:40:06Z	2026-03-23T23:24:30Z	222762	v	Email addresses;IP addresses;Passwords;Usernames
+RussianAmerica	Russian America	russianamerica.com	2017-01-01	2018-09-13T04:48:08Z	2018-09-13T04:48:08Z	182717	v	Email addresses;Names;Passwords;Phone numbers
+SamsungGermany	Samsung Germany Customer Tickets	samsung.de	2025-03-30	2025-04-13T00:24:36Z	2025-04-13T12:42:28Z	216333	v	Email addresses;Names;Physical addresses;Purchases;Salutations;Shipment tracking numbers;Support tickets
+Scentbird	Scentbird	scentbird.com	2020-06-22	2020-07-30T00:11:15Z	2020-07-30T00:11:15Z	5814988	v	Dates of birth;Email addresses;Genders;Names;Password strengths;Passwords
+schenkYOU	schenkYOU	schenkyou.de	2024-08-15	2024-12-19T13:26:26Z	2024-12-19T13:26:26Z	237349	v	Dates of birth;Email addresses;Names;Passwords
+Scholastic	Scholastic	scholastic.com	2025-01-08	2025-01-13T01:55:39Z	2025-01-13T01:55:39Z	4247768	v	Email addresses;Names;Phone numbers;Physical addresses
+SchoolDistrict42	School District 42	sd42.ca	2023-01-15	2023-02-02T05:27:50Z	2023-02-02T08:16:17Z	18850	v	Email addresses;Names
+ScufGaming	Scuf Gaming	scufgaming.com	2015-06-05	2026-03-26T05:31:26Z	2026-03-26T05:31:26Z	128683	v	Display names;Email addresses;IP addresses;Passwords;Usernames
+Seedpeer	Seedpeer	seedpeer.eu	2015-07-12	2016-03-09T02:49:28Z	2016-03-09T02:49:28Z	281924	v	Email addresses;Passwords;Usernames
+SeniorDating	Senior Dating	seniordating.app	2024-11-23	2024-12-09T12:38:50Z	2024-12-09T12:38:50Z	765517	vs	Bios;Dates of birth;Drinking habits;Education levels;Email addresses;Genders;Geographic locations;Latitude and longitude pairs;Occupations;Profile photos;Relationship statuses;Smoking habits;Social media profiles
+Sephora	Sephora	sephora.com.au	2017-01-09	2019-10-06T15:14:12Z	2019-10-06T15:14:12Z	780073	v	Dates of birth;Email addresses;Ethnicities;Genders;Names;Physical attributes
+ServerPact	ServerPact	serverpact.com	2016-01-01	2016-09-06T04:21:06Z	2016-09-06T04:21:06Z	73587	v	Dates of birth;Email addresses;IP addresses;Passwords;Usernames
+SevenRooms	SevenRooms	sevenrooms.com	2022-12-11	2023-08-24T21:49:00Z	2023-08-24T21:49:00Z	1205385	v	Email addresses;Names;Purchases
+Shadi	Shadi.com	shadi.com	2016-07-09	2022-07-20T07:07:31Z	2022-07-20T07:07:31Z	2021984	vs	Email addresses;Passwords
+Shadow	Shadow	shadow.tech	2023-09-28	2024-08-11T00:06:02Z	2024-08-11T04:46:29Z	543295	v	Dates of birth;Email addresses;Names;Physical addresses
+Sharecare	Sharecare	sharecare.com	2026-08-12	2026-10-12T23:28:32Z	2026-10-12T23:28:32Z	318185	v	Dates of birth;Email addresses;Employers;Genders;Government issued IDs;Job titles;Marital statuses;Names;Phone numbers;Physical addresses
+ShareThis	ShareThis	sharethis.com	2018-07-09	2019-03-03T06:31:39Z	2019-03-12T21:00:14Z	40960499	v	Dates of birth;Email addresses;Names;Passwords
+SHEIN	SHEIN	shein.com	2018-06-01	2019-07-17T13:59:41Z	2019-07-17T13:59:41Z	39086762	v	Email addresses;Passwords
+Shitexpress	Shitexpress	shitexpress.com	2022-08-08	2022-08-16T22:40:35Z	2022-08-16T22:40:35Z	23817	vs	Email addresses;IP addresses;Names;Physical addresses;Private messages;Purchases
+ShockGore	ShockGore	shockgore.com	2020-08-11	2022-01-20T00:07:47Z	2022-01-20T00:07:47Z	73944	vs	Email addresses;Genders;IP addresses;Passwords;Private messages;Usernames
+ShoeZone	Shoe Zone	shoezone.com	2024-06-28	2024-08-05T22:13:35Z	2024-08-05T22:13:35Z	46140	v	Email addresses;Names;Partial credit card data;Physical addresses;Purchases
+ShopBack	ShopBack	shopback.com	2020-09-17	2021-04-25T05:41:24Z	2021-04-25T05:41:24Z	20529819	v	Email addresses;Geographic locations;Names;Passwords;Phone numbers
+ShopperPlus	Shopper+	shopperplus.ca	2020-09-14	2023-03-11T07:20:20Z	2023-03-11T07:20:20Z	878290	v	Dates of birth;Email addresses;Genders;Names;Phone numbers;Physical addresses;Spoken languages
+ShortEdition	Short Édition	short-edition.com	2021-06-26	2021-07-19T04:49:43Z	2021-07-19T04:49:43Z	505466	v	Dates of birth;Email addresses;Genders;Names;Passwords;Phone numbers;Physical addresses;Social media profiles;Usernames
+Shotbow	Shotbow	shotbow.net	2016-05-09	2017-10-29T23:53:20Z	2017-10-29T23:53:20Z	1052753	v	Email addresses;Passwords;Usernames
+SIAE	Società Italiana degli Autori ed Editori	siae.it	2018-11-03	2018-11-07T04:31:14Z	2018-11-07T04:37:11Z	14609	v	Email addresses;IP addresses;Names;Passwords;Phone numbers
+SirHurt	SirHurt	sirhurt.net	2021-04-23	2022-05-24T05:06:08Z	2022-05-24T05:06:08Z	90655	v	Email addresses;IP addresses;Passwords;Usernames
+SitePoint	SitePoint	sitepoint.com	2020-06-20	2022-08-17T08:21:50Z	2022-08-17T08:21:50Z	1021790	v	Bios;Email addresses;IP addresses;Names;Passwords;Usernames
+SkTorrent	SkTorrent	sktorrent.eu	2016-02-19	2016-02-23T03:30:49Z	2016-02-23T03:30:49Z	117070	v	Email addresses;Passwords;Usernames
+Slickwraps	Slickwraps	slickwraps.com	2020-02-16	2020-02-22T19:20:00Z	2020-02-22T19:20:00Z	857611	v	Email addresses;Names;Phone numbers;Physical addresses;Purchases
+SlideTeam	SlideTeam	slideteam.net	2021-04-06	2023-01-07T01:05:24Z	2023-01-07T01:05:24Z	1464271	v	Email addresses;Names;Passwords
+Smogon	Smogon	smogon.com	2017-09-10	2018-04-11T00:12:09Z	2018-04-11T00:12:09Z	386489	v	Email addresses;Genders;Geographic locations;Passwords;Usernames;Website activity
+Snail	Snail	snail.com	2015-03-14	2019-07-27T16:24:09Z	2019-07-27T16:24:09Z	1410899	v	Email addresses;IP addresses;Passwords;Usernames
+Snapchat	Snapchat	snapchat.com	2014-01-01	2014-01-02T00:00:00Z	2014-01-02T00:00:00Z	4609615	v	Geographic locations;Phone numbers;Usernames
+SoarGames	SoarGames	soargames.com	2019-12-16	2023-12-03T06:56:13Z	2023-12-03T06:56:13Z	4774445	v	Email addresses;IP addresses;Passwords;Usernames
+SocialEngineered	Social Engineered	socialengineered.net	2019-06-13	2019-06-23T20:46:39Z	2019-06-25T18:06:57Z	89392	v	Email addresses;IP addresses;Passwords;Private messages;Usernames
+Solomid	Team SoloMid	solomid.net	2014-12-22	2016-03-09T13:04:08Z	2016-03-09T13:04:08Z	442166	v	Email addresses;IP addresses;Passwords;Usernames
+SongTrivia2	SongTrivia2	songtrivia2.io	2026-04-02	2026-04-04T01:59:01Z	2026-04-04T01:59:01Z	291739	v	Auth tokens;Avatars;Email addresses;Names;Passwords;Usernames
+Sonicbids	Sonicbids	sonicbids.com	2019-12-30	2020-08-18T07:39:37Z	2020-08-18T07:39:37Z	751700	v	Email addresses;Names;Passwords;Usernames
+Sony	Sony	sony.com	2011-06-02	2013-12-04T00:00:00Z	2013-12-04T00:00:00Z	37103	v	Dates of birth;Email addresses;Genders;Names;Passwords;Phone numbers;Physical addresses;Usernames
+SoundCloud	SoundCloud	soundcloud.com	2025-12-15	2026-01-27T01:13:16Z	2026-01-27T01:19:20Z	29815722	v	Avatars;Email addresses;Geographic locations;Names;Profile statistics;Usernames
+SoundRadix	Sound Radix	soundradix.com	2026-03-25	2026-03-26T00:06:29Z	2026-03-26T05:02:02Z	292993	v	Email addresses;Names;Passwords
+Soundwave	Soundwave	soundwave.com	2015-07-16	2017-03-17T22:36:34Z	2017-03-17T22:36:34Z	130705	v	Dates of birth;Email addresses;Genders;Geographic locations;Names;Passwords;Social connections
+Speedio	Speedio	speedio.com.br	2024-12-24	2025-01-30T07:14:40Z	2025-01-30T07:14:40Z	27501041		Company names;Email addresses;Phone numbers;Physical addresses
+Sphero	Sphero	sphero.com	2023-09-09	2023-10-20T07:16:25Z	2023-10-20T07:16:25Z	832255	v	Dates of birth;Email addresses;Geographic locations;Names;Usernames
+Spirol	Spirol	spirol.com	2014-02-22	2014-02-22T20:47:56Z	2014-02-22T20:47:56Z	55622	v	Email addresses;Employers;Job titles;Names;Phone numbers;Physical addresses
+SplitVPN	SplitVPN	splitvpn.io	2026-07-21	2026-08-01T05:29:26Z	2026-08-01T05:29:26Z	865336	v	Device information;Email addresses;Geographic locations;IP addresses;Partial credit card data
+Sport2000	Sport 2000	sport2000.fr	2024-04-18	2024-08-28T06:56:12Z	2024-08-28T06:56:12Z	3189643	v	Dates of birth;Email addresses;Names;Phone numbers;Physical addresses;Purchases;Salutations
+Spoutible	Spoutible	spoutible.com	2024-01-31	2024-02-05T07:33:00Z	2024-02-05T07:33:00Z	207114	v	Email addresses;Genders;IP addresses;Names;Passwords;Phone numbers;Usernames
+SprashivaiRu	Спрашивай.ру	sprashivai.ru	2015-05-11	2015-05-12T23:50:08Z	2015-05-12T23:50:08Z	3474763	v	Dates of birth;Email addresses;Genders;Geographic locations;IP addresses;Passwords;Spoken languages
+SpyFone	SpyFone	spyfone.com	2018-08-16	2018-08-24T04:36:24Z	2024-07-11T19:29:17Z	44109	vs	Audio recordings;Browsing histories;Device information;Email addresses;Geographic locations;IMEI numbers;IP addresses;Names;Passwords;Photos;SMS messages
+Spyic	Spyic	spyic.com	2025-02-14	2025-02-20T23:12:38Z	2025-02-20T23:12:38Z	875999	vs	Email addresses
+Spytech	Spytech	spytech-web.com	2024-06-04	2024-07-30T03:30:44Z	2024-07-30T03:30:44Z	5645	vs	Browsing histories;Device information;Email addresses;Names;Passwords;Purchases;Usernames
+SpyX	SpyX	spyx.com	2024-06-24	2025-03-19T22:34:18Z	2025-03-19T22:34:18Z	1977011	vs	Device information;Email addresses;Geographic locations;IP addresses;Passwords
+Spyzie	Spyzie	spyzie.io	2024-02-22	2025-02-27T22:57:21Z	2025-02-27T22:57:21Z	518643	vs	Email addresses
+StalkerOnline	Stalker Online	stalker.so	2020-05-05	2024-10-31T20:11:33Z	2024-10-31T20:11:33Z	1385472	v	Email addresses;IP addresses;Passwords;Usernames
+Staminus	Staminus	staminus.net	2016-03-11	2017-10-05T03:58:50Z	2017-10-05T03:58:50Z	26815	v	Credit cards;Email addresses;IP addresses;Passwords;Support tickets;Usernames
+StarNet	StarNet	starnet.md	2015-02-26	2015-04-11T06:35:46Z	2015-04-11T06:35:46Z	139395	v	Customer interactions;Dates of birth;Email addresses;Genders;IP addresses;MAC addresses;Names;Passport numbers;Passwords;Phone numbers
+Start	START	start.film	2021-06-01	2022-08-30T02:48:30Z	2022-08-30T02:55:07Z	7455386	v	Email addresses;Geographic locations;Names;Passwords
+StarTribune	StarTribune	startribune.com	2019-10-10	2020-10-30T23:30:39Z	2020-10-31T01:01:09Z	2192857	v	Dates of birth;Email addresses;Genders;Names;Passwords;Physical addresses;Usernames
+SterKinekor	Ster-Kinekor	sterkinekor.co.za	2017-03-09	2017-03-13T10:13:16Z	2017-03-13T10:13:16Z	1619544	v	Dates of birth;Email addresses;Genders;Names;Passwords;Phone numbers;Physical addresses;Spoken languages
+StockX	StockX	stockx.com	2019-07-26	2019-08-10T15:34:08Z	2019-08-11T04:12:11Z	6840339	v	Email addresses;Names;Passwords;Physical addresses;Purchases;Usernames
+Storenvy	Storenvy	storenvy.com	2019-04-04	2025-02-16T08:31:34Z	2025-02-16T08:31:34Z	11052071	v	Dates of birth;Email addresses;Genders;Geographic locations;IP addresses;Passwords;Usernames
+StoryBird	StoryBird	storybird.com	2015-08-07	2021-02-02T00:39:58Z	2021-02-02T00:39:58Z	1047200	v	Email addresses;Names;Passwords;Usernames
+Straffic	Straffic	straffic.io	2020-02-14	2020-02-27T19:28:29Z	2020-02-27T19:28:29Z	48580249	v	Email addresses;Genders;Names;Phone numbers;Physical addresses
+Stratfor	Stratfor	stratfor.com	2011-12-24	2013-12-04T00:00:00Z	2013-12-04T00:00:00Z	859777	v	Credit cards;Email addresses;Names;Passwords;Phone numbers;Physical addresses;Usernames
+StreamCraft	StreamCraft	streamcraft.net	2020-07-06	2024-10-27T21:01:08Z	2024-10-27T21:01:08Z	1772620	v	Email addresses;IP addresses;Passwords;Usernames
+StreetEasy	StreetEasy	streeteasy.com	2016-06-28	2019-10-06T18:18:50Z	2019-10-06T18:25:03Z	988230	v	Email addresses;Names;Passwords;Usernames
+Stripchat	Stripchat	stripchat.com	2021-11-05	2022-08-31T06:17:42Z	2022-08-31T06:37:07Z	10001355	vs	Email addresses;IP addresses;Usernames
+StrongholdKingdoms	Stronghold Kingdoms	strongholdkingdoms.com	2018-07-04	2019-07-21T15:36:01Z	2019-07-21T15:36:01Z	5187305	v	Email addresses;Passwords;Usernames
+SubaGames	SubaGames	subagames.com	2016-11-01	2021-08-25T06:39:28Z	2021-08-25T06:44:29Z	6137666	v	Email addresses;Passwords;Usernames
+Substack	Substack	substack.com	2025-10-23	2026-02-06T23:33:22Z	2026-02-06T23:33:22Z	663121	v	Email addresses;Phone numbers
+SUCCESS	SUCCESS	success.com	2026-03-04	2026-04-01T06:51:14Z	2026-04-01T06:51:14Z	253510	v	Device information;Email addresses;IP addresses;Names;Passwords;Phone numbers;Physical addresses;Purchases
+SumoTorrent	Sumo Torrent	sumotorrent.sx	2014-06-21	2016-03-09T01:23:23Z	2016-03-09T01:23:23Z	285191	v	Email addresses;IP addresses;Passwords;Usernames;Website activity
+SundryFiles	Sundry Files	sundryfiles.com	2022-01-21	2023-03-31T04:51:11Z	2023-03-31T04:51:11Z	274461	v	Email addresses;IP addresses;Passwords;Usernames
+Suno	Suno	suno.com	2025-11-25	2026-07-20T19:49:51Z	2026-07-20T19:49:51Z	55282226	v	Email addresses;Names;Partial credit card data;Phone numbers;Physical addresses;Purchases
+SuperDraft	SuperDraft	superdraft.io	2024-10-27	2025-01-12T05:43:05Z	2025-01-15T22:31:36Z	300187	v	Dates of birth;Email addresses;Geographic locations;Latitude and longitude pairs;Passwords;Purchases;Usernames
+SurveyLama	SurveyLama	surveylama.com	2024-02-01	2024-04-02T23:04:58Z	2024-04-02T23:04:58Z	4426879	v	Dates of birth;Email addresses;IP addresses;Names;Passwords;Phone numbers;Physical addresses
+SvenskaMagic	SvenskaMagic	svenskamagic.com	2015-07-01	2018-08-30T05:05:04Z	2018-08-30T05:08:09Z	30327	v	Email addresses;Passwords;Usernames
+SweClockers	SweClockers.com	sweclockers.com	2015-04-01	2017-03-22T02:01:20Z	2018-07-27T21:59:04Z	254867	v	Email addresses;Passwords;Usernames
+Switch	Switch	switchit.hu	2024-10-01	2024-10-05T20:18:44Z	2024-10-05T20:18:44Z	5397	v	Email addresses;Job applications;Names;Social media profiles
+SwordFantasy	SwordFantasy	swordfantasy.com	2017-01-20	2024-03-26T08:31:58Z	2024-03-26T08:31:58Z	2690657	v	Email addresses;IP addresses;Passwords;Usernames
+Swvl	Swvl	swvl.com	2020-06-23	2020-07-31T06:24:42Z	2020-07-31T07:59:49Z	4195918	v	Email addresses;Names;Partial credit card data;Passwords;Phone numbers;Profile photos
+Sysco	Sysco	sysco.com	2026-06-15	2026-06-28T15:57:29Z	2026-06-28T15:57:29Z	2691852	v	Customer feedback;Email addresses;Employers;Job titles;Names;Phone numbers;Physical addresses;Usernames
+T2	T2	t2tea.com	2024-04-17	2024-04-22T06:17:17Z	2024-04-24T04:06:11Z	94584	v	Dates of birth;Email addresses;Names;Passwords;Phone numbers;Physical addresses;Purchases;Salutations
+TaiLieu	TaiLieu	tailieu.vn	2019-11-24	2020-05-03T23:48:08Z	2020-05-03T23:48:08Z	7327477	v	Dates of birth;Email addresses;Genders;Geographic locations;Names;Passwords;Phone numbers;Usernames
+Tamodo	Tamodo	tamodo.com	2020-02-28	2020-03-24T23:47:43Z	2020-03-24T23:55:46Z	494945	v	Dates of birth;Email addresses;Genders;Geographic locations;IP addresses;Names;Passwords
+Tangerine	Tangerine	tangerinetelecom.com.au	2024-02-18	2024-02-28T01:42:43Z	2024-02-28T01:42:43Z	243462	v	Dates of birth;Email addresses;Names;Passwords;Phone numbers;Physical addresses;Salutations
+Taobao	Taobao	taobao.com	2012-01-01	2016-10-08T10:53:23Z	2016-10-08T10:53:23Z	21149008		Email addresses;Passwords
+TAPAirPortugal	TAP Air Portugal	flytap.com	2022-08-25	2022-09-23T05:33:05Z	2023-02-05T06:13:01Z	6083479	v	Dates of birth;Email addresses;Genders;Names;Nationalities;Phone numbers;Physical addresses;Salutations;Spoken languages
+Tappware	Tappware	tappware.com	2024-04-23	2024-05-09T00:34:12Z	2024-05-09T00:34:12Z	94734	v	Dates of birth;Email addresses;Genders;Government issued IDs;Job titles;Names;Phone numbers;Physical addresses;Religions
+Taringa	Taringa	taringa.net	2017-08-01	2018-04-19T10:11:37Z	2018-04-19T10:11:37Z	27971100	v	Email addresses;Passwords;Usernames
+Technic	Technic	technicpack.net	2018-11-30	2018-12-04T02:32:35Z	2018-12-04T02:32:35Z	265410	v	Chat logs;Email addresses;IP addresses;Passwords;Private messages;Time zones
+Teespring	Teespring	teespring.com	2020-04-01	2021-06-25T06:58:48Z	2021-06-25T06:58:48Z	8234193	v	Email addresses;Geographic locations;Names;Social media profiles
+TehetsegKapu	TehetségKapu	tehetsegkapu.hu	2025-03-26	2025-05-01T06:55:54Z	2025-05-01T06:55:54Z	54357	v	Email addresses;Names;Usernames
+Teracod	Teracod	teracod.org	2016-05-28	2016-08-22T11:21:27Z	2016-08-22T11:21:27Z	97151	v	Avatars;Email addresses;IP addresses;Passwords;Payment histories;Private messages;Usernames;Website activity
+Terravision	Terravision	terravision.eu	2023-02-01	2023-04-23T03:50:37Z	2023-04-23T03:50:37Z	2075625	v	Dates of birth;Email addresses;Geographic locations;Names;Passwords;Phone numbers
+Tesco	Tesco	tesco.com	2014-02-12	2014-02-13T21:19:24Z	2014-02-13T21:19:24Z	2239	v	Email addresses;Passwords;Reward program balances
+TGBUS	TGBUS	tgbus.com	2017-09-01	2018-04-28T02:02:29Z	2018-04-28T02:02:29Z	10371766		Email addresses;Passwords;Usernames
+TheBottingNetwork	The Botting Network	thebotnet.com	2012-08-12	2025-12-18T01:33:47Z	2025-12-18T01:33:47Z	96320	v	Dates of birth;Email addresses;Passwords;Usernames
+TheCandidBoard	The Candid Board	thecandidboard.com	2015-09-03	2017-01-22T08:33:43Z	2017-01-22T08:33:43Z	178201	vs	Dates of birth;Email addresses;Geographic locations;IP addresses;Passwords;Usernames;Website activity
+TheClubPenguinExperience	The Club Penguin Experience	thecpexperience.com	2024-10-14	2024-10-26T05:21:55Z	2024-10-26T05:21:55Z	6342	v	Age groups;Email addresses;Password hints;Passwords;Usernames
+TheFappening	The Fappening	thefappening.so	2015-12-01	2016-04-13T01:08:20Z	2016-04-13T01:08:20Z	179030	vs	Email addresses;Passwords;Usernames
+TheFlyOnTheWall	The Fly on the Wall	theflyonthewall.com	2017-12-31	2018-01-15T06:42:31Z	2018-01-15T06:42:31Z	84011	v	Age groups;Credit cards;Email addresses;Genders;Names;Passwords;Phone numbers;Physical addresses;Purchases;Usernames
+TheGradCafe	TheGradCafe	thegradcafe.com	2023-02-26	2023-03-24T04:12:17Z	2023-03-24T04:12:17Z	310975	v	Email addresses;Genders;Geographic locations;IP addresses;Names;Passwords;Phone numbers;Physical addresses;Usernames
+TheHeritageFoundation	The Heritage Foundation	heritage.org	2024-07-09	2024-07-10T06:51:28Z	2024-07-10T06:51:28Z	72004	v	Email addresses;IP addresses;Names;Passwords;Usernames
+ThePi-Hole	Pi-hole	pi-hole.net	2025-07-30	2025-07-31T22:46:38Z	2025-07-31T22:46:38Z	29926	v	Email addresses;Names
+ThePostMillennial	The Post Millennial	thepostmillennial.com	2024-05-02	2024-05-10T01:55:22Z	2024-05-14T20:33:14Z	56973345	v	Email addresses;Genders;IP addresses;Names;Passwords;Phone numbers;Physical addresses;Usernames
+TheRealWorld	The Real World	therealworld.net	2024-11-15	2024-11-22T21:55:44Z	2024-11-22T21:55:44Z	324382	v	Chat logs;Email addresses;Usernames
+Thermomix	Thermomix Recipe World Forum	rezeptwelt.de	2025-01-30	2025-02-06T20:20:40Z	2025-02-06T20:20:40Z	3123439	v	Bios;Dates of birth;Email addresses;Names;Phone numbers;Physical addresses;Usernames
+TheSquare	TheSqua.re	thesqua.re	2025-06-27	2025-08-27T03:59:00Z	2025-08-27T03:59:00Z	107041	v	Email addresses;Geographic locations;Names;Phone numbers
+TheTVDB	TheTVDB.com	thetvdb.com	2017-11-21	2018-01-29T07:50:12Z	2018-01-29T07:50:12Z	181871	v	Email addresses;Passwords;Usernames
+Thingiverse	Thingiverse	thingiverse.com	2020-10-13	2021-10-14T10:02:04Z	2021-10-14T10:02:04Z	228102	v	Dates of birth;Email addresses;IP addresses;Names;Passwords;Physical addresses;Usernames
+ThisHabboForum	ThisHabbo Forum	thishabboforum.com	2014-01-01	2015-03-28T05:35:28Z	2025-02-03T02:25:01Z	612414	v	Email addresses;IP addresses;Passwords;Usernames
+Tianya	Tianya	tianya.cn	2011-12-26	2016-06-30T03:39:05Z	2016-06-30T03:39:05Z	29020808	v	Email addresses;Names;Usernames
+Tibber	Tibber	tibber.com	2024-11-10	2024-12-14T06:49:41Z	2024-12-14T06:49:41Z	50002	v	Email addresses;Geographic locations;Names;Purchases
+Ticketcounter	Ticketcounter	ticketcounter.nl	2021-02-22	2021-03-01T22:37:54Z	2023-06-21T20:28:24Z	1921722	v	Bank account numbers;Dates of birth;Email addresses;Genders;IP addresses;Names;Payment histories;Phone numbers;Physical addresses
+Ticketfly	Ticketfly	ticketfly.com	2018-05-31	2018-06-03T06:14:14Z	2021-07-23T03:15:33Z	26151608	v	Email addresses;Names;Phone numbers;Physical addresses
+Tigo	Tigo	tigo.chat	2023-03-31	2023-07-24T23:25:32Z	2023-07-24T23:25:32Z	700394	v	Device information;Email addresses;Genders;Geographic locations;IP addresses;Names;Private messages;Profile photos;Usernames
+Tisza	TISZA Világ	tiszavilag.hu	2025-10-06	2025-11-08T09:45:55Z	2025-11-08T10:00:53Z	198520	vs	Email addresses;Names;Phone numbers;Physical addresses;Usernames
+TNAFlix	TNAFlix	tnaflix.com	2022-06-01	2024-10-30T23:01:03Z	2024-10-30T23:01:03Z	1374344	vs	Email addresses;IP addresses;Passwords;Usernames
+Tokopedia	Tokopedia	tokopedia.com	2020-04-17	2020-05-02T23:45:21Z	2020-07-17T00:53:20Z	71443698	v	Dates of birth;Email addresses;Genders;Names;Passwords
+ToonDoo	ToonDoo	toondoo.com	2019-08-21	2019-11-11T06:19:53Z	2019-11-11T06:19:53Z	6002694	v	Email addresses;Genders;Geographic locations;IP addresses;Passwords;Usernames
+TorrentInvites	Torrent Invites	torrent-invites.com	2013-12-12	2017-03-22T01:14:11Z	2017-03-22T01:14:11Z	352120	v	Dates of birth;Email addresses;IP addresses;Passwords;Usernames;Website activity
+Toumei	Toumei	toumei.co.jp	2023-10-18	2023-10-27T07:16:19Z	2023-10-27T07:16:19Z	76682	v	Email addresses;Names;Phone numbers;Physical addresses
+Tout	Tout	tout.com	2014-09-11	2020-01-25T06:12:28Z	2020-01-25T06:12:28Z	652683	v	Bios;Email addresses;Geographic locations;IP addresses;Names;Passwords;Usernames
+ToyBattles	Toy Battles	toybattles.net	2026-02-06	2026-02-10T02:44:47Z	2026-02-10T02:44:47Z	1017	v	Chat logs;Email addresses;IP addresses;Usernames
+Tracki	Tracki	tracki.com	2024-08-15	2024-08-19T07:52:19Z	2024-08-19T07:52:19Z	372557	v	Email addresses;Names
+Traderie	Traderie	traderie.com	2022-09-24	2024-08-25T20:08:07Z	2024-08-25T20:08:07Z	364898	v	Email addresses;IP addresses;Social media profiles;Usernames
+TRAI	Telecom Regulatory Authority of India	trai.gov.in	2015-04-27	2015-04-27T11:21:59Z	2015-04-27T11:21:59Z	107776	v	Email addresses;Email messages
+Travelio	Travelio	travelio.com	2021-11-23	2022-04-08T00:05:43Z	2022-04-08T00:05:43Z	471376	v	Auth tokens;Dates of birth;Email addresses;Names;Passwords;Phone numbers;Physical addresses
+TravelOK	Travel Oklahoma	travelok.com	2020-12-17	2021-03-10T22:48:23Z	2021-03-10T22:48:23Z	637279	v	Age groups;Dates of birth;Email addresses;Genders;Names;Physical addresses
+Trello	Trello	trello.com	2024-01-16	2024-01-22T19:41:05Z	2024-01-22T19:41:05Z	15111945	v	Email addresses;Names;Usernames
+Trillian	Trillian	trillian.im	2015-12-27	2016-07-15T11:14:44Z	2016-07-15T11:14:44Z	3827238	v	Dates of birth;Email addresses;IP addresses;Names;Passwords;Usernames
+TroyHuntMailchimpList	Troy Hunt's Mailchimp List	troyhunt.com	2025-03-25	2025-03-25T13:45:48Z	2025-03-29T09:51:58Z	16627	v	Email addresses;Geographic locations;IP addresses;Latitude and longitude pairs
+TruckersMP	TruckersMP	truckersmp.com	2016-02-25	2016-04-24T21:27:05Z	2016-04-24T21:27:05Z	83957	v	Email addresses;Passwords;Usernames
+TrueFire	TrueFire	truefire.com	2020-02-21	2020-08-02T20:46:26Z	2020-08-02T20:46:26Z	599667	v	Account balances;Dates of birth;Email addresses;Names;Passwords;Phone numbers;Physical addresses;Usernames
+TruthFinder	Truth Finder	truthfinder.com	2019-04-12	2023-02-04T07:02:52Z	2023-02-04T07:02:52Z	8159573	v	Email addresses;Names;Passwords;Phone numbers
+Tumblr	tumblr	tumblr.com	2013-02-28	2016-05-29T22:59:04Z	2016-05-29T22:59:04Z	65469298	v	Email addresses;Passwords
+TunedGlobal	Tuned Global	tunedglobal.com	2016-03-16	2022-08-03T00:00:15Z	2022-08-03T03:10:14Z	985586	v	Email addresses;Names;Passwords;Phone numbers;Physical addresses
+Tunngle	Tunngle	tunngle.net	2016-07-01	2023-10-21T21:20:33Z	2023-10-21T21:20:33Z	8192928	v	Email addresses;IP addresses;Passwords;Usernames
+Twitter	Twitter	twitter.com	2022-01-01	2022-08-13T02:29:52Z	2022-08-13T02:40:49Z	6682453	v	Bios;Email addresses;Geographic locations;Names;Phone numbers;Profile photos;Usernames
+Twitter200M	Twitter (200M)	twitter.com	2021-01-01	2023-01-05T20:49:16Z	2023-01-05T20:49:16Z	211524284	v	Email addresses;Names;Social media profiles;Usernames
+Ualabee	Ualabee	ualabee.com	2025-05-06	2025-06-13T06:24:35Z	2025-06-13T06:24:35Z	472296	v	Dates of birth;Email addresses;Names;Phone numbers;Profile photos
+Ubook	Ubook	ubook.com	2024-07-28	2024-07-30T22:25:42Z	2024-07-30T22:25:42Z	699908	v	Dates of birth;Email addresses;Genders;Names;Profile photos
+UC	University of California	universityofcalifornia.edu	2020-12-24	2021-06-20T07:44:34Z	2021-07-04T01:03:54Z	547422	v	Dates of birth;Education levels;Email addresses;Ethnicities;Genders;Job titles;Names;Phone numbers;Physical addresses;Social security numbers
+Udemy	Udemy	udemy.com	2026-04-24	2026-04-26T23:01:50Z	2026-04-26T23:01:50Z	1401259	v	Email addresses;Employers;Job titles;Names;Payment methods;Phone numbers;Physical addresses
+Uiggy	Uiggy	uiggy.com	2016-06-01	2016-06-27T08:07:18Z	2016-06-27T08:07:18Z	2682650	v	Email addresses;Genders;Names;Social connections;Website activity
+Ulmon	Ulmon	ulmon.com	2020-01-26	2020-05-08T02:10:50Z	2020-05-08T02:14:52Z	777769	v	Bios;Email addresses;Names;Passwords;Phone numbers;Social media profiles
+UnderArmour	Under Armour	underarmour.com	2025-11-17	2026-01-21T06:34:18Z	2026-01-21T06:42:44Z	72742892	v	Dates of birth;Email addresses;Genders;Geographic locations;Names;Purchases
+UnderworldEmpire	Underworld Empire	underworldempireforums.com	2017-04-25	2018-02-19T10:28:11Z	2018-02-19T10:28:11Z	428779	v	Email addresses;IP addresses;Passwords;Usernames
+UnicoCampania	Unico Campania	unicocampania.it	2020-08-19	2020-08-19T23:29:21Z	2020-08-19T23:29:21Z	166031	v	Email addresses;Passwords
+Unigame	Unigame	unigame.me	2019-12-14	2025-08-08T04:48:58Z	2025-08-08T04:51:39Z	843696	v	Email addresses;Passwords
+Universarium	Universarium	universarium.org	2019-11-01	2020-01-03T09:40:01Z	2020-01-03T09:54:20Z	564962	v	Email addresses;Passwords
+UniversityOfNottingham	University of Nottingham	nottingham.ac.uk	2026-06-09	2026-06-10T22:13:31Z	2026-06-10T22:13:31Z	454635	v	Academic records;Citizenship statuses;Dates of birth;Disabilities;Email addresses;Ethnicities;Genders;IP addresses;Names;Passport numbers;Phone numbers;Physical addresses;Purchases;Salutations;Usernames
+UniversityOfPennsylvania	University of Pennsylvania	upenn.edu	2025-10-30	2026-02-16T21:57:51Z	2026-02-16T21:57:51Z	623750	v	Charitable donations;Dates of birth;Email addresses;Genders;Income levels;Job titles;Names;Physical addresses;Religions;Salutations;Spouses names
+UnrealEngine	Unreal Engine	unrealengine.com	2016-08-11	2016-11-07T09:04:54Z	2016-11-07T09:04:54Z	530147	v	Email addresses;Passwords;Usernames
+Upstox	Upstox	upstox.com	2021-04-08	2022-01-19T03:29:03Z	2022-01-19T03:29:03Z	111002	v	Bank account numbers;Dates of birth;Email addresses;Family members' names;Genders;Government issued IDs;Income levels;Marital statuses;Nationalities;Occupations;Passwords;Phone numbers;Physical addresses
+UtahGunExchange	Utah Gun Exchange	utahgunexchange.com	2020-07-17	2020-08-19T07:56:09Z	2020-08-19T08:05:00Z	235233	v	Email addresses;Genders;IP addresses;Passwords;Usernames
+Utair	Utair	utair.ru	2019-03-21	2025-12-26T04:28:29Z	2025-12-26T20:13:12Z	401400	v	Dates of birth;Email addresses;Genders;Loyalty program details;Names;Passport numbers;Phone numbers;Physical addresses
+uTorrent	uTorrent	utorrent.com	2016-01-14	2016-11-05T22:32:39Z	2016-11-05T22:32:39Z	395044	v	Email addresses;Passwords;Usernames
+uuu9	uuu9	uuu9.com	2016-09-06	2016-12-27T10:05:41Z	2016-12-27T10:05:41Z	7485802		Email addresses;Passwords;Usernames
+Vakinha	Vakinha	vakinha.com.br	2020-06-22	2020-08-01T05:56:06Z	2020-08-01T05:56:06Z	4775203	v	Dates of birth;Email addresses;IP addresses;Names;Passwords;Phone numbers
+Vastaamo	Vastaamo	vastaamo.fi	2019-03-31	2021-07-17T01:51:01Z	2021-08-27T05:37:20Z	30433	vs	Email addresses;Names;Personal health data;Social security numbers
+VBulletin	vBulletin	vbulletin.com	2015-11-03	2016-01-24T13:15:11Z	2016-01-24T13:15:11Z	518966	v	Dates of birth;Email addresses;Homepage URLs;Instant messenger identities;IP addresses;Passwords;Security questions and answers;Spoken languages;Website activity
+Vedantu	Vedantu	vedantu.com	2019-07-08	2019-11-01T05:13:40Z	2019-11-01T05:13:40Z	686899	v	Browser user agent details;Email addresses;Genders;IP addresses;Names;Passwords;Phone numbers;Spoken languages;Time zones;Website activity
+VerificationsIO	Verifications.io	verifications.io	2019-02-25	2019-03-09T19:29:54Z	2019-03-09T20:49:51Z	763117241	v	Dates of birth;Email addresses;Employers;Genders;Geographic locations;IP addresses;Job titles;Names;Phone numbers;Physical addresses
+Verified	Verified	verified.cm	2014-01-10	2014-07-06T04:16:37Z	2014-07-06T04:16:37Z	16919	v	Email addresses;Historical passwords;IP addresses;Passwords;Private messages;Usernames;Website activity
+Vermillion	Vermillion	v3rmillion.net	2014-08-30	2023-07-11T08:14:42Z	2023-07-11T08:14:42Z	8106	v	Dates of birth;Email addresses;IP addresses;Passwords;Usernames
+Vianet	Vianet	vianet.com.np	2020-04-08	2020-04-22T03:00:17Z	2020-04-22T03:00:17Z	94353	v	Email addresses;Names;Phone numbers;Physical addresses
+VictoryPhones	Victory Phones	victoryphones.com	2017-01-01	2017-10-11T21:01:33Z	2017-10-11T21:01:33Z	166046	v	Dates of birth;Email addresses;IP addresses;Names;Phone numbers;Physical addresses
+VietnamAirlines	Vietnam Airlines	vietnamairlines.com	2025-06-20	2025-10-11T09:20:39Z	2025-10-12T01:28:16Z	7316915	v	Dates of birth;Email addresses;Loyalty program details;Names;Phone numbers
+ViewFines	ViewFines	viewfines.co.za	2018-05-07	2018-05-24T09:11:55Z	2018-05-24T09:11:55Z	777649	v	Email addresses;Government issued IDs;Names;Passwords;Phone numbers
+Vimeo	Vimeo	vimeo.com	2026-04-28	2026-05-05T02:08:50Z	2026-05-05T02:08:50Z	119167	v	Email addresses;Names
+VimeWorld	VimeWorld	vimeworld.com	2018-10-01	2024-10-30T07:02:43Z	2024-10-30T07:02:43Z	3118964	v	Email addresses;IP addresses;Passwords;Usernames
+VivaAir	Viva Air	vivaair.com	2022-03-14	2023-09-11T07:11:30Z	2024-06-04T18:43:45Z	932232	v	Email addresses;IP addresses;Names;Partial credit card data;Phone numbers;Physical addresses;Purchases
+VK	VK	vk.com	2012-01-01	2016-06-09T09:16:36Z	2016-06-09T09:16:36Z	93338602	v	Email addresses;Names;Passwords;Phone numbers
+VNG	VNG	zing.vn	2015-05-19	2018-04-28T07:49:02Z	2018-04-28T07:49:02Z	24853850	v	Dates of birth;Email addresses;Genders;IP addresses;Marital statuses;Names;Occupations;Passwords;Phone numbers;Physical addresses;Usernames
+Vodafone	Vodafone	vodafone.is	2013-11-30	2013-11-30T00:00:00Z	2019-05-13T12:22:01Z	56021	v	Credit cards;Email addresses;Government issued IDs;IP addresses;Names;Passwords;Phone numbers;Physical addresses;Purchases;SMS messages;Usernames
+VoidTO	Void.to	void.to	2019-06-13	2019-09-11T06:47:08Z	2019-09-11T06:47:08Z	95431	v	Email addresses;IP addresses;Passwords;Private messages;Usernames
+VTightGel	V-Tight Gel	vtightgel.com	2016-02-13	2017-11-17T07:31:16Z	2017-11-17T07:47:39Z	2013164	s	Email addresses;IP addresses;Names;Phone numbers;Physical addresses
+Vultr	Vultr	vultr.com	2022-07-08	2025-11-20T01:22:52Z	2025-11-20T01:22:52Z	187872	v	Email addresses;Geographic locations;IP addresses;Names
+Wakanim	Wakanim	wakanim.tv	2022-08-28	2022-10-06T22:44:01Z	2022-10-06T22:44:01Z	6706951	v	Browser user agent details;Email addresses;IP addresses;Names;Physical addresses;Usernames
+Wanelo	Wanelo	wanelo.com	2018-12-13	2019-09-30T17:15:11Z	2019-10-01T05:39:41Z	23165793	v	Email addresses;IP addresses;Names;Passwords;Physical addresses
+Warframe	Warframe	warframe.com	2014-11-24	2016-07-21T02:25:49Z	2016-07-21T02:25:49Z	819478	v	Email addresses;Usernames;Website activity
+WarInc	War Inc.	thewarinc.com	2012-07-04	2016-11-07T11:07:25Z	2016-11-07T11:07:25Z	1020136	v	Email addresses;Passwords;Usernames;Website activity
+Warmane	Warmane	warmane.com	2016-12-01	2018-09-08T07:54:18Z	2018-09-08T07:57:44Z	1116256	v	Dates of birth;Email addresses;Passwords;Usernames
+WashingtonStateFoodWorkerCard	Washington State Food Worker Card	foodworkercard.wa.gov	2022-11-17	2024-03-31T02:34:15Z	2024-03-31T02:38:36Z	1594305	v	Dates of birth;Driver's licenses;Email addresses;Geographic locations;Names
+Wattpad	Wattpad	wattpad.com	2020-06-29	2020-07-19T22:49:19Z	2020-07-19T22:49:19Z	268765495	v	Bios;Dates of birth;Email addresses;Genders;Geographic locations;IP addresses;Names;Passwords;Social media profiles;User website URLs;Usernames
+WebHostingTalk	Web Hosting Talk	webhostingtalk.com	2016-07-01	2025-12-17T22:43:18Z	2025-12-17T22:43:18Z	515149	v	Email addresses;IP addresses;Passwords;Usernames
+WedMeGood	WedMeGood	wedmegood.com	2021-01-06	2021-05-13T00:08:20Z	2021-05-13T00:08:20Z	1306723	v	Email addresses;Genders;Names;Passwords;Phone numbers;Physical addresses
+Weee	Weee	sayweee.com	2022-07-11	2023-02-08T23:17:51Z	2023-02-08T23:17:51Z	1117405	v	Delivery instructions;Email addresses;Names;Phone numbers;Purchases
+WeHeartIt	We Heart It	weheartit.com	2013-11-03	2017-10-14T20:14:58Z	2017-10-14T20:14:58Z	8600635	v	Email addresses;Passwords;Usernames
+WeLeakInfo	WeLeakInfo	weleakinfo.com	2021-03-08	2021-03-15T22:48:25Z	2021-05-03T11:08:29Z	11788	vs	Browser user agent details;Email addresses;Employers;IP addresses;Names;Partial credit card data;Physical addresses;Purchases
+Welhof	Welhof	welhof.com	2023-12-01	2025-01-22T08:28:11Z	2025-01-23T23:46:16Z	107292	v	Email addresses;Names;Physical addresses;Purchases
+Wendys	Wendy's	wendys.com.ph	2018-03-31	2022-05-24T23:50:35Z	2022-05-24T23:50:35Z	52485	v	Education levels;Email addresses;IP addresses;Job applications;Names;Passwords;Phone numbers;Physical addresses
+WhiteDate	WhiteDate	whitedate.net	2025-12-29	2026-01-06T06:26:19Z	2026-02-06T01:40:14Z	20363	vs	Ages;Astrological signs;Bios;Device information;Education levels;Email addresses;Family structure;Forum posts;Genders;Geographic locations;Income levels;IP addresses;IQ levels;Nicknames;Passwords;Physical attributes;Private messages;Profile photos;Races;Relationship statuses;Sexual orientations;Usernames
+Whitepages	Whitepages	whitepages.com	2016-06-27	2019-03-27T01:50:45Z	2019-03-27T01:50:45Z	11657763	v	Email addresses;Names;Passwords
+WhiteRoom	Fashion Nexus	fashionnexus.co.uk	2018-07-09	2018-07-31T08:20:54Z	2018-07-31T08:20:54Z	1279263	v	Browser user agent details;Dates of birth;Email addresses;Genders;IP addresses;Names;Passwords;Phone numbers;Physical addresses;Purchases
+WHMCS	WHMCS	whmcs.com	2012-05-21	2016-06-28T23:47:07Z	2016-06-28T23:47:07Z	134047	v	Email addresses;Email messages;Employers;IP addresses;Names;Partial credit card data;Passwords;Payment histories;Physical addresses;Website activity
+WifeLovers	Wife Lovers	wifelovers.com	2018-10-07	2018-10-20T20:26:13Z	2018-10-23T06:00:07Z	1274051	vs	Email addresses;IP addresses;Names;Passwords;Usernames
+WIIUISO	WIIU ISO	wiiuiso.com	2015-09-25	2016-09-06T05:51:12Z	2016-09-06T05:51:12Z	458155	v	Email addresses;IP addresses;Passwords;Usernames
+WildStar	WildStar	wildstar-online.com	2015-07-11	2016-03-06T21:41:16Z	2016-03-06T21:41:16Z	738556	v	Dates of birth;Email addresses;IP addresses;Passwords;Usernames
+Win7Vista	Win7Vista Forum	win7vista.com	2013-09-03	2014-06-01T10:01:32Z	2014-06-01T10:01:32Z	202683	v	Email addresses;Instant messenger identities;IP addresses;Names;Passwords;Private messages;Usernames;Website activity
+Windows93	Windows93 / Myspace93	windows93.net	2021-01-01	2026-05-21T03:45:15Z	2026-05-21T03:45:15Z	46105	v	Email addresses;IP addresses;Passwords;Usernames
+WIRED	WIRED	wired.com	2025-09-08	2025-12-27T23:29:49Z	2025-12-28T00:08:02Z	2364431	v	Dates of birth;Display names;Email addresses;Genders;Geographic locations;Names;Phone numbers;Physical addresses
+WiredBucks	WiredBucks	wiredbucks.com	2022-05-25	2025-06-10T07:56:31Z	2025-06-10T07:56:31Z	918529	v	Earnings;Email addresses;IP addresses;Names;Passwords;Physical addresses;Usernames
+Wishbone	Wishbone (2016)	wishbone.io	2016-08-07	2017-03-15T19:29:52Z	2020-05-28T03:55:18Z	2247314	v	Auth tokens;Dates of birth;Email addresses;Genders;Names;Phone numbers;Usernames
+Wishbone2020	Wishbone (2020)	wishbone.io	2020-01-27	2020-05-28T03:54:44Z	2020-05-28T03:54:44Z	9705172	v	Auth tokens;Dates of birth;Email addresses;Genders;Geographic locations;IP addresses;Names;Passwords;Phone numbers;Profile photos;Social media profiles;Usernames
+WiziShop	WiziShop	wizishop.fr	2020-07-14	2020-10-05T03:42:29Z	2021-11-25T22:08:12Z	2856769	v	Dates of birth;Email addresses;IP addresses;Names;Passwords;Phone numbers;Physical addresses
+Woflow	Woflow	woflow.com	2026-03-04	2026-05-07T06:48:33Z	2026-05-07T06:48:33Z	447593	v	Email addresses;Names;Phone numbers;Physical addresses
+Wongnai	Wongnai	wongnai.com	2020-10-28	2020-11-04T21:14:50Z	2020-11-05T04:42:20Z	3924454	v	Dates of birth;Email addresses;Geographic locations;IP addresses;Names;Passwords;Phone numbers;Social media profiles
+WoTLabs	WoTLabs	wotlabs.net	2024-03-03	2024-03-07T03:32:45Z	2024-03-07T03:45:25Z	21994	v	Dates of birth;Email addresses;IP addresses;Time zones;Usernames
+WPSandbox	WPSandbox	wpsandbox.io	2018-11-04	2018-11-06T07:26:07Z	2018-11-06T07:26:07Z	858	v	Email addresses;Passwords
+WPT	WPT Amateur Poker League	wptapl.com	2014-01-04	2014-02-01T02:57:21Z	2014-02-01T02:57:21Z	148366	v	Email addresses;Passwords
+xat	xat	xat.com	2015-11-04	2016-08-05T06:53:35Z	2016-08-05T06:53:35Z	5968783	v	Email addresses;IP addresses;Passwords;Usernames;Website activity
+Xbox-Scene	Xbox-Scene	xboxscene.com	2015-02-01	2016-02-07T20:26:56Z	2016-02-07T20:26:56Z	432552	v	Email addresses;IP addresses;Passwords;Usernames
+Xbox360ISO	Xbox 360 ISO	xbox360iso.com	2015-09-25	2017-01-29T07:20:52Z	2017-01-29T07:20:52Z	1296959	v	Email addresses;IP addresses;Passwords;Usernames
+xHamster	xHamster	xhamster.com	2016-11-28	2018-03-08T02:09:26Z	2018-03-08T02:09:26Z	377377	vs	Email addresses;Passwords;Usernames
+Xiaomi	Xiaomi	xiaomi.cn	2012-08-01	2019-07-21T21:45:31Z	2019-07-21T21:45:31Z	7088010		Email addresses;IP addresses;Passwords;Usernames
+XKCD	XKCD	xkcd.com	2019-07-01	2019-09-01T08:58:32Z	2019-09-01T08:58:32Z	561991	v	Email addresses;IP addresses;Passwords;Usernames
+XPGameSaves	XPG	xpgamesaves.com	2016-01-01	2017-07-01T15:28:17Z	2017-07-01T15:28:17Z	890341	v	Email addresses;IP addresses;Passwords;Usernames
+XSplit	XSplit	xsplit.com	2013-11-07	2015-08-08T04:28:48Z	2015-08-08T04:28:48Z	2983472	v	Email addresses;Names;Passwords;Usernames
+Yahoo	Yahoo	yahoo.com	2012-07-11	2013-12-04T00:00:00Z	2013-12-04T00:00:00Z	453427	v	Email addresses;Passwords
+Yam	Yam	yam.com	2013-06-02	2021-05-22T08:02:31Z	2021-05-22T08:02:31Z	13258797	v	Dates of birth;Email addresses;Names;Passwords;Phone numbers;Physical addresses;Usernames
+Yandex	Yandex Dump	forum.btcsec.com	2014-09-07	2014-09-12T04:50:32Z	2014-09-12T04:50:32Z	1186564	v	Email addresses;Passwords
+Yatra	Yatra	yatra.com	2013-09-01	2018-07-04T23:15:57Z	2018-07-04T23:15:57Z	5033997	v	Dates of birth;Email addresses;Names;Passwords;Phone numbers;Physical addresses;PINs
+Yonema	Yonéma	yonema.com	2024-11-21	2024-12-14T07:28:27Z	2024-12-14T07:28:27Z	35962	v	Dates of birth;Device information;Email addresses;IP addresses;Names;Passwords;Phone numbers
+YoteprestoCom	yotepresto.com	yotepresto.com	2020-06-22	2021-06-25T05:04:47Z	2021-06-25T05:04:47Z	1444629	v	Email addresses;IP addresses;Passwords;Usernames
+Youku	Youku	youku.com	2016-12-01	2017-04-15T11:02:35Z	2017-04-15T11:02:35Z	91890110	v	Email addresses;Passwords
+YoungLivingEssentialOils	Young Living Essential Oils	youngliving.com	2024-12-11	2024-12-19T14:37:40Z	2024-12-19T14:37:40Z	1128951	v	Dates of birth;Email addresses;Geographic locations;Names
+YouNow	YouNow	younow.com	2019-02-15	2019-07-18T08:59:45Z	2019-07-18T08:59:45Z	18241518	v	Email addresses;IP addresses;Names;Social media profiles;Usernames
+YouPorn	YouPorn	youporn.com	2012-02-21	2015-07-30T05:32:00Z	2018-05-20T05:24:11Z	1327567	vs	Email addresses;Passwords
+Youthmanual	Youthmanual	youthmanual.com	2019-01-31	2025-02-09T06:28:46Z	2025-02-09T06:28:46Z	937912	v	Bios;Dates of birth;Email addresses;Genders;Names;Passwords;Phone numbers;Physical addresses;Places of birth
+Zacks	Zacks	zacks.com	2020-05-10	2023-06-10T23:10:02Z	2023-06-10T23:23:18Z	8929503	v	Email addresses;Names;Passwords;Phone numbers;Physical addresses;Usernames
+Zacks2024	Zacks (2024)	zacks.com	2024-06-22	2025-02-12T23:19:43Z	2025-02-12T23:19:43Z	11994223	v	Email addresses;IP addresses;Names;Passwords;Phone numbers;Physical addresses;Usernames
+ZadigVoltaire	Zadig & Voltaire	zadig-et-voltaire.com	2023-11-16	2024-06-17T06:02:11Z	2024-06-17T06:02:11Z	586895	v	Email addresses;Genders;Names;Phone numbers;Physical addresses
+ZAPHosting	ZAP-Hosting	zap-hosting.com	2021-11-22	2022-03-19T23:48:45Z	2022-03-19T23:48:45Z	746682	v	Browser user agent details;Chat logs;Email addresses;IP addresses;Names;Phone numbers;Physical addresses;Purchases
+Zara	Zara	zara.com	2026-04-15	2026-05-08T07:14:22Z	2026-05-08T07:14:22Z	197376	v	Email addresses;Geographic locations;Purchases;Support tickets
+ZenBusiness	ZenBusiness	zenbusiness.com	2026-03-27	2026-05-02T05:53:38Z	2026-05-02T05:53:38Z	5118184	v	Email addresses;Names;Phone numbers
+Zhenai	Zhenai.com	zhenai.com	2011-12-21	2019-07-11T06:31:32Z	2019-07-11T06:31:32Z	5024908	s	Email addresses;Passwords
+Zilvia	Zilvia.net	zilvia.net	2025-11-06	2025-12-01T07:34:16Z	2025-12-01T07:34:16Z	287863	v	Email addresses;IP addresses;Passwords;Usernames
+ZLib	Z-lib	z-lib.is	2024-06-20	2024-11-04T04:12:07Z	2024-11-04T04:12:07Z	9737374	v	Cryptocurrency wallet addresses;Email addresses;Geographic locations;Passwords;Purchases;Usernames
+Zomato	Zomato	zomato.com	2017-05-17	2017-09-04T21:06:46Z	2017-09-04T21:06:46Z	16472873	v	Email addresses;Passwords;Usernames
+Zoomcar	Zoomcar	zoomcar.com	2018-07-01	2020-06-05T02:57:26Z	2020-06-05T02:57:26Z	3589795	v	Email addresses;IP addresses;Names;Passwords;Phone numbers
+Zoosk2020	Zoosk (2020)	zoosk.com	2020-01-12	2020-08-07T03:46:38Z	2020-08-07T03:46:38Z	23927853	vs	Dates of birth;Drinking habits;Education levels;Email addresses;Ethnicities;Family structure;Genders;Geographic locations;Income levels;Names;Nicknames;Physical attributes;Political views;Relationship statuses;Religions;Sexual orientations;Smoking habits
+Zooville	Zooville	zooville.org	2019-09-27	2019-10-19T21:22:44Z	2019-10-20T21:58:16Z	71407	vs	Dates of birth;Email addresses;IP addresses;Passwords;Usernames
+Zurich	Zurich	zurich.co.jp	2023-01-08	2023-01-22T22:30:56Z	2023-01-22T22:30:56Z	756737	v	Dates of birth;Email addresses;Genders;Names;Vehicle details
+Zynga	Zynga	zynga.com	2019-09-01	2019-12-19T04:54:45Z	2020-01-11T00:41:51Z	172869660	v	Email addresses;Passwords;Phone numbers;Usernames
