@@ -42,7 +42,7 @@
   "kit.pdf.intro": "Passbox protects your data with two keys: your master password and the Secret Key below. You need both to sign in on a new device. Nobody can recover them for you, not even Passbox.",
   "kit.pdf.passwordHint": "Optional: write down your master password by hand. Then keep this page as safe as cash.",
   "kit.pdf.helper": "Who can help me:  ____________________   Phone:  ________________",
-  "kit.pdf.footer": "Passbox is in early development and has not been independently audited yet.",
+  "kit.pdf.footer": "Passbox · open source (MIT) · end-to-end encrypted. This kit was made on your device and was not uploaded anywhere.",
   "kit.reminder.title": "Emergency Kit not saved yet",
   "kit.reminder.body": "Without the kit you can't get to your data on a new device.",
   "kit.reminder.action": "Save it now",
@@ -1785,5 +1785,8 @@
   "security.alert.breachedText": "Attackers try leaked passwords first. Change them on the websites, starting with email and banking.",
   "security.alert.breachedSites": "{count, plural, one {# website you use had a data breach} other {# websites you use had a data breach}}",
   "security.alert.breachedSitesText": "If you have not changed the password since then, change it now.",
-  "security.alert.details": "Details"
+  "security.alert.details": "Details",
+  "settings.transparency": "Security design",
+  "settings.transparencyDescription": "How Passbox protects your data, and how to report a vulnerability.",
+  "settings.sections": "Settings sections"
 }

@@ -42,7 +42,7 @@
   "kit.pdf.intro": "Passbox schützt Ihre Daten mit zwei Schlüsseln: Ihrem Master-Passwort und dem Geheimschlüssel unten. Auf einem neuen Gerät brauchen Sie beide. Niemand kann sie für Sie wiederherstellen, auch Passbox nicht.",
   "kit.pdf.passwordHint": "Optional: Notieren Sie Ihr Master-Passwort von Hand. Bewahren Sie diese Seite dann so sicher auf wie Bargeld.",
   "kit.pdf.helper": "Wer mir hilft:  ____________________   Telefon:  ________________",
-  "kit.pdf.footer": "Passbox befindet sich in früher Entwicklung und wurde noch nicht unabhängig geprüft.",
+  "kit.pdf.footer": "Passbox · Open Source (MIT) · Ende-zu-Ende-verschlüsselt. Dieses Kit wurde auf Ihrem Gerät erstellt und nirgends hochgeladen.",
   "kit.reminder.title": "Notfall-Kit noch nicht gesichert",
   "kit.reminder.body": "Ohne Kit kommen Sie auf neuen Geräten nicht an Ihre Daten.",
   "kit.reminder.action": "Jetzt sichern",
@@ -1785,5 +1785,8 @@
   "security.alert.breachedText": "Angreifer probieren geleakte Passwörter zuerst aus. Ändern Sie sie auf den Websites, zuerst bei E-Mail und Bank.",
   "security.alert.breachedSites": "{count, plural, one {# Website, die Sie nutzen, hatte ein Datenleck} other {# Websites, die Sie nutzen, hatten ein Datenleck}}",
   "security.alert.breachedSitesText": "Wenn Sie das Passwort seitdem nicht geändert haben, ändern Sie es jetzt.",
-  "security.alert.details": "Details"
+  "security.alert.details": "Details",
+  "settings.transparency": "Sicherheitsdesign",
+  "settings.transparencyDescription": "Wie Passbox Ihre Daten schützt und wie Sie eine Schwachstelle melden.",
+  "settings.sections": "Bereiche der Einstellungen"
 }
