@@ -241,5 +241,8 @@
   "menu.lookalikeKnown": "The address imitates a well-known site with look-alike characters. This is a common phishing trick.",
   "save.lookalikeTitle": "This site only looks like {site}.",
   "save.lookalikeText": "If you just entered the password of your real account on {host}, change it on the real site now.",
-  "category.environment": "Environment"
+  "category.environment": "Environment",
+  "settings.appearance": "Appearance",
+  "settings.websiteIcons": "Show website icons",
+  "settings.websiteIconsText": "Icons of your saved websites come through your Passbox server, so the websites never see this browser. Your server learns which websites you saved; the contents stay encrypted."
 }
