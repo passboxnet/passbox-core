@@ -1,0 +1,22 @@
+{
+  "name": "@passbox/site-icons",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "description": "Bundled website icons of the most popular sites, so clients show them without asking any server. Generated with scripts/update-site-icons.mjs; a pack loads only when the first icon is shown.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./pack": "./src/pack.ts",
+    "./manifest.json": "./manifest.json"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.5",
+    "typescript": "5.9.3",
+    "vitest": "5.0.5"
+  }
+}
