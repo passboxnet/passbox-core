@@ -561,10 +561,14 @@ function kotlinFile() {
     labelMedium: "LabelSm",
     labelSmall: "Overline",
   };
+  // Lazy: PassboxType uses PassboxSans from this file, so an eager value
+  // would read PassboxType's styles while it is still being initialized.
   out.push("/** Material 3 roles mapped onto the Passbox type scale. */");
-  out.push("val PassboxTokenTypography = Typography(");
-  for (const [role, step] of Object.entries(material)) out.push(`    ${role} = PassboxType.${step},`);
-  out.push(")");
+  out.push("val PassboxTokenTypography: Typography by lazy {");
+  out.push("    Typography(");
+  for (const [role, step] of Object.entries(material)) out.push(`        ${role} = PassboxType.${step},`);
+  out.push("    )");
+  out.push("}");
   out.push("");
   out.push("/** Corner radii in dp. */");
   out.push("object PassboxRadius {");
