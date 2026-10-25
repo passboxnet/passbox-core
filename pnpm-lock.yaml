@@ -87,6 +87,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@passbox/ai':
+        specifier: workspace:*
+        version: link:../../packages/ai
       '@passbox/api-client':
         specifier: workspace:*
         version: link:../../packages/api-client
@@ -214,6 +217,18 @@ importers:
       typescript:
         specifier: 5.9.3
         version: 5.9.3
+
+  packages/ai:
+    devDependencies:
+      '@types/node':
+        specifier: 26.6.5
+        version: 26.6.5
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: 5.0.5
+        version: 5.0.5(@types/node@26.6.5)(jsdom@30.1.1)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0))
 
   packages/api-client:
     devDependencies:
