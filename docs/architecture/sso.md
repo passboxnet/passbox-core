@@ -8,7 +8,7 @@ This document describes waves E1 (sign-in with OpenID Connect), E2 (unlocking wi
 | --- | --- |
 | ID token verification, PKCE (feature `oidc`, server only) | [`crates/core/src/oidc.rs`](../../crates/core/src/oidc.rs) |
 | Trusted device keys and grants | [`crates/core/src/trusted_device.rs`](../../crates/core/src/trusted_device.rs), WebAssembly in [`crates/core-wasm`](../../crates/core-wasm/src/lib.rs) |
-| Server | [`crates/server/src/api/sso`](../../crates/server/src/api/sso) (`mod.rs` configuration, `oidc.rs` provider HTTP, `login.rs` flow and policy, `devices.rs` trusted devices), [`crates/server/src/api/scim`](../../crates/server/src/api/scim), migration [`0010_sso.sql`](../../crates/server/migrations/0010_sso.sql) |
+| Server | [`crates/server/src/api/sso`](../../crates/server/src/api/sso) (`mod.rs` configuration, `oidc.rs` provider HTTP, `login.rs` flow and policy, `devices.rs` trusted devices), [`crates/server/src/api/scim`](../../crates/server/src/api/scim), migration [`0001_baseline.sql`](../../crates/server/migrations/0001_baseline.sql) |
 | TypeScript client | [`packages/api-client/src/sso.ts`](../../packages/api-client/src/sso.ts), [`packages/client/src/sso.ts`](../../packages/client/src/sso.ts), `PassboxClient` (`ssoFor`, `startSso`, `redeemSso`, `signIn`/`unlock` with `ssoProof`, `unlockWithSso`, `trustThisDevice`, `approveDevice`, `requestDeviceApproval`, `checkDeviceApproval`, `sso`) |
 | Web | [`apps/web/src/sso`](../../apps/web/src/sso): sign-in option, callback screen (`#/sso`), trusted devices in Settings, organization settings (`#/org-sso/{id}`) with SCIM |
 
@@ -108,7 +108,7 @@ What a user resource does in Passbox:
 
 ## Server storage and limits
 
-Migration `0010_sso.sql`: `org_sso`, `sso_domains`, `sso_identities`, `sso_flows` (10 minutes), `sso_tickets` (5 minutes), `sso_proofs` (10 minutes), `device_tokens.sso_until`, `trusted_devices`, `trusted_device_requests`, `scim_tokens`, `scim_users`, `scim_groups`, `scim_group_members`. Secrets in flight (state, tickets, proofs, request tokens, SCIM tokens) are stored as SHA-256 hashes. SQL is portable (SQLite and PostgreSQL).
+Migration `0001_baseline.sql`: `org_sso`, `sso_domains`, `sso_identities`, `sso_flows` (10 minutes), `sso_tickets` (5 minutes), `sso_proofs` (10 minutes), `device_tokens.sso_until`, `trusted_devices`, `trusted_device_requests`, `scim_tokens`, `scim_users`, `scim_groups`, `scim_group_members`. Secrets in flight (state, tickets, proofs, request tokens, SCIM tokens) are stored as SHA-256 hashes. SQL is portable (PostgreSQL with row level security).
 
 Talking to the provider: `ureq` with rustls and the platform certificate store on the blocking pool, 10 second timeout, no redirects, 256 KiB response limit. Only `https://` URLs (plus `http://` on `localhost`/`127.0.0.1`/`[::1]` when `PASSBOX_SSO_ALLOW_HTTP_LOOPBACK=1`, for development). Because organization admins choose the issuer URL, the server makes outbound requests on their behalf; it never returns response bodies, and the connection check is rate limited. On shared instances, restrict outbound traffic of the server at the network level if internal https services must not be probed.
 
@@ -119,7 +119,7 @@ Events (`account_events`): `sso_authenticated`, `login_sso`, `login_sso_device`,
 ## Tests
 
 - Core: RFC 7636 PKCE vector; RS256 and ES256 tokens; `none`, HMAC and unknown algorithms; wrong `kid`, key type, issuer, audience, `azp`, expiry, `iat`, `nbf`, nonce and `sub`; tampered payloads; JWKS parsing (`oidc::tests`). Trusted devices: unlock, approval by another device, foreign keys, grants and key pairs (`trusted_device::tests`).
-- Server: `crates/server/tests/api/sso.rs` on SQLite and PostgreSQL against an in-process mock provider (discovery, JWKS, token endpoint checking client authentication and PKCE, signed ID tokens): configuration and secrets, domain claims, discovery, the full flow, flow secret binding, single-use state and proofs, every rejection case, subject linking, `SSO required` with remembered devices, the connection test, trusted devices and approvals, SCIM (filters, paging, uniqueness, PATCH in Okta and Entra style, deprovisioning ending sessions, reactivation, groups, owner protection, token revocation) and SSO accepting a provisioned invitation.
+- Server: `crates/server/tests/api/sso.rs` against an in-process mock provider (discovery, JWKS, token endpoint checking client authentication and PKCE, signed ID tokens): configuration and secrets, domain claims, discovery, the full flow, flow secret binding, single-use state and proofs, every rejection case, subject linking, `SSO required` with remembered devices, the connection test, trusted devices and approvals, SCIM (filters, paging, uniqueness, PATCH in Okta and Entra style, deprovisioning ending sessions, reactivation, groups, owner protection, token revocation) and SSO accepting a provisioned invitation.
 - Web: `e2e/tests/sso.spec.ts` runs its own server and a mock provider: setup, connection check, test sign-in in a popup, SCIM token and a provisioned person, sign-in with SSO on a new device, trusting the browser and unlocking with SSO only.
 
 ## Not done yet

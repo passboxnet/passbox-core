@@ -178,7 +178,7 @@ organization security aggregate.
   similar passwords, expiry dates, directories.
 - `cargo test -p passbox-server --test api` – proxy (cache, validation, off
   switch) and monitoring (codes, isolation, periodic check, alert mail) with
-  a fake Have I Been Pwned, on SQLite and PostgreSQL.
+  a fake Have I Been Pwned, on PostgreSQL.
 - `cargo test -p passbox-client --test analysis` – report, dismissals, proxy
   routing and monitoring end to end; alias providers with a recording
   transport.

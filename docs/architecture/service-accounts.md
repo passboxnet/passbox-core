@@ -45,7 +45,7 @@ grant_sig = Ed25519(owner.sig_sk, grant)
 
 ## Server
 
-Migration [`0011_service_accounts_agents.sql`](../../crates/server/migrations/0011_service_accounts_agents.sql): `service_accounts`, `service_account_grants` (one row per vault and key epoch), `service_account_events`. The name is visible to the server (like a device name).
+Migration [`0001_baseline.sql`](../../crates/server/migrations/0001_baseline.sql): `service_accounts`, `service_account_grants` (one row per vault and key epoch), `service_account_events`. The name is visible to the server (like a device name).
 
 Owner endpoints (signed-in session): `GET/POST /api/v1/service-accounts`, `PUT/DELETE /service-accounts/{id}`, `PUT /service-accounts/{id}/grants`, `DELETE /service-accounts/{id}/grants/{vault_id}`, `POST /service-accounts/{id}/revoke`, `GET /service-accounts/{id}/events`.
 

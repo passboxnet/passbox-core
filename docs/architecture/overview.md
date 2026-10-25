@@ -18,7 +18,7 @@
                └──────────────────────────────────────────────────────────────┘
                          │
                          ▼
-                 SQLite (single user) / PostgreSQL (teams, enterprise)
+                 PostgreSQL (roles and row level security per tenant)
 ```
 
 ## Principles
@@ -47,7 +47,8 @@
 
 ## Server
 
-- **Database:** SQLite (default, single file) or PostgreSQL, selected by `PASSBOX_DATABASE_URL`. One code path serves both through the sqlx `Any` driver and portable SQL migrations in [`crates/server/migrations`](../../crates/server/migrations). Binary values are stored as Base64url text and timestamps as Unix milliseconds.
+- **Database:** PostgreSQL only ([ADR 0007](../adr/0007-postgresql-only.md)), migrations in [`crates/server/migrations`](../../crates/server/migrations) with native types (`BYTEA` ciphertext, `JSONB`, `BOOLEAN`, `BIGINT` Unix milliseconds) and compile-time checked queries (`sqlx::query!`, cache in `.sqlx/`). Handlers never get a pool: `crate::db::Db` opens a transaction that names its context (`as_account`, `public`, `as_org`, `system`), and row level security on every tenant table limits each statement to that context. See [database-security.md](database-security.md).
+- **Operations:** `passbox-server migrate` (or `PASSBOX_AUTO_MIGRATE`), `/health` and `/ready`, Prometheus metrics on `PASSBOX_METRICS_BIND` (`crates/server/src/metrics.rs`).
 - **Sync:** a global change counter. Every write takes the next value inside its transaction; `GET /api/v1/sync?since=<cursor>` returns everything with a higher value. Deleted items remain as tombstones without data.
 - **Instance administration:** `crates/server/src/instance.rs` holds the instance settings (registration mode, name, help address, default mail language, master password policy) as a JSON document in `instance_state`, decides who may register, and knows who is an instance admin (first account, `PASSBOX_ADMIN_EMAILS`). `api/admin.rs` serves `/api/v1/admin/*` behind the `AdminSession` extractor and writes the hash-chained `admin_events` log; record new admin actions with `admin::record` or, inside a write transaction, `admin::record_in`.
 - **Mail:** see [Sending mail](#sending-mail-from-server-modules).
@@ -93,7 +94,7 @@ Both are covered by integration tests against a real server; the Watchtower heur
 Implemented:
 
 - **Core:** Argon2id + Secret Key derivation, OPAQUE login, key hierarchy with context-bound XChaCha20-Poly1305 encryption, keyring session export, account key pairs (X-Wing, Ed25519), key directory verification, organization and shared vault verification, ES256 passkeys, TOTP/HOTP, password and PIN generator
-- **Server:** registration, login, sessions, vaults, items, incremental sync on SQLite and PostgreSQL, CORS for non-browser-origin clients, key directory, organizations (family and team) with invitations and roles, groups and shared vaults (see [sharing.md](sharing.md)), instance administration (registration modes, invitations, disabling accounts, hash-chained admin log), mail over SMTP with a durable outbox, and single sign-on with OpenID Connect, SSO unlock on trusted devices and SCIM 2.0 provisioning (see [sso.md](sso.md))
+- **Server:** registration, login, sessions, vaults, items, incremental sync on PostgreSQL with row level security, CORS for non-browser-origin clients, key directory, organizations (family and team) with invitations and roles, groups and shared vaults (see [sharing.md](sharing.md)), instance administration (registration modes, invitations, disabling accounts, hash-chained admin log), mail over SMTP with a durable outbox, and single sign-on with OpenID Connect, SSO unlock on trusted devices and SCIM 2.0 provisioning (see [sso.md](sso.md))
 - **Web client:** sign-up with Emergency Kit, sign-in on new devices, unlock, logins/notes/cards with TOTP and custom fields, vaults, favorites, tags, search, command palette, Watchtower, generator, settings, auto-lock, periodic sync, configurable server
 - **Extension:** sign-in and unlock, inline autofill (logins, multi-step forms, one-time codes, password suggestions), save and update prompts, passkeys with browser fallback
 - **Desktop (Windows, macOS, Linux):** Tauri 2 shell around the web client with tray, global shortcut and lock on sleep
