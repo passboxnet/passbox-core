@@ -197,8 +197,30 @@ impl Client {
         approved: bool,
         max_uses: u64,
     ) -> Result<()> {
-        let (decision, signature) = self
-            .with_keyring(|k| k.decide_agent_grant(&grant.request, approved, max_uses, now_ms()))?;
+        self.decide_agent_grant_with_reveal(grant, approved, false, max_uses)
+    }
+
+    /// Like [`Client::decide_agent_grant`], with the person's explicit tick
+    /// "Allow revealing the value to the agent" (`passbox_reveal`). Show a
+    /// strong warning first. Refused when the request does not ask for
+    /// `reveal` or an organization's policy forbids it for one of the
+    /// items' vaults.
+    pub fn decide_agent_grant_with_reveal(
+        &self,
+        grant: &AgentGrantRecord,
+        approved: bool,
+        allow_reveal: bool,
+        max_uses: u64,
+    ) -> Result<()> {
+        let (decision, signature) = self.with_keyring(|k| {
+            k.decide_agent_grant_with_reveal(
+                &grant.request,
+                approved,
+                allow_reveal,
+                max_uses,
+                now_ms(),
+            )
+        })?;
         self.call(
             "POST",
             &format!("/api/v1/agent-grants/{}/decision", grant.id),

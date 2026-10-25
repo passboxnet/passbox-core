@@ -56,6 +56,8 @@ fn settings(features: &[FeatureId], location: ModelLocation) -> AiSettings {
             model: "llama3.2".into(),
             api_key_item: None,
             jurisdiction: None,
+            api: Default::default(),
+            preset: None,
         }),
         features: features.to_vec(),
     }

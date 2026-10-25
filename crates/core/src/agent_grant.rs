@@ -12,8 +12,17 @@
 //!                      [path], reason, ttl_ms, max_uses, created_at, nonce)
 //! decision = canonical("passbox/v1/agent-grant-decision", object_hash(request), approved,
 //!                      not_after, max_uses, approver_id, decided_at)
+//!          | canonical("passbox/v2/agent-grant-decision", ..., reveal_allowed = 1)
+//!                      (only when the person ticked "Allow revealing the value to the agent")
 //! sig      = Ed25519(on_behalf_of.sig_sk, decision)
 //! ```
+//!
+//! `reveal` (handing a secret value to the agent, `passbox_reveal`) is the
+//! one exception to "agents never see values" (ADR 0006). A request may ask
+//! for it, but it is only allowed when the decision carries
+//! `reveal_allowed`, which the approving app sets only when the person
+//! ticks the checkbox for that grant. A decision in the v1 format never
+//! allows a reveal, so earlier decisions and older apps stay safe.
 //!
 //! The requesting broker keeps the exact request bytes and accepts a
 //! decision only if it covers their hash and is signed by the account the
@@ -28,6 +37,7 @@ use crate::{Error, Result, encoding, id, random};
 
 const REQUEST_TAG: &str = "passbox/v1/agent-grant-request";
 const DECISION_TAG: &str = "passbox/v1/agent-grant-decision";
+const DECISION_TAG_REVEAL: &str = "passbox/v2/agent-grant-decision";
 
 /// Upper bounds that keep requests readable in an approval dialog.
 pub const MAX_ITEMS: usize = 50;
@@ -36,9 +46,13 @@ pub const MAX_TEXT_LEN: usize = 2000;
 /// Longest grant a person can approve (8 hours).
 pub const MAX_TTL_MS: i64 = 8 * 60 * 60 * 1000;
 
-/// Actions a grant can cover. `reveal` (handing a secret to the agent) is
-/// deliberately not one of them.
-pub const ACTIONS: &[&str] = &["run", "inject", "create"];
+/// Actions a grant can cover. `reveal` hands a secret value to the agent;
+/// it needs the person's explicit tick in the approval dialog
+/// ([`Decision::reveal_allowed`]) and, for vaults of an organization, a
+/// policy that allows it (`allow_agent_reveal`).
+pub const ACTIONS: &[&str] = &["run", "inject", "create", "reveal"];
+/// The action that returns a value to the agent.
+pub const REVEAL: &str = "reveal";
 
 /// Who asks: a signed-in CLI session of the account, or a service account.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -147,6 +161,11 @@ impl GrantRequest {
         request.actions.dedup();
         request.validate()?;
         Ok(request)
+    }
+
+    /// Whether the request asks to reveal values to the agent.
+    pub fn asks_reveal(&self) -> bool {
+        self.actions.iter().any(|a| a == REVEAL)
     }
 
     fn validate(&self) -> Result<()> {
@@ -295,23 +314,37 @@ pub struct Decision {
     pub max_uses: u64,
     pub approver_id: String,
     pub decided_at: i64,
+    /// The person ticked "Allow revealing the value to the agent" for this
+    /// grant. Only then may `reveal` be used.
+    pub reveal_allowed: bool,
 }
 
 impl Decision {
     pub fn to_canonical(&self) -> Vec<u8> {
-        Writer::new(DECISION_TAG)
-            .bytes(&self.request_hash)
+        let tag = if self.reveal_allowed {
+            DECISION_TAG_REVEAL
+        } else {
+            DECISION_TAG
+        };
+        let mut w = Writer::new(tag);
+        w.bytes(&self.request_hash)
             .u64(u64::from(self.approved))
             .i64(self.not_after)
             .u64(self.max_uses)
             .str(&self.approver_id)
-            .i64(self.decided_at)
-            .finish()
+            .i64(self.decided_at);
+        if self.reveal_allowed {
+            w.u64(1);
+        }
+        w.finish()
     }
 
     pub fn from_canonical(bytes: &[u8]) -> Result<Self> {
-        let mut r = Reader::new(bytes, DECISION_TAG)?;
-        let decision = Self {
+        let (mut r, reveal) = match Reader::new(bytes, DECISION_TAG) {
+            Ok(r) => (r, false),
+            Err(_) => (Reader::new(bytes, DECISION_TAG_REVEAL)?, true),
+        };
+        let mut decision = Self {
             request_hash: r.array()?,
             approved: match r.u64()? {
                 0 => false,
@@ -322,7 +355,14 @@ impl Decision {
             max_uses: r.u64()?,
             approver_id: r.string()?,
             decided_at: r.i64()?,
+            reveal_allowed: false,
         };
+        if reveal {
+            if r.u64()? != 1 {
+                return Err(Error::InvalidData("malformed decision".into()));
+            }
+            decision.reveal_allowed = true;
+        }
         r.finish()?;
         Ok(decision)
     }
@@ -364,6 +404,11 @@ pub fn verify_decision(
             ));
         }
     }
+    if decision.reveal_allowed && (!decision.approved || !parsed.asks_reveal()) {
+        return Err(Error::InvalidData(
+            "the approval allows revealing values, which was not requested".into(),
+        ));
+    }
     Ok(decision)
 }
 
@@ -380,6 +425,22 @@ impl Keyring {
         max_uses: u64,
         decided_at: i64,
     ) -> Result<(String, String)> {
+        self.decide_agent_grant_with_reveal(request, approved, false, max_uses, decided_at)
+    }
+
+    /// Like [`Keyring::decide_agent_grant`], with the person's explicit
+    /// choice to let the agent see values (`passbox_reveal`). Refused when
+    /// the request did not ask for `reveal`, or when an item is in a vault
+    /// of an organization whose policy does not allow agent reveals
+    /// (`allow_agent_reveal`, off unless an admin turned it on).
+    pub fn decide_agent_grant_with_reveal(
+        &self,
+        request: &str,
+        approved: bool,
+        allow_reveal: bool,
+        max_uses: u64,
+        decided_at: i64,
+    ) -> Result<(String, String)> {
         let keys = self.account_keys()?;
         let bytes = encoding::decode(request)?;
         let parsed = GrantRequest::from_canonical(&bytes)?;
@@ -387,6 +448,24 @@ impl Keyring {
             return Err(Error::InvalidData(
                 "the request is for another account".into(),
             ));
+        }
+        let reveal_allowed = approved && allow_reveal;
+        if reveal_allowed {
+            if !parsed.asks_reveal() {
+                return Err(Error::InvalidData(
+                    "the request does not ask to reveal values".into(),
+                ));
+            }
+            if parsed
+                .items
+                .iter()
+                .any(|item| !self.agent_reveal_allowed(&item.vault_id))
+            {
+                return Err(Error::PolicyViolation(
+                    "your organization does not allow revealing values of its vaults to AI agents"
+                        .into(),
+                ));
+            }
         }
         let max_uses = match (parsed.max_uses, max_uses) {
             (0, wanted) => wanted,
@@ -404,12 +483,27 @@ impl Keyring {
             max_uses: if approved { max_uses } else { 0 },
             approver_id: self.account_id.clone(),
             decided_at,
+            reveal_allowed,
         }
         .to_canonical();
         Ok((
             encoding::encode(&decision),
             encoding::encode(&keys.sig.sign(&decision)),
         ))
+    }
+
+    /// Whether values of items in `vault_id` may be revealed to an agent:
+    /// for personal vaults yes (with the person's tick), for an
+    /// organization's vaults only when its verified policy has
+    /// `allow_agent_reveal`.
+    pub fn agent_reveal_allowed(&self, vault_id: &str) -> bool {
+        match self.sharing.data.vault_access.get(vault_id) {
+            None => true,
+            Some(access) => self
+                .effective_policy()
+                .agent_reveal_orgs
+                .contains(&access.org_id),
+        }
     }
 
     /// Verifies a decision on a request this account made itself (CLI
@@ -541,10 +635,70 @@ mod tests {
     }
 
     #[test]
+    fn reveal_needs_the_explicit_tick() {
+        let owner = account();
+        let mut wanted = request(owner.account_id(), 1);
+        wanted.actions = vec![REVEAL.into()];
+        let bytes = wanted.to_canonical();
+        let encoded = encoding::encode(&bytes);
+        // Approved without the tick: no reveal (v1 decision format).
+        let (decision, signature) = owner.decide_agent_grant(&encoded, true, 0, 2_000).unwrap();
+        let verified = owner
+            .verify_agent_decision(&bytes, &decision, &signature)
+            .unwrap();
+        assert!(verified.approved && !verified.reveal_allowed);
+        // With the tick (personal vault): allowed, v2 format.
+        let (decision, signature) = owner
+            .decide_agent_grant_with_reveal(&encoded, true, true, 0, 2_000)
+            .unwrap();
+        let verified = owner
+            .verify_agent_decision(&bytes, &decision, &signature)
+            .unwrap();
+        assert!(verified.reveal_allowed);
+        assert_eq!(
+            Decision::from_canonical(&encoding::decode(&decision).unwrap()).unwrap(),
+            verified
+        );
+        // A denial never allows a reveal.
+        let (decision, signature) = owner
+            .decide_agent_grant_with_reveal(&encoded, false, true, 0, 2_000)
+            .unwrap();
+        let verified = owner
+            .verify_agent_decision(&bytes, &decision, &signature)
+            .unwrap();
+        assert!(!verified.approved && !verified.reveal_allowed);
+
+        // A request without `reveal` cannot be approved with the tick, and a
+        // decision that adds it to such a request does not verify.
+        let run = self::request(owner.account_id(), 0).to_canonical();
+        assert!(
+            owner
+                .decide_agent_grant_with_reveal(&encoding::encode(&run), true, true, 0, 2_000)
+                .is_err()
+        );
+        let forged = Decision {
+            request_hash: identity::object_hash(&run),
+            approved: true,
+            not_after: 2_000 + 15 * 60 * 1000,
+            max_uses: 0,
+            approver_id: owner.account_id().to_owned(),
+            decided_at: 2_000,
+            reveal_allowed: true,
+        }
+        .to_canonical();
+        let sig = owner.account_keys().unwrap().sig.sign(&forged);
+        assert!(
+            owner
+                .verify_agent_decision(&run, &encoding::encode(&forged), &encoding::encode(&sig))
+                .is_err()
+        );
+    }
+
+    #[test]
     fn rejects_invalid_requests() {
         let owner = account();
         let mut bad = request(owner.account_id(), 0);
-        bad.actions = vec!["reveal".into()];
+        bad.actions = vec!["delete".into()];
         assert!(GrantRequest::from_canonical(&bad.to_canonical()).is_err());
         let mut bad = request(owner.account_id(), 0);
         bad.ttl_ms = MAX_TTL_MS + 1;

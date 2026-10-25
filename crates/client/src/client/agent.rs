@@ -56,4 +56,8 @@ impl Backend for Client {
             .keyring
             .verify_agent_decision(request, decision, signature)?)
     }
+
+    fn reveal_allowed(&self, vault_id: &str) -> Result<bool> {
+        self.with_keyring(|k| Ok(k.agent_reveal_allowed(vault_id)))
+    }
 }

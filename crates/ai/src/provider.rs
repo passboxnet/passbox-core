@@ -326,9 +326,209 @@ impl AiProvider for OpenAiCompatible {
     }
 }
 
+/// Version header of Anthropic's Messages API.
+pub const ANTHROPIC_VERSION: &str = "2023-06-01";
+
+/// Anthropic's native Messages API (`POST {base_url}/messages`, headers
+/// `x-api-key` and `anthropic-version`), with the user's own key.
+pub struct Anthropic {
+    base_url: String,
+    model: String,
+    api_key: String,
+    jurisdiction: Option<String>,
+    http: Box<dyn HttpPost>,
+}
+
+impl Anthropic {
+    /// `api_key` comes from a vault item; it is sent as `x-api-key`, never
+    /// as part of the prompt.
+    pub fn new(base_url: &str, model: &str, api_key: Option<String>) -> Result<Self> {
+        validate_endpoint(base_url, ModelLocation::Cloud)?;
+        if model.trim().is_empty() {
+            return Err(AiError::Settings("choose a model name".into()));
+        }
+        let api_key = api_key.filter(|k| !k.is_empty()).ok_or_else(|| {
+            AiError::Settings("a cloud provider needs an API key from a vault item".into())
+        })?;
+        Ok(Self {
+            base_url: base_url.trim_end_matches('/').to_owned(),
+            model: model.trim().to_owned(),
+            api_key,
+            jurisdiction: None,
+            http: Box::new(UreqPost::default()),
+        })
+    }
+
+    pub fn with_jurisdiction(mut self, jurisdiction: &str) -> Self {
+        self.jurisdiction = Some(jurisdiction.to_owned()).filter(|j| !j.is_empty());
+        self
+    }
+
+    pub fn with_http(mut self, http: Box<dyn HttpPost>) -> Self {
+        self.http = http;
+        self
+    }
+}
+
+impl AiProvider for Anthropic {
+    fn id(&self) -> &str {
+        "anthropic"
+    }
+
+    fn location(&self) -> ModelLocation {
+        ModelLocation::Cloud
+    }
+
+    fn jurisdiction(&self) -> Option<&str> {
+        self.jurisdiction.as_deref()
+    }
+
+    fn complete(&self, request: &AiRequest) -> Result<Value> {
+        let system = format!(
+            "{}\n\nAnswer with one JSON object that follows this JSON schema, nothing else:\n{}",
+            request.system(),
+            request.schema()
+        );
+        let body = json!({
+            "model": self.model,
+            "max_tokens": 4096,
+            "system": system,
+            "messages": [{ "role": "user", "content": request.input() }],
+        });
+        let headers = [
+            ("x-api-key", self.api_key.clone()),
+            ("anthropic-version", ANTHROPIC_VERSION.to_owned()),
+        ];
+        let (status, bytes) = self.http.post(
+            &format!("{}/messages", self.base_url),
+            &headers,
+            serde_json::to_vec(&body).map_err(|e| AiError::Provider(e.to_string()))?,
+        )?;
+        if !(200..300).contains(&status) {
+            return Err(AiError::Provider(format!(
+                "the model server answered with status {status}"
+            )));
+        }
+        let response: Value = serde_json::from_slice(&bytes)
+            .map_err(|_| AiError::InvalidResponse("the server did not answer with JSON".into()))?;
+        let text: String = response
+            .get("content")
+            .and_then(Value::as_array)
+            .map(|blocks| {
+                blocks
+                    .iter()
+                    .filter(|b| b["type"] == "text")
+                    .filter_map(|b| b["text"].as_str())
+                    .collect()
+            })
+            .unwrap_or_default();
+        if text.is_empty() {
+            return Err(AiError::InvalidResponse("the answer has no text".into()));
+        }
+        serde_json::from_str(strip_fence(&text))
+            .map_err(|_| AiError::InvalidResponse("the model did not answer with JSON".into()))
+    }
+}
+
+/// The provider for settings: Anthropic's Messages API or an
+/// OpenAI-compatible endpoint. `api_key` is the value of the settings' API
+/// key item, read from the vault by the app.
+pub fn provider_from_settings(
+    settings: &crate::gateway::ProviderSettings,
+    api_key: Option<String>,
+) -> Result<Box<dyn AiProvider>> {
+    let jurisdiction = settings.jurisdiction.as_deref().unwrap_or_default();
+    Ok(match settings.api {
+        crate::presets::ProviderApi::Anthropic => {
+            if settings.location != ModelLocation::Cloud {
+                return Err(AiError::Settings(
+                    "Anthropic's API is a cloud provider".into(),
+                ));
+            }
+            Box::new(
+                Anthropic::new(&settings.endpoint, &settings.model, api_key)?
+                    .with_jurisdiction(jurisdiction),
+            )
+        }
+        crate::presets::ProviderApi::Openai => Box::new(
+            OpenAiCompatible::new(
+                settings.preset.as_deref().unwrap_or("openai-compatible"),
+                &settings.endpoint,
+                &settings.model,
+                api_key,
+                settings.location,
+            )?
+            .with_jurisdiction(jurisdiction),
+        ),
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    type Call = (String, Vec<(String, String)>, Value);
+    struct Recorder(std::sync::Mutex<Vec<Call>>, Value);
+
+    impl HttpPost for std::sync::Arc<Recorder> {
+        fn post(
+            &self,
+            url: &str,
+            headers: &[(&str, String)],
+            body: Vec<u8>,
+        ) -> Result<(u16, Vec<u8>)> {
+            self.0.lock().unwrap().push((
+                url.to_owned(),
+                headers
+                    .iter()
+                    .map(|(k, v)| ((*k).to_owned(), v.clone()))
+                    .collect(),
+                serde_json::from_slice(&body).unwrap(),
+            ));
+            Ok((200, serde_json::to_vec(&self.1).unwrap()))
+        }
+    }
+
+    #[test]
+    fn anthropic_messages_api() {
+        let recorder = std::sync::Arc::new(Recorder(
+            std::sync::Mutex::new(Vec::new()),
+            json!({ "content": [
+                { "type": "thinking", "thinking": "…" },
+                { "type": "text", "text": "```json\n{\"ok\":true}\n```" }
+            ] }),
+        ));
+        let provider = Anthropic::new(
+            "https://api.anthropic.com/v1/",
+            "claude-opus-5-5",
+            Some("sk-ant-test".into()),
+        )
+        .unwrap()
+        .with_jurisdiction("US")
+        .with_http(Box::new(recorder.clone()));
+        let request = AiRequest::new(
+            FeatureId::ImportMapping,
+            "Map columns.",
+            "{\"columns\":[]}".into(),
+            vec![DataClass::D1],
+            json!({ "type": "object" }),
+        );
+        assert_eq!(provider.complete(&request).unwrap(), json!({ "ok": true }));
+        assert_eq!(provider.jurisdiction(), Some("US"));
+        let calls = recorder.0.lock().unwrap();
+        let (url, headers, body) = &calls[0];
+        assert_eq!(url, "https://api.anthropic.com/v1/messages");
+        assert!(headers.contains(&("x-api-key".into(), "sk-ant-test".into())));
+        assert!(headers.contains(&("anthropic-version".into(), ANTHROPIC_VERSION.into())));
+        assert!(!headers.iter().any(|(k, _)| k == "authorization"));
+        assert_eq!(body["model"], "claude-opus-5-5");
+        assert!(body["system"].as_str().unwrap().starts_with("Map columns."));
+        assert_eq!(body["messages"][0]["content"], "{\"columns\":[]}");
+        // The key never travels in the prompt.
+        assert!(!body.to_string().contains("sk-ant-test"));
+        assert!(Anthropic::new("https://api.anthropic.com/v1", "m", None).is_err());
+        assert!(Anthropic::new("http://api.anthropic.com/v1", "m", Some("k".into())).is_err());
+    }
 
     #[test]
     fn endpoints() {

@@ -57,6 +57,10 @@ pub struct InvitationPreview {
     /// Email of the admin who invited; missing from older servers.
     #[serde(default)]
     pub inviter_email: Option<String>,
+    /// The organization's admins will be able to restore this account's
+    /// access once it joined (recovery on and required; never for guests).
+    #[serde(default)]
+    pub recovery: bool,
 }
 
 /// Who owns a vault and what this account may do with it.
@@ -256,7 +260,24 @@ impl Client {
             Some(serde_json::to_value(&request)?),
         )?;
         self.sync()?;
+        self.set_up_new_org(&id)?;
         Ok(id)
+    }
+
+    /// Organization recovery is on by default (C1, since 25.10.2026): a new
+    /// organization gets its recovery key and a first policy that requires
+    /// enrollment ([`PolicyRules::new_org_defaults`]), and the creator
+    /// enrolls. Admins can turn both off later.
+    ///
+    /// [`PolicyRules::new_org_defaults`]: passbox_core::policy::PolicyRules::new_org_defaults
+    fn set_up_new_org(&self, org_id: &str) -> Result<()> {
+        self.set_up_org_recovery(org_id)?;
+        self.set_org_policy(
+            org_id,
+            &passbox_core::policy::PolicyRules::new_org_defaults(),
+        )?;
+        self.enroll_org_recovery(org_id)?;
+        Ok(())
     }
 
     /// Renames an organization (admins).
@@ -365,7 +386,7 @@ impl Client {
 
     /// Confirms a member who accepted an invitation (admins): looks up their
     /// key in the key directory, attests it and seals the organization key.
-    /// In a family, the member also gets the family vault (edit). Returns
+    /// In a family, the member (not a guest) also gets the family vault (edit). Returns
     /// the attested key's fingerprint, which admin and member can compare.
     pub fn confirm_member(&self, org_id: &str, account_id: &str) -> Result<String> {
         self.sync()?;
@@ -383,7 +404,13 @@ impl Client {
         )?;
         self.sync()?;
         let org = self.org(org_id)?;
+        // Guests only see what is shared with them (B8): no family vault.
+        let guest = org
+            .members
+            .iter()
+            .any(|m| m.account_id == account_id && m.role == "guest");
         if org.kind == "family"
+            && !guest
             && let Some(vault_id) = org.default_vault_id
         {
             let can_manage = self

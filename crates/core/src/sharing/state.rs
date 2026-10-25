@@ -821,6 +821,10 @@ impl Keyring {
                     role = role.max(Some(entry.role));
                 }
             }
+            // Guests are view-only whatever the manifest grants (B8).
+            if let Some(own) = roster.active(&my_id) {
+                role = role.map(|r| r.min(own.role.max_vault_role()));
+            }
             vview.role = role.map(|r| r.as_str().to_owned());
             let server_role = VaultRole::parse(&access.role).ok();
             if server_role != role {

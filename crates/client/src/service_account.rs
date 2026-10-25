@@ -470,4 +470,12 @@ impl crate::agent::Backend for ServiceAccountClient {
     fn verify_decision(&self, request: &[u8], decision: &str, signature: &str) -> Result<Decision> {
         ServiceAccountClient::verify_decision(self, request, decision, signature)
     }
+
+    /// A service account cannot verify organization policies (it has no
+    /// roster); the owner's approving app and the server check
+    /// `allow_agent_reveal` instead, and the broker reveals only after the
+    /// server accepted the reveal.
+    fn reveal_allowed(&self, _vault_id: &str) -> Result<bool> {
+        Ok(true)
+    }
 }

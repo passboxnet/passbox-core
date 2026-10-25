@@ -61,6 +61,23 @@ impl OrgRole {
     pub fn is_admin(self) -> bool {
         matches!(self, Self::Owner | Self::Admin)
     }
+
+    /// Guests are view-only (B8): they open, copy and fill items of the
+    /// vaults shared with them and change nothing.
+    pub fn is_guest(self) -> bool {
+        self == Self::Guest
+    }
+
+    /// The highest vault role this organization role can use. A manifest
+    /// may list a guest with more (for example after a role change from
+    /// member to guest); clients and the server cap it at this.
+    pub fn max_vault_role(self) -> VaultRole {
+        if self.is_guest() {
+            VaultRole::View
+        } else {
+            VaultRole::Manage
+        }
+    }
 }
 
 impl VaultRole {
@@ -592,6 +609,9 @@ mod tests {
         assert!(OrgRole::Admin.is_admin() && !OrgRole::Member.is_admin());
         assert!(VaultRole::Edit.can_write() && !VaultRole::View.can_write());
         assert!(VaultRole::View < VaultRole::Edit && VaultRole::Edit < VaultRole::Manage);
+        assert_eq!(OrgRole::Guest.max_vault_role(), VaultRole::View);
+        assert_eq!(OrgRole::Member.max_vault_role(), VaultRole::Manage);
+        assert!(OrgRole::Guest.is_guest() && !OrgRole::Admin.is_guest());
         assert_eq!(VaultRole::parse("manage").unwrap(), VaultRole::Manage);
         assert!(VaultRole::parse("owner").is_err());
     }

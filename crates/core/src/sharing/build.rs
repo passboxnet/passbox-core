@@ -768,6 +768,13 @@ impl Keyring {
     ) -> Result<VaultMemberChange> {
         let (latest, roster) = self.managed_vault(vault_id)?;
         let recipient = self.recipient(&roster, principal_type, principal_id, true)?;
+        if principal_type == PrincipalType::Account
+            && roster
+                .active(principal_id)
+                .is_some_and(|member| role > member.role.max_vault_role())
+        {
+            return Err(denied("guests can only view shared vaults"));
+        }
         let m = &latest.manifest;
         let mut members: Vec<ManifestEntry> = m
             .members

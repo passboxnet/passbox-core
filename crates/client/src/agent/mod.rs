@@ -7,8 +7,12 @@
 //! - **Access without disclosure.** Agents see metadata (titles, field
 //!   names, references) and the *effects* of using a secret: a command ran,
 //!   a file was written. Secret values go into a child process's
-//!   environment or a file, never into a tool answer. There is no tool that
-//!   returns a secret.
+//!   environment or a file, never into a tool answer. The one exception is
+//!   [`Broker::reveal`] (`passbox_reveal`, ADR 0006): it returns one value
+//!   only under a grant whose approval carries the person's explicit tick
+//!   "Allow revealing the value to the agent", only where the
+//!   organization's policy allows it (`allow_agent_reveal`), and only after
+//!   the server accepted the `reveal` audit event.
 //! - **The person approves outside the agent's channel.** Every use needs a
 //!   grant the person approved on another signed-in device (web or desktop
 //!   app). The decision is signed with the account key and verified here;
@@ -32,7 +36,7 @@ use std::process::{Command, Stdio};
 use std::sync::Mutex;
 use std::time::{Duration, Instant};
 
-use passbox_core::agent_grant::{Decision, GrantItem, GrantRequest, PrincipalKind};
+use passbox_core::agent_grant::{Decision, GrantItem, GrantRequest, PrincipalKind, REVEAL};
 use passbox_core::{encoding, identity};
 use serde::Serialize;
 use serde_json::{Value, json};
@@ -78,6 +82,10 @@ pub trait Backend: Send + Sync {
     fn agent_call(&self, method: &str, path: &str, body: Option<Value>) -> Result<Value>;
     /// Verifies a decision signed by the approving account.
     fn verify_decision(&self, request: &[u8], decision: &str, signature: &str) -> Result<Decision>;
+    /// Whether values of items in `vault_id` may be revealed to an agent
+    /// as far as this backend can tell (verified organization policy).
+    /// The server checks the policy again before a reveal.
+    fn reveal_allowed(&self, vault_id: &str) -> Result<bool>;
 }
 
 impl<B: Backend + ?Sized> Backend for std::sync::Arc<B> {
@@ -101,6 +109,9 @@ impl<B: Backend + ?Sized> Backend for std::sync::Arc<B> {
     }
     fn verify_decision(&self, request: &[u8], decision: &str, signature: &str) -> Result<Decision> {
         (**self).verify_decision(request, decision, signature)
+    }
+    fn reveal_allowed(&self, vault_id: &str) -> Result<bool> {
+        (**self).reveal_allowed(vault_id)
     }
 }
 
@@ -183,6 +194,16 @@ pub struct AccessRequest {
     pub max_uses: u64,
 }
 
+/// A value revealed to an agent (`passbox_reveal`).
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RevealOutcome {
+    pub value: String,
+    /// The field's label, for the agent's orientation.
+    pub label: String,
+    pub grant_id: String,
+}
+
 /// The result of a command run for an agent.
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -225,6 +246,10 @@ impl ActiveGrant {
                 code: self.request.code(),
             },
         }
+    }
+
+    fn reveal_allowed(&self) -> bool {
+        self.request.asks_reveal() && self.decision.as_ref().is_some_and(|d| d.reveal_allowed)
     }
 
     fn usable(&self, now: i64) -> bool {
@@ -336,6 +361,21 @@ impl<B: Backend> Broker<B> {
     /// Reports an action to the server and the local log. Failures to
     /// report are written to standard error; the action already happened.
     fn audit(&self, grant_id: &str, tool: &str, items: &[String], target: &str, result: &str) {
+        if let Err(e) = self.report(grant_id, tool, items, target, result) {
+            eprintln!("pbx mcp: could not report the {tool} action to the server: {e}");
+        }
+    }
+
+    /// Writes the local log line and reports the event to the server,
+    /// returning the server's answer (a reveal waits for it).
+    fn report(
+        &self,
+        grant_id: &str,
+        tool: &str,
+        items: &[String],
+        target: &str,
+        result: &str,
+    ) -> Result<()> {
         let client_name = self.lock_name().clone();
         let event = json!({
             "grantId": grant_id,
@@ -352,9 +392,9 @@ impl<B: Backend> Broker<B> {
                 eprintln!("pbx mcp: could not write the local audit log: {e}");
             }
         }
-        if let Err(e) = self.backend.agent_call("POST", "agent-events", Some(event)) {
-            eprintln!("pbx mcp: could not report the {tool} action to the server: {e}");
-        }
+        self.backend
+            .agent_call("POST", "agent-events", Some(event))
+            .map(|_| ())
     }
 
     fn vault_list(&self) -> Result<Vec<Vault>> {
@@ -607,6 +647,7 @@ impl<B: Backend> Broker<B> {
                             .iter()
                             .any(|c| command_allowed(c, target)),
                         "inject" => g.request.paths.iter().any(|p| *p == target),
+                        REVEAL => g.reveal_allowed(),
                         _ => true,
                     }
             })
@@ -905,6 +946,86 @@ impl<B: Backend> Broker<B> {
             .unwrap_or_default();
         self.audit("", "create", std::slice::from_ref(&id), &target.id, "ok");
         Ok((id, reference))
+    }
+
+    /// Reveals one field's value to the agent (`passbox_reveal`). Off by
+    /// default and the only tool that returns a secret: it needs a grant
+    /// for `reveal` on the item whose approval carries the person's tick
+    /// "Allow revealing the value to the agent" (requested here as a
+    /// single-use grant when none covers it), the organization's policy
+    /// must allow it for the item's vault, and the server must accept the
+    /// `reveal` audit event before the value is returned.
+    pub fn reveal(
+        &self,
+        field_reference: &str,
+        reason: &str,
+        wait: Duration,
+    ) -> Result<std::result::Result<RevealOutcome, GrantState>> {
+        let parsed = Reference::parse(field_reference)?;
+        let Some(field_name) = parsed.field.clone() else {
+            return Err(Error::InvalidData(
+                "name one field, for example pbx://Vault/Item/password".into(),
+            ));
+        };
+        let items = self.resolve_items(&[field_reference.to_owned()])?;
+        let item_ids: Vec<String> = items.iter().map(|i| i.id.clone()).collect();
+        let target = format!("field:{}", field_name.chars().take(60).collect::<String>());
+        for item in &items {
+            if !self.backend.reveal_allowed(&item.vault_id)? {
+                self.audit("", REVEAL, &item_ids, &target, "blocked");
+                return Err(Error::Core(passbox_core::Error::PolicyViolation(
+                    "the organization's policy does not allow revealing values of its vaults to AI agents; use passbox_run or passbox_inject instead".into(),
+                )));
+            }
+        }
+        let grant_id = match self.grant_for(REVEAL, &items, "", reason, wait)? {
+            Ok(id) => id,
+            Err(state) => {
+                self.audit(
+                    grant_id_of(&state),
+                    REVEAL,
+                    &item_ids,
+                    &target,
+                    result_of(&state),
+                );
+                return Ok(Err(state));
+            }
+        };
+        let allowed = self
+            .lock_grants()
+            .iter()
+            .any(|g| g.request.id == grant_id && g.reveal_allowed());
+        if !allowed {
+            // Approved, but without the tick: nothing is revealed.
+            self.audit(&grant_id, REVEAL, &item_ids, &target, "denied");
+            return Ok(Err(GrantState::Denied { grant_id }));
+        }
+        let vaults = self.vault_list()?;
+        let all = self.backend.items()?;
+        let value = reference::resolve(&vaults, &all, field_reference, now_secs())?;
+        let label = items
+            .first()
+            .and_then(|item| {
+                item.data
+                    .fields
+                    .iter()
+                    .find(|f| f.id == field_name || f.label.eq_ignore_ascii_case(&field_name))
+            })
+            .map_or_else(|| field_name.clone(), |f| f.label.clone());
+        // Fail closed: the value leaves only once the server logged the
+        // reveal (and checked the grant and the organization's policy).
+        self.report(&grant_id, REVEAL, &item_ids, &target, "ok")
+            .map_err(|e| {
+                Error::InvalidData(format!(
+                    "the server did not accept the reveal ({e}); nothing was revealed"
+                ))
+            })?;
+        self.consume(&grant_id);
+        Ok(Ok(RevealOutcome {
+            value,
+            label,
+            grant_id,
+        }))
     }
 
     /// Grants of this session (for the agent's overview).

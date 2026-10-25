@@ -62,6 +62,12 @@ pub struct ProviderSettings {
     /// Country or region of a cloud provider, shown at opt-in.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub jurisdiction: Option<String>,
+    /// Wire format (OpenAI-compatible unless Anthropic's Messages API).
+    #[serde(default)]
+    pub api: crate::presets::ProviderApi,
+    /// The preset the settings came from ([`crate::presets`]).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub preset: Option<String>,
 }
 
 /// AI settings. Everything is off by default; each feature is switched on

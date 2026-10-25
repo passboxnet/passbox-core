@@ -646,6 +646,37 @@ impl Client {
         Ok(())
     }
 
+    /// Enrolls in the recovery of every organization whose policy requires
+    /// it and that has recovery set up (on by default for new
+    /// organizations; members were told when they joined). Guests are never
+    /// enrolled. Returns the organizations enrolled now; organizations that
+    /// fail (for example while the membership is not confirmed yet) are
+    /// skipped and tried again next time.
+    pub fn enroll_required_org_recovery(&self) -> Result<Vec<String>> {
+        let required = self.effective_policy()?.recovery_enrollment_orgs;
+        if required.is_empty() {
+            return Ok(Vec::new());
+        }
+        let enrolled = self.recovery_status()?.org_escrows;
+        let mut done = Vec::new();
+        for org_id in required.into_iter().filter(|o| !enrolled.contains(o)) {
+            match self.enroll_org_recovery(&org_id) {
+                Ok(()) => done.push(org_id),
+                Err(Error::Locked) => return Err(Error::Locked),
+                Err(_) => {}
+            }
+        }
+        Ok(done)
+    }
+
+    /// Turns recovery off for the whole organization (owners and admins):
+    /// the recovery key, admins' copies and members' escrows are deleted.
+    /// Refused while the policy requires recovery (`recovery_required`).
+    pub fn turn_off_org_recovery(&self, org_id: &str) -> Result<()> {
+        self.call("DELETE", &format!("/api/v1/orgs/{org_id}/recovery"), None)?;
+        Ok(())
+    }
+
     /// Opts out.
     pub fn withdraw_org_recovery(&self, org_id: &str) -> Result<()> {
         self.call(

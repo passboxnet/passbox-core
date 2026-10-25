@@ -33,7 +33,7 @@ use crate::canon::{Reader, Writer};
 use crate::identity::HASH_LEN;
 use crate::keyring::Keyring;
 use crate::sharing::data::SharingData;
-use crate::sharing::objects::{Canonical, Signed};
+use crate::sharing::objects::{Canonical, OrgRole, Signed};
 use crate::sharing::state::{TrustStore, Warning};
 use crate::sharing::verify::Roster;
 use crate::{Error, Result, encoding};
@@ -115,6 +115,11 @@ pub struct PolicyRules {
     /// of this organization's vaults to its audit log (signed events, no
     /// contents). Off by default; members see that it is on.
     pub report_item_usage: bool,
+    /// Members may let AI agents see values of this organization's items
+    /// (`passbox_reveal`, each time with an explicit tick in the approval
+    /// dialog). Off by default: without a policy that turns it on, agents
+    /// can only use these secrets, never see them (ADR 0006).
+    pub allow_agent_reveal: bool,
 }
 
 impl Default for PolicyRules {
@@ -131,11 +136,26 @@ impl Default for PolicyRules {
             require_recovery_enrollment: false,
             allow_personal_vault: true,
             report_item_usage: false,
+            allow_agent_reveal: false,
         }
     }
 }
 
-const RULE_NAMES: [&str; 11] = [
+impl PolicyRules {
+    /// The first policy of an organization created from now on: recovery
+    /// through the organization is required (C1, on by default since
+    /// 25.10.2026), everything else as [`PolicyRules::default`]. Admins can
+    /// turn it off like any rule.
+    pub fn new_org_defaults() -> Self {
+        Self {
+            require_recovery_enrollment: true,
+            ..Self::default()
+        }
+    }
+}
+
+const RULE_NAMES: [&str; 12] = [
+    "allow_agent_reveal",
     "allow_personal_vault",
     "forbid_export",
     "forbid_external_sharing",
@@ -208,6 +228,7 @@ impl PolicyRules {
     /// The rules as sorted `(name, value)` pairs, every known rule included.
     pub fn to_pairs(&self) -> Vec<(String, String)> {
         let pairs = [
+            ("allow_agent_reveal", self.allow_agent_reveal.to_string()),
             (
                 "allow_personal_vault",
                 self.allow_personal_vault.to_string(),
@@ -248,6 +269,7 @@ impl PolicyRules {
         let mut unknown = Vec::new();
         for (name, value) in pairs {
             match name.as_str() {
+                "allow_agent_reveal" => rules.allow_agent_reveal = parse_bool(name, value)?,
                 "allow_personal_vault" => rules.allow_personal_vault = parse_bool(name, value)?,
                 "forbid_export" => rules.forbid_export = parse_bool(name, value)?,
                 "forbid_external_sharing" => {
@@ -464,6 +486,11 @@ pub struct EffectivePolicy {
     pub external_sharing_blocked_orgs: Vec<String>,
     /// Organizations whose audit log receives item usage from this device.
     pub item_usage_orgs: Vec<String>,
+    /// Organizations whose policy lets members reveal values of the
+    /// organization's items to AI agents (`allow_agent_reveal`). Vaults of
+    /// any other organization never reveal values to agents.
+    #[serde(default)]
+    pub agent_reveal_orgs: Vec<String>,
     /// Some policy has rules this client does not know.
     pub has_unknown_rules: bool,
 }
@@ -488,6 +515,7 @@ impl EffectivePolicy {
             export_blocked_orgs: Vec::new(),
             external_sharing_blocked_orgs: Vec::new(),
             item_usage_orgs: Vec::new(),
+            agent_reveal_orgs: Vec::new(),
             has_unknown_rules: false,
         };
         for policy in policies {
@@ -520,6 +548,9 @@ impl EffectivePolicy {
             }
             if r.report_item_usage {
                 effective.item_usage_orgs.push(org());
+            }
+            if r.allow_agent_reveal {
+                effective.agent_reveal_orgs.push(org());
             }
             effective.has_unknown_rules |= !policy.unknown_rules.is_empty();
         }
@@ -736,7 +767,15 @@ pub(crate) fn evaluate(
                 .is_some_and(|o| o.status == "confirmed" || o.status == "suspended")
         })
         .collect();
-    let effective = EffectivePolicy::combine(&binding);
+    let mut effective = EffectivePolicy::combine(&binding);
+    // Guests are external people with their own account (B8): an
+    // organization never gets to recover a guest's account, so a policy
+    // that requires recovery does not apply to them.
+    effective.recovery_enrollment_orgs.retain(|org_id| {
+        data.orgs
+            .get(org_id)
+            .is_none_or(|o| o.role != OrgRole::Guest.as_str())
+    });
     (views, effective)
 }
 
@@ -850,7 +889,31 @@ mod tests {
             require_recovery_enrollment: true,
             allow_personal_vault: false,
             report_item_usage: true,
+            allow_agent_reveal: false,
         }
+    }
+
+    #[test]
+    fn new_organizations_require_recovery_and_forbid_agent_reveals() {
+        let rules = PolicyRules::new_org_defaults();
+        assert!(rules.require_recovery_enrollment);
+        assert!(!rules.allow_agent_reveal);
+        assert_eq!(
+            PolicyRules {
+                require_recovery_enrollment: false,
+                ..rules.clone()
+            },
+            PolicyRules::default()
+        );
+        // A policy signed before the rule existed keeps agent reveals off.
+        let (old, unknown) =
+            PolicyRules::from_pairs(&[("require_two_factor".to_owned(), "true".to_owned())])
+                .unwrap();
+        assert!(!old.allow_agent_reveal && unknown.is_empty());
+        let (on, _) =
+            PolicyRules::from_pairs(&[("allow_agent_reveal".to_owned(), "true".to_owned())])
+                .unwrap();
+        assert!(on.allow_agent_reveal);
     }
 
     fn record(org_id: &str, upload: &PolicyUpload) -> PolicyRecord {
@@ -962,7 +1025,20 @@ mod tests {
             unknown_rules: vec!["x".into()],
             ..a.clone()
         };
+        let c = OrgPolicyView {
+            org_id: "c".into(),
+            rules: PolicyRules {
+                allow_agent_reveal: true,
+                ..PolicyRules::default()
+            },
+            ..a.clone()
+        };
+        assert_eq!(
+            EffectivePolicy::combine(&[&a, &b, &c]).agent_reveal_orgs,
+            vec!["c".to_owned()]
+        );
         let effective = EffectivePolicy::combine(&[&a, &b]);
+        assert!(effective.agent_reveal_orgs.is_empty());
         assert!(effective.require_two_factor);
         assert_eq!(effective.two_factor_orgs, vec!["b".to_owned()]);
         assert_eq!(effective.min_password_score, 3);

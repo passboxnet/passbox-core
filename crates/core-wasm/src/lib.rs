@@ -1699,7 +1699,10 @@ impl Keyring {
 
     /// Signs the decision on an agent grant request (Base64url bytes as
     /// relayed by the server). Show the person `parseAgentRequest(request)`
-    /// first. Returns JSON `{ decision, decisionSignature }`.
+    /// first. `allowReveal` is the person's explicit tick "Allow revealing
+    /// the value to the agent" (refused when the request does not ask for
+    /// `reveal` or an organization's policy forbids it). Returns JSON
+    /// `{ decision, decisionSignature }`.
     #[wasm_bindgen(js_name = decideAgentGrant)]
     pub fn decide_agent_grant(
         &self,
@@ -1707,13 +1710,20 @@ impl Keyring {
         approved: bool,
         max_uses: f64,
         now_ms: f64,
+        allow_reveal: Option<bool>,
     ) -> Result<String, JsValue> {
         if max_uses.fract() != 0.0 || !(0.0..=1e9).contains(&max_uses) {
             return Err(js_sys::Error::new("maxUses must be a non-negative integer").into());
         }
         let (decision, signature) = self
             .inner
-            .decide_agent_grant(request, approved, max_uses as u64, now(now_ms))
+            .decide_agent_grant_with_reveal(
+                request,
+                approved,
+                allow_reveal.unwrap_or(false),
+                max_uses as u64,
+                now(now_ms),
+            )
             .map_err(js_error)?;
         Ok(serde_json::json!({ "decision": decision, "decisionSignature": signature }).to_string())
     }

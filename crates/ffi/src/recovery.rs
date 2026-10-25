@@ -298,6 +298,18 @@ impl PassboxClient {
         Ok(self.inner.withdraw_org_recovery(&org_id)?)
     }
 
+    /// Enrolls in every organization whose policy requires recovery (on by
+    /// default for new organizations; never for guests). Call after unlock
+    /// and after joining. Returns the organizations enrolled now.
+    pub fn enroll_required_org_recovery(&self) -> Result<Vec<String>> {
+        Ok(self.inner.enroll_required_org_recovery()?)
+    }
+
+    /// Turns recovery off for the whole organization (owners and admins).
+    pub fn turn_off_org_recovery(&self, org_id: String) -> Result<()> {
+        Ok(self.inner.turn_off_org_recovery(&org_id)?)
+    }
+
     pub fn recovery_requests(&self, org_id: String) -> Result<Vec<RecoveryRequest>> {
         Ok(self
             .inner

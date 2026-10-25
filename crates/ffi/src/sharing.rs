@@ -131,6 +131,11 @@ pub struct InvitationPreview {
     pub expires_at: i64,
     /// Email of the admin who sent the invitation (older servers: none).
     pub inviter_email: Option<String>,
+    /// The organization's admins will be able to restore this account's
+    /// access (recovery on and required; never for guests). Show it before
+    /// accepting.
+    #[uniffi(default = false)]
+    pub recovery: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
@@ -332,6 +337,7 @@ impl PassboxClient {
             role: p.role,
             expires_at: p.expires_at,
             inviter_email: p.inviter_email,
+            recovery: p.recovery,
         })
     }
 

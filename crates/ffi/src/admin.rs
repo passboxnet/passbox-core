@@ -28,6 +28,10 @@ pub struct PolicyRules {
     pub require_recovery_enrollment: bool,
     pub allow_personal_vault: bool,
     pub report_item_usage: bool,
+    /// Members may reveal values of this organization's items to AI agents
+    /// (`passbox_reveal`, with an explicit tick per grant). Off by default.
+    #[uniffi(default = false)]
+    pub allow_agent_reveal: bool,
 }
 
 impl From<policy::PolicyRules> for PolicyRules {
@@ -44,6 +48,7 @@ impl From<policy::PolicyRules> for PolicyRules {
             require_recovery_enrollment: r.require_recovery_enrollment,
             allow_personal_vault: r.allow_personal_vault,
             report_item_usage: r.report_item_usage,
+            allow_agent_reveal: r.allow_agent_reveal,
         }
     }
 }
@@ -63,6 +68,7 @@ impl TryFrom<PolicyRules> for policy::PolicyRules {
             require_recovery_enrollment: r.require_recovery_enrollment,
             allow_personal_vault: r.allow_personal_vault,
             report_item_usage: r.report_item_usage,
+            allow_agent_reveal: r.allow_agent_reveal,
         })
     }
 }

@@ -9,6 +9,8 @@
 //! inputs that only the redaction layer can build ([`Redacted`]), and every
 //! feature has a deterministic result when AI is off or fails.
 //!
+//! - [`presets`]: bring-your-own-key presets for cloud providers (Mistral,
+//!   IONOS, STACKIT, Scaleway, Langdock, OpenAI, Anthropic).
 //! - [`provider`]: where a model runs (on the device, self-hosted
 //!   OpenAI-compatible endpoint such as Ollama or vLLM, or a cloud provider
 //!   with the user's own key) and how it is called.
@@ -20,12 +22,16 @@
 
 pub mod gateway;
 pub mod import_mapping;
+pub mod presets;
 pub mod provider;
 pub mod redact;
 pub mod security_copilot;
 
 pub use gateway::{AiLogEntry, AiSettings, FeatureId, FeatureManifest, Gateway, ProviderSettings};
-pub use provider::{AiProvider, AiRequest, ModelLocation, OpenAiCompatible};
+pub use presets::{PROVIDER_PRESETS, ProviderApi, ProviderPreset};
+pub use provider::{
+    AiProvider, AiRequest, Anthropic, ModelLocation, OpenAiCompatible, provider_from_settings,
+};
 pub use redact::{DataClass, Redacted, SecretGuard};
 
 /// Errors of the gateway. None of them contains model input.
