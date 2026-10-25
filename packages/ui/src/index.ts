@@ -15,6 +15,7 @@ export { cn } from "./cn";
 export { ConfirmDialog, type ConfirmDialogProps, Dialog, type DialogProps, Sheet, type SheetProps } from "./Dialog";
 export { EmptyState, type EmptyStateProps } from "./EmptyState";
 export { Field, type FieldProps } from "./Field";
+export { GridFrame, type GridFrameProps } from "./GridFrame";
 export {
   fieldClassName,
   Input,

@@ -41,7 +41,7 @@ the mark with a gap of 30–40 % of the mark size.
 | Desktop (Tauri) | macOS-grid icon (824 px tile on 1024 px with shadow) as PNGs, `icon.icns`, `icon.ico`, Windows Store tiles | `apps/desktop/src-tauri/icons`, `tauri.conf.json` |
 | Browser extension | 16, 32, 48, 128 px (128 with 16 px padding) | `apps/extension/public/icons`, `manifest.json` |
 | Web app, website | `favicon.svg`, `favicon.ico` (16 + 32), `apple-touch-icon.png` (180, opaque), `icon-512.png` | `apps/web/index.html`, `apps/website/components/SiteDocument.tsx` |
-| Emails | `packages/ui/brand/png/email-logo@2x.png` (mark + wordmark, 164 × 48 at 2×, for light backgrounds) and `email-logo-dark@2x.png` | To be served by the server and referenced from `crates/server/src/mail/templates.rs` when the emails are restyled; emails must not depend on the image (alt text “Passbox”, the wordmark also as text). |
+| Emails | `packages/ui/brand/png/email-logo@2x.png` (mark + wordmark, 164 × 48 at 2×, for light backgrounds) and `email-logo-dark@2x.png` | Attached to every mail as inline images (`cid:logo-light@passbox`, `cid:logo-dark@passbox`; `crates/server/src/mail/layout.rs`), so no remote image is loaded; also served at `/assets/mail/logo-light.png` and `/assets/mail/logo-dark.png`. The alt text “Passbox” is styled as the wordmark, so the header still reads with images off. |
 
 ## 2. The signature gradient
 
@@ -107,3 +107,28 @@ These shapes say “Passbox” before the logo does; use them consistently:
   icon chip, and the **alert card** above them.
 - **Orange inline banner** for “Zeit, Ihr Passwort zu ändern · Jetzt ändern”.
 - **Large titles** on mobile, two-line headlines on the website.
+
+## 7. The server's own surfaces
+
+The server renders a few things itself; they carry the same brand line:
+
+- **Emails** (`crates/server/src/mail/layout.rs`): one table-based layout
+  with inline styles. Light theme inline (readable in every client), dark
+  theme through `prefers-color-scheme` (and Outlook.com's `[data-ogsc]`).
+  Logo header, a 6 px band in the signature gradient (solid
+  `#2061F5` fallback), the panel (24 px radius) with dotted guides and four
+  corner dots, details in a rounded well, a pill button with the link
+  repeated as text below it, and a footer with the template's reason, the
+  instance name and its address. Plain-text alternatives are unchanged.
+  Previews of every template in both languages:
+  `cargo run -p passbox-server --example mail-previews -- <dir>`.
+- **Pages** (`crates/server/src/brand`): without a web vault
+  (`PASSBOX_WEB_DIR` unset) browsers get a start page with the server
+  address, a branded 404, and single sign-on errors (when no
+  `PASSBOX_PUBLIC_URL` is set to redirect to). They use the backdrop
+  gradient with grain, a bezelled panel with the dotted grid frame, the mark,
+  Plus Jakarta Sans served by the instance (`/assets/brand/*.woff2`) and pill
+  buttons, in light and dark.
+- Colors come from `crates/server/src/brand/tokens.rs`, generated from
+  `tokens.json` like every other platform (sRGB, because email clients do not
+  understand OKLCH).
