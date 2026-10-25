@@ -421,5 +421,7 @@
   "orgAdmin.error.twoFactorRequired": "Your organization requires two-factor sign-in, so you cannot turn it off.",
   "orgAdmin.error.policy": "Your organization's policy does not allow this.",
   "orgAdmin.switchOrg": "Organization",
-  "orgAdmin.members.lastSignIn": "Last sign-in: {time}"
+  "orgAdmin.members.lastSignIn": "Last sign-in: {time}",
+  "orgAdmin.integrations.worksWith": "Works with any SIEM that can poll an HTTP API or receive webhooks, for example:",
+  "orgAdmin.integrations.nameSuggestions": "Name suggestions"
 }

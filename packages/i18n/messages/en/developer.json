@@ -9,6 +9,7 @@
   "developer.limit.personal": "{used} of {allowed} AI agents and service accounts used (free, fair use).",
   "developer.limit.organization": "{used} of {allowed} AI agents and service accounts used in your organization ({perMember} per member, free, fair use).",
   "developer.limit.reached": "The fair-use limit for AI agents and service accounts is reached. Revoke one you no longer need, or ask the administrator of this server to raise the limit.",
+
   "category.environment": "Environment",
   "category.environments": "Environments",
   "list.emptyCategory.environment": "Environments hold the variables of an app, for example API keys and database URLs. Use them with `pbx env` instead of .env files.",
@@ -16,6 +17,7 @@
   "environment.invalidNames": "Not used as variables, because the label is not a valid name (letters, digits and _): {names}",
   "environment.dotenv": ".env content",
   "environment.copy": "Copy as .env",
+
   "activity.kind.service_account_created": "Service account created",
   "activity.kind.service_account_access_changed": "Service account access changed",
   "activity.kind.service_account_revoked": "Service account revoked",
@@ -29,6 +31,7 @@
   "activity.kind.agent_inject": "AI agent wrote a file with secrets",
   "activity.kind.agent_create": "AI agent saved an item",
   "activity.kind.agent_reveal": "AI agent was shown a secret value",
+
   "agent.title": "{client} wants to use secrets",
   "agent.unknownClient": "An AI agent",
   "agent.who.service": "Through the service account “{name}”. Nothing is revealed to the agent; secrets only go into the command or file below.",
@@ -65,6 +68,7 @@
   "agent.notify.body": "Open Passbox to approve or deny the request.",
   "agent.notify.offer": "Get a notification when an agent waits while Passbox is in the background.",
   "agent.notify.enable": "Turn on notifications",
+
   "agent.pending.title": "Waiting for you",
   "agent.pending.description": "Requests from AI agents connected with pbx mcp. They expire after 10 minutes.",
   "agent.pending.none": "No agent is waiting.",
@@ -102,9 +106,10 @@
   "agent.setup.title": "Connect an AI agent",
   "agent.setup.description": "Agents see titles and field names, never secret values, and need your approval here for every use.",
   "agent.setup.step1": "Create a service account with read access to a vault that holds only what the agent needs.",
-  "agent.setup.step2": "Install pbx and add it to your agent as an MCP server, for example in Claude Code:",
+  "agent.setup.step2": "Install pbx and add it to your agent as an MCP server:",
   "agent.setup.step3": "Keep Passbox open on this or another device: approvals appear here.",
-  "agent.setup.more": "Cursor, VS Code, Claude Desktop and Codex: see docs/architecture/ai-agents.md.",
+  "agent.setup.more": "Details and other agents: docs/architecture/ai-agents.md.",
+
   "serviceAccount.title": "Service accounts",
   "serviceAccount.description": "Machine identities for CI pipelines, servers and AI agents. Each has its own key, access to the vaults you choose, and never more access than you.",
   "serviceAccount.new": "New service account",
@@ -169,5 +174,13 @@
   "serviceAccount.event.access_removed": "Vault access removed",
   "serviceAccount.event.updated": "Changed",
   "serviceAccount.event.revoked": "Revoked",
-  "serviceAccount.event.other": "Other activity"
+  "serviceAccount.event.other": "Other activity",
+  "agent.setup.client": "Your agent",
+  "agent.setup.where.claudeCode": "In a terminal (user scope, not a committed .mcp.json):",
+  "agent.setup.where.claudeDesktop": "In claude_desktop_config.json (Settings → Developer → Edit Config):",
+  "agent.setup.where.cursor": "In ~/.cursor/mcp.json (global, not in the project):",
+  "agent.setup.where.vscode": "In your user mcp.json (Command Palette → “MCP: Open User Configuration”). VS Code asks for the token, so it isn't stored in the file:",
+  "agent.setup.where.codex": "In ~/.codex/config.toml:",
+  "agent.setup.copy": "Copy configuration",
+  "agent.setup.configuration": "Configuration"
 }

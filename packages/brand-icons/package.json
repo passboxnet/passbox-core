@@ -1,0 +1,21 @@
+{
+  "name": "@passbox/brand-icons",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "description": "Bundled icons of the third-party services Passbox names in its UI (import sources, SSO and alias providers, SIEMs, browsers, AI providers). Refreshed with scripts/update-brand-icons.mjs; no requests to these services at run time.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./manifest.json": "./manifest.json"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.5",
+    "typescript": "5.9.3",
+    "vitest": "5.0.5"
+  }
+}

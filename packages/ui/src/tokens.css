@@ -111,6 +111,9 @@
     --pb-success-text: oklch(0.45 0.12 155);
     --pb-monogram-bg-l: 0.93;
     --pb-monogram-fg-l: 0.42;
+    /* Tiles behind website and brand icons: light in both themes so dark marks stay visible. */
+    --pb-icon-tile: oklch(1 0 0);
+    --pb-icon-tile-ring: oklch(0.21 0.015 262 / 0.08);
   }
 
   @media (prefers-color-scheme: dark) {
@@ -139,6 +142,8 @@
       --pb-success-text: oklch(0.76 0.13 155);
       --pb-monogram-bg-l: 0.3;
       --pb-monogram-fg-l: 0.86;
+      --pb-icon-tile: oklch(0.95 0.004 262);
+      --pb-icon-tile-ring: oklch(1 0 0 / 0.06);
     }
   }
 
@@ -167,6 +172,8 @@
     --pb-success-text: oklch(0.76 0.13 155);
     --pb-monogram-bg-l: 0.3;
     --pb-monogram-fg-l: 0.86;
+    --pb-icon-tile: oklch(0.95 0.004 262);
+    --pb-icon-tile-ring: oklch(1 0 0 / 0.06);
   }
 
   html {

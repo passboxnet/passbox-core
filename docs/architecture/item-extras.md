@@ -69,6 +69,39 @@ files, not in the keychain (iOS `AppSecureStore` does this).
 show a monogram when it is off, when `meta.icons` is false or when there is
 no icon. The preference is local to the app.
 
+**Where they show:** logins with a public host name (not IP addresses or
+names without a dot) show their icon on a light rounded tile
+(`SiteIcon` in `packages/ui`), with the tinted monogram while it loads and
+when there is none; other categories keep their category icon.
+
+| App | Places | Setting and cache |
+| --- | --- | --- |
+| Web, desktop | item list, item detail header, command palette, security check lists, trash, archive, emergency access, share dialogs (`ItemIcon`) | Settings → "Sprache und Darstellung" (`passbox.preferences` → `showWebsiteIcons`); icons load when a row scrolls into view, six at a time, and stay in the client's memory until it is reloaded |
+| Extension | popup list, item view and trash, inline menu, save banner (`WebsiteIcon`) | Settings → "Darstellung" (`showWebsiteIcons` in `chrome.storage.local`); the service worker loads them (`popup.icon`, `frame.icon`) and keeps them in `chrome.storage.session` (memory only) until the vault locks |
+| iOS, Android | lists and detail | in the app's settings; Rust client cache (above) |
+
+The extension does not use the browser's own favicon cache (the `favicon`
+permission and `_favicon/` URLs): that needs another permission, exists only
+in Chromium and knows only sites the browser has visited. The save banner
+shows no icon for a site that looks like another one (G17), so a phishing
+page does not look more trustworthy.
+
+## Brand icons of third-party services
+
+Icons of the services Passbox names in its own UI (import sources, alias
+providers, identity providers, SIEMs, browsers and app stores, agent clients,
+Have I Been Pwned, 2fa.directory, AI providers) are a different thing: they
+are bundled with the apps in `packages/brand-icons` (64 px PNGs, a manifest
+with the source URL and date of each, see
+[THIRD_PARTY_NOTICES.md](../../THIRD_PARTY_NOTICES.md)) and never loaded at
+run time. `brandIcon(domainOrId)` returns the bundled URL (by ID such as
+`okta`, host name such as `okta.com` or `acme.okta.com`, or URL);
+`<BrandIcon service="okta" />` from `@passbox/ui/brand-icon` draws it on the
+same tile as website icons, with the service's name as alternative text
+(`decorative` when the name is written next to it). Refresh the set with
+`node scripts/update-brand-icons.mjs [id …]`; add services in
+`packages/brand-icons/services.json`.
+
 ## Breach check ("Kompromittierte Passwörter")
 
 Have I Been Pwned's range API with k-anonymity: only the first 5 hex

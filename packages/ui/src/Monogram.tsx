@@ -12,7 +12,8 @@ function hueFor(seed: string): number {
 
 export type MonogramSize = "sm" | "md" | "lg" | "xl";
 
-const sizes: Record<MonogramSize, string> = {
+/** Box, corner radius, text and icon size per size step (shared with the image tiles). */
+export const monogramSizes: Record<MonogramSize, string> = {
   sm: "size-6 rounded-md text-2xs [&_svg]:size-3.5",
   md: "size-8 rounded-lg text-xs [&_svg]:size-4",
   lg: "size-10 rounded-lg text-sm [&_svg]:size-5",
@@ -25,7 +26,7 @@ export interface MonogramProps {
   size?: MonogramSize;
   /** Replaces the initial, for example with a category icon. */
   icon?: ReactNode;
-  className?: string;
+  className?: string | undefined;
 }
 
 /** Colored initial (or icon) used for items, vaults and people. */
@@ -38,7 +39,11 @@ export function Monogram({ name, size = "md", icon, className }: MonogramProps) 
         backgroundColor: `oklch(var(--pb-monogram-bg-l) 0.06 ${hue})`,
         color: `oklch(var(--pb-monogram-fg-l) 0.14 ${hue})`,
       }}
-      className={cn("flex shrink-0 items-center justify-center font-semibold uppercase", sizes[size], className)}
+      className={cn(
+        "flex shrink-0 items-center justify-center font-semibold uppercase",
+        monogramSizes[size],
+        className,
+      )}
     >
       {icon ?? (name.trim().charAt(0) || "?")}
     </span>

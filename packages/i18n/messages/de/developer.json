@@ -9,6 +9,7 @@
   "developer.limit.personal": "{used} von {allowed} KI-Agenten und Dienstkonten genutzt (kostenlos, faire Nutzung).",
   "developer.limit.organization": "{used} von {allowed} KI-Agenten und Dienstkonten in Ihrer Organisation genutzt ({perMember} pro Mitglied, kostenlos, faire Nutzung).",
   "developer.limit.reached": "Das Kontingent für KI-Agenten und Dienstkonten ist ausgeschöpft. Widerrufen Sie eines, das Sie nicht mehr brauchen, oder bitten Sie die Administration dieses Servers, das Kontingent zu erhöhen.",
+
   "category.environment": "Umgebung",
   "category.environments": "Umgebungen",
   "list.emptyCategory.environment": "Umgebungen enthalten die Variablen einer Anwendung, zum Beispiel API-Schlüssel und Datenbank-URLs. Nutzen Sie sie mit `pbx env` statt mit .env-Dateien.",
@@ -16,6 +17,7 @@
   "environment.invalidNames": "Nicht als Variable verwendet, weil die Bezeichnung kein gültiger Name ist (Buchstaben, Ziffern und _): {names}",
   "environment.dotenv": ".env-Inhalt",
   "environment.copy": "Als .env kopieren",
+
   "activity.kind.service_account_created": "Dienstkonto erstellt",
   "activity.kind.service_account_access_changed": "Zugriff eines Dienstkontos geändert",
   "activity.kind.service_account_revoked": "Dienstkonto widerrufen",
@@ -29,6 +31,7 @@
   "activity.kind.agent_inject": "KI-Agent hat eine Datei mit Geheimnissen geschrieben",
   "activity.kind.agent_create": "KI-Agent hat einen Eintrag gespeichert",
   "activity.kind.agent_reveal": "KI-Agent wurde ein geheimer Wert gezeigt",
+
   "agent.title": "{client} möchte Geheimnisse verwenden",
   "agent.unknownClient": "Ein KI-Agent",
   "agent.who.service": "Über das Dienstkonto „{name}“. Dem Agenten wird nichts offengelegt; die Geheimnisse gehen nur in den Befehl oder die Datei unten.",
@@ -65,6 +68,7 @@
   "agent.notify.body": "Öffnen Sie Passbox, um die Anfrage freizugeben oder abzulehnen.",
   "agent.notify.offer": "Lassen Sie sich benachrichtigen, wenn ein Agent wartet, während Passbox im Hintergrund ist.",
   "agent.notify.enable": "Benachrichtigungen einschalten",
+
   "agent.pending.title": "Wartet auf Sie",
   "agent.pending.description": "Anfragen von KI-Agenten, die mit pbx mcp verbunden sind. Sie laufen nach 10 Minuten ab.",
   "agent.pending.none": "Kein Agent wartet.",
@@ -102,9 +106,10 @@
   "agent.setup.title": "KI-Agenten verbinden",
   "agent.setup.description": "Agenten sehen Titel und Feldnamen, nie geheime Werte, und brauchen für jede Verwendung Ihre Freigabe hier.",
   "agent.setup.step1": "Erstellen Sie ein Dienstkonto mit Lesezugriff auf einen Tresor, der nur enthält, was der Agent braucht.",
-  "agent.setup.step2": "Installieren Sie pbx und fügen Sie es Ihrem Agenten als MCP-Server hinzu, zum Beispiel in Claude Code:",
+  "agent.setup.step2": "Installieren Sie pbx und fügen Sie es Ihrem Agenten als MCP-Server hinzu:",
   "agent.setup.step3": "Lassen Sie Passbox auf diesem oder einem anderen Gerät geöffnet: Freigaben erscheinen hier.",
-  "agent.setup.more": "Cursor, VS Code, Claude Desktop und Codex: siehe docs/architecture/ai-agents.md.",
+  "agent.setup.more": "Details und weitere Agenten: docs/architecture/ai-agents.md.",
+
   "serviceAccount.title": "Dienstkonten",
   "serviceAccount.description": "Maschinen-Identitäten für CI-Pipelines, Server und KI-Agenten. Jedes hat einen eigenen Schlüssel, Zugriff auf die Tresore Ihrer Wahl und nie mehr Zugriff als Sie selbst.",
   "serviceAccount.new": "Neues Dienstkonto",
@@ -169,5 +174,13 @@
   "serviceAccount.event.access_removed": "Zugriff auf Tresor entfernt",
   "serviceAccount.event.updated": "Geändert",
   "serviceAccount.event.revoked": "Widerrufen",
-  "serviceAccount.event.other": "Sonstige Aktivität"
+  "serviceAccount.event.other": "Sonstige Aktivität",
+  "agent.setup.client": "Ihr Agent",
+  "agent.setup.where.claudeCode": "Im Terminal (Benutzerbereich, nicht in einer eingecheckten .mcp.json):",
+  "agent.setup.where.claudeDesktop": "In claude_desktop_config.json (Settings → Developer → Edit Config):",
+  "agent.setup.where.cursor": "In ~/.cursor/mcp.json (global, nicht im Projekt):",
+  "agent.setup.where.vscode": "In Ihrer Benutzer-mcp.json (Befehlspalette → „MCP: Open User Configuration“). VS Code fragt nach dem Token, er steht also nicht in der Datei:",
+  "agent.setup.where.codex": "In ~/.codex/config.toml:",
+  "agent.setup.copy": "Konfiguration kopieren",
+  "agent.setup.configuration": "Konfiguration"
 }

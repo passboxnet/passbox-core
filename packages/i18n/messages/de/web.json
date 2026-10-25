@@ -1682,5 +1682,9 @@
   "alias.error.no_key": "Der Eintrag des Dienstes hat keinen API-Schlüssel.",
   "alias.error.network": "{provider} war nicht erreichbar. Manche Dienste blockieren Anfragen aus Webseiten; nutzen Sie dann die Browser-Erweiterung oder die Desktop-App.",
   "alias.serverPlaceholder": "https://aliases.example.com",
-  "alias.domainPlaceholder": "anonaddy.me"
+  "alias.domainPlaceholder": "anonaddy.me",
+  "settings.websiteIcons": "Website-Icons anzeigen",
+  "settings.websiteIconsDescription": "Lädt die Icons der Websites in Ihrem Tresor über Ihren Passbox-Server, sodass die Websites dieses Gerät nie sehen. Ihr Server erfährt dabei, welche Websites Sie gespeichert haben; die Inhalte bleiben verschlüsselt.",
+  "settings.websiteIconsOff": "Ihr Passbox-Server lädt keine Website-Icons, daher zeigt Passbox stattdessen Initialen.",
+  "security.dataSource": "Daten: {name}"
 }

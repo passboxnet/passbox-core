@@ -421,5 +421,7 @@
   "orgAdmin.error.twoFactorRequired": "Ihre Organisation verlangt die Zwei-Faktor-Anmeldung, daher können Sie sie nicht ausschalten.",
   "orgAdmin.error.policy": "Die Richtlinie Ihrer Organisation erlaubt das nicht.",
   "orgAdmin.switchOrg": "Organisation",
-  "orgAdmin.members.lastSignIn": "Letzte Anmeldung: {time}"
+  "orgAdmin.members.lastSignIn": "Letzte Anmeldung: {time}",
+  "orgAdmin.integrations.worksWith": "Funktioniert mit jedem SIEM, das eine HTTP-API abfragen oder Webhooks empfangen kann, zum Beispiel:",
+  "orgAdmin.integrations.nameSuggestions": "Namensvorschläge"
 }
