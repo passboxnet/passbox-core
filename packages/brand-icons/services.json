@@ -1,0 +1,194 @@
+{
+  "$comment": "Third-party services that Passbox names in its UI. scripts/update-brand-icons.mjs fetches each one's public favicon from `homepage` (or from `icon` when set) into icons/<id>.png and writes manifest.json. `domain` is the service's own host name for brandIcon() lookups; leave it out when the service has no host name of its own. `imageClass` takes the first <img> inside the element with that class instead of the page's favicon (Apple's user guides show the app icon that way). `aliases` are further IDs or host names that resolve to the same icon.",
+  "services": [
+    { "id": "1password", "name": "1Password", "domain": "1password.com", "homepage": "https://1password.com/" },
+    { "id": "bitwarden", "name": "Bitwarden", "domain": "bitwarden.com", "homepage": "https://bitwarden.com/" },
+    { "id": "lastpass", "name": "LastPass", "domain": "lastpass.com", "homepage": "https://www.lastpass.com/" },
+    { "id": "dashlane", "name": "Dashlane", "domain": "dashlane.com", "homepage": "https://www.dashlane.com/" },
+    { "id": "keeper", "name": "Keeper", "domain": "keepersecurity.com", "homepage": "https://www.keepersecurity.com/" },
+    { "id": "protonpass", "name": "Proton Pass", "domain": "pass.proton.me", "homepage": "https://proton.me/pass" },
+    { "id": "keepass", "name": "KeePass", "domain": "keepass.info", "homepage": "https://keepass.info/" },
+    { "id": "keepassxc", "name": "KeePassXC", "domain": "keepassxc.org", "homepage": "https://keepassxc.org/" },
+    { "id": "passbolt", "name": "Passbolt", "domain": "passbolt.com", "homepage": "https://www.passbolt.com/" },
+    { "id": "nordpass", "name": "NordPass", "domain": "nordpass.com", "homepage": "https://app.nordpass.com/" },
+    { "id": "enpass", "name": "Enpass", "domain": "enpass.io", "homepage": "https://www.enpass.io/" },
+    { "id": "roboform", "name": "RoboForm", "domain": "roboform.com", "homepage": "https://www.roboform.com/" },
+    {
+      "id": "google-password-manager",
+      "name": "Google Password Manager",
+      "domain": "passwords.google.com",
+      "homepage": "https://passwords.google/"
+    },
+    {
+      "id": "apple-passwords",
+      "name": "Apple Passwords",
+      "homepage": "https://support.apple.com/guide/passwords/welcome/mac",
+      "imageClass": "app-icon",
+      "aliases": ["passwords"]
+    },
+
+    {
+      "id": "chrome",
+      "name": "Google Chrome",
+      "domain": "chrome.com",
+      "homepage": "https://www.google.com/chrome/",
+      "aliases": ["chromewebstore.google.com", "chrome-web-store"]
+    },
+    {
+      "id": "edge",
+      "name": "Microsoft Edge",
+      "domain": "microsoftedge.com",
+      "homepage": "https://www.microsoft.com/edge",
+      "aliases": ["microsoftedge.microsoft.com", "edge-add-ons"]
+    },
+    {
+      "id": "firefox",
+      "name": "Firefox",
+      "domain": "firefox.com",
+      "homepage": "https://www.firefox.com/",
+      "aliases": ["addons.mozilla.org", "firefox-add-ons"]
+    },
+    {
+      "id": "safari",
+      "name": "Safari",
+      "homepage": "https://support.apple.com/guide/safari/welcome/mac",
+      "imageClass": "app-icon"
+    },
+    { "id": "brave", "name": "Brave", "domain": "brave.com", "homepage": "https://brave.com/" },
+
+    { "id": "windows", "name": "Windows", "domain": "windows.com", "homepage": "https://www.microsoft.com/windows" },
+    {
+      "id": "macos",
+      "name": "macOS",
+      "homepage": "https://support.apple.com/guide/mac-help/welcome/mac",
+      "imageClass": "app-icon"
+    },
+    { "id": "apple", "name": "Apple", "domain": "apple.com", "homepage": "https://www.apple.com/" },
+    { "id": "linux", "name": "Linux", "domain": "kernel.org", "homepage": "https://www.kernel.org/" },
+    { "id": "ios", "name": "iOS", "homepage": "https://www.apple.com/ios/" },
+    { "id": "app-store", "name": "App Store", "domain": "apps.apple.com", "homepage": "https://apps.apple.com/" },
+    { "id": "android", "name": "Android", "domain": "android.com", "homepage": "https://www.android.com/" },
+    { "id": "google-play", "name": "Google Play", "domain": "play.google.com", "homepage": "https://play.google.com/" },
+
+    { "id": "simplelogin", "name": "SimpleLogin", "domain": "simplelogin.io", "homepage": "https://simplelogin.io/" },
+    {
+      "id": "addy",
+      "name": "addy.io",
+      "domain": "addy.io",
+      "homepage": "https://addy.io/",
+      "aliases": ["anonaddy.com", "app.addy.io"]
+    },
+    { "id": "fastmail", "name": "Fastmail", "domain": "fastmail.com", "homepage": "https://www.fastmail.com/" },
+    { "id": "duckduckgo", "name": "DuckDuckGo", "domain": "duckduckgo.com", "homepage": "https://duckduckgo.com/" },
+    {
+      "id": "firefox-relay",
+      "name": "Firefox Relay",
+      "domain": "relay.firefox.com",
+      "homepage": "https://relay.firefox.com/"
+    },
+
+    {
+      "id": "entra",
+      "name": "Microsoft Entra ID",
+      "domain": "entra.microsoft.com",
+      "homepage": "https://www.microsoft.com/security/business/microsoft-entra",
+      "aliases": ["login.microsoftonline.com", "azure-ad"]
+    },
+    { "id": "microsoft", "name": "Microsoft", "domain": "microsoft.com", "homepage": "https://www.microsoft.com/" },
+    {
+      "id": "google",
+      "name": "Google",
+      "domain": "google.com",
+      "homepage": "https://www.google.com/",
+      "aliases": ["accounts.google.com", "google-workspace"]
+    },
+    { "id": "okta", "name": "Okta", "domain": "okta.com", "homepage": "https://www.okta.com/" },
+    { "id": "keycloak", "name": "Keycloak", "domain": "keycloak.org", "homepage": "https://www.keycloak.org/" },
+    { "id": "authentik", "name": "authentik", "domain": "goauthentik.io", "homepage": "https://goauthentik.io/" },
+    {
+      "id": "zitadel",
+      "name": "ZITADEL",
+      "domain": "zitadel.com",
+      "homepage": "https://zitadel.com/",
+      "aliases": ["zitadel.cloud"]
+    },
+
+    { "id": "splunk", "name": "Splunk", "domain": "splunk.com", "homepage": "https://www.splunk.com/" },
+    {
+      "id": "sentinel",
+      "name": "Microsoft Sentinel",
+      "homepage": "https://www.microsoft.com/security/business/siem-and-xdr/microsoft-sentinel",
+      "aliases": ["microsoft-sentinel"]
+    },
+    { "id": "elastic", "name": "Elastic", "domain": "elastic.co", "homepage": "https://www.elastic.co/" },
+    { "id": "graylog", "name": "Graylog", "domain": "graylog.org", "homepage": "https://graylog.org/" },
+    { "id": "wazuh", "name": "Wazuh", "domain": "wazuh.com", "homepage": "https://wazuh.com/" },
+
+    { "id": "anthropic", "name": "Anthropic", "domain": "anthropic.com", "homepage": "https://www.anthropic.com/" },
+    {
+      "id": "claude",
+      "name": "Claude",
+      "domain": "claude.ai",
+      "homepage": "https://claude.ai/",
+      "aliases": ["claude.com", "claude-code", "claude-desktop"]
+    },
+    { "id": "cursor", "name": "Cursor", "domain": "cursor.com", "homepage": "https://cursor.com/" },
+    {
+      "id": "vscode",
+      "name": "Visual Studio Code",
+      "domain": "code.visualstudio.com",
+      "homepage": "https://code.visualstudio.com/",
+      "aliases": ["vs-code"]
+    },
+    {
+      "id": "openai",
+      "name": "OpenAI",
+      "domain": "openai.com",
+      "homepage": "https://openai.com/",
+      "icon": "https://cdn.oaistatic.com/assets/favicon-180x180-od45eci6.webp",
+      "aliases": ["api.openai.com", "chatgpt.com", "codex"]
+    },
+    {
+      "id": "github",
+      "name": "GitHub",
+      "domain": "github.com",
+      "homepage": "https://github.com/",
+      "icon": "https://github.githubassets.com/favicons/favicon.svg",
+      "aliases": ["github-actions"]
+    },
+
+    {
+      "id": "hibp",
+      "name": "Have I Been Pwned",
+      "domain": "haveibeenpwned.com",
+      "homepage": "https://haveibeenpwned.com/",
+      "aliases": ["api.pwnedpasswords.com", "pwnedpasswords.com"]
+    },
+    { "id": "2fa-directory", "name": "2FA Directory", "domain": "2fa.directory", "homepage": "https://2fa.directory/" },
+
+    { "id": "langdock", "name": "Langdock", "domain": "langdock.com", "homepage": "https://www.langdock.com/" },
+    {
+      "id": "mistral",
+      "name": "Mistral AI",
+      "domain": "mistral.ai",
+      "homepage": "https://mistral.ai/",
+      "aliases": ["api.mistral.ai"]
+    },
+    {
+      "id": "ionos",
+      "name": "IONOS",
+      "domain": "ionos.com",
+      "homepage": "https://www.ionos.com/",
+      "aliases": ["ionos.de", "cloud.ionos.com"]
+    },
+    {
+      "id": "stackit",
+      "name": "STACKIT",
+      "domain": "stackit.de",
+      "homepage": "https://www.stackit.de/",
+      "aliases": ["stackit.cloud"]
+    },
+    { "id": "scaleway", "name": "Scaleway", "domain": "scaleway.com", "homepage": "https://www.scaleway.com/" },
+    { "id": "ollama", "name": "Ollama", "domain": "ollama.com", "homepage": "https://ollama.com/" }
+  ]
+}

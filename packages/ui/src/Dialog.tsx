@@ -15,11 +15,13 @@ export interface DialogProps {
   children?: ReactNode;
   footer?: ReactNode;
   size?: "sm" | "md" | "lg";
+  /** Shown before the title, for example the icon of the item the dialog is about. */
+  icon?: ReactNode;
 }
 
 const widths = { sm: "max-w-sm", md: "max-w-lg", lg: "max-w-2xl" };
 
-export function Dialog({ open, onOpenChange, title, description, children, footer, size = "md" }: DialogProps) {
+export function Dialog({ open, onOpenChange, title, description, children, footer, size = "md", icon }: DialogProps) {
   const strings = useUiStrings();
   return (
     <RadixDialog.Root open={open} onOpenChange={onOpenChange}>
@@ -33,7 +35,8 @@ export function Dialog({ open, onOpenChange, title, description, children, foote
           )}
         >
           <div className="flex items-start justify-between gap-4 px-6 pt-5">
-            <div>
+            {icon && <div className="shrink-0">{icon}</div>}
+            <div className="min-w-0 flex-1">
               <RadixDialog.Title className="text-base font-semibold text-text">{title}</RadixDialog.Title>
               {description ? (
                 <RadixDialog.Description className="mt-1 text-sm text-text-muted">

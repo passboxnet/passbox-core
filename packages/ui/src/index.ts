@@ -14,8 +14,9 @@ export {
 } from "./Input";
 export { Logo, type LogoProps } from "./Logo";
 export { Menu, MenuContent, MenuItem, type MenuItemProps, MenuLabel, MenuSeparator, MenuTrigger } from "./Menu";
-export { Monogram, type MonogramProps, type MonogramSize } from "./Monogram";
+export { Monogram, type MonogramProps, type MonogramSize, monogramSizes } from "./Monogram";
 export { SegmentedControl, type SegmentedControlProps } from "./SegmentedControl";
+export { SiteIcon, type SiteIconProps } from "./SiteIcon";
 export { Spinner } from "./Spinner";
 export { StrengthMeter, type StrengthMeterProps } from "./StrengthMeter";
 export { Switch, type SwitchProps } from "./Switch";
