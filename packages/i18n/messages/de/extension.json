@@ -244,5 +244,22 @@
   "category.environment": "Umgebung",
   "settings.appearance": "Darstellung",
   "settings.websiteIcons": "Website-Icons anzeigen",
-  "settings.websiteIconsText": "Die Icons Ihrer gespeicherten Websites kommen über Ihren Passbox-Server, sodass die Websites diesen Browser nie sehen. Ihr Server erfährt dabei, welche Websites Sie gespeichert haben; die Inhalte bleiben verschlüsselt."
+  "settings.websiteIconsText": "Die Icons Ihrer gespeicherten Websites kommen über Ihren Passbox-Server, sodass die Websites diesen Browser nie sehen. Ihr Server erfährt dabei, welche Websites Sie gespeichert haben; die Inhalte bleiben verschlüsselt.",
+  "breach.titleOne": "Neues Datenleck bei {site}",
+  "breach.titleMany": "{count, plural, one {# neues Datenleck} other {# neue Datenlecks}} bei Ihren Websites",
+  "breach.body": "{count, plural, one {# Ihrer Anmeldungen ist betroffen.} other {# Ihrer Anmeldungen sind betroffen.}} Ändern Sie die Passwörter im Sicherheits-Check.",
+  "breach.badgeTitle": "{count, plural, one {# neues Datenleck} other {# neue Datenlecks}} bei Ihren Websites",
+  "breach.open": "Sicherheits-Check öffnen",
+  "breach.dismiss": "Verstanden",
+  "breach.item.affected": "{site} hatte am {date} ein Datenleck ({data}). Dieses Passwort ist älter. Jetzt ändern.",
+  "breach.item.possibly": "{site} hatte am {date} ein Datenleck ({data}). Wann dieses Passwort gesetzt wurde, ist unbekannt – ändern Sie es sicherheitshalber.",
+  "breach.item.affectedUndated": "{site} hatte ein Datenleck ({data}). Dieses Passwort ist älter. Jetzt ändern.",
+  "breach.item.possiblyUndated": "{site} hatte ein Datenleck ({data}). Wann dieses Passwort gesetzt wurde, ist unbekannt – ändern Sie es sicherheitshalber.",
+  "breach.item.change": "Passwort auf der Website ändern",
+  "breach.source": "Quelle: Have I Been Pwned (CC BY 4.0). Geprüft auf diesem Gerät.",
+  "breach.data.passwords": "Passwörter",
+  "breach.data.emailAddresses": "E-Mail-Adressen",
+  "breach.data.usernames": "Benutzernamen",
+  "breach.data.names": "Namen",
+  "breach.data.phoneNumbers": "Telefonnummern"
 }
