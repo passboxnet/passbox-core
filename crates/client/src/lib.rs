@@ -17,8 +17,8 @@ pub mod store;
 
 pub use api::{AccountEvent, SecurityKeyInfo, SessionInfo, TotpSetup, TwoFactorStatus};
 pub use client::analysis::{
-    ALIAS_TAG, AliasProvider, AliasService, AliasTransport, EmailBreach, EmailMonitoring,
-    MonitoredEmail, ReportOptions, alias_field, create_alias_with,
+    ALIAS_TAG, AliasProvider, AliasService, AliasTransport, BREACH_CATALOG_KEY, CatalogStatus,
+    EmailBreach, EmailMonitoring, MonitoredEmail, ReportOptions, alias_field, create_alias_with,
 };
 pub use client::comfort::MoveOutcome;
 pub use client::developer::{AgentGrantRecord, ServiceAccountGrant, ServiceAccountInfo};
@@ -41,7 +41,9 @@ pub use model::{
     format,
 };
 pub use passbox_core::analysis::{
-    CategorySummary, Finding, FindingKind, FixAction, Priority, Rating, SecurityReport, Severity,
+    CatalogInfo, CategorySummary, Finding, FindingKind, FixAction, Priority, Rating,
+    SecurityReport, Severity,
+    breaches::{BreachCatalog, BreachedSite, SiteBreach},
     lookalike::{Lookalike, LookalikeReason},
     sites::SiteSupport,
 };

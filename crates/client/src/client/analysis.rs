@@ -1,18 +1,22 @@
 //! The vault security analysis for the apps: the report
-//! ([`passbox_core::analysis`]), dismissals, email breach monitoring through
-//! the server, lookalike checks and email aliases.
+//! ([`passbox_core::analysis`]), dismissals, the breach catalogue
+//! ("compromised websites"), email breach monitoring through the server,
+//! lookalike checks and email aliases.
 
 use std::collections::BTreeMap;
 use std::time::Duration;
 
 use passbox_core::analysis::{
     self, AnalysisItem, AnalysisOptions, BreachInfo, ExposedEmail, FindingKind, ItemView,
-    SecurityReport, lookalike,
+    SecurityReport,
+    breaches::{self, BreachCatalog, BreachedSite},
+    lookalike,
 };
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 
 use super::{Client, now_ms};
+
 use crate::model::{FieldType, ItemCategory, ItemData, field};
 use crate::{Error, Result};
 
@@ -75,6 +79,28 @@ pub struct EmailMonitoring {
     pub available: bool,
     pub check_interval_hours: u64,
     pub emails: Vec<MonitoredEmail>,
+}
+
+/// Store key of the breach catalogue fetched from the server (public data).
+pub const BREACH_CATALOG_KEY: &str = "breach_catalog";
+/// Store key prefix of the newest catalogue date the account was alerted
+/// about (`breach_seen.<account id>`, Unix ms as text).
+const BREACH_SEEN_KEY: &str = "breach_seen";
+
+/// What [`Client::refresh_breach_catalog`] found.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CatalogStatus {
+    /// The server offers the catalogue (`false`: off or an older server;
+    /// the bundled snapshot is used).
+    pub available: bool,
+    /// A newer catalogue was downloaded just now.
+    pub changed: bool,
+    pub version: String,
+    /// Newest added or modified date of its entries (Unix ms).
+    pub updated_at: i64,
+    pub entries: u32,
+    /// The bundled snapshot is in use.
+    pub bundled: bool,
 }
 
 /// An email alias service ("Alias erstellen" in the generator, G10).
@@ -446,8 +472,146 @@ impl Client {
                 disabled: options.disabled.clone(),
                 breach_counts,
                 exposed_emails: exposed,
+                site_breaches: self.stored_catalog(),
             },
         ))
+    }
+
+    // --- Breach catalogue ("compromised websites") ----------------------------------
+
+    fn stored_catalog(&self) -> Option<BreachCatalog> {
+        let bytes = self.store.get(BREACH_CATALOG_KEY).ok()??;
+        serde_json::from_slice(&bytes).ok()
+    }
+
+    fn catalog_status(&self, available: bool, changed: bool) -> CatalogStatus {
+        match self.stored_catalog() {
+            Some(stored) => CatalogStatus {
+                available,
+                changed,
+                version: stored.version.clone(),
+                updated_at: stored.updated_at,
+                entries: stored.breaches.len() as u32,
+                bundled: false,
+            },
+            None => {
+                let bundled = breaches::bundled();
+                CatalogStatus {
+                    available,
+                    changed,
+                    version: bundled.version.clone(),
+                    updated_at: bundled.updated_at,
+                    entries: bundled.breaches.len() as u32,
+                    bundled: true,
+                }
+            }
+        }
+    }
+
+    /// Checks the server's breach catalogue version and downloads the
+    /// catalogue when it is newer than the stored one. The same document
+    /// goes to everyone; matching happens in [`Client::security_report`].
+    /// Does not need an unlocked vault. Offline or with the catalogue
+    /// turned off, the stored or bundled catalogue stays in use.
+    pub fn refresh_breach_catalog(&self) -> Result<CatalogStatus> {
+        let not_found = |e: &Error| matches!(e, Error::Server { status: 404, .. });
+        let version =
+            match self
+                .api
+                .request_anonymous("GET", "/api/v1/breaches/catalog/version", None)
+            {
+                Ok(v) => v,
+                Err(e) if not_found(&e) => return Ok(self.catalog_status(false, false)),
+                Err(e) => return Err(e),
+            };
+        let remote_version = version["version"].as_str().unwrap_or_default().to_owned();
+        let remote_updated = version["updatedAt"].as_i64().unwrap_or(0);
+        let stored = self.stored_catalog();
+        let local_updated = stored
+            .as_ref()
+            .map_or(breaches::bundled().updated_at, |s| s.updated_at);
+        let same = stored.as_ref().is_some_and(|s| s.version == remote_version);
+        // An older catalogue than the bundled one (a server that has not
+        // fetched yet) is not worth downloading.
+        if same || remote_version.is_empty() || remote_updated < local_updated {
+            return Ok(self.catalog_status(true, false));
+        }
+        let value = match self
+            .api
+            .request_anonymous("GET", "/api/v1/breaches/catalog", None)
+        {
+            Ok(v) => v,
+            Err(e) if not_found(&e) => return Ok(self.catalog_status(false, false)),
+            Err(e) => return Err(e),
+        };
+        let catalog: BreachCatalog = serde_json::from_value(value)?;
+        self.store
+            .put(BREACH_CATALOG_KEY, &serde_json::to_vec(&catalog)?)?;
+        Ok(self.catalog_status(true, true))
+    }
+
+    fn breach_seen_key(&self) -> Result<String> {
+        let account = self
+            .device_account()?
+            .ok_or_else(|| Error::InvalidData("no account on this device".into()))?;
+        Ok(format!("{BREACH_SEEN_KEY}.{}", account.account_id))
+    }
+
+    fn breach_seen(&self) -> Result<i64> {
+        let key = self.breach_seen_key()?;
+        Ok(self
+            .store
+            .get(&key)?
+            .and_then(|b| String::from_utf8(b).ok())
+            .and_then(|s| s.trim().parse().ok())
+            // Breaches in the app's own snapshot are shown in the security
+            // check, not announced.
+            .unwrap_or(breaches::bundled().updated_at))
+    }
+
+    /// Breached websites the user has not been alerted about yet: open
+    /// breaches of saved logins that were published or changed after the
+    /// last acknowledged catalogue (the bundled snapshot at first). Apps
+    /// show a notification for these and then call
+    /// [`Client::acknowledge_breach_alerts`].
+    pub fn breach_alerts(&self, options: &ReportOptions) -> Result<Vec<BreachedSite>> {
+        let seen = self.breach_seen()?;
+        let report = self.security_report(options)?;
+        let dismissed: std::collections::BTreeSet<&str> = report
+            .findings
+            .iter()
+            .filter(|f| f.kind == FindingKind::BreachedSite && f.dismissed)
+            .map(|f| f.item_id.as_str())
+            .collect();
+        let catalog = self.stored_catalog();
+        let changed_at = |name: &str| {
+            catalog
+                .as_ref()
+                .unwrap_or_else(|| breaches::bundled())
+                .breaches
+                .iter()
+                .find(|b| b.name == name)
+                .map_or(0, breaches::SiteBreach::changed_at)
+        };
+        Ok(report
+            .breached_sites
+            .into_iter()
+            .filter(|site| {
+                site.affected
+                    .iter()
+                    .chain(&site.possibly)
+                    .any(|id| !dismissed.contains(id.as_str()))
+            })
+            .filter(|site| changed_at(&site.name) > seen)
+            .collect())
+    }
+
+    /// Marks the current catalogue as announced, so [`Client::breach_alerts`]
+    /// only reports breaches published later.
+    pub fn acknowledge_breach_alerts(&self) -> Result<()> {
+        let updated = self.catalog_status(true, false).updated_at;
+        let key = self.breach_seen_key()?;
+        self.store.put(&key, updated.to_string().as_bytes())
     }
 
     /// Dismisses (or restores) one finding of one item. Stored in the item
