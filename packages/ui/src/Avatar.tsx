@@ -23,13 +23,14 @@ export function initials(name: string): string {
   );
 }
 
-export type AvatarSize = "xs" | "sm" | "md" | "lg";
+export type AvatarSize = "xs" | "sm" | "md" | "lg" | "xl";
 
 const sizes: Record<AvatarSize, string> = {
   xs: "size-6 text-[0.625rem]",
   sm: "size-8 text-[0.6875rem]",
   md: "size-9 text-xs",
   lg: "size-11 text-sm",
+  xl: "size-16 text-lg",
 };
 
 export interface AvatarProps {

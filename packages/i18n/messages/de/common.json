@@ -96,8 +96,6 @@
   "error.rateLimited": "Zu viele Anmeldeversuche. Bitte in {minutes, plural, one {# Minute} other {# Minuten}} erneut versuchen. Falls Sie das nicht waren, rät vielleicht jemand – Ihr Geheimschlüssel schützt das Konto.",
   "error.conflict": "Der Eintrag wurde auf einem anderen Gerät geändert. Die neueste Version wurde geladen.",
   "error.capsLock": "Die Feststelltaste ist aktiviert.",
-  "notice.preview": "Passbox befindet sich in früher Entwicklung und wurde noch nicht unabhängig geprüft. Speichern Sie noch keine Geheimnisse, deren Verlust Sie sich nicht leisten können.",
-  "notice.previewBadge": "Vorschau",
   "term.twoFactor": "Zwei-Faktor-Anmeldung",
   "term.recoveryCode": "Wiederherstellungscode",
   "term.securityKey": "Sicherheitsschlüssel",

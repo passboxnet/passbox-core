@@ -261,5 +261,6 @@
   "breach.data.emailAddresses": "E-Mail-Adressen",
   "breach.data.usernames": "Benutzernamen",
   "breach.data.names": "Namen",
-  "breach.data.phoneNumbers": "Telefonnummern"
+  "breach.data.phoneNumbers": "Telefonnummern",
+  "vault.privateName": "Privat"
 }
