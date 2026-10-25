@@ -37,7 +37,7 @@ From the outside in:
 | `as_org(Scim, org)` | `context = 'scim'`, `org_id` | a SCIM token of `org` | that organization's members, SCIM users and groups; ending access of its members |
 | `as_org(Events, org)` | `context = 'org_events'`, `org_id` | the events API token of `org` | that organization's audit log |
 | `as_org(Sso, org)` | `context = 'sso'`, `org_id` | the SSO flow of `org` after the provider answered | that organization's SSO configuration, identities and members |
-| `system(Job::…)` | `system` | server start (`secrets`), the mail queue (`outbox`), `/metrics` (`metrics`), background jobs (`worker:<job>`) | only the rows of that job, for example `worker:mail` the mail queue |
+| `system(Job::…)` | `system` | server start (`secrets`), the mail queue (`outbox`), `/metrics` (`metrics`), the shared website icon store from requests (`icons`), background jobs (`worker:<job>`) | only the rows of that job, for example `worker:mail` the mail queue |
 
 Signed-out flows switch to the account once its credential is verified (`db::switch_to_account`), so the rest of a sign-in or sign-up transaction runs with that account's rights only.
 
@@ -70,7 +70,7 @@ Policies use the same kind of functions for membership (`passbox.my_orgs()`, `pa
 
 ## Coverage
 
-All 68 tenant tables have `ENABLE` and `FORCE ROW LEVEL SECURITY`. `counters` (the global change sequences) has no tenant data and no policy; `_sqlx_migrations` belongs to sqlx. The policies, grouped:
+All 68 tenant tables have `ENABLE` and `FORCE ROW LEVEL SECURITY`. `counters` (the global change sequences) has no tenant data and no policy; `_sqlx_migrations` belongs to sqlx. `site_icons` (migration 0003, the website icons shared by all users) has no tenant data either: no account, session or address column, and none may be added. It has forced row level security anyway, so every table follows the same rules: every named context reads it, only the `icons` context (request handlers, which look icons up there instead of as the account) and the `worker:icons` refresh job write it, and only the job deletes. The policies, grouped:
 
 | Tables | Who sees and changes rows |
 | --- | --- |
@@ -88,6 +88,7 @@ All 68 tenant tables have `ENABLE` and `FORCE ROW LEVEL SECURITY`. `counters` (t
 | `instance_state`, `instance_invites`, `admin_events` | instance admins; the meta context reads settings, the auth context reads and uses invitations; an account may append admin events it is the actor of |
 | `mail_outbox` | every transaction with a context queues; instance admins read the status; the mail job delivers |
 | `server_secrets` | the `secrets` system context at start only |
+| `site_icons` | every named context reads; the `icons` and `worker:icons` contexts write (no tenant data) |
 
 The exact policies are in `0002_rls.sql`; `crates/server/tests/api/rls.rs` checks that every table is forced and tries reads, writes and inserts across tenants, the escalation to instance admin, and each signed-out and machine context.
 

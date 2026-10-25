@@ -17,6 +17,7 @@
   "dependencies": {
     "@passbox/api-client": "workspace:*",
     "@passbox/core-wasm": "workspace:*",
+    "@passbox/site-icons": "workspace:*",
     "fflate": "0.8.2"
   },
   "devDependencies": {
