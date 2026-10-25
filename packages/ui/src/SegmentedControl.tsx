@@ -23,7 +23,7 @@ export function SegmentedControl<T extends string>({
   return (
     <fieldset
       className={cn(
-        "inline-grid auto-cols-fr grid-flow-col rounded-lg bg-surface-sunken p-0.5 ring-1 ring-border ring-inset",
+        "inline-grid auto-cols-fr grid-flow-col gap-0.5 rounded-full bg-surface-sunken p-1 ring-1 ring-hairline ring-inset",
         className,
       )}
     >
@@ -32,10 +32,10 @@ export function SegmentedControl<T extends string>({
         <label
           key={option.value}
           className={cn(
-            "flex h-8 cursor-pointer items-center justify-center rounded-md px-3 text-center text-[0.8125rem] font-medium transition coarse:h-11",
-            "has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-accent",
+            "flex h-8 cursor-pointer items-center justify-center rounded-full px-3.5 text-center text-[0.8125rem] font-semibold transition-colors duration-150 coarse:h-11",
+            "has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-focus",
             value === option.value
-              ? "bg-surface text-text shadow-card ring-1 ring-border"
+              ? "bg-surface-overlay text-text shadow-card ring-1 ring-hairline"
               : "text-text-muted hover:text-text",
           )}
         >

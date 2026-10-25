@@ -14,9 +14,9 @@ import { cn } from "./cn";
 import { useUiStrings } from "./UiStrings";
 
 export const fieldClassName = cn(
-  "w-full rounded-lg border border-border-strong bg-surface text-sm text-text shadow-xs transition",
+  "w-full rounded-control border border-border-strong bg-field text-sm text-text shadow-xs transition-[border-color,box-shadow] duration-150",
   "placeholder:text-text-subtle hover:border-text-subtle",
-  "focus:border-accent focus:outline-none focus:ring-3 focus:ring-accent/20",
+  "focus:border-accent focus:outline-none focus:ring-4 focus:ring-focus/20",
   "disabled:cursor-not-allowed disabled:bg-surface-sunken disabled:opacity-70",
   "aria-invalid:border-danger aria-invalid:focus:ring-danger/20",
 );
@@ -145,7 +145,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(fu
             onClick={() => setRevealed((r) => !r)}
             aria-label={revealed ? strings.hidePassword : strings.showPassword}
             aria-pressed={revealed}
-            className="flex size-7 items-center justify-center rounded-md text-text-muted hover:bg-surface-sunken hover:text-text coarse:size-10 [&_svg]:size-4"
+            className="flex size-7 items-center justify-center rounded-lg text-text-muted hover:bg-surface-raised hover:text-text coarse:size-10 [&_svg]:size-4"
           >
             {revealed ? <EyeOff /> : <Eye />}
           </button>

@@ -19,7 +19,7 @@ export function Tooltip({ content, children, side = "top" }: TooltipProps) {
         <RadixTooltip.Content
           side={side}
           sideOffset={6}
-          className="z-50 animate-fade-in rounded-md bg-text px-2 py-1 text-xs font-medium text-canvas shadow-overlay"
+          className="z-(--pb-z-tooltip) animate-fade-in rounded-lg bg-surface-inverse px-2.5 py-1.5 text-xs font-medium text-text-inverse shadow-overlay"
         >
           {content}
         </RadixTooltip.Content>

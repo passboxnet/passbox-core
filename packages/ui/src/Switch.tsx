@@ -26,9 +26,9 @@ export function Switch({ checked, onCheckedChange, label, description, disabled 
         checked={checked}
         onCheckedChange={onCheckedChange}
         disabled={disabled}
-        className="relative h-5 w-9 shrink-0 rounded-full bg-border-strong transition-colors data-[state=checked]:bg-accent disabled:opacity-50"
+        className="relative h-6 w-10 shrink-0 rounded-full bg-border-strong transition-colors duration-200 ease-standard focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus data-[state=checked]:bg-accent disabled:opacity-50"
       >
-        <RadixSwitch.Thumb className="block size-4 translate-x-0.5 rounded-full bg-white shadow-xs transition-transform data-[state=checked]:translate-x-[18px]" />
+        <RadixSwitch.Thumb className="block size-5 translate-x-0.5 rounded-full bg-white shadow-[0_1px_3px_rgb(0_0_0/0.25)] transition-transform duration-200 ease-emphasized data-[state=checked]:translate-x-[18px]" />
       </RadixSwitch.Root>
     </div>
   );

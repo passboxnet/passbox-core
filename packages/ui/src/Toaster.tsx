@@ -20,9 +20,9 @@ export function Toaster({ position = "bottom-right", duration, offset }: Toaster
       toastOptions={{
         classNames: {
           toast:
-            "!rounded-lg !border !border-border !bg-surface !text-text !shadow-overlay !font-sans !text-[0.8125rem] !gap-2.5",
+            "!rounded-control !border !border-hairline !bg-surface-overlay !text-text !shadow-overlay !font-sans !text-[0.8125rem] !gap-2.5",
           description: "!text-text-muted",
-          actionButton: "!bg-accent !text-accent-contrast !font-medium",
+          actionButton: "!rounded-full !bg-accent !text-accent-contrast !font-semibold",
           success: "[&_[data-icon]]:!text-success",
           error: "[&_[data-icon]]:!text-danger",
         },

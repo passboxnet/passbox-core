@@ -10,14 +10,15 @@ function hueFor(seed: string): number {
   return HUES[hash % HUES.length] ?? 262;
 }
 
-export type MonogramSize = "sm" | "md" | "lg" | "xl";
+export type MonogramSize = "sm" | "md" | "lg" | "xl" | "2xl";
 
-/** Box, corner radius, text and icon size per size step (shared with the image tiles). */
+/** Box, corner radius (28 % of the box), text and icon size per step (shared with the image tiles). */
 export const monogramSizes: Record<MonogramSize, string> = {
-  sm: "size-6 rounded-md text-2xs [&_svg]:size-3.5",
-  md: "size-8 rounded-lg text-xs [&_svg]:size-4",
-  lg: "size-10 rounded-lg text-sm [&_svg]:size-5",
-  xl: "size-14 rounded-xl text-xl [&_svg]:size-7",
+  sm: "size-6 rounded-[7px] text-2xs [&_svg]:size-3.5",
+  md: "size-8 rounded-[9px] text-xs [&_svg]:size-4",
+  lg: "size-10 rounded-[11px] text-sm [&_svg]:size-5",
+  xl: "size-14 rounded-tile text-xl [&_svg]:size-7",
+  "2xl": "size-18 rounded-[20px] text-2xl [&_svg]:size-9",
 };
 
 export interface MonogramProps {
