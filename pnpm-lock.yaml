@@ -163,6 +163,9 @@ importers:
 
   apps/website:
     dependencies:
+      '@passbox/brand-icons':
+        specifier: workspace:*
+        version: link:../../packages/brand-icons
       '@passbox/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n
