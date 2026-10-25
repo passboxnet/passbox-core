@@ -42,6 +42,7 @@ import {
   type WebAuthnRequestOptionsJson,
 } from "@passbox/api-client";
 import type * as Core from "@passbox/core-wasm";
+import { bundledSiteIcon, isBundledSite } from "@passbox/site-icons";
 import {
   type EffectivePolicy,
   NEW_ORG_POLICY_RULES,
@@ -1580,29 +1581,44 @@ export class PassboxClient {
   }
 
   /**
-   * The website icon of `domain` as a `data:` URL for an `<img>`, loaded
-   * through the user's own server (no request reaches the website from this
-   * device), or `null`. Cached in memory. Respect the user's icon setting.
+   * The website icon of `domain` as a `data:` URL for an `<img>`, or `null`.
+   * Popular sites come from the icons bundled with the app
+   * (`@passbox/site-icons`) without any request; for those the server is
+   * never asked. Others are loaded through the user's own server (no
+   * request reaches the website from this device). Cached in memory.
+   * Respect the user's icon setting.
    */
   iconUrl(domain: string): Promise<string | null> {
     const key = domain.trim().toLowerCase();
     if (!key) return Promise.resolve(null);
     let icon = this.icons.get(key);
     if (!icon) {
-      icon = this.api.icon(key).then(
-        (response) =>
-          response && ICON_TYPES.has(response.contentType)
-            ? `data:${response.contentType};base64,${bytesToBase64(response.bytes)}`
-            : null,
-        (error: unknown) => {
-          // Try again next time (offline, rate limited).
-          this.icons.delete(key);
-          throw error;
-        },
-      );
+      icon = this.loadIcon(key).catch((error: unknown) => {
+        // Try again next time (offline, rate limited).
+        this.icons.delete(key);
+        throw error;
+      });
       this.icons.set(key, icon);
     }
     return icon;
+  }
+
+  private async loadIcon(key: string): Promise<string | null> {
+    let bundled = false;
+    try {
+      bundled = await isBundledSite(key);
+    } catch {
+      // The bundled pack could not be loaded: only the server can help.
+    }
+    if (bundled) {
+      // A bundled site that cannot be drawn shows its monogram; asking the
+      // server instead would tell it about the site.
+      return bundledSiteIcon(key).catch(() => null);
+    }
+    const response = await this.api.icon(key);
+    return response && ICON_TYPES.has(response.contentType)
+      ? `data:${response.contentType};base64,${bytesToBase64(response.bytes)}`
+      : null;
   }
 
   /**

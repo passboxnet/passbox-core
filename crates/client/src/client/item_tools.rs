@@ -267,11 +267,14 @@ impl Client {
 
     // --- Website icons --------------------------------------------------------------
 
-    /// The website icon of `domain` (PNG, ICO, JPEG, GIF or WebP bytes)
-    /// through the user's own server, or `None`. Results are cached in the
-    /// store for 7 days ("no icon" for a day); offline, a cached icon is
-    /// returned. Pass the bare host name (`github.com`, punycode for
-    /// international names). Showing icons is a user preference of the app.
+    /// The website icon of `domain` (PNG, ICO, JPEG, GIF or WebP bytes), or
+    /// `None`. Popular sites come from the bundled icons the app installed
+    /// with [`crate::site_icons::set_bundled_site_icons`], without any
+    /// request; the server is never asked for them. Others come through
+    /// the user's own server and are cached in the store for 7 days ("no
+    /// icon" for a day); offline, a cached icon is returned. Pass the bare
+    /// host name (`github.com`, punycode for international names). Showing
+    /// icons is a user preference of the app.
     pub fn icon(&self, domain: &str) -> Result<Option<Vec<u8>>> {
         let domain = domain.trim().trim_end_matches('.').to_ascii_lowercase();
         let valid = !domain.is_empty()
@@ -282,6 +285,11 @@ impl Client {
                 .all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'.' || b == b'-');
         if !valid {
             return Ok(None);
+        }
+        if let Some(icon) = crate::site_icons::bundled_site_icons()
+            .and_then(|pack| pack.get(&domain).map(<[u8]>::to_vec))
+        {
+            return Ok(Some(icon));
         }
         let key = format!("{ICON_KEY_PREFIX}{}", domain.replace('.', "_"));
         let cached = self.store.get(&key)?.and_then(|bytes| decode_icon(&bytes));

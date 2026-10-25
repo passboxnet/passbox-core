@@ -13,6 +13,7 @@ pub mod model;
 pub mod reference;
 pub mod security;
 pub mod service_account;
+pub mod site_icons;
 pub mod store;
 
 pub use api::{AccountEvent, SecurityKeyInfo, SessionInfo, TotpSetup, TwoFactorStatus};

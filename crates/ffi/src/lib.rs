@@ -1151,6 +1151,21 @@ pub fn normalize_secret_key(input: String) -> Result<String> {
         .map_err(|_| PassboxError::InvalidCredentials)
 }
 
+// --- Bundled website icons ---------------------------------------------------------
+
+/// Installs the website icons bundled with the app (the asset
+/// `packages/site-icons/mobile/site-icons-64.pbic`) for every client of this process.
+/// Call it once at start, before the first `icon(domain)`. `icon` then
+/// answers bundled sites (WebP, 64 px) without a request, and never asks the
+/// server for them. Returns the number of bundled sites; fails with
+/// `InvalidData` for a damaged pack (the apps then work as without one).
+#[uniffi::export]
+pub fn set_bundled_site_icons(pack: Vec<u8>) -> Result<u32> {
+    let pack = client::site_icons::SiteIconPack::parse(pack)?;
+    let count = client::site_icons::set_bundled_site_icons(Some(pack));
+    Ok(u32::try_from(count).unwrap_or(u32::MAX))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
