@@ -41,5 +41,32 @@
         "organizeImports": "on"
       }
     }
-  }
+  },
+  "overrides": [
+    {
+      "includes": ["packages/ai/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "paths": {
+                  "@passbox/core-wasm": "AI code gets no keys and no vault access: packages/ai must not import the core or the client (docs/architecture/ai-gateway.md).",
+                  "@passbox/client": "AI code gets no keys and no vault access: packages/ai must not import the core or the client (docs/architecture/ai-gateway.md).",
+                  "@passbox/api-client": "AI code gets no keys and no vault access: packages/ai must not import the core or the client (docs/architecture/ai-gateway.md)."
+                },
+                "patterns": [
+                  {
+                    "group": ["@passbox/core-wasm/**", "@passbox/client/**"],
+                    "message": "AI code gets no keys and no vault access: packages/ai must not import the core or the client (docs/architecture/ai-gateway.md)."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
 }
