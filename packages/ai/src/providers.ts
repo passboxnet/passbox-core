@@ -1,7 +1,8 @@
 /**
  * Providers: an OpenAI-compatible endpoint (Ollama, vLLM, LocalAI,
- * LiteLLM, Mistral, OpenAI, …) and the browser's built-in model (Chrome
- * Prompt API). Both return parsed JSON; the feature validates it.
+ * LiteLLM, Mistral, IONOS, STACKIT, Scaleway, Langdock, OpenAI, …),
+ * Anthropic's Messages API and the browser's built-in model (Chrome Prompt
+ * API). All return parsed JSON; the feature validates it.
  */
 import { endpointProblem, type ProviderSettings, providerProblem } from "./settings";
 import { AiError, type AiProvider, type AiRequest, type ModelLocation } from "./types";
@@ -95,6 +96,88 @@ export function openAiCompatibleProvider(options: OpenAiCompatibleOptions): AiPr
   };
 }
 
+/** Version header of Anthropic's Messages API. */
+export const ANTHROPIC_VERSION = "2023-06-01";
+
+export interface AnthropicOptions {
+  id?: string;
+  /** `https://api.anthropic.com/v1` (the preset). */
+  baseUrl: string;
+  model: string;
+  /** From a vault item; sent as `x-api-key`, never in the prompt. */
+  apiKey: string | undefined;
+  jurisdiction?: string | undefined;
+  fetch?: typeof globalThis.fetch;
+}
+
+/**
+ * Anthropic's native Messages API (`POST {baseUrl}/messages`): the user's
+ * own key, called from this browser. Anthropic requires
+ * `anthropic-dangerous-direct-browser-access` for calls from a web page;
+ * the key is the user's own and never leaves this device otherwise.
+ */
+export function anthropicProvider(options: AnthropicOptions): AiProvider {
+  const problem = endpointProblem(options.baseUrl, "cloud");
+  if (problem || !options.baseUrl.trim()) throw new AiError("settings", `invalid endpoint (${problem ?? "missing"})`);
+  if (!options.model.trim()) throw new AiError("settings", "choose a model name");
+  if (!options.apiKey) throw new AiError("settings", "a cloud provider needs an API key from a vault item");
+  const base = options.baseUrl.trim().replace(/\/+$/, "");
+  const fetchImpl = options.fetch ?? globalThis.fetch.bind(globalThis);
+  const apiKey = options.apiKey;
+  return {
+    id: options.id ?? "anthropic",
+    location: "cloud",
+    ...(options.jurisdiction ? { jurisdiction: options.jurisdiction } : {}),
+    async complete(request) {
+      let response: Response;
+      try {
+        response = await fetchImpl(`${base}/messages`, {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            accept: "application/json",
+            "x-api-key": apiKey,
+            "anthropic-version": ANTHROPIC_VERSION,
+            "anthropic-dangerous-direct-browser-access": "true",
+          },
+          credentials: "omit",
+          referrerPolicy: "no-referrer",
+          ...(request.signal ? { signal: request.signal } : {}),
+          body: JSON.stringify({
+            model: options.model.trim(),
+            max_tokens: 4096,
+            system: systemPrompt(request),
+            messages: [{ role: "user", content: JSON.stringify(request.input.value) }],
+          }),
+        });
+      } catch (error) {
+        throw new AiError(
+          "provider",
+          error instanceof Error && error.name === "TimeoutError"
+            ? "the model did not answer in time"
+            : "Anthropic's API could not be reached",
+        );
+      }
+      if (!response.ok) throw new AiError("provider", `the model server answered with status ${response.status}`);
+      let body: unknown;
+      try {
+        body = await response.json();
+      } catch {
+        throw new AiError("invalid_response", "the server did not answer with JSON");
+      }
+      const blocks = (body as { content?: { type?: unknown; text?: unknown }[] }).content;
+      const text = Array.isArray(blocks)
+        ? blocks
+            .filter((b) => b.type === "text" && typeof b.text === "string")
+            .map((b) => b.text as string)
+            .join("")
+        : "";
+      if (!text) throw new AiError("invalid_response", "the answer has no text");
+      return parseJson(text);
+    },
+  };
+}
+
 /** The part of Chrome's Prompt API (`LanguageModel`) Passbox uses. */
 interface LanguageModelSession {
   prompt(input: string, options?: { responseConstraint?: unknown; signal?: AbortSignal }): Promise<string>;
@@ -158,6 +241,15 @@ export function providerFromSettings(
   const problem = providerProblem(settings);
   if (problem) throw new AiError("settings", `the AI settings are incomplete (${problem})`);
   if (settings.location === "on-device" && !settings.endpoint.trim()) return promptApiProvider();
+  if (settings.api === "anthropic") {
+    return anthropicProvider({
+      baseUrl: settings.endpoint,
+      model: settings.model,
+      apiKey,
+      jurisdiction: settings.jurisdiction,
+      ...(fetchImpl ? { fetch: fetchImpl } : {}),
+    });
+  }
   return openAiCompatibleProvider({
     baseUrl: settings.endpoint,
     model: settings.model,

@@ -85,8 +85,21 @@ export interface AgentEventRecord {
   createdAt: number;
 }
 
+/** The fair-use limit for AI agents and service accounts (they never count as members). */
+export interface AgentUsage {
+  /** 0 = unlimited. */
+  limitPerMember: number;
+  used: number;
+  /** 0 = unlimited. */
+  allowed: number;
+  pool: "personal" | "organization";
+  orgId?: string;
+  members?: number;
+}
+
 export interface DeveloperApi {
   serviceAccounts(): Promise<ServiceAccountRecord[]>;
+  agentLimit(): Promise<AgentUsage>;
   createServiceAccount(body: {
     id: string;
     name: string;
@@ -117,6 +130,7 @@ export function developerApi(call: Call): DeveloperApi {
   const sa = (id: string) => `/api/v1/service-accounts/${e(id)}`;
   return {
     serviceAccounts: () => call("GET", "/api/v1/service-accounts"),
+    agentLimit: () => call("GET", "/api/v1/agent-limit"),
     createServiceAccount: (body) => call("POST", "/api/v1/service-accounts", body),
     updateServiceAccount: (id, body) => call("PUT", sa(id), body),
     putServiceAccountGrants: (id, grants) => call("PUT", `${sa(id)}/grants`, { grants }),

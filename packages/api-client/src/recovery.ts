@@ -173,6 +173,8 @@ export interface RecoveryApi {
   addOrgGrant(orgId: string, body: unknown): Promise<void>;
   putEscrow(orgId: string, body: unknown): Promise<void>;
   deleteEscrow(orgId: string): Promise<void>;
+  /** Turns recovery off for the whole organization (admins). */
+  turnOff(orgId: string): Promise<void>;
   orgRequests(orgId: string): Promise<OrgRecoveryRequest[]>;
   approveRequest(orgId: string, requestId: string, body: unknown): Promise<void>;
   denyRequest(orgId: string, requestId: string): Promise<void>;
@@ -227,6 +229,7 @@ export function recoveryApi(call: Call): RecoveryApi {
     addOrgGrant: (orgId, body) => call("POST", `${org(orgId)}/grants`, body),
     putEscrow: (orgId, body) => call("PUT", `${org(orgId)}/escrow`, body),
     deleteEscrow: (orgId) => call("DELETE", `${org(orgId)}/escrow`),
+    turnOff: (orgId) => call("DELETE", org(orgId)),
     orgRequests: (orgId) => call("GET", `${org(orgId)}/requests`),
     approveRequest: (orgId, requestId, body) => call("POST", `${org(orgId)}/requests/${e(requestId)}/approve`, body),
     denyRequest: (orgId, requestId) => call("POST", `${org(orgId)}/requests/${e(requestId)}/deny`, {}),

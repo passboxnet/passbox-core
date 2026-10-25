@@ -30,6 +30,15 @@ export {
   type ValueKind,
 } from "./importMapping";
 export {
+  PROVIDER_PRESETS,
+  type ProviderApi,
+  type ProviderPreset,
+  presetById,
+  presetForEndpoint,
+} from "./presets";
+export {
+  ANTHROPIC_VERSION,
+  anthropicProvider,
   openAiCompatibleProvider,
   promptApiAvailability,
   promptApiProvider,

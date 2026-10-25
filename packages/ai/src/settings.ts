@@ -2,6 +2,7 @@
  * AI settings: off by default, opt-in per feature, one provider. API keys
  * are vault items; settings only hold the item's ID.
  */
+import { PROVIDER_PRESETS, type ProviderApi } from "./presets";
 import { FEATURES, type FeatureId, MODEL_LOCATIONS, type ModelLocation } from "./types";
 
 export interface ProviderSettings {
@@ -17,6 +18,10 @@ export interface ProviderSettings {
   apiKeyItemId?: string;
   /** Country or region of a cloud provider, shown at opt-in ("EU"). */
   jurisdiction?: string;
+  /** Wire format; absent means OpenAI-compatible. */
+  api?: ProviderApi;
+  /** The preset the settings came from (`presets.ts`), for the UI. */
+  preset?: string;
 }
 
 export interface AiSettings {
@@ -54,6 +59,8 @@ export function parseAiSettings(raw: unknown): AiSettings {
           model: str(p.model, 200),
           ...(str(p.apiKeyItemId, 100) ? { apiKeyItemId: str(p.apiKeyItemId, 100) } : {}),
           ...(str(p.jurisdiction, 40) ? { jurisdiction: str(p.jurisdiction, 40) } : {}),
+          ...(p.api === "anthropic" ? { api: "anthropic" as const } : {}),
+          ...(PROVIDER_PRESETS.some((preset) => preset.id === p.preset) ? { preset: p.preset as string } : {}),
         }
       : undefined;
   const features = Array.isArray(r.features) ? FEATURES.filter((f) => (r.features as unknown[]).includes(f)) : [];

@@ -22,7 +22,15 @@ export const DEFAULT_POLICY_RULES: PolicyRules = {
   requireRecoveryEnrollment: false,
   allowPersonalVault: true,
   reportItemUsage: false,
+  allowAgentReveal: false,
 };
+
+/**
+ * The first policy of a new organization (since 25.10.2026): recovery
+ * through the organization is required, everything else restricts nothing
+ * (mirrors `PolicyRules::new_org_defaults`).
+ */
+export const NEW_ORG_POLICY_RULES: PolicyRules = { ...DEFAULT_POLICY_RULES, requireRecoveryEnrollment: true };
 
 /** The policy in force for one organization (mirrors `passbox_core::policy::OrgPolicyView`). */
 export interface OrgPolicy {
@@ -52,7 +60,18 @@ export interface EffectivePolicy {
   exportBlockedOrgs: string[];
   externalSharingBlockedOrgs: string[];
   itemUsageOrgs: string[];
+  /** Organizations whose policy lets members reveal values to AI agents (older cores omit it). */
+  agentRevealOrgs?: string[];
   hasUnknownRules: boolean;
+}
+
+/**
+ * Whether an approver may tick "Allow revealing the value to the agent" for
+ * items of this vault: personal vaults yes, an organization's vaults only
+ * with `allowAgentReveal` in its policy.
+ */
+export function agentRevealAllowed(policy: EffectivePolicy, vault: { orgId?: string | undefined }): boolean {
+  return !vault.orgId || (policy.agentRevealOrgs ?? []).includes(vault.orgId);
 }
 
 export const NO_POLICY: EffectivePolicy = {
@@ -66,6 +85,7 @@ export const NO_POLICY: EffectivePolicy = {
   exportBlockedOrgs: [],
   externalSharingBlockedOrgs: [],
   itemUsageOrgs: [],
+  agentRevealOrgs: [],
   hasUnknownRules: false,
 };
 

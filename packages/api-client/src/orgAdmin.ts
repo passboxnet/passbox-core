@@ -19,6 +19,12 @@ export interface PolicyRules {
   requireRecoveryEnrollment: boolean;
   allowPersonalVault: boolean;
   reportItemUsage: boolean;
+  /**
+   * Members may let AI agents see values of this organization's items
+   * (`passbox_reveal`, with an explicit tick per grant). Off by default;
+   * servers and apps before this rule omit it (= off).
+   */
+  allowAgentReveal?: boolean;
 }
 
 /** A signed policy as the server stores it. */
@@ -163,6 +169,14 @@ export interface OrgReport {
   pendingRecoveryRequests: number;
   recoverySetUp: boolean;
   policyVersion: number;
+  /** Confirmed members who are not guests (billable). Older servers omit it. */
+  memberCount?: number;
+  /** Confirmed guests: free and view-only, never billable. */
+  guestCount?: number;
+  /** Active service accounts of the members (free, fair use). */
+  serviceAccountCount?: number;
+  /** Fair-use limit of agents and service accounts per member; 0 = unlimited. */
+  agentLimitPerMember?: number;
 }
 
 export interface OrgSettings {

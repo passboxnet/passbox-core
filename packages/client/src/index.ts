@@ -2,6 +2,7 @@ export type { EmailBreach, EmailMonitoring, MonitoredEmail } from "@passbox/api-
 export {
   AUDIT_CATEGORIES,
   type AuditRecord,
+  agentRevealAllowed,
   auditCategory,
   auditDetails,
   canExportVault,
@@ -9,6 +10,7 @@ export {
   clampAutoLock,
   DEFAULT_POLICY_RULES,
   type EffectivePolicy,
+  NEW_ORG_POLICY_RULES,
   NO_POLICY,
   type OrgPolicy,
   type PolicyRules,
@@ -86,6 +88,7 @@ export {
 export {
   type AgentEventRecord,
   type AgentRequest,
+  type AgentUsage,
   type CreatedServiceAccount,
   type ServiceAccount,
   type ServiceAccountEventRecord,

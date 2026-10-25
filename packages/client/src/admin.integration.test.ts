@@ -50,6 +50,9 @@ describe.skipIf(!serverUrl)("organization administration against a server", () =
       await alice.client.confirmMember(orgId, member.id);
     }
 
+    // New organizations start with recovery required (policy version 1).
+    expect(alice.client.orgPolicy(orgId)).toMatchObject({ version: 1, rules: { requireRecoveryEnrollment: true } });
+
     // Carol (admin) signs the policy.
     await carol.client.sync();
     const policy = await carol.client.setOrgPolicy(orgId, {
@@ -59,7 +62,7 @@ describe.skipIf(!serverUrl)("organization administration against a server", () =
       forbidExport: true,
       reportItemUsage: true,
     });
-    expect(policy).toMatchObject({ version: 1, source: "verified", signerId: carol.id });
+    expect(policy).toMatchObject({ version: 2, source: "verified", signerId: carol.id });
     await expect(bob.client.setOrgPolicy(orgId, DEFAULT_POLICY_RULES)).rejects.toThrow();
 
     await bob.client.sync();
@@ -99,14 +102,16 @@ describe.skipIf(!serverUrl)("organization administration against a server", () =
 
     const report = await alice.client.orgAdmin.reports(orgId);
     expect(report.members.find((m) => m.accountId === bob.id)?.security?.total).toBe(1);
-    expect(report.policyVersion).toBe(1);
+    expect(report.policyVersion).toBe(2);
+    // Members and guests are counted separately (guests are never billable).
+    expect(report).toMatchObject({ memberCount: 3, guestCount: 0 });
 
     // Offboarding Carol, who signed the policy: Alice signs it again.
     const result = await alice.client.offboardMember(orgId, carol.id);
     expect(result.pendingRotation).toEqual([]);
-    expect(alice.client.orgPolicy(orgId)).toMatchObject({ version: 2, signerId: alice.id, source: "verified" });
+    expect(alice.client.orgPolicy(orgId)).toMatchObject({ version: 3, signerId: alice.id, source: "verified" });
     await bob.client.sync();
-    expect(bob.client.orgPolicy(orgId)).toMatchObject({ version: 2, needsResign: false });
+    expect(bob.client.orgPolicy(orgId)).toMatchObject({ version: 3, needsResign: false });
     expect(bob.client.getSnapshot().effectivePolicy.allowPersonalVault).toBe(false);
 
     // Offboarding Bob signs him out everywhere.
@@ -114,6 +119,6 @@ describe.skipIf(!serverUrl)("organization administration against a server", () =
     expect(after.pendingRotation).toEqual([]);
     await expect(bob.client.sync()).rejects.toMatchObject({ status: 401 });
     const history = await alice.client.policyHistory(orgId);
-    expect(history.map((p) => p.version)).toEqual([2, 1]);
+    expect(history.map((p) => p.version)).toEqual([3, 2, 1]);
   });
 });

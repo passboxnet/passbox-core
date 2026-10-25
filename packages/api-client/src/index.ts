@@ -321,6 +321,22 @@ export interface InstanceSettings {
   supportUrl: string;
   defaultLocale: MailLocale;
   passwordPolicy: PasswordPolicy;
+  /**
+   * AI agents and service accounts per member (fair use). `null` or absent:
+   * `PASSBOX_AGENT_LIMIT_PER_MEMBER`; 0 = unlimited.
+   */
+  agentLimitPerMember?: number | null;
+}
+
+/** What the server holds; guests, agents and service accounts are never billable members. */
+export interface InstanceUsage {
+  accounts: number;
+  organizations: number;
+  /** Accounts that are confirmed members (not guests) of an organization. */
+  members: number;
+  /** Accounts that are only guests. */
+  guests: number;
+  serviceAccounts: number;
 }
 
 export interface MailStatus {
@@ -341,6 +357,9 @@ export interface AdminSettings {
   mail: MailStatus;
   /** Admins configured with `PASSBOX_ADMIN_EMAILS`. */
   envAdminEmails: string[];
+  /** `PASSBOX_AGENT_LIMIT_PER_MEMBER` (0 = unlimited). Older servers omit it. */
+  envAgentLimitPerMember?: number;
+  usage?: InstanceUsage;
 }
 
 export interface AdminUser {
@@ -518,6 +537,11 @@ export interface InvitationPreview {
   expiresAt: number;
   /** Email of the admin who invited (servers before this field omit it). */
   inviterEmail?: string;
+  /**
+   * The organization's admins will be able to restore the invitee's access
+   * (recovery is on and required). The app must say so before accepting.
+   */
+  recovery?: boolean;
 }
 
 /**

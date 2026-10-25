@@ -5,7 +5,12 @@
  */
 import type { AgentGrantRecord, ServiceAccountPermission, ServiceAccountRecord } from "@passbox/api-client";
 
-export type { AgentEventRecord, ServiceAccountEventRecord, ServiceAccountPermission } from "@passbox/api-client";
+export type {
+  AgentEventRecord,
+  AgentUsage,
+  ServiceAccountEventRecord,
+  ServiceAccountPermission,
+} from "@passbox/api-client";
 
 /** A service account with its vault access, as its owner sees it. */
 export type ServiceAccount = ServiceAccountRecord & {

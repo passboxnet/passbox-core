@@ -1,11 +1,14 @@
 import { describe, expect, it } from "vitest";
 import {
   AUDIT_CATEGORIES,
+  agentRevealAllowed,
   auditCategory,
   auditDetails,
   canExportVault,
   canMoveBetween,
   clampAutoLock,
+  DEFAULT_POLICY_RULES,
+  NEW_ORG_POLICY_RULES,
   NO_POLICY,
   policyTasks,
   securityAggregate,
@@ -25,6 +28,21 @@ const strict = {
 };
 
 describe("policy helpers", () => {
+  it("requires recovery for new organizations and keeps agent reveals off", () => {
+    expect(NEW_ORG_POLICY_RULES).toEqual({ ...DEFAULT_POLICY_RULES, requireRecoveryEnrollment: true });
+    expect(NEW_ORG_POLICY_RULES.allowAgentReveal).toBe(false);
+  });
+
+  it("allows agent reveals only for personal vaults and organizations that allow them", () => {
+    const policy = { ...NO_POLICY, agentRevealOrgs: ["a"] };
+    expect(agentRevealAllowed(policy, {})).toBe(true);
+    expect(agentRevealAllowed(policy, { orgId: "a" })).toBe(true);
+    expect(agentRevealAllowed(policy, { orgId: "b" })).toBe(false);
+    // Older cores without the field: organizations never allow it.
+    const { agentRevealOrgs: _, ...old } = NO_POLICY;
+    expect(agentRevealAllowed(old, { orgId: "a" })).toBe(false);
+  });
+
   it("clamps auto-lock to the limit", () => {
     expect(clampAutoLock(strict, 0)).toBe(10);
     expect(clampAutoLock(strict, 60)).toBe(10);

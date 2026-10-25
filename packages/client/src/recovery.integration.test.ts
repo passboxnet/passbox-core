@@ -116,13 +116,15 @@ describe.skipIf(!serverUrl)("recovery against a server", () => {
     await bob.client.sync();
     const shared = await alice.client.createItem(vaultId, secret("Shared", "team-secret"));
 
-    expect((await bob.client.orgRecovery(orgId)).available).toBe(false);
-    await alice.client.setUpOrgRecovery(orgId);
+    // On by default: the organization has recovery and requires it; Bob's
+    // client enrolls automatically once he is confirmed.
     const info = await bob.client.orgRecovery(orgId);
     expect(info).toMatchObject({ available: true, enrolled: false, canApprove: false, admins: [alice.id] });
     expect((await alice.client.orgRecovery(orgId)).canApprove).toBe(true);
-    await bob.client.enrollOrgRecovery(orgId);
+    expect((await alice.client.orgRecovery(orgId)).enrolled).toBe(true);
+    expect(await bob.client.enrollRequiredOrgRecovery()).toEqual([orgId]);
     expect((await bob.client.orgRecovery(orgId)).enrolled).toBe(true);
+    expect(await bob.client.enrollRequiredOrgRecovery()).toEqual([]);
     expect(bob.client.recoveryOptions?.orgs.map((o) => o.orgId)).toEqual([orgId]);
 
     // Bob's new device asks; Alice compares the code and approves.

@@ -5,6 +5,7 @@ import {
   type AccountKeys,
   type AccountPreferences,
   type AdminApi,
+  type AgentUsage,
   ApiError,
   type AttachmentUsageResponse,
   type AuditExport,
@@ -43,6 +44,7 @@ import {
 import type * as Core from "@passbox/core-wasm";
 import {
   type EffectivePolicy,
+  NEW_ORG_POLICY_RULES,
   NO_POLICY,
   type OrgPolicy,
   type PolicyRules,
@@ -2075,7 +2077,19 @@ export class PassboxClient {
     ) as { id: string };
     await this.api.sharing.createOrg(body);
     await this.sync();
+    await this.setUpNewOrg(body.id);
     return body.id;
+  }
+
+  /**
+   * Organization recovery is on by default (C1, since 25.10.2026): a new
+   * organization gets its recovery key and a first policy that requires
+   * enrollment, and the creator enrolls. Admins can turn both off later.
+   */
+  private async setUpNewOrg(orgId: string): Promise<void> {
+    await this.setUpOrgRecovery(orgId);
+    await this.setOrgPolicy(orgId, NEW_ORG_POLICY_RULES);
+    await this.enrollOrgRecovery(orgId);
   }
 
   /** Renames an organization (admins). */
@@ -2173,8 +2187,11 @@ export class PassboxClient {
     await this.sync();
     const org = this.org(orgId);
     const vaultId = org.defaultVaultId;
+    // Guests only see what is shared with them (B8): no family vault.
+    const guest = org.members.some((m) => m.accountId === accountId && m.role === "guest");
     if (
       org.kind === "family" &&
+      !guest &&
       vaultId &&
       this.sharedVaults().some((v) => v.vaultId === vaultId && v.role === "manage")
     ) {
@@ -2691,6 +2708,42 @@ export class PassboxClient {
     if (!state.key) throw new Error("the organization has not set up recovery");
     const body = JSON.parse(keyring.enrollOrgRecovery(orgId, JSON.stringify(state.key), Date.now()));
     await this.api.recovery.putEscrow(orgId, body);
+    await this.refreshRecoveryOptions().catch(() => undefined);
+  }
+
+  /**
+   * Enrolls in the recovery of every organization whose policy requires it
+   * and that has recovery set up (on by default for new organizations;
+   * members were told when they joined). Guests are never enrolled.
+   * Returns the organizations enrolled now; failures (for example before an
+   * admin confirmed the membership) are retried next time.
+   */
+  async enrollRequiredOrgRecovery(): Promise<string[]> {
+    const required = this.getSnapshot().effectivePolicy.recoveryEnrollmentOrgs;
+    if (required.length === 0) return [];
+    const status = await this.recoveryStatus();
+    const enrolled = new Set(status.orgEscrows.map((e) => e.orgId));
+    const done: string[] = [];
+    for (const orgId of required) {
+      if (enrolled.has(orgId)) continue;
+      try {
+        await this.enrollOrgRecovery(orgId);
+        done.push(orgId);
+      } catch (error) {
+        console.warn("Could not enroll in organization recovery yet", error);
+      }
+    }
+    return done;
+  }
+
+  /**
+   * Turns recovery off for the whole organization (owners and admins): the
+   * recovery key, admins' copies and members' escrows are deleted. The
+   * server refuses while the policy requires recovery (`recovery_required`).
+   */
+  async turnOffOrgRecovery(orgId: string): Promise<void> {
+    this.requireKeyring();
+    await this.api.recovery.turnOff(orgId);
     await this.refreshRecoveryOptions().catch(() => undefined);
   }
 
@@ -3597,6 +3650,11 @@ export class PassboxClient {
     await this.api.developer.deleteServiceAccount(id);
   }
 
+  /** The fair-use limit for AI agents and service accounts (they never count as members). */
+  async agentLimit(): Promise<AgentUsage> {
+    return this.api.developer.agentLimit();
+  }
+
   async serviceAccountEvents(id: string): Promise<ServiceAccountEventRecord[]> {
     return this.api.developer.serviceAccountEvents(id);
   }
@@ -3637,10 +3695,15 @@ export class PassboxClient {
 
   /**
    * Approves or denies an agent request, signed with this account's key.
-   * `maxUses` 0 keeps the request's limit.
+   * `maxUses` 0 keeps the request's limit. `allowReveal` is the person's
+   * explicit tick "Allow revealing the value to the agent" for a request
+   * that asks for `reveal` (`passbox_reveal`); the core refuses it when an
+   * organization's policy forbids reveals for one of the items' vaults.
    */
-  async decideAgentRequest(request: AgentRequest, approved: boolean, maxUses = 0): Promise<void> {
-    const signed = JSON.parse(this.requireKeyring().decideAgentGrant(request.raw, approved, maxUses, Date.now())) as {
+  async decideAgentRequest(request: AgentRequest, approved: boolean, maxUses = 0, allowReveal = false): Promise<void> {
+    const signed = JSON.parse(
+      this.requireKeyring().decideAgentGrant(request.raw, approved, maxUses, Date.now(), allowReveal),
+    ) as {
       decision: string;
       decisionSignature: string;
     };
