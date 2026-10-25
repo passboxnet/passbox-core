@@ -4,7 +4,7 @@
 
 This document describes waves C1 (recovery through an organization or family), C2 (personal recovery code), C3 (emergency access) and C4 (adding a device with a code) as implemented. The planning sketch is in [docs/planning/feature-gap.md](../planning/feature-gap.md) §5.3 (German); where this document differs, this document is what the code does. It builds on the key hierarchy in [cryptography.md](cryptography.md) and the key pairs, key directory and organizations in [sharing.md](sharing.md).
 
-All cryptography is in [`crates/core`](../../crates/core): `recovery::code`, `recovery::org`, `emergency` and `device_link`. The web app and the extension use it through `@passbox/core-wasm` and [`packages/client`](../../packages/client) (`PassboxClient`), the native apps through [`crates/client`](../../crates/client) and the FFI ([`crates/ffi/src/recovery.rs`](../../crates/ffi/src/recovery.rs)). The server ([`crates/server/src/api/recovery.rs`](../../crates/server/src/api/recovery.rs), `org_recovery.rs`, `emergency.rs`, `device_links.rs`, migration [`0007_recovery.sql`](../../crates/server/migrations/0007_recovery.sql)) stores sealed data and enforces who gets it when.
+All cryptography is in [`crates/core`](../../crates/core): `recovery::code`, `recovery::org`, `emergency` and `device_link`. The web app and the extension use it through `@passbox/core-wasm` and [`packages/client`](../../packages/client) (`PassboxClient`), the native apps through [`crates/client`](../../crates/client) and the FFI ([`crates/ffi/src/recovery.rs`](../../crates/ffi/src/recovery.rs)). The server ([`crates/server/src/api/recovery.rs`](../../crates/server/src/api/recovery.rs), `org_recovery.rs`, `emergency.rs`, `device_links.rs`, migration [`0001_baseline.sql`](../../crates/server/migrations/0001_baseline.sql)) stores sealed data and enforces who gets it when.
 
 ## What recovery means here
 
@@ -145,7 +145,7 @@ Trust that remains by design:
 
 ## Server storage and limits
 
-Migration [`0007_recovery.sql`](../../crates/server/migrations/0007_recovery.sql): `account_recovery` (second OPAQUE record and wrap), `recovery_attempts`, `recovery_sessions` (token hashes, single use, 15 minutes), `org_recovery_keys`, `org_recovery_grants`, `org_recovery_escrows`, `org_recovery_requests` (token hashes, 48 hours), `emergency_grants`, `device_links` (claim token hashes, 10 minutes). All writes run in `db::begin_write` transactions; SQL is portable (SQLite and PostgreSQL).
+Migration [`0001_baseline.sql`](../../crates/server/migrations/0001_baseline.sql): `account_recovery` (second OPAQUE record and wrap), `recovery_attempts`, `recovery_sessions` (token hashes, single use, 15 minutes), `org_recovery_keys`, `org_recovery_grants`, `org_recovery_escrows`, `org_recovery_requests` (token hashes, 48 hours), `emergency_grants`, `device_links` (claim token hashes, 10 minutes). All writes run in `db::begin_write` transactions; SQL is portable (PostgreSQL with row level security).
 
 Rate limits (in memory, per server process): recovery-code logins share the per-IP authentication limit and count failures per (email, IP) (10), per email (20) and per IP (100) in 15 minutes; the second factor uses the two-factor limits; organization recovery requests are limited to 10 per IP and 3 per email per hour; emergency invitations to 20 per account per hour and 20 contacts per account; device link claims to 10 per IP per minute and 5 open links per account.
 
@@ -169,7 +169,7 @@ Endpoints are listed in [docs/api/openapi.yaml](../api/openapi.yaml) under the t
 ## Tests
 
 - Core: known-answer test of the recovery code encoding and derivation (computed independently with Python's `hashlib`/`hmac`), checksum and typo handling, wrong code, wrong account, tampering (`recovery::code`); organization recovery end to end, a swapped ephemeral key, forged approvals, bundles and escrows (`recovery::org::tests`); emergency access, tampering, wrong recipients and waiting-period bounds (`emergency`); device links with a swapped key and wrong codes (`device_link`).
-- Server: `crates/server/tests/api/recovery.rs` (SQLite and PostgreSQL): recovery code with and without a second factor, fake answers for unknown emails, single-use tokens, revoked sessions, rate limits; organization recovery with forged approvals, wrong request tokens, denial and opt-out; emergency access with signed waiting period checks, versions, decline, release after the waiting period and removal; device links.
+- Server: `crates/server/tests/api/recovery.rs` (PostgreSQL with row level security): recovery code with and without a second factor, fake answers for unknown emails, single-use tokens, revoked sessions, rate limits; organization recovery with forged approvals, wrong request tokens, denial and opt-out; emergency access with signed waiting period checks, versions, decline, release after the waiting period and removal; device links.
 - Rust client: `crates/client/tests/recovery.rs`. TypeScript: `packages/client/src/recovery.integration.test.ts`. Swift and Kotlin bindings: `RecoveryIntegrationTests.swift`, `FfiRecoveryTest.kt`. Web: unit tests and `e2e/tests/recovery.spec.ts` (recovery code, emergency access).
 
 ## Open issues
