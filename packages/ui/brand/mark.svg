@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32"><title>Passbox</title>
-  <defs><linearGradient id="pb" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5EA8F9"/><stop offset="0.5" stop-color="#2061F5"/><stop offset="1" stop-color="#1A2C94"/></linearGradient>
-    <radialGradient id="pb-glow" cx="0.22" cy="0.12" r="0.75"><stop offset="0" stop-color="#fff" stop-opacity="0.24"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs>
+  <defs><linearGradient id="pb" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#36596A"/><stop offset="0.5" stop-color="#243E4B"/><stop offset="1" stop-color="#12232B"/></linearGradient>
+    <radialGradient id="pb-glow" cx="0.22" cy="0.12" r="0.75"><stop offset="0" stop-color="#6EABC7" stop-opacity="0.38"/><stop offset="1" stop-color="#6EABC7" stop-opacity="0"/></radialGradient></defs>
   <rect width="32" height="32" rx="9" fill="url(#pb)"/>
   <rect width="32" height="32" rx="9" fill="url(#pb-glow)"/>
-  <rect x="0.5" y="0.5" width="31" height="31" rx="8.5" fill="none" stroke="#fff" stroke-opacity="0.18"/>
-  <circle cx="16" cy="13.4" r="4.2" fill="#fff"/><path d="M14.2 16.2h3.6l1.1 6.9a.8.8 0 0 1-.8.9h-4.2a.8.8 0 0 1-.8-.9z" fill="#fff"/>
+  <rect x="0.5" y="0.5" width="31" height="31" rx="8.5" fill="none" stroke="#fff" stroke-opacity="0.14"/>
+  <circle cx="16" cy="13.4" r="4.2" fill="#FFE26D"/><path d="M14.2 16.2h3.6l1.1 6.9a.8.8 0 0 1-.8.9h-4.2a.8.8 0 0 1-.8-.9z" fill="#FFE26D"/>
 </svg>

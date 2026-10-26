@@ -1,4 +1,4 @@
-# Passbox design system ("Passbox Night")
+# Passbox design system ("Passbox Marina")
 
 The visual language of every Passbox surface: website, web app, desktop app,
 browser extension, iOS, Android and the server's own pages and emails. The
@@ -6,10 +6,13 @@ brand elements (logo, app icons, gradient, motif, icon family) are in
 [brand.md](brand.md); the visual board is [board.html](board.html) (open it in
 a browser; screenshots in both themes are attached to the redesign PRs).
 
-**Direction:** dark-first, premium and calm. Deep ink surfaces, one electric
-blue, generous radii, hairline borders, elevation through lighter surfaces
-rather than heavy shadows, and a light theme designed with the same care (not
-an inversion). The system default theme is respected everywhere.
+**Direction:** dark-first, premium and calm. Deep Marina surfaces, one Solar
+Silk accent used sparingly, Sky Horizon for selection and information,
+generous radii, hairline borders, elevation through lighter surfaces rather
+than heavy shadows, the stacked-card lip as a quiet 3D motif, and a light
+theme on warm paper designed with the same care (not an inversion). The
+system default theme is respected everywhere. Colour roles and the reasoning
+behind them: [brand.md](brand.md#2-colours-and-the-signature-gradient).
 
 ## Sources and outputs
 
@@ -21,7 +24,7 @@ One source, generated everywhere:
 | Generator and checks (sRGB gamut, WCAG contrast, stale outputs) | `scripts/generate-design-tokens.mjs` (`pnpm --filter @passbox/ui tokens`; `pnpm test` runs `--check`) |
 | Web, extension, desktop, website | `packages/ui/src/tokens.css` (Tailwind CSS v4 `@theme` + CSS variables `--pb-*`) |
 | iOS | `apps/ios/Shared/DesignTokens.swift` (dynamic light/dark colors without asset catalog entries, type scale, radii, spacing, motion, gradients) |
-| Android | `apps/android/app/src/main/java/dev/passbox/android/ui/theme/Tokens.kt` (Material `ColorScheme` light/dark, `PassboxColors`, `PassboxTokenTypography`, `PassboxShapeScale`, spacing, motion, gradients) |
+| Android | `apps/android/app/src/main/java/dev/passbox/android/ui/theme/Tokens.kt` (Material `ColorScheme` light/dark with `primary` = `control`, so Material text buttons and switches never show Solar on white; `PassboxColors`, `PassboxTokenTypography`, `PassboxShapeScale`, spacing, motion, gradients) |
 | Server pages and emails | `crates/server/src/brand/tokens.rs` (sRGB colors per theme, gradients, font stacks, radii) |
 | Logo, app icons, icon family | `scripts/generate-brand-assets.mjs`, see [brand.md](brand.md) |
 
@@ -66,8 +69,17 @@ color utility (`bg-surface`, `text-text-muted`, `border-hairline`,
   is tuned for 4.5:1 on the canvas and surfaces. In Tailwind, `text-accent`,
   `text-danger`, `text-success`, `text-warning` and `text-info` already map to
   the text variants (`--text-color-*`), while `bg-*`, `border-*` and `ring-*`
-  use the fill. Text on a fill uses `*-contrast` (white, except ink on the
-  orange warning fill).
+  use the fill. Text on a fill uses `*-contrast`: Marina ink on Solar
+  (`accent-contrast`) and on the orange warning fill, white on success (light)
+  and danger.
+- **Solar is a fill, not a text colour on light.** `accent` is Solar Silk in
+  both themes; `accent-text` is deep Sky in light and Solar in dark. Checked
+  controls (switch tracks, checkboxes, radios, progress) use `control` /
+  `control-contrast` (Marina with white in light, Solar with Marina ink in
+  dark), because a Solar track has no contrast on white.
+- **Selection is Sky.** Selected rows, the active navigation item and selected
+  tabs use `selection` with `selection-marker`; Solar fills are reserved for
+  the primary action and the raised “+”.
 - **Elevation is lightness.** In dark mode surfaces get lighter as they rise
   (canvas → surface → surface-raised → surface-overlay); shadows are subtle
   and add a 1 px top highlight. In light mode surfaces are white on an
@@ -85,7 +97,12 @@ compiles to `var(--pb-surface)` and resolves on the element itself
 - Radii: controls 12 px, cards 20 px, panels and windows 24 px, sheets 28 px,
   pills and switches fully round. Icon tiles use 28 % of their size.
 - Shadows (`shadow-xs`, `shadow-card`, `shadow-raised`, `shadow-overlay`,
-  `shadow-glow`, `shadow-highlight`) switch with the theme.
+  `shadow-glow`, `shadow-highlight`) switch with the theme. The lip:
+  `shadow-lip` (2 px `accent-edge` under Solar pills and the “+”),
+  `shadow-lip-glow` (the same with the Solar glow, on hover) and
+  `shadow-stack` (3 px darker bottom edge of stat tiles and category cards).
+  Native: a 2 pt/dp bottom edge in `accentEdge` under Solar fills, a 3 pt/dp
+  edge in `cardEdge` under stacked cards.
 - Glass (`glass` utility: translucent surface, 24 px backdrop blur, light
   edge) only for the desktop window, floating bars and the mobile bottom bar.
   Text on glass must still pass contrast against the darkest/lightest
@@ -110,93 +127,112 @@ returns no animation, Compose code checks the animator duration scale.
 <!-- @generated tokens:start — Generated by scripts/generate-design-tokens.mjs from packages/ui/tokens/tokens.json. Do not edit. -->
 | Token | Light | Dark | Use |
 | --- | --- | --- | --- |
-| `canvas` | `0.975 0.004 266` #F5F7FA | `0.145 0.022 266` #060A13 | App and page background |
-| `surface` | `1 0 0` #FFFFFF | `0.195 0.026 266` #0F1521 | Surface 1: cards, panels, list columns |
-| `surface-raised` | `0.968 0.006 266` #F2F4F9 | `0.235 0.028 266` #181E2B | Surface 2: hover rows, nested cards, dialog footers |
-| `surface-overlay` | `1 0 0` #FFFFFF | `0.27 0.03 266` #1F2635 | Surface 3: menus, popovers, dialogs, sheets |
-| `field` | `1 0 0` #FFFFFF | `0.165 0.024 266` #090E19 | Text field and search background |
-| `surface-sunken` | `0.955 0.007 266` #EEF0F5 | `0.125 0.02 266` #04060E | Wells: segmented-control tracks, code blocks, input groups |
-| `surface-inverse` | `0.2 0.03 266` #101624 | `0.96 0.006 266` #F0F2F6 | Tooltips and inverse chips |
-| `hairline` | `0.2 0.03 266 / 0.08` #101624 @ 8 % | `1 0 0 / 0.08` #FFFFFF @ 8 % | Dividers and glass edges (translucent) |
-| `border` | `0.915 0.008 266` #E0E3E8 | `0.3 0.03 266` #272E3D | Card and control borders |
-| `border-strong` | `0.855 0.012 266` #CCCFD7 | `0.38 0.032 266` #3A4254 | Input borders, emphasized outlines |
-| `text` | `0.19 0.03 266` #0D1321 | `0.97 0.006 266` #F3F5F9 | Primary text |
-| `text-muted` | `0.45 0.025 266` #4F5564 | `0.79 0.02 266` #B4BBC8 | Secondary text (alias: text-secondary) |
-| `text-subtle` | `0.515 0.02 266` #626773 | `0.7 0.022 266` #989EAD | Muted text: captions, placeholders, meta |
-| `text-inverse` | `0.97 0.006 266` #F3F5F9 | `0.19 0.03 266` #0D1321 | Text on surface-inverse |
-| `accent` | `0.54 0.225 263` #1F5FEE | `0.57 0.215 262` #276CF3 | Electric blue fill: primary buttons, selected rows, switches |
-| `accent-hover` | `0.49 0.215 263` #1550D7 | `0.535 0.22 262` #185FEA | Hover on accent fills |
-| `accent-pressed` | `0.45 0.2 263` #1046C1 | `0.5 0.21 262` #1256D8 | Pressed accent fills |
-| `accent-soft` | `0.945 0.026 263` #E4EDFF | `0.3 0.085 263` #162B58 | Tinted backgrounds: badges, selected chips, icon tiles |
-| `accent-contrast` | `1 0 0` #FFFFFF | `1 0 0` #FFFFFF | Text and icons on accent |
-| `accent-text` | `0.52 0.22 263` #1C59E4 | `0.76 0.12 258` #80B3FD | Links and accent text on canvas and surfaces (Tailwind `text-accent`) |
-| `focus` | `0.54 0.225 263` #1F5FEE | `0.72 0.14 260` #6FA4FC | Focus ring |
-| `success` | `0.53 0.125 155` #13804A | `0.7 0.15 155` #3BB974 | Success icons, bars, fills |
-| `success-text` | `0.46 0.11 155` #0A693C | `0.8 0.14 155` #6AD895 | Success text |
-| `success-soft` | `0.955 0.035 155` #DFF8E6 | `0.27 0.055 155` #0B2E1A | Success backgrounds |
+| `canvas` | `0.974 0.005 90` #F8F6F3 | `0.205 0.022 232` #0C1920 | App and page background (light: warm paper; dark: deep Marina) |
+| `surface` | `1 0 0` #FFFFFF | `0.255 0.028 232` #14252E | Surface 1: cards, panels, list columns |
+| `surface-raised` | `0.962 0.006 231` #EFF3F6 | `0.295 0.033 232` #1B303A | Surface 2: hover rows, nested cards, dialog footers |
+| `surface-overlay` | `1 0 0` #FFFFFF | `0.3487 0.0392 231.13` #243E4B | Surface 3: menus, popovers, dialogs, sheets (dark: Nocturnal Marina) |
+| `field` | `1 0 0` #FFFFFF | `0.23 0.025 232` #101F27 | Text field and search background |
+| `surface-sunken` | `0.948 0.008 231` #E9EFF2 | `0.178 0.02 232` #081318 | Wells: segmented-control tracks, code blocks, input groups |
+| `surface-inverse` | `0.255 0.032 231` #11262F | `0.96 0.006 231` #EEF3F5 | Tooltips and inverse chips |
+| `hairline` | `0.255 0.032 231 / 0.09` #11262F @ 9 % | `1 0 0 / 0.08` #FFFFFF @ 8 % | Dividers and glass edges (translucent) |
+| `border` | `0.905 0.01 231` #D9E1E5 | `0.36 0.035 232` #2A414C | Card and control borders |
+| `border-strong` | `0.85 0.014 231` #C5D0D5 | `0.44 0.04 231` #3B5765 | Input borders, emphasized outlines |
+| `card-edge` | `0.87 0.014 231` #CBD6DC | `0.15 0.02 232` #040D12 | The lip under stacked cards: 3 px bottom edge of stat tiles and category cards |
+| `text` | `0.255 0.032 231` #11262F | `0.97 0.006 231` #F1F6F8 | Primary text (light: Marina ink) |
+| `text-muted` | `0.45 0.03 231` #455963 | `0.83 0.02 231` #BBCAD2 | Secondary text (alias: text-secondary) |
+| `text-subtle` | `0.515 0.026 231` #596B74 | `0.76 0.025 231` #A2B4BE | Muted text: captions, placeholders, meta |
+| `text-inverse` | `0.97 0.006 231` #F1F6F8 | `0.255 0.032 231` #11262F | Text on surface-inverse |
+| `accent` | `0.9144 0.1396 95.56` #FFE26D | `0.9144 0.1396 95.56` #FFE26D | Solar Silk fill: primary buttons, the raised “+”, key highlights (always with accent-contrast ink) |
+| `accent-hover` | `0.885 0.15 92` #FDD554 | `0.935 0.105 97` #FDEA97 | Hover on accent fills |
+| `accent-pressed` | `0.842 0.1503 87.19` #F5C443 | `0.842 0.1503 87.19` #F5C443 | Pressed accent fills (the Solar lip) |
+| `accent-edge` | `0.64 0.13 75` #BA7F14 | `0.78 0.15 82` #E7AC2A | The lip under accent fills: 2 px bottom edge of primary pills and the “+” |
+| `accent-soft` | `0.945 0.02 228` #E0F0F8 | `0.38 0.052 229` #214858 | Sky-tinted backgrounds: badges, chips, icon tiles |
+| `accent-contrast` | `0.255 0.032 231` #11262F | `0.255 0.032 231` #11262F | Text and icons on accent (Marina ink, never white) |
+| `accent-text` | `0.46 0.08 232` #1E5F7D | `0.9144 0.1396 95.56` #FFE26D | Links and accent text on canvas and surfaces (Tailwind `text-accent`; light: deep Sky, dark: Solar) |
+| `focus` | `0.3487 0.0392 231.13` #243E4B | `0.9144 0.1396 95.56` #FFE26D | Focus ring (light: Marina, dark: Solar) |
+| `selection` | `0.915 0.03 229` #CFE7F3 | `0.365 0.05 229` #1F4353 | Selected list rows, active navigation, selected tabs (Sky tint) |
+| `selection-marker` | `0.3487 0.0392 231.13` #243E4B | `0.9144 0.1396 95.56` #FFE26D | Marker bar and icon of the selected row or nav item |
+| `control` | `0.3487 0.0392 231.13` #243E4B | `0.9144 0.1396 95.56` #FFE26D | Checked controls: switch tracks, checkboxes, radios, progress |
+| `control-contrast` | `1 0 0` #FFFFFF | `0.255 0.032 231` #11262F | Thumb and check mark on control |
+| `success` | `0.53 0.125 155` #13804A | `0.72 0.15 155` #43C07A | Success icons, bars, fills |
+| `success-text` | `0.46 0.11 155` #0A693C | `0.82 0.13 155` #79DD9F | Success text |
+| `success-soft` | `0.955 0.035 155` #DFF8E6 | `0.31 0.055 160` #123927 | Success backgrounds |
 | `success-contrast` | `1 0 0` #FFFFFF | `0.16 0.03 155` #031108 | Text on success fills |
-| `warning` | `0.72 0.165 58` #EF861B | `0.75 0.16 60` #F6922E | Warning icons, bars, the orange update banner |
-| `warning-text` | `0.49 0.12 55` #924A03 | `0.83 0.13 72` #FBB961 | Warning text |
-| `warning-soft` | `0.965 0.027 75` #FFF1E0 | `0.29 0.06 60` #412307 | Warning backgrounds |
-| `warning-contrast` | `0.2 0.05 50` #270E01 | `0.2 0.05 50` #270E01 | Text on warning fills (ink, not white, for AA) |
+| `warning` | `0.7 0.17 50` #EF7926 | `0.74 0.16 52` #F88A3D | Warning icons, bars, the orange update banner (orange, never Solar yellow) |
+| `warning-text` | `0.5 0.13 48` #9C470D | `0.82 0.12 58` #FEB073 | Warning text |
+| `warning-soft` | `0.965 0.025 72` #FEF1E2 | `0.32 0.06 50` #4B2915 | Warning backgrounds |
+| `warning-contrast` | `0.2 0.05 45` #280D02 | `0.2 0.05 45` #280D02 | Text on warning fills (ink, not white, for AA) |
 | `danger` | `0.56 0.2 25` #D02B31 | `0.58 0.2 25` #D73337 | Danger icons and fills (destructive buttons) |
-| `danger-text` | `0.52 0.19 25` #BE222A | `0.76 0.14 22` #FE8A88 | Danger text |
-| `danger-soft` | `0.96 0.019 25` #FFEDEB | `0.28 0.075 25` #471715 | Danger backgrounds |
+| `danger-text` | `0.52 0.19 25` #BE222A | `0.8 0.1 22` #F8A4A1 | Danger text |
+| `danger-soft` | `0.96 0.019 25` #FFEDEB | `0.32 0.07 25` #512320 | Danger backgrounds |
 | `danger-contrast` | `1 0 0` #FFFFFF | `1 0 0` #FFFFFF | Text on danger fills |
-| `info` | `0.58 0.1 235` #3383AD | `0.72 0.11 230` #50B1DC | Info icons |
-| `info-text` | `0.48 0.09 235` #1C6589 | `0.82 0.09 230` #85CFF3 | Info text |
-| `info-soft` | `0.96 0.02 235` #E6F4FE | `0.28 0.05 235` #0A2C3E | Info backgrounds |
-| `scrim` | `0.2 0.03 266 / 0.45` #101624 @ 45 % | `0.08 0.02 266 / 0.7` #010205 @ 70 % | Behind dialogs and sheets |
-| `glass` | `1 0 0 / 0.72` #FFFFFF @ 72 % | `0.2 0.03 266 / 0.68` #101624 @ 68 % | Desktop window and floating bars (with backdrop blur) |
+| `info` | `0.56 0.085 232` #397D9E | `0.7101 0.0751 228.76` #6EABC7 | Info icons (Sky Horizon) |
+| `info-text` | `0.47 0.08 232` #216280 | `0.85 0.055 228` #A9D6EA | Info text |
+| `info-soft` | `0.955 0.022 228` #E2F3FC | `0.33 0.045 230` #1A3A48 | Info backgrounds |
+| `scrim` | `0.255 0.032 231 / 0.45` #11262F @ 45 % | `0.12 0.02 232 / 0.72` #01070C @ 72 % | Behind dialogs and sheets |
+| `glass` | `1 0 0 / 0.72` #FFFFFF @ 72 % | `0.25 0.028 232 / 0.7` #13242D @ 70 % | Desktop window and floating bars (with backdrop blur) |
 | `glass-border` | `1 0 0 / 0.7` #FFFFFF @ 70 % | `1 0 0 / 0.1` #FFFFFF @ 10 % | Edge of glass surfaces |
-| `icon-tile` | `1 0 0` #FFFFFF | `0.95 0.004 266` #EDEEF1 | Tile behind favicons (light in both themes so dark marks stay visible) |
-| `icon-tile-ring` | `0.19 0.03 266 / 0.08` #0D1321 @ 8 % | `1 0 0 / 0.06` #FFFFFF @ 6 % | Inner ring of favicon tiles |
+| `icon-tile` | `1 0 0` #FFFFFF | `0.95 0.004 231` #ECEFF1 | Tile behind favicons (light in both themes so dark marks stay visible) |
+| `icon-tile-ring` | `0.255 0.032 231 / 0.08` #11262F @ 8 % | `1 0 0 / 0.06` #FFFFFF @ 6 % | Inner ring of favicon tiles |
 
 Aliases: `surface-1` → `surface`, `surface-2` → `surface-raised`, `surface-3` → `surface-overlay`, `text-primary` → `text`, `text-secondary` → `text-muted`, `text-tertiary` → `text-subtle`.
 
-Brand scale (theme independent): `50` #F0F5FE, `100` #DFEAFE, `200` #BED5FE, `300` #91B8FD, `400` #5E95FD, `500` #3376FB, `600` #1F5FEE, `700` #164DC8, `800` #153A99, `900` #102766, `950` #071335.
+Brand colors (`palette`, theme independent): `marina` #243E4B, `marina-lip` #0B1A21, `solar` #FFE26D, `solar-lip` #F5C443, `sky` #6EABC7, `sky-lip` #44739A, `glow-sky` rgba(110, 171, 199, 0.45), `glow-solar` rgba(255, 226, 109, 0.18).
 
-Category dots (`tag-*`, theme independent): `blue` #3E89F7, `violet` #9167EA, `pink` #ED58A9, `red` #ED4A49, `orange` #EF852E, `yellow` #F3C530, `green` #4AC06C, `teal` #16BBBC.
+Brand scale (Marina to Sky, theme independent): `50` #F0F8FC, `100` #DBEFF9, `200` #BADEEF, `300` #92C7DF, `400` #6EABC7, `500` #548FAB, `600` #417691, `700` #36596A, `800` #243E4B, `900` #12232B, `950` #0B1A21.
+
+Category dots (`tag-*`, theme independent): `blue` #3F90DD, `violet` #8F6CE0, `pink` #EA5DA9, `red` #ED4A49, `orange` #F18336, `yellow` #F0CF4C, `green` #4AC06C, `teal` #35B9C0.
 
 ### Checked contrast pairs
 
 | Foreground | Background | Target | Light | Dark |
 | --- | --- | --- | --- | --- |
-| `text` | `canvas` | 7:1 | 17.20 | 18.16 |
-| `text` | `surface-overlay` | 7:1 | 18.49 | 13.84 |
-| `text-muted` | `canvas` | 4.5:1 | 6.93 | 10.24 |
-| `text-muted` | `surface-overlay` | 4.5:1 | 7.45 | 7.80 |
-| `text-muted` | `surface-sunken` | 4.5:1 | 6.53 | 10.45 |
-| `text-subtle` | `canvas` | 4.5:1 | 5.24 | 7.41 |
-| `text-subtle` | `surface` | 4.5:1 | 5.63 | 6.85 |
-| `text-subtle` | `surface-raised` | 4.5:1 | 5.13 | 6.24 |
-| `text-subtle` | `field` | 4.5:1 | 5.63 | 7.21 |
-| `text` | `field` | 7:1 | 18.49 | 17.68 |
-| `text-inverse` | `surface-inverse` | 7:1 | 16.62 | 16.46 |
-| `accent-contrast` | `accent` | 4.5:1 | 5.34 | 4.65 |
-| `accent-contrast` | `accent-hover` | 4.5:1 | 6.62 | 5.43 |
-| `accent-contrast` | `accent-pressed` | 4.5:1 | 7.84 | 6.30 |
-| `accent-text` | `canvas` | 4.5:1 | 5.41 | 9.20 |
-| `accent-text` | `surface-raised` | 4.5:1 | 5.30 | 7.76 |
-| `accent-text` | `accent-soft` | 4.5:1 | 4.95 | 6.40 |
-| `focus` | `canvas` | 3:1 | 4.97 | 7.92 |
-| `focus` | `surface-overlay` | 3:1 | 5.34 | 6.04 |
-| `accent` | `canvas` | 3:1 | 4.97 | 4.25 |
-| `border-strong` | `surface` | 1.4:1 | 1.56 | 1.83 |
-| `success-text` | `success-soft` | 4.5:1 | 5.99 | 8.35 |
-| `success-text` | `surface` | 4.5:1 | 6.75 | 10.35 |
-| `success-contrast` | `success` | 4.5:1 | 4.97 | 7.71 |
-| `success` | `surface` | 3:1 | 4.97 | 7.31 |
-| `warning-text` | `warning-soft` | 4.5:1 | 5.89 | 8.32 |
-| `warning-text` | `surface` | 4.5:1 | 6.53 | 10.64 |
-| `warning-contrast` | `warning` | 4.5:1 | 7.03 | 7.88 |
-| `warning` | `surface` | 2.2:1 | 2.60 | 7.90 |
-| `danger-text` | `danger-soft` | 4.5:1 | 5.38 | 6.59 |
-| `danger-text` | `surface` | 4.5:1 | 6.08 | 8.04 |
+| `text` | `canvas` | 7:1 | 14.55 | 16.40 |
+| `text` | `surface-overlay` | 7:1 | 15.68 | 10.33 |
+| `text-muted` | `canvas` | 4.5:1 | 6.85 | 10.63 |
+| `text-muted` | `surface-overlay` | 4.5:1 | 7.38 | 6.70 |
+| `text-muted` | `surface-sunken` | 4.5:1 | 6.35 | 11.20 |
+| `text-subtle` | `canvas` | 4.5:1 | 5.18 | 8.37 |
+| `text-subtle` | `surface` | 4.5:1 | 5.59 | 7.35 |
+| `text-subtle` | `surface-raised` | 4.5:1 | 5.01 | 6.46 |
+| `text-subtle` | `field` | 4.5:1 | 5.59 | 7.88 |
+| `text` | `field` | 7:1 | 15.68 | 15.45 |
+| `text-inverse` | `surface-inverse` | 7:1 | 14.39 | 13.98 |
+| `accent-contrast` | `accent` | 4.5:1 | 12.21 | 12.21 |
+| `accent-contrast` | `accent-hover` | 4.5:1 | 11.09 | 13.02 |
+| `accent-contrast` | `accent-pressed` | 4.5:1 | 9.60 | 9.60 |
+| `accent-text` | `canvas` | 4.5:1 | 6.49 | 13.91 |
+| `accent-text` | `surface` | 4.5:1 | 7.00 | 12.22 |
+| `accent-text` | `surface-raised` | 4.5:1 | 6.27 | 10.73 |
+| `accent-text` | `surface-overlay` | 4.5:1 | 7.00 | 8.77 |
+| `accent-text` | `accent-soft` | 4.5:1 | 5.98 | 7.69 |
+| `accent-text` | `selection` | 4.5:1 | 5.47 | 8.18 |
+| `focus` | `canvas` | 3:1 | 10.44 | 13.91 |
+| `focus` | `surface` | 3:1 | 11.26 | 12.22 |
+| `focus` | `surface-overlay` | 3:1 | 11.26 | 8.77 |
+| `accent-edge` | `surface` | 3:1 | 3.44 | 7.74 |
+| `text` | `selection` | 7:1 | 12.27 | 9.65 |
+| `text-muted` | `selection` | 4.5:1 | 5.77 | 6.25 |
+| `selection-marker` | `selection` | 3:1 | 8.81 | 8.18 |
+| `control` | `surface` | 3:1 | 11.26 | 12.22 |
+| `control` | `surface-raised` | 3:1 | 10.09 | 10.73 |
+| `control-contrast` | `control` | 4.5:1 | 11.26 | 12.21 |
+| `border-strong` | `surface` | 1.4:1 | 1.58 | 2.04 |
+| `success-text` | `success-soft` | 4.5:1 | 5.99 | 7.74 |
+| `success-text` | `surface` | 4.5:1 | 6.75 | 9.45 |
+| `success-contrast` | `success` | 4.5:1 | 4.97 | 8.29 |
+| `success` | `surface` | 3:1 | 4.97 | 6.74 |
+| `warning-text` | `warning-soft` | 4.5:1 | 5.70 | 7.20 |
+| `warning-text` | `surface` | 4.5:1 | 6.32 | 8.74 |
+| `warning-contrast` | `warning` | 4.5:1 | 6.46 | 7.55 |
+| `warning` | `surface` | 2.2:1 | 2.83 | 6.48 |
+| `danger-text` | `danger-soft` | 4.5:1 | 5.38 | 6.72 |
+| `danger-text` | `surface` | 4.5:1 | 6.08 | 8.07 |
 | `danger-contrast` | `danger` | 4.5:1 | 5.15 | 4.74 |
-| `danger` | `surface` | 3:1 | 5.15 | 3.86 |
-| `info-text` | `info-soft` | 4.5:1 | 5.74 | 8.45 |
-| `info-text` | `surface` | 4.5:1 | 6.42 | 10.69 |
+| `danger` | `surface` | 3:1 | 5.15 | 3.31 |
+| `info-text` | `info-soft` | 4.5:1 | 5.90 | 7.74 |
+| `info-text` | `surface` | 4.5:1 | 6.70 | 10.05 |
+| `info` | `surface` | 3:1 | 4.56 | 6.21 |
 
 ### Type scale
 
@@ -221,8 +257,8 @@ Category dots (`tag-*`, theme independent): `blue` #3E89F7, `violet` #9167EA, `p
 
 ### Gradients
 
-- `signature` (135°): #5EA8F9 0 % → #2061F5 50 % → #1A2C94 100 %. The Passbox gradient: logo tile, app icons, primary hero accents. Sky blue top-left into electric blue into deep indigo.
-- `backdrop` (180°): #040713 0 % → #061348 45 % → #2D54D3 100 %. Website and onboarding backdrop behind panels: deep navy into electric blue (add grain).
+- `signature` (135°): #36596A 0 % → #243E4B 50 % → #12232B 100 %. The Passbox gradient: logo tile, app icons, brand panels. Lighter Marina top-left into Nocturnal Marina into deep Marina (#36596A → #243E4B → #12232B).
+- `backdrop` (180°): #123847 0 % → #0D1D25 42 % → #061016 100 %. Website and onboarding backdrop behind panels: deep Marina, lighter towards the top; add the Sky glow (top), the soft Solar glow and grain.
 
 ### Radii
 
@@ -254,14 +290,14 @@ focus ring (`focus` token, 2 px, offset 2 px), a 44 px (iOS, touch web) or
 
 | Component | Anatomy | States and rules |
 | --- | --- | --- |
-| `Button` | label, optional leading icon or spinner; `variant` primary / secondary / soft / ghost / subtle / danger / onAccent (icon buttons on a solid accent row); `size` xs–lg, icon sizes; `shape="pill"` | Hover darkens the fill and adds `shadow-glow` (primary); pressed uses `accent-pressed`; `loading` disables and shows a spinner. Pill shape for calls to action and marketing; rounded (12 px) in app chrome. One primary button per view. |
+| `Button` | label, optional leading icon or spinner; `variant` primary / secondary / soft / ghost / subtle / danger / onAccent (icon buttons on a solid accent fill); `size` xs–lg, icon sizes; `shape="pill"` | Primary: Solar fill, Marina ink, the lip (`shadow-lip`); hover `accent-hover` + `shadow-lip-glow`; pressed `accent-pressed` without lip. `loading` disables and shows a spinner. Pill shape for calls to action and marketing; rounded (12 px) in app chrome. One primary button per view. |
 | `IconButton` | icon only, required `label` (accessible name) | Ghost by default. |
-| `Fab` | the raised round “+”: 56 px circle on the signature gradient, glow, a 4 px canvas-colored ring | One per screen, bottom right of the desktop/web item list (opens “Neuer Eintrag”); the mobile bottom bar uses the same anatomy. Required `label`. |
-| `Avatar` | round tile with up to two initials; `tone` tint (a hue per person) or signature (the signed-in account, on the gradient); sizes xs 24 / sm 32 / md 36 / lg 44 / xl 64 | People only (account card, unlock, “Geteilt mit”, members); items use favicon tiles. Decorative: the name is always next to it. |
+| `Fab` | the raised round “+”: 56 px Solar circle with a Marina “+”, the lip and the Solar glow, a 4 px canvas-colored ring | One per screen, bottom right of the desktop/web item list (opens “Neuer Eintrag”); the mobile bottom bar uses the same anatomy. Required `label`. |
+| `Avatar` | round tile with up to two initials; `tone` tint (a hue per person) or signature (the signed-in account: Solar initials on the Marina gradient); sizes xs 24 / sm 32 / md 36 / lg 44 / xl 64 | People only (account card, unlock, “Geteilt mit”, members); items use favicon tiles. Decorative: the name is always next to it. |
 | `Input`, `PasswordInput`, `Textarea` | label, field (12 px radius, `field` background), hint or error below, leading/trailing slots | Focus: accent border + 4 px focus halo; error: danger border and `danger-text` message that says what happened and what to do. Password fields: mono, reveal toggle, Caps Lock hint. |
 | `Field` | read-only item field: caption label, value, actions (reveal, copy, open) | Hairline divider; secrets in mono; actions are `IconButton`s with labels. |
 | `SegmentedControl` | pill track (`surface-sunken`), selected pill on `surface-overlay` | Native radio inputs; arrow keys work. |
-| `Switch` | 40 × 24 track, 20 px thumb | Track `accent` when on; always paired with a visible label. |
+| `Switch` | 40 × 24 track, 20 px thumb | Track `control` when on with a `control-contrast` thumb (Marina/white in light, Solar/Marina in dark); always paired with a visible label. |
 | `Badge` / `Pill` | pill, optional dot; tones neutral / accent / success / warning / danger / info; `variant` soft / solid / outline | Status only; never the only carrier of meaning (text always present). |
 | `Card` | 20 px radius surface; `variant` default / raised / sunken / glass / outline; `padding` | `interactive` adds hover and focus. |
 | `Panel` | 24 px radius large surface, optional bezel, optional forced `theme` | Website device panels (alternate light and dark on the backdrop), desktop window. |
@@ -273,10 +309,10 @@ focus ring (`focus` token, 2 px, offset 2 px), a 44 px (iOS, touch web) or
 | `Monogram`, `SiteIcon` (`ItemIcon`) | tile with favicon on a light tile, or a tinted initial | Sizes sm 24 / md 32 / lg 40 / xl 56 / 2xl 72; radius 28 % of the size. Always a real favicon or brand icon when available. |
 | `StatTile` | tone chip (icon) or dot, big tabular number, label, optional detail | Security report: Gefährdet (danger), Mehrfach (warning), Schwach (warning), Sicher (success). Tone only in the chip, the number stays `text`. `interactive` makes it a filter button. |
 | `AlertCard` | `card`: icon tile, title, description, action; `banner`: solid strip with action (the orange “Zeit, Ihr Passwort zu ändern · Jetzt ändern”) | Danger and warning use `role="alert"`, others `role="status"`; optional dismiss. |
-| `EmptyState` | `brand` (default): the icon on the signature gradient inside two dotted rings with corner dots (the panel motif in miniature) and a soft glow; `quiet`: an accent-soft tile; title, description, action | Every list has one; it says what to do next. `quiet` for searches without results and small inline lists. |
+| `EmptyState` | `brand` (default): the Solar icon on the Marina signature gradient inside two dotted rings with corner dots (the panel motif in miniature) and a soft glow; `quiet`: an accent-soft tile; title, description, action | Every list has one; it says what to do next. `quiet` for searches without results and small inline lists. |
 | `Skeleton` | shimmering placeholder shape | Hidden from screen readers; the region sets `aria-busy`. Shimmer stops with reduced motion. |
-| `SidebarItem` | icon or colored category dot (`tag-*`), label, count | Active: `surface-raised` with accent icon, `aria-current="page"`. `sidebarItemClassName` for router links. |
-| `ListRow` | icon tile, title (service), subtitle (username), trailing (shield badge, time) | Selected = solid `accent` fill with white text and glow; hover = `surface-raised`. `listRowClassName` for router links. |
+| `SidebarItem` | icon or colored category dot (`tag-*`), label, count | Active: `selection` fill with a `selection-marker` icon, `aria-current="page"`. `sidebarItemClassName` for router links. |
+| `ListRow` | icon tile, title (service), subtitle (username), trailing (shield badge, time) | Selected = `selection` fill (Sky tint) with a 3 px `selection-marker` bar at the leading edge and normal text colours; hover = `surface-raised`. `listRowClassName` for router links. |
 | `Menu`, `Tooltip`, `Kbd`, `Spinner`, `StrengthMeter`, `Logo` | as before, restyled | Menus on `surface-overlay` at the popover layer; tooltips inverse. |
 
 ### Mobile patterns (iOS and Android)
@@ -285,21 +321,23 @@ focus ring (`focus` token, 2 px, offset 2 px), a 44 px (iOS, touch web) or
 - Home: 2 × 2 category cards (`sheet` radius on mobile, outline icon, title,
   count, chevron), then “Zuletzt verwendet” with round favicon tiles.
 - Bottom bar: floating glass bar with four outline icons and a raised round
-  “+” in the middle on the signature gradient (56–60 pt, glow, a canvas-colored
-  ring separates it from the bar). It opens “Neuer Eintrag”.
+  “+” in the middle in Solar with a Marina “+” (56–60 pt, the lip, a soft
+  Solar glow, a canvas-colored ring separates it from the bar). It opens
+  “Neuer Eintrag”. The selected tab icon uses `selection-marker`.
+- Category cards and stat tiles are stacked cards with the 3 pt/dp lip.
 - Security: score ring, alert card, 2 × 2 `StatTile`s.
 
 ### Desktop and web vault
 
-Three columns on the app canvas (`bg-app`: the canvas with two soft glows in
-the signature hues). The sidebar (`surface` at 70 % with backdrop blur) has
-the account card (gradient avatar, email, family or team), the sections
+Three columns on the app canvas (`bg-app`: the canvas with a soft Sky glow
+top left and a faint Solar glow bottom right). The sidebar (`surface` at 70 % with backdrop blur) has
+the account card (Marina avatar with Solar initials, email, family or team), the sections
 Alle Einträge / Favoriten / Sicherheits-Check / Familie & Team / Papierkorb
 with counts, categories, vaults with colored dots (`vaultColor`: the personal
-vault blue, others a stable color per vault), tools, the sync state and the
-full-width “Neuer Eintrag +” pill at the bottom. The item list (glass) has a
-44 px search field, rows with 40 px favicon tiles, the selected row in solid
-accent with glow (on phones only once the user opened an item), a shield
+vault Sky, others a stable color per vault), tools, the sync state and the
+full-width Solar “Neuer Eintrag +” pill at the bottom. The item list (glass) has a
+44 px search field, rows with 40 px favicon tiles, the selected row in the Sky
+selection tint with its marker (on phones only once the user opened an item), a shield
 badge on rows with findings, and the raised round “+” (`Fab`). The detail
 (`surface` at 85 %) shows the 56 px icon tile, the title with a category
 pill and a vault chip, the actions favourite / edit / share / more, the
@@ -343,13 +381,16 @@ of a bottom bar item, if at all. Status icons: `shield-alert` (compromised),
 
 | Do | Don't |
 | --- | --- |
-| One electric-blue primary action per view | Several competing blue buttons |
+| One Solar primary action per view | Several competing yellow buttons, or Solar as decoration |
+| Marina ink on Solar | White text on Solar, Solar text on white |
+| Sky tint for selection | Full Solar fill for selected rows |
+| Orange for warnings | Yellow (Solar-like) for warnings |
 | Lighter surfaces for elevation in dark mode | Heavy black drop shadows |
 | `text-accent` (text variant) for links | Accent fill color for small text on dark surfaces |
 | Status colors only for status | Orange or red for decoration |
 | Real favicons in rounded tiles | Generic globe icons when an icon is available |
 | Hairline borders, generous radii | Thick borders, sharp corners on cards |
-| The signature gradient on the mark, app icons, the “+” and hero accents | Gradient behind body text or on every card |
+| The Marina signature gradient on the mark, app icons and brand panels | Gradient behind body text or on every card |
 | Tabular numbers in stats and codes | Proportional digits that jump while counting |
 
 ## Accessibility

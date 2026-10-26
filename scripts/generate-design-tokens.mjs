@@ -102,6 +102,7 @@ for (const [fg, bg, target] of tokens.contrast) {
 }
 for (const name of colorNames) for (const theme of themes) toSrgb(tokens.color[name][theme], `${name} (${theme})`);
 for (const [k, v] of Object.entries(tokens.brand)) toSrgb(v, `brand-${k}`);
+for (const [k, v] of Object.entries(tokens.palette)) toSrgb(v.value, `palette-${k}`);
 for (const [k, v] of Object.entries(tokens.tag)) toSrgb(v, `tag-${k}`);
 
 // ---------------------------------------------------------------- helpers
@@ -139,6 +140,8 @@ function cssTheme() {
   const { sans, mono } = tokens.font;
   lines.push(`--font-sans: "${sans.web}", ${sans.fallback};`);
   lines.push(`--font-mono: "${mono.web}", ${mono.fallback};`);
+  lines.push("");
+  for (const [k, v] of Object.entries(tokens.palette)) lines.push(`--color-${k}: ${v.value};`);
   lines.push("");
   for (const [k, v] of Object.entries(tokens.brand)) lines.push(`--color-brand-${k}: ${v};`);
   lines.push("");
@@ -266,7 +269,13 @@ function swiftFile() {
     );
   }
   out.push("");
-  out.push("        /// Brand scale (theme independent).");
+  out.push("        // Named brand colors (theme independent).");
+  for (const [k, v] of Object.entries(tokens.palette)) {
+    out.push(`        /// ${v.use}`);
+    out.push(`        static let ${camel(k)} = fixed(${rgbArgs(v.value, k)})`);
+  }
+  out.push("");
+  out.push("        /// Brand scale, Marina to Sky (theme independent).");
   for (const [k, v] of Object.entries(tokens.brand))
     out.push(`        static let brand${k} = fixed(${rgbArgs(v, `brand-${k}`)})`);
   out.push("");
@@ -440,11 +449,16 @@ function kotlinFile() {
     const c = k(theme);
     const dark = theme === "dark";
     const roles = {
-      primary: c("accent"),
-      onPrimary: c("accent-contrast"),
+      // Material uses `primary` for text buttons, switches, checkboxes and
+      // focus as well as fills, so it is the `control` color (Marina in light,
+      // Solar in dark): Solar text on white would be unreadable. Solar fills
+      // (primary pills, the raised "+") use PassboxColors.accent explicitly.
+      primary: c("control"),
+      onPrimary: c("control-contrast"),
       primaryContainer: c("accent-soft"),
       onPrimaryContainer: c("accent-text"),
-      inversePrimary: dark ? color(tokens.brand["600"], "brand") : color(tokens.brand["300"], "brand"),
+      // Primary on the inverse surface: Solar on the dark inverse (light theme), Marina on the light one (dark theme).
+      inversePrimary: dark ? color(tokens.palette.marina.value, "marina") : color(tokens.palette.solar.value, "solar"),
       secondary: c("text-muted"),
       onSecondary: c("canvas"),
       secondaryContainer: c("surface-raised"),
@@ -528,8 +542,12 @@ function kotlinFile() {
   }
   out.push("val LocalPassboxColors = staticCompositionLocalOf { LightPassboxColors }");
   out.push("");
-  out.push("/** Brand scale and category dot colors (theme independent). */");
+  out.push("/** Named brand colors, brand scale and category dot colors (theme independent). */");
   out.push("object PassboxPalette {");
+  for (const [n, v] of Object.entries(tokens.palette)) {
+    out.push(`    /** ${v.use} */`);
+    out.push(`    val ${pascal(n)} = ${color(v.value, n)}`);
+  }
   for (const [n, v] of Object.entries(tokens.brand)) out.push(`    val Brand${n} = ${color(v, `brand-${n}`)}`);
   for (const [n, v] of Object.entries(tokens.tag)) out.push(`    val Tag${pascal(n)} = ${color(v, `tag-${n}`)}`);
   out.push("}");
@@ -640,7 +658,15 @@ function docsTables() {
   );
   lines.push("");
   lines.push(
-    "Brand scale (theme independent): " +
+    "Brand colors (`palette`, theme independent): " +
+      Object.entries(tokens.palette)
+        .map(([k, v]) => `\`${k}\` ${cssSrgb(v.value, k)}`)
+        .join(", ") +
+      ".",
+  );
+  lines.push("");
+  lines.push(
+    "Brand scale (Marina to Sky, theme independent): " +
       Object.entries(tokens.brand)
         .map(([k, v]) => `\`${k}\` ${hexRgb(v, k)}`)
         .join(", ") +
@@ -775,6 +801,14 @@ function rustFile() {
       out.push(`    ${field(name)}: "${cssSrgb(tokens.color[name][theme], `${name} (${theme})`)}",`);
     out.push("};");
   }
+  out.push("");
+  out.push("/// Named brand colors (theme independent).");
+  out.push("pub mod palette {");
+  for (const [name, v] of Object.entries(tokens.palette)) {
+    out.push(`    /// ${v.use}`);
+    out.push(`    pub const ${field(name).toUpperCase()}: &str = "${cssSrgb(v.value, name)}";`);
+  }
+  out.push("}");
   for (const [name, g] of Object.entries(tokens.gradient)) {
     const stops = g.stops.map(([at, c]) => `${hexRgb(c, name)} ${Math.round(at * 100)}%`).join(", ");
     out.push("");
