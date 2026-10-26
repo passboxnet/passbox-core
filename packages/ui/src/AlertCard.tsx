@@ -36,7 +36,7 @@ const tile: Record<AlertTone, string> = {
 };
 
 const banner: Record<AlertTone, string> = {
-  info: "bg-accent text-accent-contrast",
+  info: "bg-info-soft text-info-text",
   success: "bg-success text-success-contrast",
   warning: "bg-warning text-warning-contrast",
   danger: "bg-danger text-danger-contrast",

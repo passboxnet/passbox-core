@@ -5,7 +5,7 @@ export type StatTone = "neutral" | "accent" | "success" | "warning" | "danger";
 
 const toneChip: Record<StatTone, string> = {
   neutral: "bg-surface-raised text-text-muted",
-  accent: "bg-accent-soft text-accent",
+  accent: "bg-accent-soft text-info-text",
   success: "bg-success-soft text-success",
   warning: "bg-warning-soft text-warning",
   danger: "bg-danger-soft text-danger",
@@ -13,7 +13,7 @@ const toneChip: Record<StatTone, string> = {
 
 const toneDot: Record<StatTone, string> = {
   neutral: "bg-text-subtle",
-  accent: "bg-accent",
+  accent: "bg-info",
   success: "bg-success",
   warning: "bg-warning",
   danger: "bg-danger",
@@ -63,7 +63,8 @@ export function StatTile({
       {detail && <div className="mt-0.5 text-xs text-text-subtle">{detail}</div>}
     </>
   );
-  const base = "flex flex-col rounded-card border border-hairline bg-surface p-5 text-left shadow-card";
+  // Stacked card with the lip (shadow-stack), as in the brand palette.
+  const base = "flex flex-col rounded-card border border-hairline bg-surface p-5 text-left shadow-stack";
   if (!interactive) return <div className={cn(base, className)}>{body}</div>;
   return (
     <button

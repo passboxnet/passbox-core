@@ -16,7 +16,7 @@ import { useUiStrings } from "./UiStrings";
 export const fieldClassName = cn(
   "w-full rounded-control border border-border-strong bg-field text-sm text-text shadow-xs transition-[border-color,box-shadow] duration-150",
   "placeholder:text-text-subtle hover:border-text-subtle",
-  "focus:border-accent focus:outline-none focus:ring-4 focus:ring-focus/20",
+  "focus:border-focus focus:outline-none focus:ring-4 focus:ring-focus/20",
   "disabled:cursor-not-allowed disabled:bg-surface-sunken disabled:opacity-70",
   "aria-invalid:border-danger aria-invalid:focus:ring-danger/20",
 );

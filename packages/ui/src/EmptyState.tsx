@@ -27,14 +27,14 @@ export function EmptyState({ icon, title, description, action, tone = "brand", c
           <span className="absolute top-1/2 right-0 size-1.5 translate-x-1/2 -translate-y-1/2 rounded-full bg-text-subtle" />
           <span
             className="absolute inset-6 rounded-full opacity-60 blur-xl"
-            style={{ background: "color-mix(in oklch, var(--pb-accent) 45%, transparent)" }}
+            style={{ background: "color-mix(in oklch, var(--color-sky) 45%, transparent)" }}
           />
-          <span className="relative flex size-16 items-center justify-center rounded-[18px] bg-signature text-white shadow-glow ring-1 ring-white/20 ring-inset [&_svg]:size-7">
+          <span className="relative flex size-16 items-center justify-center rounded-[18px] bg-signature text-solar shadow-[0_3px_0_0_var(--color-marina-lip)] ring-1 ring-white/15 ring-inset [&_svg]:size-7">
             {icon}
           </span>
         </div>
       ) : (
-        <div className="mb-5 flex size-14 items-center justify-center rounded-tile bg-accent-soft text-accent shadow-highlight ring-1 ring-accent/15 ring-inset [&_svg]:size-6">
+        <div className="mb-5 flex size-14 items-center justify-center rounded-tile bg-accent-soft text-accent shadow-highlight ring-1 ring-info/20 ring-inset [&_svg]:size-6">
           {icon}
         </div>
       )}

@@ -177,7 +177,7 @@ returns no animation, Compose code checks the animator duration scale.
 
 Aliases: `surface-1` → `surface`, `surface-2` → `surface-raised`, `surface-3` → `surface-overlay`, `text-primary` → `text`, `text-secondary` → `text-muted`, `text-tertiary` → `text-subtle`.
 
-Brand colors (`palette`, theme independent): `marina` #243E4B, `marina-lip` #0B1A21, `solar` #FFE26D, `solar-lip` #F5C443, `sky` #6EABC7, `sky-lip` #44739A, `glow-sky` rgba(110, 171, 199, 0.45), `glow-solar` rgba(255, 226, 109, 0.18).
+Brand colors (`palette`, theme independent): `marina` #243E4B, `marina-lip` #0B1A21, `solar` #FFE26D, `solar-lip` #F5C443, `sky` #6EABC7, `sky-lip` #44739A, `glow-sky` rgba(110, 171, 199, 0.45), `glow-solar` rgba(255, 226, 109, 0.1).
 
 Brand scale (Marina to Sky, theme independent): `50` #F0F8FC, `100` #DBEFF9, `200` #BADEEF, `300` #92C7DF, `400` #6EABC7, `500` #548FAB, `600` #417691, `700` #36596A, `800` #243E4B, `900` #12232B, `950` #0B1A21.
 
@@ -334,7 +334,7 @@ top left and a faint Solar glow bottom right). The sidebar (`surface` at 70 % wi
 the account card (Marina avatar with Solar initials, email, family or team), the sections
 Alle Einträge / Favoriten / Sicherheits-Check / Familie & Team / Papierkorb
 with counts, categories, vaults with colored dots (`vaultColor`: the personal
-vault Sky, others a stable color per vault), tools, the sync state and the
+vault `tag-blue`, others a stable color per vault), tools, the sync state and the
 full-width Solar “Neuer Eintrag +” pill at the bottom. The item list (glass) has a
 44 px search field, rows with 40 px favicon tiles, the selected row in the Sky
 selection tint with its marker (on phones only once the user opened an item), a shield

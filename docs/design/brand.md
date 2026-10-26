@@ -124,10 +124,10 @@ small **corner dots** where they cross (`GridFrame`, utilities `dotted-x`,
 `dotted-y`). The motif is decoration only: never as a background behind text
 in the app, never animated.
 
-The motif also frames the app's **empty states** (`EmptyState`: the icon on
-the signature gradient inside dotted rings with corner dots) and the
-**Emergency Kit** PDF (`apps/web/src/lib/kit.ts`: a band in the signature
-gradient with the white keyhole and the wordmark, dotted guides along the
+The motif also frames the app's **empty states** (`EmptyState`: the Solar icon on
+the Marina signature gradient tile with its lip inside dotted rings with corner dots) and the
+**Emergency Kit** PDF (`apps/web/src/lib/kit.ts`: a band in the Marina signature
+gradient with its lip, the Solar keyhole and the wordmark, dotted guides along the
 content with corner dots, rounded tinted boxes for the Secret Key and the
 recovery code).
 

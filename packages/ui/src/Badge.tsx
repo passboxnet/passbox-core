@@ -7,7 +7,7 @@ export type BadgeVariant = "soft" | "solid" | "outline";
 
 const soft: Record<BadgeTone, string> = {
   neutral: "bg-surface-raised text-text-muted ring-border",
-  accent: "bg-accent-soft text-accent ring-accent/25",
+  accent: "bg-accent-soft text-accent ring-accent-text/20",
   success: "bg-success-soft text-success ring-success/25",
   warning: "bg-warning-soft text-warning ring-warning/30",
   danger: "bg-danger-soft text-danger ring-danger/25",
@@ -16,7 +16,7 @@ const soft: Record<BadgeTone, string> = {
 
 const solid: Record<BadgeTone, string> = {
   neutral: "bg-surface-inverse text-text-inverse ring-transparent",
-  accent: "bg-accent text-accent-contrast ring-transparent",
+  accent: "bg-accent text-accent-contrast ring-accent-edge/60",
   success: "bg-success text-success-contrast ring-transparent",
   warning: "bg-warning text-warning-contrast ring-transparent",
   danger: "bg-danger text-danger-contrast ring-transparent",
@@ -25,7 +25,7 @@ const solid: Record<BadgeTone, string> = {
 
 const outline: Record<BadgeTone, string> = {
   neutral: "bg-transparent text-text-muted ring-border-strong",
-  accent: "bg-transparent text-accent ring-accent/50",
+  accent: "bg-transparent text-accent ring-accent-text/50",
   success: "bg-transparent text-success ring-success/50",
   warning: "bg-transparent text-warning ring-warning/60",
   danger: "bg-transparent text-danger ring-danger/50",

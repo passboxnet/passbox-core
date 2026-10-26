@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Passbox Night board</title>
+    <title>Passbox Marina board</title>
     <meta
       name="description"
       content="Passbox design board: brand, palette in both themes, type scale, components and mocks. Self-contained; tokens from packages/ui/tokens/tokens.json."
@@ -360,7 +360,7 @@
       .masthead p {
         margin: 0;
         max-width: 40ch;
-        color: oklch(0.88 0.03 266);
+        color: oklch(0.88 0.03 231);
       }
       .lockup {
         display: inline-flex;
@@ -451,7 +451,7 @@
         display: block;
       }
       .squircle.dark {
-        background: #0b0d12;
+        background: #0b1a21;
       }
       .circle-icon {
         width: 84px;
@@ -470,6 +470,35 @@
         width: 92px;
         height: 92px;
         display: block;
+      }
+      .palette-stack {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+      }
+      .pal {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        min-height: 128px;
+        padding: 18px 20px;
+        border-radius: 20px;
+        box-shadow: 0 6px 0 0 var(--lip);
+      }
+      .pal b {
+        font-size: 20px;
+        letter-spacing: -0.02em;
+      }
+      .pal span {
+        font-size: 12px;
+        font-weight: 600;
+        opacity: 0.85;
+      }
+      .pal em {
+        margin-top: auto;
+        font-style: normal;
+        font-size: 12.5px;
+        line-height: 1.4;
       }
       .gradient-swatch {
         height: 112px;
@@ -651,11 +680,11 @@
       .btn.primary {
         background: var(--pb-accent);
         color: var(--pb-accent-contrast);
-        box-shadow: var(--pb-shadow-xs);
+        box-shadow: var(--pb-shadow-lip);
       }
       .btn.primary.hover {
         background: var(--pb-accent-hover);
-        box-shadow: var(--pb-shadow-glow);
+        box-shadow: var(--pb-shadow-lip-glow);
       }
       .btn.secondary {
         background: var(--pb-surface);
@@ -691,8 +720,8 @@
         border-radius: 50%;
         padding: 0;
         background: var(--pb-accent);
-        color: #fff;
-        box-shadow: var(--pb-shadow-glow);
+        color: var(--pb-accent-contrast);
+        box-shadow: var(--pb-shadow-lip-glow);
       }
       .fab svg {
         width: 24px;
@@ -724,7 +753,7 @@
         flex: 1;
       }
       .input.focus {
-        border-color: var(--pb-accent);
+        border-color: var(--pb-focus);
         box-shadow: 0 0 0 4px color-mix(in oklch, var(--pb-focus) 22%, transparent);
       }
       .input.error {
@@ -786,10 +815,11 @@
         box-shadow: 0 1px 3px rgb(0 0 0 / 0.25);
       }
       .switch.on {
-        background: var(--pb-accent);
+        background: var(--pb-control);
       }
       .switch.on::after {
         left: 18px;
+        background: var(--pb-control-contrast);
       }
       .badge {
         display: inline-flex;
@@ -835,7 +865,7 @@
       }
       .b-solid {
         background: var(--pb-accent);
-        color: #fff;
+        color: var(--pb-accent-contrast);
         letter-spacing: 0.06em;
         text-transform: uppercase;
         font-size: 10px;
@@ -858,7 +888,7 @@
       }
       .tabs > span.on {
         color: var(--pb-text);
-        border-color: var(--pb-accent);
+        border-color: var(--pb-selection-marker);
       }
       .count {
         font-size: 11px;
@@ -964,7 +994,7 @@
         border-radius: var(--pb-radius-card);
         background: var(--pb-surface);
         border: 1px solid var(--pb-hairline);
-        box-shadow: var(--pb-shadow-card);
+        box-shadow: var(--pb-shadow-stack);
       }
       .stat .chip {
         width: 32px;
@@ -1027,12 +1057,8 @@
         min-width: 0;
       }
       .list-row.sel {
-        background: var(--pb-accent);
-        color: #fff;
-        box-shadow: var(--pb-shadow-glow);
-      }
-      .list-row.sel .s {
-        color: #fff;
+        background: var(--pb-selection);
+        box-shadow: inset 3px 0 0 0 var(--pb-selection-marker);
       }
       .list-row.hover {
         background: var(--pb-surface-raised);
@@ -1053,11 +1079,11 @@
         height: 16px;
       }
       .side-item.on {
-        background: var(--pb-surface-raised);
+        background: var(--pb-selection);
         color: var(--pb-text);
       }
       .side-item.on svg {
-        color: var(--pb-accent-text);
+        color: var(--pb-selection-marker);
       }
       .side-item .dot {
         width: 8px;
@@ -1120,9 +1146,9 @@
         border-radius: 16px;
         display: grid;
         place-items: center;
-        background: var(--pb-accent-soft);
-        color: var(--pb-accent-text);
-        box-shadow: var(--pb-shadow-highlight), inset 0 0 0 1px color-mix(in oklch, var(--pb-accent) 15%, transparent);
+        background: var(--pb-gradient-signature);
+        color: var(--color-solar, #ffe26d);
+        box-shadow: 0 3px 0 0 #0b1a21, inset 0 0 0 1px oklch(1 0 0 / 0.15);
       }
       .empty .ic svg {
         width: 24px;
@@ -1141,7 +1167,7 @@
         height: 720px;
         border-radius: 48px;
         padding: 10px;
-        background: oklch(0.3 0.02 266);
+        background: oklch(0.3 0.025 231);
         box-shadow: var(--pb-shadow-overlay);
       }
       .screen {
@@ -1259,7 +1285,7 @@
         height: 23px;
       }
       .tabbar .on {
-        color: var(--pb-accent-text);
+        color: var(--pb-selection-marker);
       }
       .tabbar .plus {
         width: 60px;
@@ -1268,10 +1294,10 @@
         border-radius: 50%;
         display: grid;
         place-items: center;
-        color: #fff;
-        background: var(--pb-gradient-signature);
+        color: var(--pb-accent-contrast);
+        background: var(--pb-accent);
         box-shadow:
-          var(--pb-shadow-glow),
+          var(--pb-shadow-lip-glow),
           0 0 0 6px var(--pb-canvas);
       }
       .tabbar .plus svg {
@@ -1331,10 +1357,10 @@
         overflow: hidden;
         padding: 56px 64px;
         background:
-          radial-gradient(60% 70% at 15% 20%, oklch(0.55 0.2 290 / 0.75), transparent 60%),
-          radial-gradient(70% 80% at 90% 90%, oklch(0.55 0.2 250 / 0.8), transparent 60%),
-          radial-gradient(50% 60% at 80% 10%, oklch(0.7 0.14 20 / 0.55), transparent 60%),
-          linear-gradient(160deg, oklch(0.25 0.08 270), oklch(0.18 0.05 260));
+          radial-gradient(60% 70% at 15% 20%, oklch(0.71 0.075 229 / 0.6), transparent 60%),
+          radial-gradient(70% 80% at 90% 90%, oklch(0.91 0.14 96 / 0.35), transparent 60%),
+          radial-gradient(50% 60% at 80% 10%, oklch(0.54 0.08 245 / 0.6), transparent 60%),
+          linear-gradient(160deg, oklch(0.35 0.04 231), oklch(0.2 0.025 230));
       }
       .window {
         display: grid;
@@ -1379,7 +1405,8 @@
         font-weight: 700;
         font-size: 13px;
         color: #fff;
-        background: linear-gradient(135deg, oklch(0.7 0.15 30), oklch(0.6 0.2 350));
+        background: var(--pb-gradient-signature);
+        color: oklch(0.9144 0.1396 95.56);
       }
       .group-label {
         padding: 16px 12px 6px;
@@ -1494,15 +1521,16 @@
         overflow: hidden;
         padding: 64px 72px 0;
         background:
-          radial-gradient(120% 70% at 50% 115%, oklch(0.62 0.2 268 / 0.8), transparent 60%), var(--pb-gradient-backdrop);
+          radial-gradient(90% 50% at 50% -5%, oklch(0.71 0.075 229 / 0.45), transparent 70%),
+          radial-gradient(50% 40% at 90% 100%, oklch(0.91 0.14 96 / 0.1), transparent 70%), var(--pb-gradient-backdrop);
       }
       .bezel {
         position: relative;
         z-index: 1;
         border-radius: 34px 34px 0 0;
         padding: 10px 10px 0;
-        background: oklch(0.75 0.03 266 / 0.28);
-        box-shadow: inset 0 0 0 1px oklch(1 0 0 / 0.18);
+        background: oklch(0.94 0.025 228 / 0.16);
+        box-shadow: inset 0 0 0 1px oklch(1 0 0 / 0.16);
       }
       .device {
         position: relative;
@@ -1516,8 +1544,8 @@
         text-align: center;
         font-size: 12px;
         padding: 8px;
-        background: oklch(0.16 0.02 266);
-        color: oklch(0.85 0.02 266);
+        background: oklch(0.18 0.02 232);
+        color: oklch(0.85 0.02 231);
       }
       .announce b {
         color: #fff;
@@ -1573,7 +1601,7 @@
         top: -80px;
         width: 520px;
         height: 420px;
-        background: radial-gradient(closest-side, color-mix(in oklch, var(--pb-accent) 18%, transparent), transparent);
+        background: radial-gradient(closest-side, color-mix(in oklch, oklch(0.71 0.075 229) 24%, transparent), transparent);
       }
       .platforms {
         display: flex;
@@ -1628,11 +1656,11 @@
         <div class="masthead-inner">
           <div>
             <span class="lockup"><span data-mark></span>Passbox</span>
-            <h1>Passbox Night.<br />The design board.</h1>
+            <h1>Passbox Marina.<br />The design board.</h1>
           </div>
           <p>
-            Dark-first, calm and precise: deep ink surfaces, one electric blue, generous radii, hairlines. A light theme
-            of equal care. Everything here comes from <span class="mono">packages/ui/tokens/tokens.json</span>.
+            Dark-first, calm and precise: deep Marina surfaces, one Solar Silk accent, Sky Horizon for selection,
+            generous radii, hairlines and the stacked-card lip. A light theme on warm paper of equal care. Everything here comes from <span class="mono">packages/ui/tokens/tokens.json</span>.
           </p>
         </div>
       </header>
@@ -1645,7 +1673,7 @@
             <h2>One mark, one gradient,<br />one typeface, one icon family.</h2>
           </div>
           <p>
-            The keyhole on the signature gradient is the only logo. The panel with its dotted grid frames marketing
+            The Solar keyhole on the Marina gradient is the only logo. The panel with its dotted grid frames marketing
             and onboarding. Plus Jakarta Sans and the Lucide outline icons are used on every platform.
           </p>
         </div>
@@ -1679,6 +1707,28 @@
               </figure>
             </div>
           </div>
+          <div class="card span-12">
+            <div class="tile-title"><h3>Brand colours</h3><span class="label">palette · with their lips</span></div>
+            <div class="palette-stack">
+              <div class="pal" style="background: #243e4b; color: #ffe26d; --lip: #0b1a21">
+                <b>Nocturnal Marina</b><span>#243E4B · lip #0B1A21</span>
+                <em>Brand base: logo tile, app icons, dark surfaces, ink on Solar.</em>
+              </div>
+              <div class="pal" style="background: #ffe26d; color: #243e4b; --lip: #f5c443">
+                <b>Solar Silk</b><span>#FFE26D · lip #F5C443</span>
+                <em>The accent: primary pills, the raised “+”, the logo glyph. Always with Marina ink.</em>
+              </div>
+              <div class="pal" style="background: #6eabc7; color: #11262f; --lip: #44739a">
+                <b>Sky Horizon</b><span>#6EABC7 · lip #44739A</span>
+                <em>Secondary: selection, info, charts, illustrations. Never the primary action.</em>
+              </div>
+            </div>
+            <p class="muted" style="margin: 14px 0 0; font-size: 13px">
+              Solar is a fill, never text on white: links are deep Sky in light and Solar in dark. Warnings stay
+              orange. Distinct from 1Password/Bitwarden blue, LastPass/Passbolt red, Proton violet, Dashlane and
+              NordPass teal and Keeper's saturated yellow on black.
+            </p>
+          </div>
           <div class="card span-4">
             <div class="tile-title"><h3>Signature gradient</h3><span class="label">135°</span></div>
             <div class="gradient-swatch" style="background: var(--pb-gradient-signature)"><span>signature</span></div>
@@ -1686,8 +1736,8 @@
               <span>backdrop · 180° + grain</span>
             </div>
             <p class="muted" style="margin: 14px 0 0; font-size: 13px">
-              Sky → electric blue → indigo. For the mark, app icons, the raised “+” and hero accents. Never behind
-              body text.
+              Lighter Marina → Nocturnal Marina → deep Marina. For the mark, app icons and brand panels; the
+              backdrop adds a Sky glow and a soft Solar glow. Never behind body text.
             </p>
           </div>
           <div class="card span-4">
@@ -1924,7 +1974,7 @@
           </div>
           <p>
             Dark is not an inversion of light: surfaces get lighter as they rise, borders are hairlines, the accent is
-            a fill with white text. Every text pair below passes WCAG 2.2 AA (checked by the generator).
+            a Solar fill with Marina ink, selection is a Sky tint. Every text pair below passes WCAG 2.2 AA (checked by the generator).
           </p>
         </div>
         <div class="theme-columns">
@@ -1998,8 +2048,8 @@
               </div>
               <div class="m-section">Zuletzt verwendet <a>Alle</a></div>
               <div class="m-list">
-                <div class="list-row"><span class="tile t44" style="background: oklch(0.45 0.02 266)">G</span><div class="grow"><div class="t">github.com</div><div class="s">m.weber</div></div><span class="time">2 Min.</span></div>
-                <div class="list-row"><span class="tile t44" style="background: oklch(0.6 0.16 250)">P</span><div class="grow"><div class="t">posteo.de</div><div class="s">m.weber@posteo.de</div></div><span class="time">1 Std.</span></div>
+                <div class="list-row"><span class="tile t44" style="background: oklch(0.45 0.02 231)">G</span><div class="grow"><div class="t">github.com</div><div class="s">m.weber</div></div><span class="time">2 Min.</span></div>
+                <div class="list-row"><span class="tile t44" style="background: oklch(0.6 0.12 235)">P</span><div class="grow"><div class="t">posteo.de</div><div class="s">m.weber@posteo.de</div></div><span class="time">1 Std.</span></div>
               </div>
               <div class="tabbar">
                 <span class="on"><i data-icon="house"></i></span><span><i data-icon="shield"></i></span>
@@ -2057,8 +2107,8 @@
               </div>
               <div class="m-section">Zuletzt verwendet <a>Alle</a></div>
               <div class="m-list">
-                <div class="list-row"><span class="tile t44" style="background: oklch(0.45 0.02 266)">G</span><div class="grow"><div class="t">github.com</div><div class="s">m.weber</div></div><span class="time">2 Min.</span></div>
-                <div class="list-row"><span class="tile t44" style="background: oklch(0.6 0.16 250)">P</span><div class="grow"><div class="t">posteo.de</div><div class="s">m.weber@posteo.de</div></div><span class="time">1 Std.</span></div>
+                <div class="list-row"><span class="tile t44" style="background: oklch(0.45 0.02 231)">G</span><div class="grow"><div class="t">github.com</div><div class="s">m.weber</div></div><span class="time">2 Min.</span></div>
+                <div class="list-row"><span class="tile t44" style="background: oklch(0.6 0.12 235)">P</span><div class="grow"><div class="t">posteo.de</div><div class="s">m.weber@posteo.de</div></div><span class="time">1 Std.</span></div>
               </div>
               <div class="tabbar">
                 <span class="on"><i data-icon="house"></i></span><span><i data-icon="shield"></i></span>
@@ -2078,7 +2128,7 @@
             <h2>A glass window,<br />three columns.</h2>
           </div>
           <p>
-            Sidebar with account and colored category dots, a list of icon tiles with the selected row in solid blue,
+            Sidebar with account and colored category dots, a list of icon tiles with the selected row in the Sky tint,
             and the detail with fields, reveal and copy. Warnings appear inline, in orange.
           </p>
         </div>
@@ -2092,7 +2142,7 @@
               <div class="side-item"><i data-icon="shield"></i>Sicherheit<span class="n">23</span></div>
               <div class="side-item"><i data-icon="trash-2"></i>Papierkorb</div>
               <div class="group-label">Tresore</div>
-              <div class="side-item"><span class="dot" style="background: var(--color-tag-blue, oklch(0.64 0.18 258))"></span>Privat<span class="n">96</span></div>
+              <div class="side-item"><span class="dot" style="background: var(--color-tag-blue, oklch(0.64 0.14 250))"></span>Privat<span class="n">96</span></div>
               <div class="side-item"><span class="dot" style="background: oklch(0.68 0.2 350)"></span>Familie<span class="n">31</span></div>
               <div class="side-item"><span class="dot" style="background: oklch(0.72 0.16 55)"></span>Arbeit<span class="n">12</span></div>
               <div class="side-item"><span class="dot" style="background: oklch(0.72 0.16 150)"></span>Streaming<span class="n">3</span></div>
@@ -2100,9 +2150,9 @@
             </aside>
             <section class="w-list">
               <div class="w-search"><i data-icon="search"></i>Suchen<kbd>⌘K</kbd></div>
-              <div class="list-row"><span class="tile t40" style="background: oklch(0.45 0.02 266)">G</span><div class="grow"><div class="t">github.com</div><div class="s">m.weber</div></div></div>
+              <div class="list-row"><span class="tile t40" style="background: oklch(0.45 0.02 231)">G</span><div class="grow"><div class="t">github.com</div><div class="s">m.weber</div></div></div>
               <div class="list-row"><span class="tile t40" style="background: oklch(0.62 0.17 145)">H</span><div class="grow"><div class="t">hetzner.com</div><div class="s">admin@weber.dev</div></div></div>
-              <div class="list-row sel"><span class="tile t40" style="background: #fff; color: oklch(0.55 0.23 263)">P</span><div class="grow"><div class="t">posteo.de</div><div class="s">m.weber@posteo.de</div></div><i data-icon="shield-alert"></i></div>
+              <div class="list-row sel"><span class="tile t40" style="background: #fff; color: oklch(0.35 0.04 231)">P</span><div class="grow"><div class="t">posteo.de</div><div class="s">m.weber@posteo.de</div></div><i data-icon="shield-alert"></i></div>
               <div class="list-row hover"><span class="tile t40" style="background: oklch(0.6 0.2 25)">D</span><div class="grow"><div class="t">db.de</div><div class="s">miriam.weber</div></div></div>
               <div class="list-row"><span class="tile t40" style="background: oklch(0.55 0.18 300)">M</span><div class="grow"><div class="t">mastodon.social</div><div class="s">@mweber</div></div><span style="color: var(--pb-warning)"><i data-icon="shield-alert"></i></span></div>
               <div class="list-row"><span class="tile t40" style="background: oklch(0.7 0.15 70)">S</span><div class="grow"><div class="t">sparkasse.de</div><div class="s">Online-Banking</div></div></div>
@@ -2111,7 +2161,7 @@
             </section>
             <section class="w-detail">
               <div class="d-head">
-                <span class="tile t56" style="background: oklch(0.6 0.16 250)">P</span>
+                <span class="tile t56" style="background: oklch(0.6 0.12 235)">P</span>
                 <div><h3>posteo.de</h3><span class="badge b-accent">E-Mail</span></div>
                 <div class="d-actions"><span><i data-icon="star"></i></span><span><i data-icon="pencil"></i></span><span><i data-icon="share-2"></i></span><span><i data-icon="ellipsis"></i></span></div>
               </div>
@@ -2269,8 +2319,8 @@
         <div class="label" style="margin-top: 10px">List rows · sidebar</div>
         <div class="two" style="gap: 12px">
           <div>
-            <div class="list-row sel"><span class="tile t40" style="background: #fff; color: oklch(0.55 0.23 263)">P</span><div class="grow"><div class="t">posteo.de</div><div class="s">m.weber@posteo.de</div></div></div>
-            <div class="list-row hover"><span class="tile t40" style="background: oklch(0.45 0.02 266)">G</span><div class="grow"><div class="t">github.com</div><div class="s">m.weber</div></div></div>
+            <div class="list-row sel"><span class="tile t40" style="background: #fff; color: oklch(0.35 0.04 231)">P</span><div class="grow"><div class="t">posteo.de</div><div class="s">m.weber@posteo.de</div></div></div>
+            <div class="list-row hover"><span class="tile t40" style="background: oklch(0.45 0.02 231)">G</span><div class="grow"><div class="t">github.com</div><div class="s">m.weber</div></div></div>
             <div class="list-row"><span class="tile t40" style="background: oklch(0.62 0.17 145)">H</span><div class="grow"><div class="t">hetzner.com</div><div class="s">admin@weber.dev</div></div></div>
           </div>
           <div>

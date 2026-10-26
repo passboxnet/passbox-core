@@ -58,7 +58,7 @@ export function Avatar({ name, size = "md", tone = "tint", className }: AvatarPr
       }
       className={cn(
         "inline-flex shrink-0 items-center justify-center rounded-full font-bold tracking-tight select-none",
-        tone === "signature" && "bg-signature text-white shadow-highlight",
+        tone === "signature" && "bg-signature text-solar shadow-highlight",
         sizes[size],
         className,
       )}
@@ -88,7 +88,8 @@ export const Fab = forwardRef<HTMLButtonElement, FabProps>(function Fab(
       type={type}
       aria-label={label}
       className={cn(
-        "flex size-14 shrink-0 items-center justify-center rounded-full bg-signature text-white shadow-glow ring-4 ring-canvas",
+        "flex size-14 shrink-0 items-center justify-center rounded-full bg-accent text-accent-contrast shadow-lip-glow ring-4 ring-canvas",
+        "transition-[background-color,box-shadow,translate] duration-150 hover:bg-accent-hover active:translate-y-px active:bg-accent-pressed active:shadow-none",
         "transition-[transform,filter] duration-150 ease-standard hover:brightness-110 active:scale-95",
         "focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus [&_svg]:size-6",
         className,

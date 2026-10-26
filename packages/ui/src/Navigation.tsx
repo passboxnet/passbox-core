@@ -26,7 +26,7 @@ export function sidebarItemClassName({
   return cn(
     "flex h-9 w-full items-center gap-3 rounded-[0.625rem] px-3 text-left text-[0.8125rem] font-medium transition-colors duration-150 coarse:h-11",
     "focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-focus [&_svg]:size-4 [&_svg]:shrink-0",
-    active ? "bg-surface-raised text-text" : "text-text-muted hover:bg-surface-raised/60 hover:text-text",
+    active ? "bg-selection text-text" : "text-text-muted hover:bg-surface-raised/60 hover:text-text",
     className,
   );
 }
@@ -53,7 +53,7 @@ export const SidebarItem = forwardRef<HTMLButtonElement, SidebarItemProps>(funct
       className={sidebarItemClassName({ active, className })}
       {...props}
     >
-      {icon && <span className={cn("flex", active ? "text-accent" : "text-text-subtle")}>{icon}</span>}
+      {icon && <span className={cn("flex", active ? "text-selection-marker" : "text-text-subtle")}>{icon}</span>}
       {dot && <span aria-hidden="true" className={cn("ml-1 size-2 shrink-0 rounded-full", tagDotClassName[dot])} />}
       <span className="min-w-0 flex-1 truncate">{label}</span>
       {count !== undefined && <span className="text-xs text-text-subtle tabular-nums">{count}</span>}
@@ -61,7 +61,7 @@ export const SidebarItem = forwardRef<HTMLButtonElement, SidebarItemProps>(funct
   );
 });
 
-/** List row styles, for router links. Selected rows are solid accent. */
+/** List row styles, for router links. Selected rows get the Sky selection tint and a marker bar. */
 export function listRowClassName({
   selected = false,
   className,
@@ -73,7 +73,7 @@ export function listRowClassName({
     "group flex w-full items-center gap-3 rounded-control px-3 py-2.5 text-left transition-colors duration-150",
     "focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-focus",
     selected
-      ? "bg-accent text-accent-contrast shadow-glow focus-visible:outline-accent-contrast"
+      ? "bg-selection text-text shadow-[inset_3px_0_0_0_var(--pb-selection-marker)]"
       : "text-text hover:bg-surface-raised",
     className,
   );
@@ -105,16 +105,10 @@ export const ListRow = forwardRef<HTMLButtonElement, ListRowProps>(function List
       {leading}
       <span className="min-w-0 flex-1">
         <span className="block truncate text-sm font-semibold">{title}</span>
-        {subtitle && (
-          <span className={cn("block truncate text-xs", selected ? "text-accent-contrast" : "text-text-muted")}>
-            {subtitle}
-          </span>
-        )}
+        {subtitle && <span className="block truncate text-xs text-text-muted">{subtitle}</span>}
       </span>
       {trailing && (
-        <span
-          className={cn("flex shrink-0 items-center gap-1.5", selected ? "text-accent-contrast" : "text-text-subtle")}
-        >
+        <span className={cn("flex shrink-0 items-center gap-1.5", selected ? "text-text-muted" : "text-text-subtle")}>
           {trailing}
         </span>
       )}

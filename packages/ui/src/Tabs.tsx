@@ -85,12 +85,14 @@ export function Tabs<T extends string>({
               variant === "underline"
                 ? cn(
                     "-mb-px h-10 border-b-2 coarse:h-12",
-                    selected ? "border-accent text-text" : "border-transparent text-text-muted hover:text-text",
+                    selected
+                      ? "border-selection-marker text-text"
+                      : "border-transparent text-text-muted hover:text-text",
                   )
                 : cn(
                     "h-8 rounded-full px-3.5 coarse:h-11",
                     selected
-                      ? "bg-accent text-accent-contrast"
+                      ? "bg-selection text-text shadow-[inset_0_0_0_1px_var(--pb-selection-marker)]"
                       : "text-text-muted hover:bg-surface-raised hover:text-text",
                   ),
             )}
@@ -100,7 +102,7 @@ export function Tabs<T extends string>({
               <span
                 className={cn(
                   "rounded-full px-1.5 text-2xs tabular-nums",
-                  selected && variant === "pill" ? "bg-accent-contrast/20" : "bg-surface-raised text-text-subtle",
+                  selected && variant === "pill" ? "bg-surface/70 text-text" : "bg-surface-raised text-text-subtle",
                 )}
               >
                 {item.count}

@@ -111,7 +111,7 @@
   --color-sky: oklch(0.7101 0.0751 228.76);
   --color-sky-lip: oklch(0.5388 0.0802 245.1);
   --color-glow-sky: oklch(0.7101 0.0751 228.76 / 0.45);
-  --color-glow-solar: oklch(0.9144 0.1396 95.56 / 0.18);
+  --color-glow-solar: oklch(0.9144 0.1396 95.56 / 0.1);
 
   --color-brand-50: oklch(0.975 0.01 228);
   --color-brand-100: oklch(0.94 0.025 228);

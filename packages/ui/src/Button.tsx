@@ -2,7 +2,7 @@ import { type ButtonHTMLAttributes, forwardRef, type ReactNode } from "react";
 import { cn } from "./cn";
 import { Spinner } from "./Spinner";
 
-/** `onAccent`: icon buttons on a solid accent surface (the selected list row). */
+/** `onAccent`: icon buttons on a tinted surface such as the selected (Sky) list row. */
 export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "subtle" | "soft" | "onAccent";
 export type ButtonSize = "xs" | "sm" | "md" | "lg" | "icon" | "icon-sm" | "icon-lg";
 /** `rounded` (default) for app chrome, `pill` for calls to action and marketing. */
@@ -17,14 +17,14 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variants: Record<ButtonVariant, string> = {
   primary:
-    "bg-accent text-accent-contrast shadow-xs hover:bg-accent-hover hover:shadow-glow active:bg-accent-pressed active:shadow-none",
+    "bg-accent text-accent-contrast shadow-lip hover:bg-accent-hover hover:shadow-lip-glow active:translate-y-px active:bg-accent-pressed active:shadow-none",
   secondary:
     "border border-border-strong bg-surface text-text shadow-xs hover:border-text-subtle hover:bg-surface-raised active:bg-surface-sunken",
   ghost: "text-text-muted hover:bg-surface-raised hover:text-text active:bg-surface-sunken",
   subtle: "bg-surface-raised text-text hover:bg-border active:bg-border-strong",
-  soft: "bg-accent-soft text-accent hover:bg-accent hover:text-accent-contrast active:bg-accent-pressed",
+  soft: "bg-accent-soft text-accent hover:bg-selection active:bg-selection",
   danger: "bg-danger text-danger-contrast shadow-xs hover:brightness-110 active:brightness-95",
-  onAccent: "text-accent-contrast hover:bg-accent-hover active:bg-accent-pressed",
+  onAccent: "text-text-muted hover:bg-text/8 hover:text-text active:bg-text/12",
 };
 
 const sizes: Record<ButtonSize, string> = {
@@ -52,7 +52,7 @@ export function buttonClassName({
 } = {}): string {
   return cn(
     "inline-flex shrink-0 select-none items-center justify-center font-semibold whitespace-nowrap",
-    "transition-[background-color,border-color,color,box-shadow,filter] duration-150 ease-standard",
+    "transition-[background-color,border-color,color,box-shadow,filter,translate] duration-150 ease-standard",
     "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus",
     "disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50",
     "[&_svg]:size-4 [&_svg]:shrink-0",
