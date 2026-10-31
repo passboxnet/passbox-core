@@ -19,11 +19,10 @@ on:
 
 env:
   TAG: ${{ inputs.tag || github.ref_name }}
+  WASM_BINDGEN_VERSION: 0.2.129
 
 permissions:
   contents: read
-
-  WASM_BINDGEN_VERSION: 0.2.129
 
 jobs:
   release:
