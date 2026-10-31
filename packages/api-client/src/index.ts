@@ -344,7 +344,7 @@ export interface InstanceUsage {
 export interface MailStatus {
   /** False when no SMTP server is configured: mails are only written to the server log. */
   configured: boolean;
-  transport: "smtps" | "starttls" | "smtp" | "log";
+  transport: "smtps" | "starttls" | "smtp" | "camelmailer" | "log";
   host: string | null;
   from: string;
   publicUrl: string | null;

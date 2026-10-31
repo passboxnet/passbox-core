@@ -1061,6 +1061,7 @@
   "admin.mail.status": "Versand",
   "admin.mail.transport.smtps": "SMTP mit TLS",
   "admin.mail.transport.starttls": "SMTP mit STARTTLS",
+  "admin.mail.transport.camelmailer": "Camelmailer-API",
   "admin.mail.transport.smtp": "SMTP ohne Verschlüsselung",
   "admin.mail.transport.log": "Nur Server-Protokoll",
   "admin.mail.host": "Mailserver",
