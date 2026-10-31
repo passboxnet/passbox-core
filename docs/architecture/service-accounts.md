@@ -45,7 +45,7 @@ grant_sig = Ed25519(owner.sig_sk, grant)
 
 ## Server
 
-Migration [`0001_baseline.sql`](https://github.com/passboxnet/passbox-server/blob/main/migrations/0001_baseline.sql): `service_accounts`, `service_account_grants` (one row per vault and key epoch), `service_account_events`. The name is visible to the server (like a device name).
+Migration [`0001_baseline.sql`](https://github.com/passboxnet/server/blob/main/migrations/0001_baseline.sql): `service_accounts`, `service_account_grants` (one row per vault and key epoch), `service_account_events`. The name is visible to the server (like a device name).
 
 Owner endpoints (signed-in session): `GET/POST /api/v1/service-accounts`, `PUT/DELETE /service-accounts/{id}`, `PUT /service-accounts/{id}/grants`, `DELETE /service-accounts/{id}/grants/{vault_id}`, `POST /service-accounts/{id}/revoke`, `GET /service-accounts/{id}/events`.
 
@@ -58,7 +58,7 @@ Checks: uploads must parse; the public key and each grant must be signed by the 
 ## Clients
 
 - Rust: `passbox_client::ServiceAccountClient` (connect with a token, list vaults and items, create/update/trash/delete items), and `Client::create_service_account`, `grant_service_account`, `service_accounts`, `revoke_service_account` for owners.
-- CLI: `PASSBOX_SERVICE_ACCOUNT_TOKEN` (with `PASSBOX_SERVER`) switches every vault command to the service account; see [cli.md](https://github.com/passboxnet/passbox-cli/blob/main/docs/cli.md).
+- CLI: `PASSBOX_SERVICE_ACCOUNT_TOKEN` (with `PASSBOX_SERVER`) switches every vault command to the service account; see [cli.md](https://github.com/passboxnet/cli/blob/main/docs/cli.md).
 - Web: **Developer → Service accounts** (`apps/web/src/developer`): create (name, vaults with read or read/write, expiry), copy the token once, add or renew vault access, see activity, revoke, delete. TypeScript API in `packages/client` (`createServiceAccount`, `grantServiceAccount`, …).
 
 ## Not yet built

@@ -1,6 +1,6 @@
 # Database security
 
-How Passbox keeps tenants apart in PostgreSQL, what row level security adds to the application's own checks, and what it does not protect. Background: [ADR 0007](../adr/0007-postgresql-only.md). The schema is in [`crates/server/migrations`](https://github.com/passboxnet/passbox-server/tree/main/migrations), the roles in [`crates/server/sql/roles.sql`](https://github.com/passboxnet/passbox-server/blob/main/sql/roles.sql) and the Rust side in [`crates/server/src/db.rs`](https://github.com/passboxnet/passbox-server/blob/main/src/db.rs).
+How Passbox keeps tenants apart in PostgreSQL, what row level security adds to the application's own checks, and what it does not protect. Background: [ADR 0007](../adr/0007-postgresql-only.md). The schema is in [`crates/server/migrations`](https://github.com/passboxnet/server/tree/main/migrations), the roles in [`crates/server/sql/roles.sql`](https://github.com/passboxnet/server/blob/main/sql/roles.sql) and the Rust side in [`crates/server/src/db.rs`](https://github.com/passboxnet/server/blob/main/src/db.rs).
 
 ## Layers
 
@@ -11,7 +11,7 @@ From the outside in:
 3. **Transaction context.** Handlers never see a connection pool. They open a transaction through `Db`, which first states on whose behalf it runs (below). The settings are transaction-local, so a pooled connection carries nothing to its next user, and they work behind a transaction-mode connection pooler such as PgBouncer.
 4. **Row level security.** Every table with tenant data has `ENABLE` and `FORCE ROW LEVEL SECURITY` and policies that compare rows with the context. A query that forgets `WHERE account_id = $1` still sees only the caller's rows; an `INSERT` or `UPDATE` that names another tenant fails with a policy violation.
 5. **Roles and grants.** The server's roles cannot bypass the policies, do not own the tables, and get only the privileges they need (`passbox_app` cannot change `accounts.instance_admin`; `passbox_worker` sees only the tables of the background jobs).
-6. **Operator controls.** TLS to the database, passwords or certificates per role, network access, backups. See [self-hosting.md](https://github.com/passboxnet/passbox-server/blob/main/docs/self-hosting.md#database).
+6. **Operator controls.** TLS to the database, passwords or certificates per role, network access, backups. See [self-hosting.md](https://github.com/passboxnet/server/blob/main/docs/self-hosting.md#database).
 
 ## Roles
 

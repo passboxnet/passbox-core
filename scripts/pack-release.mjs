@@ -1,7 +1,7 @@
 // Packs every @passbox/* package into dist/ for a GitHub release, with a
 // SHA256SUMS file. pnpm pack replaces workspace:* with the released version.
 // Until the packages are on npm, other repositories install these tarballs
-// by URL, e.g. https://github.com/passboxnet/passbox-core/releases/download/v0.1.0/passbox-ui-0.1.0.tgz
+// by URL, e.g. https://github.com/passboxnet/core/releases/download/v0.1.0/passbox-ui-0.1.0.tgz
 //
 //   pnpm build:wasm && node scripts/pack-release.mjs
 

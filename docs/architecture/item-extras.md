@@ -68,7 +68,7 @@ every 10 minutes, rows claimed with `FOR UPDATE SKIP LOCKED`) checks icons
 again after 30 days with `If-None-Match`/`If-Modified-Since` and misses after
 7 days; an icon that fails three times a day apart becomes a miss; entries
 nobody asked for in 180 days are removed. `/metrics` counts lookups by tier
-and refreshes by outcome. See [self-hosting.md](https://github.com/passboxnet/passbox-server/blob/main/docs/self-hosting.md#website-icons)
+and refreshes by outcome. See [self-hosting.md](https://github.com/passboxnet/server/blob/main/docs/self-hosting.md#website-icons)
 for the fetch rules, storage and the privacy note. Admins can turn the
 server tiers off (`PASSBOX_ICONS=off`, `/api/v1/meta` → `icons: false`);
 the server then answers 404 and other sites show monograms. Bundled icons

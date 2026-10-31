@@ -2,15 +2,15 @@
 
 > **Draft.** Not reviewed by cryptographers and not audited. Formats may still change before the first release that ships them.
 
-This document describes waves E1 (sign-in with OpenID Connect), E2 (unlocking with SSO on trusted devices), E3 (SCIM 2.0 provisioning) and E4 (SAML, deferred: [ADR 0005](../adr/0005-saml-deferred.md)) as implemented. The planning sketch is in docs/planning/feature-gap.md §5.6 (German); where this document differs, this document is what the code does. Setting it up per identity provider: [self-hosting.md](https://github.com/passboxnet/passbox-server/blob/main/docs/self-hosting.md#single-sign-on-sso).
+This document describes waves E1 (sign-in with OpenID Connect), E2 (unlocking with SSO on trusted devices), E3 (SCIM 2.0 provisioning) and E4 (SAML, deferred: [ADR 0005](../adr/0005-saml-deferred.md)) as implemented. The planning sketch is in docs/planning/feature-gap.md §5.6 (German); where this document differs, this document is what the code does. Setting it up per identity provider: [self-hosting.md](https://github.com/passboxnet/server/blob/main/docs/self-hosting.md#single-sign-on-sso).
 
 | Part | Code |
 | --- | --- |
 | ID token verification, PKCE (feature `oidc`, server only) | [`crates/core/src/oidc.rs`](../../crates/core/src/oidc.rs) |
 | Trusted device keys and grants | [`crates/core/src/trusted_device.rs`](../../crates/core/src/trusted_device.rs), WebAssembly in [`crates/core-wasm`](../../crates/core-wasm/src/lib.rs) |
-| Server | [`crates/server/src/api/sso`](https://github.com/passboxnet/passbox-server/tree/main/src/api/sso) (`mod.rs` configuration, `oidc.rs` provider HTTP, `login.rs` flow and policy, `devices.rs` trusted devices), [`crates/server/src/api/scim`](https://github.com/passboxnet/passbox-server/tree/main/src/api/scim), migration [`0001_baseline.sql`](https://github.com/passboxnet/passbox-server/blob/main/migrations/0001_baseline.sql) |
+| Server | [`crates/server/src/api/sso`](https://github.com/passboxnet/server/tree/main/src/api/sso) (`mod.rs` configuration, `oidc.rs` provider HTTP, `login.rs` flow and policy, `devices.rs` trusted devices), [`crates/server/src/api/scim`](https://github.com/passboxnet/server/tree/main/src/api/scim), migration [`0001_baseline.sql`](https://github.com/passboxnet/server/blob/main/migrations/0001_baseline.sql) |
 | TypeScript client | [`packages/api-client/src/sso.ts`](../../packages/api-client/src/sso.ts), [`packages/client/src/sso.ts`](../../packages/client/src/sso.ts), `PassboxClient` (`ssoFor`, `startSso`, `redeemSso`, `signIn`/`unlock` with `ssoProof`, `unlockWithSso`, `trustThisDevice`, `approveDevice`, `requestDeviceApproval`, `checkDeviceApproval`, `sso`) |
-| Web | [`apps/web/src/sso`](https://github.com/passboxnet/passbox-web/tree/main/src/sso): sign-in option, callback screen (`#/sso`), trusted devices in Settings, organization settings (`#/org-sso/{id}`) with SCIM |
+| Web | [`apps/web/src/sso`](https://github.com/passboxnet/web/tree/main/src/sso): sign-in option, callback screen (`#/sso`), trusted devices in Settings, organization settings (`#/org-sso/{id}`) with SCIM |
 
 ## What SSO does and does not do
 

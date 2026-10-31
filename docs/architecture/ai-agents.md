@@ -110,7 +110,7 @@ AI agents and service accounts never count as members. To prevent abuse, the hos
 
 ## Setup
 
-Recommended for every agent: create a service account (**Developer → Service accounts** in the web app) with **read** access to a vault that holds only what the agent needs, and an expiry. Install `pbx` (see [cli.md](https://github.com/passboxnet/passbox-cli/blob/main/docs/cli.md)). Keep the Passbox web or desktop app open and signed in on a device you are watching: that is where approvals appear.
+Recommended for every agent: create a service account (**Developer → Service accounts** in the web app) with **read** access to a vault that holds only what the agent needs, and an expiry. Install `pbx` (see [cli.md](https://github.com/passboxnet/cli/blob/main/docs/cli.md)). Keep the Passbox web or desktop app open and signed in on a device you are watching: that is where approvals appear.
 
 Without a service account, `pbx mcp` uses the account signed in with `pbx signin` and needs `PASSBOX_PASSWORD` in its environment (it cannot prompt, standard input is the protocol). Prefer the service account: the master password in a configuration file is a much bigger key.
 

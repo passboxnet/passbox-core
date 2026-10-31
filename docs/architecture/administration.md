@@ -196,7 +196,7 @@ Verify the signature with the secret and reject timestamps older than a few minu
 
 ## Storage (migration 0009)
 
-Tables (migration [`0001_baseline.sql`](https://github.com/passboxnet/passbox-server/blob/main/migrations/0001_baseline.sql), policies in `0002_rls.sql`): `org_policies` (every version, signed, with the parsed rules), `org_audit_heads`, `org_audit_events` (indexes per organization and time, actor and action; unique client nonce), `org_settings` (retention), `org_security_reports`, `org_event_tokens` (token hashes), `org_webhooks` (URL, secret, cursor, backoff, last status).
+Tables (migration [`0001_baseline.sql`](https://github.com/passboxnet/server/blob/main/migrations/0001_baseline.sql), policies in `0002_rls.sql`): `org_policies` (every version, signed, with the parsed rules), `org_audit_heads`, `org_audit_events` (indexes per organization and time, actor and action; unique client nonce), `org_settings` (retention), `org_security_reports`, `org_event_tokens` (token hashes), `org_webhooks` (URL, secret, cursor, backoff, last status).
 
 ## API summary
 

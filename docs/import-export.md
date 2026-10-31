@@ -3,7 +3,7 @@
 Passbox imports the export files of browsers and other password managers and exports your data as an encrypted Passbox file or as CSV. Everything happens on your device: the file is parsed in the browser (in a Web Worker), and each item is encrypted with its vault key before it is uploaded, like any other item.
 
 - Web app: **Settings → Import and export**, or open `#/import` directly.
-- Code: parsers in [`packages/client/src/import`](../packages/client/src/import), export in [`packages/client/src/export`](../packages/client/src/export), the export encryption in [`crates/core/src/export.rs`](../crates/core/src/export.rs), the UI in [`apps/web/src/import`](https://github.com/passboxnet/passbox-web/tree/main/src/import) and [`apps/web/src/export`](https://github.com/passboxnet/passbox-web/tree/main/src/export).
+- Code: parsers in [`packages/client/src/import`](../packages/client/src/import), export in [`packages/client/src/export`](../packages/client/src/export), the export encryption in [`crates/core/src/export.rs`](../crates/core/src/export.rs), the UI in [`apps/web/src/import`](https://github.com/passboxnet/web/tree/main/src/import) and [`apps/web/src/export`](https://github.com/passboxnet/web/tree/main/src/export).
 - The command-line client has no import or export yet (`pbx import` / `pbx export` are planned).
 
 ## Supported formats

@@ -2,7 +2,7 @@ name: Release
 
 # A tag v* publishes a GitHub release with the npm tarballs of every
 # @passbox/* package (including the WebAssembly build of the core) and their
-# SHA256SUMS, with a build provenance attestation. passbox-web, passbox-server
+# SHA256SUMS, with a build provenance attestation. passboxnet/web, passboxnet/server
 # and the website install them by URL until the packages are on npm; the Rust
 # crates are used as a git dependency on the same tag.
 

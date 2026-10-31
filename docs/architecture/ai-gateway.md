@@ -2,7 +2,7 @@
 
 > **Draft.** Not reviewed by cryptographers and not audited. The settings format may still change.
 
-This document describes the first AI-native wave as implemented, following the concept in docs/planning/ai-native.md (German; principles §3, data classes §4, architecture §6). Agent access (`pbx mcp`, K1) and the agent audit (K12) are a separate building block: see [ai-agents.md](ai-agents.md). `pbx scan` (K10) uses no AI and is documented in [cli.md](https://github.com/passboxnet/passbox-cli/blob/main/docs/cli.md#finding-leaked-secrets-pbx-scan).
+This document describes the first AI-native wave as implemented, following the concept in docs/planning/ai-native.md (German; principles §3, data classes §4, architecture §6). Agent access (`pbx mcp`, K1) and the agent audit (K12) are a separate building block: see [ai-agents.md](ai-agents.md). `pbx scan` (K10) uses no AI and is documented in [cli.md](https://github.com/passboxnet/cli/blob/main/docs/cli.md#finding-leaked-secrets-pbx-scan).
 
 The binding rules are in [ADR 0006: AI principles](../adr/0006-ai-principles.md): secrets never reach a model (local or remote), the only exception being the explicit per-grant `passbox_reveal` for agents; AI off by default and opt-in per feature; bring your own model, no Passbox-hosted inference; members' names and emails pseudonymised by default for a future admin assistant (K9).
 
@@ -158,7 +158,7 @@ The security check shows **Your plan** above the findings: up to five steps, mos
 
 ### K10 `pbx scan`
 
-No model, no network. See [cli.md](https://github.com/passboxnet/passbox-cli/blob/main/docs/cli.md#finding-leaked-secrets-pbx-scan).
+No model, no network. See [cli.md](https://github.com/passboxnet/cli/blob/main/docs/cli.md#finding-leaked-secrets-pbx-scan).
 
 ## Threat model (AI features)
 

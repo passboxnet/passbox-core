@@ -4,7 +4,7 @@
 
 This document describes waves C1 (recovery through an organization or family), C2 (personal recovery code), C3 (emergency access) and C4 (adding a device with a code) as implemented. The planning sketch is in docs/planning/feature-gap.md §5.3 (German); where this document differs, this document is what the code does. It builds on the key hierarchy in [cryptography.md](cryptography.md) and the key pairs, key directory and organizations in [sharing.md](sharing.md).
 
-All cryptography is in [`crates/core`](../../crates/core): `recovery::code`, `recovery::org`, `emergency` and `device_link`. The web app and the extension use it through `@passbox/core-wasm` and [`packages/client`](../../packages/client) (`PassboxClient`), the native apps through [`crates/client`](../../crates/client) and the FFI ([`crates/ffi/src/recovery.rs`](../../crates/ffi/src/recovery.rs)). The server ([`crates/server/src/api/recovery.rs`](https://github.com/passboxnet/passbox-server/blob/main/src/api/recovery.rs), `org_recovery.rs`, `emergency.rs`, `device_links.rs`, migration [`0001_baseline.sql`](https://github.com/passboxnet/passbox-server/blob/main/migrations/0001_baseline.sql)) stores sealed data and enforces who gets it when.
+All cryptography is in [`crates/core`](../../crates/core): `recovery::code`, `recovery::org`, `emergency` and `device_link`. The web app and the extension use it through `@passbox/core-wasm` and [`packages/client`](../../packages/client) (`PassboxClient`), the native apps through [`crates/client`](../../crates/client) and the FFI ([`crates/ffi/src/recovery.rs`](../../crates/ffi/src/recovery.rs)). The server ([`crates/server/src/api/recovery.rs`](https://github.com/passboxnet/server/blob/main/src/api/recovery.rs), `org_recovery.rs`, `emergency.rs`, `device_links.rs`, migration [`0001_baseline.sql`](https://github.com/passboxnet/server/blob/main/migrations/0001_baseline.sql)) stores sealed data and enforces who gets it when.
 
 ## What recovery means here
 
@@ -145,7 +145,7 @@ Trust that remains by design:
 
 ## Server storage and limits
 
-Migration [`0001_baseline.sql`](https://github.com/passboxnet/passbox-server/blob/main/migrations/0001_baseline.sql): `account_recovery` (second OPAQUE record and wrap), `recovery_attempts`, `recovery_sessions` (token hashes, single use, 15 minutes), `org_recovery_keys`, `org_recovery_grants`, `org_recovery_escrows`, `org_recovery_requests` (token hashes, 48 hours), `emergency_grants`, `device_links` (claim token hashes, 10 minutes). Every request runs in a transaction that names its context first (`crate::db::Db`), and the tables have forced row level security ([database-security.md](database-security.md)).
+Migration [`0001_baseline.sql`](https://github.com/passboxnet/server/blob/main/migrations/0001_baseline.sql): `account_recovery` (second OPAQUE record and wrap), `recovery_attempts`, `recovery_sessions` (token hashes, single use, 15 minutes), `org_recovery_keys`, `org_recovery_grants`, `org_recovery_escrows`, `org_recovery_requests` (token hashes, 48 hours), `emergency_grants`, `device_links` (claim token hashes, 10 minutes). Every request runs in a transaction that names its context first (`crate::db::Db`), and the tables have forced row level security ([database-security.md](database-security.md)).
 
 Rate limits (in memory, per server process): recovery-code logins share the per-IP authentication limit and count failures per (email, IP) (10), per email (20) and per IP (100) in 15 minutes; the second factor uses the two-factor limits; organization recovery requests are limited to 10 per IP and 3 per email per hour; emergency invitations to 20 per account per hour and 20 contacts per account; device link claims to 10 per IP per minute and 5 open links per account.
 
@@ -164,7 +164,7 @@ Mails (English and German, `crates/server/src/mail/templates.rs`): `recovery_cod
 | Emergency access | `emergencyContacts`, `addEmergencyContact`, `acceptEmergencyInvitation`, `confirmEmergencyContact` (returns the fingerprint), `requestEmergencyAccess`, `approveEmergencyAccess`, `denyEmergencyAccess`, `removeEmergencyContact`, `openEmergencyAccess`, `resealEmergencyAccess` (after unlock) | same |
 | Device code | `startDeviceLink`, `deviceLinkStatus`, `approveDeviceLink`, `cancelDeviceLink`, `claimDeviceLink`, `pollDeviceLink`, `isDeviceCode` | same; FFI `is_device_code` |
 
-Endpoints are listed in [docs/api/openapi.yaml](https://github.com/passboxnet/passbox-server/blob/main/docs/api/openapi.yaml) under the tags `recovery`, `emergency` and `devices`.
+Endpoints are listed in [docs/api/openapi.yaml](https://github.com/passboxnet/server/blob/main/docs/api/openapi.yaml) under the tags `recovery`, `emergency` and `devices`.
 
 ## Tests
 
