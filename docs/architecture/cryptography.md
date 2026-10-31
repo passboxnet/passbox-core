@@ -37,9 +37,9 @@ Passbox uses OPAQUE (RFC 9807) with ristretto255, 3DH and SHA-512 (`opaque-ke`).
 - Login is a two-round protocol. The server keeps the login state between the rounds in the database (5 minutes, single use) and issues a random 256-bit session token after verifying the client. Only the SHA-256 hash of the token is stored. Sessions last 30 days.
 - Unknown emails get a stable fake prelogin answer and a fake OPAQUE response, so the API does not reveal which accounts exist. (Sign-up does reveal whether an email is taken.)
 - The web client performs a full OPAQUE login on every unlock and keeps the session token in memory only.
-- Online guessing is rate limited. Because every unlock is a login, a successful login also returns a random 256-bit device token (stored by the client, SHA-256 hash on the server, replaced on every login). A login that presents it is exempt from the per-email lockout, so failed attempts by someone who only knows the email cannot lock the user out of their devices. Without a device token, failures are limited per (email, IP) pair and, as a backstop, per email; see [Security behavior](../self-hosting.md#security-behavior).
+- Online guessing is rate limited. Because every unlock is a login, a successful login also returns a random 256-bit device token (stored by the client, SHA-256 hash on the server, replaced on every login). A login that presents it is exempt from the per-email lockout, so failed attempts by someone who only knows the email cannot lock the user out of their devices. Without a device token, failures are limited per (email, IP) pair and, as a backstop, per email; see [Security behavior](https://github.com/passboxnet/passbox-server/blob/main/docs/self-hosting.md#security-behavior).
 
-Code: [`crates/core/src/opaque.rs`](../../crates/core/src/opaque.rs), [`crates/server/src/api/auth.rs`](../../crates/server/src/api/auth.rs).
+Code: [`crates/core/src/opaque.rs`](../../crates/core/src/opaque.rs), [`crates/server/src/api/auth.rs`](https://github.com/passboxnet/passbox-server/blob/main/src/api/auth.rs).
 
 ## Login two-factor authentication (implemented)
 
@@ -51,7 +51,7 @@ A second step after OPAQUE protects server sessions (session takeover, complianc
 - **Challenges** (login, key registration, checks before turning 2FA off) are random 256-bit tokens, stored as SHA-256 hashes, valid for 5 minutes and single use.
 - **Remember this device:** the device token (see above) gets a `two_factor_until` timestamp (30 days) that carries over when the token is rotated. It only skips the second step; the password is always needed.
 
-Code: [`crates/core/src/two_factor.rs`](../../crates/core/src/two_factor.rs), [`crates/core/src/webauthn.rs`](../../crates/core/src/webauthn.rs), [`crates/server/src/api/two_factor.rs`](../../crates/server/src/api/two_factor.rs).
+Code: [`crates/core/src/two_factor.rs`](../../crates/core/src/two_factor.rs), [`crates/core/src/webauthn.rs`](../../crates/core/src/webauthn.rs), [`crates/server/src/api/two_factor.rs`](https://github.com/passboxnet/passbox-server/blob/main/src/api/two_factor.rs).
 
 ## Key hierarchy (implemented)
 
@@ -109,7 +109,7 @@ Manifest V3 service workers are stopped when idle, which would drop the unlocked
 
 The extension keeps the session key, the encrypted blob and the server session token only in `chrome.storage.session` (memory only, cleared when the browser closes, not readable by content scripts). Locking, auto-lock (after the configured idle time, and when the screen locks) and signing out delete it. Holding both values is equivalent to holding the unlocked keys, so this protects against the keys reaching disk, not against code running inside the extension.
 
-Code: [`crates/core/src/keyring.rs`](../../crates/core/src/keyring.rs), [`apps/extension/src/background/vault.ts`](../../apps/extension/src/background/vault.ts).
+Code: [`crates/core/src/keyring.rs`](../../crates/core/src/keyring.rs), [`apps/extension/src/background/vault.ts`](https://github.com/passboxnet/passbox-extension/blob/main/src/background/vault.ts).
 
 ## Export files (implemented)
 
@@ -127,7 +127,7 @@ Passbox acts as a WebAuthn authenticator for ES256 (ECDSA P-256 with SHA-256, CO
 - **Storage:** the PKCS#8 private key lives in the login item's `passkeys` array and is encrypted like every other item field. Clients never display it.
 - **Origin rules:** the extension takes the calling origin from the browser (never from the page), requires https (http only on `localhost`), and accepts an RP ID only if it equals the origin's host or is a registrable suffix of it (never a public suffix, per the Public Suffix List). It builds `clientDataJSON` itself.
 
-Code: [`crates/core/src/passkey.rs`](../../crates/core/src/passkey.rs), [`apps/extension/src/background/passkeys.ts`](../../apps/extension/src/background/passkeys.ts).
+Code: [`crates/core/src/passkey.rs`](../../crates/core/src/passkey.rs), [`apps/extension/src/background/passkeys.ts`](https://github.com/passboxnet/passbox-extension/blob/main/src/background/passkeys.ts).
 
 ## Changing the master password (implemented)
 

@@ -2,7 +2,7 @@
 
 > **Draft.** Not reviewed by cryptographers and not audited. Formats may still change before the first release that ships them.
 
-This document describes waves A1 (account key pairs), A4 (key directory, first version), B1 (organizations, invitations, roles), B2 (shared vaults), B3 (groups), B4 (families), B5 (moving items between vaults), B7 (share links), B8 (guests) and B9 (access requests) as implemented. The planning sketch is in [docs/planning/feature-gap.md](../planning/feature-gap.md) §5.1–5.2 (German); where this document differs, this document is what the code does.
+This document describes waves A1 (account key pairs), A4 (key directory, first version), B1 (organizations, invitations, roles), B2 (shared vaults), B3 (groups), B4 (families), B5 (moving items between vaults), B7 (share links), B8 (guests) and B9 (access requests) as implemented. The planning sketch is in docs/planning/feature-gap.md §5.1–5.2 (German); where this document differs, this document is what the code does.
 
 All cryptography is in [`crates/core`](../../crates/core): `identity` (key pairs, sealing, signatures), `canon` (canonical encoding), `directory` (key log), `sharing/*` (signed objects, verification, request builders). The TypeScript client uses it through `@passbox/core-wasm`, the native clients through `crates/client` and `crates/ffi`. The server stores and serves; it verifies uploads only to keep garbage out, never as a security boundary for clients.
 
@@ -183,7 +183,7 @@ A confirmed member of an organization who opens a link to one of its shared vaul
 
 ## Server storage
 
-Migration [`0001_baseline.sql`](../../crates/server/migrations/0001_baseline.sql): `account_keys`, `key_log`, `organizations`, `org_members`, `org_invitations` (token hashes only), `org_keys`, `org_groups`, `group_versions`, `group_members`, `vault_members`, `vault_keys`, `vault_manifests`; new columns `vaults.org_id`, `vaults.key_epoch`, `vaults.rotation_pending`, `items.key_epoch`. Security-relevant changes are recorded in `account_events` (`keys_published`, `org_created`, `org_invitation_created`, `org_invitation_accepted`, `org_membership_confirmed`, `org_role_changed`, `org_membership_suspended`/`reactivated`/`removed`, `vault_shared`, `vault_unshared`, `vault_key_rotated`, `group_joined`, `group_left`, ...).
+Migration [`0001_baseline.sql`](https://github.com/passboxnet/passbox-server/blob/main/migrations/0001_baseline.sql): `account_keys`, `key_log`, `organizations`, `org_members`, `org_invitations` (token hashes only), `org_keys`, `org_groups`, `group_versions`, `group_members`, `vault_members`, `vault_keys`, `vault_manifests`; new columns `vaults.org_id`, `vaults.key_epoch`, `vaults.rotation_pending`, `items.key_epoch`. Security-relevant changes are recorded in `account_events` (`keys_published`, `org_created`, `org_invitation_created`, `org_invitation_accepted`, `org_membership_confirmed`, `org_role_changed`, `org_membership_suspended`/`reactivated`/`removed`, `vault_shared`, `vault_unshared`, `vault_key_rotated`, `group_joined`, `group_left`, ...).
 
 Server checks on uploads (`api/signed.rs`): objects must parse, name the IDs of the request, be signed by the uploader's published key and match the server's member lists. Every endpoint checks membership and role (`api/access.rs`); non-members get 404.
 

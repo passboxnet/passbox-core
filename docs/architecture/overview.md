@@ -23,7 +23,7 @@
 
 ## Principles
 
-1. **Headless first.** The server is a pure HTTP API described in [`docs/api/openapi.yaml`](../api/openapi.yaml). The web client, the extension, the CLI and later the desktop and mobile apps are equal clients of that API.
+1. **Headless first.** The server is a pure HTTP API described in [`docs/api/openapi.yaml`](https://github.com/passboxnet/passbox-server/blob/main/docs/api/openapi.yaml). The web client, the extension, the CLI and later the desktop and mobile apps are equal clients of that API.
 2. **One cryptographic core.** `crates/core` is the only place with cryptographic code. Browsers use it through `crates/core-wasm`; desktop and mobile will use it through UniFFI bindings.
 3. **Zero knowledge against a malicious server.** The server stores ciphertext and public keys. Clients authenticate everything they receive and never trust server-supplied security parameters (see [cryptography.md](cryptography.md)).
 4. **Offline first.** Clients keep an encrypted local copy of the vault and sync changes by revision.
@@ -37,17 +37,17 @@
 | Core | Rust, RustCrypto crates | `#![forbid(unsafe_code)]` workspace-wide |
 | Web client | React 19, Vite, Tailwind CSS 4 | Loads the core as WebAssembly |
 | Extension | Manifest V3, React | Vault in the service worker, unlocked keys only in `chrome.storage.session`; server URL can be preset through enterprise policy (`managed_schema.json`). See [extension.md](extension.md) |
-| Desktop | Tauri 2 | Wraps the built web client; tray, global shortcut, lock on sleep. See [desktop.md](../desktop.md) |
+| Desktop | Tauri 2 | Wraps the built web client; tray, global shortcut, lock on sleep. See [desktop.md](https://github.com/passboxnet/passbox-desktop/blob/main/docs/desktop.md) |
 | Website | Next.js, static export | Shares the design tokens of `packages/ui` |
 | Rust client | Rust (`crates/client`) | Native client logic with encrypted offline cache; used by the CLI, iOS and Android |
 | Bindings | UniFFI (`crates/ffi`) | Swift and Kotlin bindings of the Rust client |
-| iOS / iPadOS | SwiftUI, AuthenticationServices | AutoFill extension, Face ID / Touch ID unlock. See [ios.md](../ios.md) |
-| Android | Kotlin, Jetpack Compose | Autofill service, biometric unlock. See [android.md](../android.md) |
-| CLI | Rust, clap | Binary name `pbx`. See [cli.md](../cli.md) |
+| iOS / iPadOS | SwiftUI, AuthenticationServices | AutoFill extension, Face ID / Touch ID unlock. See [ios.md](https://github.com/passboxnet/passbox-ios/blob/main/docs/ios.md) |
+| Android | Kotlin, Jetpack Compose | Autofill service, biometric unlock. See [android.md](https://github.com/passboxnet/passbox-android/blob/main/docs/android.md) |
+| CLI | Rust, clap | Binary name `pbx`. See [cli.md](https://github.com/passboxnet/passbox-cli/blob/main/docs/cli.md) |
 
 ## Server
 
-- **Database:** PostgreSQL only ([ADR 0007](../adr/0007-postgresql-only.md)), migrations in [`crates/server/migrations`](../../crates/server/migrations) with native types (`BYTEA` ciphertext, `JSONB`, `BOOLEAN`, `BIGINT` Unix milliseconds) and compile-time checked queries (`sqlx::query!`, cache in `.sqlx/`). Handlers never get a pool: `crate::db::Db` opens a transaction that names its context (`as_account`, `public`, `as_org`, `system`), and row level security on every tenant table limits each statement to that context. See [database-security.md](database-security.md).
+- **Database:** PostgreSQL only ([ADR 0007](../adr/0007-postgresql-only.md)), migrations in [`crates/server/migrations`](https://github.com/passboxnet/passbox-server/tree/main/migrations) with native types (`BYTEA` ciphertext, `JSONB`, `BOOLEAN`, `BIGINT` Unix milliseconds) and compile-time checked queries (`sqlx::query!`, cache in `.sqlx/`). Handlers never get a pool: `crate::db::Db` opens a transaction that names its context (`as_account`, `public`, `as_org`, `system`), and row level security on every tenant table limits each statement to that context. See [database-security.md](database-security.md).
 - **Operations:** `passbox-server migrate` (or `PASSBOX_AUTO_MIGRATE`), `/health` and `/ready`, Prometheus metrics on `PASSBOX_METRICS_BIND` (`crates/server/src/metrics.rs`).
 - **Sync:** a global change counter. Every write takes the next value inside its transaction; `GET /api/v1/sync?since=<cursor>` returns everything with a higher value. Deleted items remain as tombstones without data.
 - **Instance administration:** `crates/server/src/instance.rs` holds the instance settings (registration mode, name, help address, default mail language, master password policy) as a JSON document in `instance_state`, decides who may register, and knows who is an instance admin (first account, `PASSBOX_ADMIN_EMAILS`). `api/admin.rs` serves `/api/v1/admin/*` behind the `AdminSession` extractor and writes the hash-chained `admin_events` log; record new admin actions with `admin::record` or, inside a write transaction, `admin::record_in`.

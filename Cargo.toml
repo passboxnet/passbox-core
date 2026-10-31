@@ -1,18 +1,17 @@
 [workspace]
 resolver = "3"
-members = ["crates/core", "crates/core-wasm", "crates/server", "crates/cli", "crates/client", "crates/ffi", "apps/desktop/src-tauri", "crates/ai"]
+members = ["crates/core", "crates/core-wasm", "crates/client", "crates/ffi", "crates/ai"]
 
 [workspace.package]
 version = "0.1.0"
 edition = "2024"
 license = "MIT"
-repository = "https://github.com/passboxnet/passbox"
+repository = "https://github.com/passboxnet/passbox-core"
 rust-version = "1.87"
 
 [workspace.dependencies]
 passbox-core = { path = "crates/core" }
 passbox-client = { path = "crates/client" }
-passbox-server = { path = "crates/server" }
 
 anyhow = "1"
 argon2 = { version = "0.6", default-features = false, features = ["alloc"] }

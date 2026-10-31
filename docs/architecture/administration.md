@@ -2,7 +2,7 @@
 
 > **Draft.** Not reviewed by cryptographers and not audited. Formats may still change before the first release that ships them.
 
-This document describes wave D of [docs/planning/feature-gap.md](../planning/feature-gap.md) as implemented: D1 (admin console), D2 (signed policies), D3 (organization audit log), D4 (offboarding), D5 (events API and webhooks) and D6 (reports). It builds on organizations, groups and shared vaults ([sharing.md](sharing.md)) and on recovery through the organization ([recovery.md](recovery.md)).
+This document describes wave D of docs/planning/feature-gap.md as implemented: D1 (admin console), D2 (signed policies), D3 (organization audit log), D4 (offboarding), D5 (events API and webhooks) and D6 (reports). It builds on organizations, groups and shared vaults ([sharing.md](sharing.md)) and on recovery through the organization ([recovery.md](recovery.md)).
 
 The cryptography is in [`crates/core`](../../crates/core): `policy` (signed policies, verification, pinning, combination) and `audit` (the hash chain, signed client events). The web app and the extension use it through `@passbox/core-wasm`, the native clients through `crates/client` and `crates/ffi`. Everything described here is part of the self-hosted server; there is no separate edition.
 
@@ -196,7 +196,7 @@ Verify the signature with the secret and reject timestamps older than a few minu
 
 ## Storage (migration 0009)
 
-Tables (migration [`0001_baseline.sql`](../../crates/server/migrations/0001_baseline.sql), policies in `0002_rls.sql`): `org_policies` (every version, signed, with the parsed rules), `org_audit_heads`, `org_audit_events` (indexes per organization and time, actor and action; unique client nonce), `org_settings` (retention), `org_security_reports`, `org_event_tokens` (token hashes), `org_webhooks` (URL, secret, cursor, backoff, last status).
+Tables (migration [`0001_baseline.sql`](https://github.com/passboxnet/passbox-server/blob/main/migrations/0001_baseline.sql), policies in `0002_rls.sql`): `org_policies` (every version, signed, with the parsed rules), `org_audit_heads`, `org_audit_events` (indexes per organization and time, actor and action; unique client nonce), `org_settings` (retention), `org_security_reports`, `org_event_tokens` (token hashes), `org_webhooks` (URL, secret, cursor, backoff, last status).
 
 ## API summary
 

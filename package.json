@@ -1,5 +1,5 @@
 {
-  "name": "passbox",
+  "name": "passbox-core",
   "private": true,
   "license": "MIT",
   "packageManager": "pnpm@10.28.0",
@@ -7,17 +7,13 @@
     "node": ">=22"
   },
   "scripts": {
-    "build": "pnpm -r --filter=!passbox --filter=!@passbox/desktop build",
+    "build": "pnpm -r --filter=!passbox-core build",
     "build:wasm": "pnpm --filter @passbox/core-wasm build",
-    "dev:web": "pnpm --filter @passbox/web dev",
-    "dev:website": "pnpm --filter @passbox/website dev",
-    "dev:extension": "pnpm --filter @passbox/extension dev",
-    "dev:desktop": "pnpm --filter @passbox/desktop dev",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r --workspace-concurrency=1 test",
     "lint": "biome check .",
     "format": "biome format --write .",
-    "e2e": "pnpm --filter @passbox/e2e e2e"
+    "pack": "node scripts/pack-release.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "2.6.2",

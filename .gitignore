@@ -28,3 +28,4 @@ crates/core-wasm/pkg/
 # Local agent worktrees
 .claude/worktrees/
 
+dist/

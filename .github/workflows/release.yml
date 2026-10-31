@@ -1,0 +1,47 @@
+name: Release
+
+# A tag v* publishes a GitHub release with the npm tarballs of every
+# @passbox/* package (including the WebAssembly build of the core) and their
+# SHA256SUMS, with a build provenance attestation. passbox-web, passbox-server
+# and the website install them by URL until the packages are on npm; the Rust
+# crates are used as a git dependency on the same tag.
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+env:
+  WASM_BINDGEN_VERSION: 0.2.129
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # create the release
+      id-token: write # provenance attestation
+      attestations: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: wasm-bindgen-cli@${{ env.WASM_BINDGEN_VERSION }}
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build:wasm
+      - run: node scripts/pack-release.mjs
+      - uses: actions/attest-build-provenance@v3
+        with:
+          subject-path: dist/*.tgz
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" dist/*.tgz dist/SHA256SUMS --title "$GITHUB_REF_NAME" --generate-notes

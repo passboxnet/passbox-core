@@ -1,10 +1,6 @@
 packages:
-  - "apps/*"
   - "packages/*"
   - "crates/core-wasm"
-  - "e2e"
 
 onlyBuiltDependencies:
   - esbuild
-  - sharp
-  - "@tailwindcss/oxide"

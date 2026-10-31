@@ -9,6 +9,10 @@
 //   docs/design/board.html                        (CSS variables between markers)
 //   crates/server/src/brand/tokens.rs             (whole file; server pages and emails)
 //
+// The iOS, Android and server files live in their own repositories. They are
+// written when those are checked out next to this one (../passbox-ios,
+// ../passbox-android, ../passbox-server) and skipped otherwise.
+//
 //   node scripts/generate-design-tokens.mjs           write the files
 //   node scripts/generate-design-tokens.mjs --check   fail if a file is stale,
 //                                                    a color leaves sRGB or a
@@ -846,8 +850,9 @@ function biomeFormat(path, text) {
 }
 
 const outputs = [];
-function output(path, produce) {
-  const file = join(root, path);
+function output(path, produce, repo) {
+  const file = repo ? join(root, "..", repo, path) : join(root, path);
+  if (repo && !existsSync(join(root, "..", repo))) return;
   let current = "";
   try {
     current = readFileSync(file, "utf8");
@@ -873,9 +878,9 @@ output("packages/ui/src/tokens.css", (text) =>
   ),
 );
 output("docs/design/board.html", (text) => replaceRegion(text, "vars", cssVars(), "board.html", "      "));
-output("apps/ios/Shared/DesignTokens.swift", () => swiftFile());
-output("apps/android/app/src/main/java/dev/passbox/android/ui/theme/Tokens.kt", () => kotlinFile());
-output("crates/server/src/brand/tokens.rs", () => rustFile());
+output("Shared/DesignTokens.swift", () => swiftFile(), "passbox-ios");
+output("app/src/main/java/dev/passbox/android/ui/theme/Tokens.kt", () => kotlinFile(), "passbox-android");
+output("src/brand/tokens.rs", () => rustFile(), "passbox-server");
 output("docs/design/system.md", (text) => replaceMdRegion(text, "tokens", docsTables(), "system.md"));
 
 let changed = 0;

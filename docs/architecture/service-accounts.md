@@ -2,7 +2,7 @@
 
 > **Draft.** Not reviewed by cryptographers and not audited. Formats may still change before the first release that ships them.
 
-Wave F2 as implemented. The planning sketch is in [docs/planning/feature-gap.md](../planning/feature-gap.md) §5.8 (German); where this document differs, this document is what the code does.
+Wave F2 as implemented. The planning sketch is in docs/planning/feature-gap.md §5.8 (German); where this document differs, this document is what the code does.
 
 A service account is a machine identity for CI pipelines, servers, scripts and AI agents. It has no master password. It belongs to the account that created it (its **owner**), has its own key pair, and can read (or read and write) the vaults the owner selected, until it expires or is revoked.
 
@@ -45,7 +45,7 @@ grant_sig = Ed25519(owner.sig_sk, grant)
 
 ## Server
 
-Migration [`0001_baseline.sql`](../../crates/server/migrations/0001_baseline.sql): `service_accounts`, `service_account_grants` (one row per vault and key epoch), `service_account_events`. The name is visible to the server (like a device name).
+Migration [`0001_baseline.sql`](https://github.com/passboxnet/passbox-server/blob/main/migrations/0001_baseline.sql): `service_accounts`, `service_account_grants` (one row per vault and key epoch), `service_account_events`. The name is visible to the server (like a device name).
 
 Owner endpoints (signed-in session): `GET/POST /api/v1/service-accounts`, `PUT/DELETE /service-accounts/{id}`, `PUT /service-accounts/{id}/grants`, `DELETE /service-accounts/{id}/grants/{vault_id}`, `POST /service-accounts/{id}/revoke`, `GET /service-accounts/{id}/events`.
 
@@ -58,7 +58,7 @@ Checks: uploads must parse; the public key and each grant must be signed by the 
 ## Clients
 
 - Rust: `passbox_client::ServiceAccountClient` (connect with a token, list vaults and items, create/update/trash/delete items), and `Client::create_service_account`, `grant_service_account`, `service_accounts`, `revoke_service_account` for owners.
-- CLI: `PASSBOX_SERVICE_ACCOUNT_TOKEN` (with `PASSBOX_SERVER`) switches every vault command to the service account; see [cli.md](../cli.md).
+- CLI: `PASSBOX_SERVICE_ACCOUNT_TOKEN` (with `PASSBOX_SERVER`) switches every vault command to the service account; see [cli.md](https://github.com/passboxnet/passbox-cli/blob/main/docs/cli.md).
 - Web: **Developer → Service accounts** (`apps/web/src/developer`): create (name, vaults with read or read/write, expiry), copy the token once, add or renew vault access, see activity, revoke, delete. TypeScript API in `packages/client` (`createServiceAccount`, `grantServiceAccount`, …).
 
 ## Not yet built

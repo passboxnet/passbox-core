@@ -2,7 +2,7 @@
 
 > **Draft.** Not reviewed by cryptographers and not audited. The blob format may still change before the first release that ships it.
 
-This document describes wave G2 as implemented: files attached to any item, and the `document` item category (a file with notes). The planning sketch is in [docs/planning/feature-gap.md](../planning/feature-gap.md) §5.9 (German); where this document differs, this document is what the code does.
+This document describes wave G2 as implemented: files attached to any item, and the `document` item category (a file with notes). The planning sketch is in docs/planning/feature-gap.md §5.9 (German); where this document differs, this document is what the code does.
 
 ## What the server learns
 
@@ -46,7 +46,7 @@ Clients encrypt and decrypt in chunks (`FileEncryptor`/`FileDecryptor` in Rust a
 
 ## Server
 
-Blobs are stored outside the database by a `BlobStore` (`crates/server/src/blobs.rs`). This version ships the disk store: `{PASSBOX_BLOB_DIR}/{first two characters of the ID}/{ID}`, written to `tmp/` first and renamed when complete. The database keeps `attachments(id, item_id, vault_id, uploaded_by, owner_type, owner_id, size, created_at)` (migration [`0001_baseline.sql`](../../crates/server/migrations/0001_baseline.sql), with row level security like every tenant table).
+Blobs are stored outside the database by a `BlobStore` (`crates/server/src/blobs.rs`). This version ships the disk store: `{PASSBOX_BLOB_DIR}/{first two characters of the ID}/{ID}`, written to `tmp/` first and renamed when complete. The database keeps `attachments(id, item_id, vault_id, uploaded_by, owner_type, owner_id, size, created_at)` (migration [`0001_baseline.sql`](https://github.com/passboxnet/passbox-server/blob/main/migrations/0001_baseline.sql), with row level security like every tenant table).
 
 **S3:** no S3-compatible backend is included yet. The available Rust S3 clients are large (the AWS SDK) or not audited, which does not fit the dependency policy; `BlobStore` is the seam for adding one. Today, put `PASSBOX_BLOB_DIR` on a volume (or an S3 FUSE mount if you need object storage) and back it up together with the database.
 

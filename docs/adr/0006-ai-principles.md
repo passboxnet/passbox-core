@@ -5,7 +5,7 @@
 
 ## Context
 
-Passbox has two kinds of AI features (concept in [docs/planning/ai-native.md](../planning/ai-native.md), German):
+Passbox has two kinds of AI features (concept in docs/planning/ai-native.md, German):
 
 - **AI agents** (Claude Code, Cursor, Codex, …) that use the user's secrets through `pbx mcp` and the agent broker ([ai-agents.md](../architecture/ai-agents.md)).
 - **Passbox's own features** that call a model through the AI gateway, such as the import column mapping (K6) and the security copilot (K4) ([ai-gateway.md](../architecture/ai-gateway.md)).
