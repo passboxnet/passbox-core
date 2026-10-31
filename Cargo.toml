@@ -6,7 +6,7 @@ members = ["crates/core", "crates/core-wasm", "crates/server", "crates/cli", "cr
 version = "0.1.0"
 edition = "2024"
 license = "MIT"
-repository = "https://github.com/relationsoftware/passbox"
+repository = "https://github.com/passboxnet/passbox"
 rust-version = "1.87"
 
 [workspace.dependencies]
