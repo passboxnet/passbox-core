@@ -9,11 +9,20 @@ name: Release
 on:
   push:
     tags: ["v*"]
+  # Publishes the release of an existing tag again, e.g. when its push did
+  # not start this workflow.
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing tag, e.g. v0.1.0
+        required: true
+
+env:
+  TAG: ${{ inputs.tag || github.ref_name }}
 
 permissions:
   contents: read
 
-env:
   WASM_BINDGEN_VERSION: 0.2.129
 
 jobs:
@@ -25,6 +34,8 @@ jobs:
       attestations: write
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.TAG }}
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: wasm32-unknown-unknown
@@ -44,4 +55,4 @@ jobs:
           subject-path: dist/*.tgz
       - env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" dist/*.tgz dist/SHA256SUMS --title "$GITHUB_REF_NAME" --generate-notes
+        run: gh release create "$TAG" dist/*.tgz dist/SHA256SUMS --title "$TAG" --generate-notes --verify-tag
