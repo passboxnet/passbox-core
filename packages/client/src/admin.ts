@@ -1,5 +1,5 @@
 /**
- * Organization administration (wave D): policy types and enforcement
+ * Organization administration: policy types and enforcement
  * helpers, the security aggregate members report, and audit log helpers.
  * The cryptography (signing and verifying policies, signing client events,
  * checking the audit hash chain) lives in `@passbox/core-wasm`.
@@ -26,7 +26,7 @@ export const DEFAULT_POLICY_RULES: PolicyRules = {
 };
 
 /**
- * The first policy of a new organization (since 25.10.2026): recovery
+ * The first policy of a new organization: recovery
  * through the organization is required, everything else restricts nothing
  * (mirrors `PolicyRules::new_org_defaults`).
  */

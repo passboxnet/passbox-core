@@ -297,7 +297,7 @@ export interface ClientSnapshot {
   sharedVaults: SharedVault[];
   /** Problems found while verifying sharing data, for example changed keys. */
   sharingWarnings: SharingWarning[];
-  /** Policies in force per organization (wave D2). */
+  /** Policies in force per organization. */
   policies: OrgPolicy[];
   /** Every policy this account is bound by, combined. */
   effectivePolicy: EffectivePolicy;
@@ -411,11 +411,11 @@ const TRUST_KEY = "passbox.trust";
  * unlocking) and grants no access by itself. Every login replaces it.
  */
 const DEVICE_TOKEN_KEY = "passbox.deviceToken";
-/** Signed item usage events waiting for upload, per account (wave D3). */
+/** Signed item usage events waiting for upload, per account. */
 const USAGE_QUEUE_KEY = "passbox.usageQueue";
 const MAX_USAGE_QUEUE = 1000;
 const USAGE_FLUSH_DELAY_MS = 5000;
-/** When the security aggregate was last reported, per account and organization (wave D6). */
+/** When the security aggregate was last reported, per account and organization. */
 const SECURITY_REPORT_KEY = "passbox.securityReport";
 const SECURITY_REPORT_INTERVAL_MS = 24 * 60 * 60 * 1000;
 /** The breach catalogue from the server (public data, the same for everyone): `{ etag, catalog }`. */
@@ -2235,7 +2235,7 @@ export class PassboxClient {
   }
 
   /**
-   * Organization recovery is on by default (C1, since 25.10.2026): a new
+   * Organization recovery is on by default: a new
    * organization gets its recovery key and a first policy that requires
    * enrollment, and the creator enrolls. Admins can turn both off later.
    */
@@ -2340,7 +2340,7 @@ export class PassboxClient {
     await this.sync();
     const org = this.org(orgId);
     const vaultId = org.defaultVaultId;
-    // Guests only see what is shared with them (B8): no family vault.
+    // Guests only see what is shared with them: no family vault.
     const guest = org.members.some((m) => m.accountId === accountId && m.role === "guest");
     if (
       org.kind === "family" &&
@@ -2541,7 +2541,7 @@ export class PassboxClient {
     await this.api.sharing.rotateGroup(orgId, groupId, body);
   }
 
-  // --- Recovery code (C2) ---------------------------------------------------------
+  // --- Recovery code --------------------------------------------------------------
 
   /** Recovery options set up on the server (recovery code, organization escrows). */
   async recoveryStatus(): Promise<RecoveryStatus> {
@@ -2806,7 +2806,7 @@ export class PassboxClient {
     this.recovering = undefined;
   }
 
-  // --- Organization recovery (C1) -------------------------------------------------------
+  // --- Organization recovery ------------------------------------------------------------
 
   /** The organization's recovery setup, verified against its roster. */
   async orgRecovery(orgId: string): Promise<OrgRecoveryInfo> {
@@ -3017,7 +3017,7 @@ export class PassboxClient {
     }
   }
 
-  // --- Emergency access (C3) -------------------------------------------------------------
+  // --- Emergency access ------------------------------------------------------------------
 
   /** People this account trusts (`granted`) and who trust it (`received`). */
   async emergencyContacts(): Promise<{ granted: EmergencyContact[]; received: EmergencyContact[] }> {
@@ -3177,7 +3177,7 @@ export class PassboxClient {
     }
   }
 
-  // --- Adding a device by code (C4) ------------------------------------------------------
+  // --- Adding a device by code -----------------------------------------------------------
 
   /** On a signed-in device: opens a link and returns the code to show (valid 10 minutes). */
   async startDeviceLink(): Promise<DeviceLinkStart> {
@@ -3301,7 +3301,7 @@ export class PassboxClient {
     this.deviceLinkRequest = undefined;
   }
 
-  // --- Single sign-on and trusted devices (wave E) --------------------------------
+  // --- Single sign-on and trusted devices -----------------------------------------
 
   /** SSO configuration, trusted devices and SCIM endpoints (organization settings). */
   get sso(): SsoApi {
@@ -3472,7 +3472,7 @@ export class PassboxClient {
     };
   }
 
-  // --- Organization administration (wave D) ----------------------------------------
+  // --- Organization administration -------------------------------------------------
   //
   // Policies are signed by an owner or admin and verified in the Rust core
   // during `sync`; this client enforces them where it acts (personal vaults,
@@ -3716,7 +3716,7 @@ export class PassboxClient {
     }
   }
 
-  // --- Service accounts (F2) and agent grants (F7) --------------------------------
+  // --- Service accounts and agent grants ------------------------------------------
 
   private vaultEpoch(vaultId: string): number {
     const vault = this.snapshot.vaults.find((v) => v.id === vaultId);
@@ -3891,8 +3891,7 @@ export class PassboxClient {
 
   // --- Archive, moving, attachments, share links, access requests ----------------
   //
-  // Waves G14, B5, G2, B7 and B9; see docs/architecture/attachments.md and
-  // docs/architecture/sharing.md.
+  // See docs/architecture/attachments.md and docs/architecture/sharing.md.
 
   /** Archives an item: hidden from lists, search and autofill, kept in its vault. */
   async archiveItem(id: string): Promise<void> {

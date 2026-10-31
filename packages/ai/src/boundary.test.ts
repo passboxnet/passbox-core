@@ -1,5 +1,5 @@
 /**
- * Build rule (concept §3.10, §6.6): AI code gets no keys and no vault
+ * Build rule: AI code gets no keys and no vault
  * access. This package must not depend on or import the core
  * (`@passbox/core-wasm`) or the client (`@passbox/client`, which contains
  * the core). The lint configuration (biome.json) blocks the imports too.

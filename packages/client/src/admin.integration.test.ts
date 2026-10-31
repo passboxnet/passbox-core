@@ -1,5 +1,5 @@
 /**
- * Organization administration (wave D) against a real server: signed
+ * Organization administration against a real server: signed
  * policies and their enforcement, item usage events, the audit log export
  * with its hash chain checked on the device, reports and offboarding.
  * Start a server and set PASSBOX_TEST_SERVER_URL (see client.integration.test.ts).

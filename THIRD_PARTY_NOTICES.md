@@ -95,10 +95,11 @@ the services at run time.
 - **Bundled as:** web, extension, desktop and website through the npm
   packages `@fontsource-variable/plus-jakarta-sans` and
   `@fontsource-variable/jetbrains-mono` (each ships its license); iOS
-  `apps/ios/Shared/Fonts/PlusJakartaSans-*.ttf` (with
+  `Shared/Fonts/PlusJakartaSans-*.ttf` in passboxnet/ios (with
   `PlusJakartaSans-OFL.txt`); Android
-  `apps/android/app/src/main/res/font/plus_jakarta_sans_*.ttf`; the server's
-  own pages `crates/server/assets/fonts/plus-jakarta-sans-*.woff2` (copied
+  `app/src/main/res/font/plus_jakarta_sans_*.ttf` in passboxnet/android; the
+  server's own pages `assets/fonts/plus-jakarta-sans-*.woff2` in
+  passboxnet/server (copied
   from the npm package, with `PlusJakartaSans-OFL.txt`). The static
   TTFs are unmodified weight instances of the variable font; their name
   tables keep the copyright and license notice.
@@ -111,8 +112,8 @@ the services at run time.
 
 - **What:** the Passbox outline icon family (docs/design/brand.md).
 - **Bundled as:** the npm package `lucide-react` on the web; on iOS
-  `apps/ios/Shared/Icons.xcassets` and on Android
-  `apps/android/app/src/main/res/drawable/pb_icon_*.xml`, exported from it by
+  `Shared/Icons.xcassets` in passboxnet/ios and on Android
+  `app/src/main/res/drawable/pb_icon_*.xml` in passboxnet/android, exported from it by
   `scripts/generate-brand-assets.mjs` (list: `packages/ui/brand/icons.json`).
 - **Source:** <https://lucide.dev>, <https://github.com/lucide-icons/lucide>.
 - **License:** ISC License, Copyright (c) Lucide Icons and Contributors;

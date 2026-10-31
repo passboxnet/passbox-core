@@ -1,5 +1,5 @@
 /**
- * Single sign-on and trusted devices (wave E1/E2) on the client side. The
+ * Single sign-on and trusted devices on the client side. The
  * cryptography (sealing the account key to a device key, verifying the
  * grant) is in the Rust core; see docs/architecture/sso.md.
  */

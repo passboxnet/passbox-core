@@ -6,8 +6,8 @@
  * always a vault item the user picks, and the D2/D3 data-class rules apply
  * exactly as for any cloud provider.
  *
- * Base URLs were checked against each provider's official documentation on
- * 25.10.2026 (`checked`). Model names change more often than endpoints: the
+ * Base URLs were checked against each provider's official documentation
+ * (the date is in `checked`). Model names change more often than endpoints: the
  * suggested model is only a starting point, and `modelChecked: false` marks
  * suggestions the documentation did not confirm.
  */

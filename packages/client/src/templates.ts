@@ -1,5 +1,5 @@
 /**
- * Default fields per category (G3). Mirrors `template` in
+ * Default fields per category. Mirrors `template` in
  * `crates/client/src/model.rs`; labels are English and apps show their own
  * for the well-known field IDs.
  */

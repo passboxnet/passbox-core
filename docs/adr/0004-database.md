@@ -1,7 +1,6 @@
 # ADR 0004: SQLite and PostgreSQL through one portable code path
 
-- Status: superseded by [ADR 0007](0007-postgresql-only.md) (PostgreSQL only)
-- Date: 2026-10-24
+- Status: Superseded by [ADR 0007](0007-postgresql-only.md) (PostgreSQL only)
 
 ## Context
 

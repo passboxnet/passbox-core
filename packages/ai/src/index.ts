@@ -1,6 +1,5 @@
 /**
- * Passbox AI gateway (TypeScript twin of `crates/ai`). Concept:
- * docs/planning/ai-native.md (German); data flows:
+ * Passbox AI gateway (TypeScript twin of `crates/ai`). Data flows:
  * docs/architecture/ai-gateway.md.
  *
  * Rules this package keeps:

@@ -1,7 +1,7 @@
-//! Account recovery (wave C).
+//! Account recovery.
 //!
-//! - [`code`]: the personal recovery code (C2).
-//! - [`org`]: recovery through an organization or family (C1): the
+//! - [`code`]: the personal recovery code.
+//! - [`org`]: recovery through an organization or family: the
 //!   organization's recovery key pair, members' escrows, approvals and the
 //!   requesting device's ephemeral key.
 //!

@@ -1,4 +1,4 @@
-//! OpenID Connect primitives for single sign-on (wave E1).
+//! OpenID Connect primitives for single sign-on.
 //!
 //! The server is the OIDC relying party (a confidential client with
 //! authorization code + PKCE). This module holds the cryptographic parts it

@@ -2,9 +2,9 @@
 
 > **Draft.** Not reviewed by cryptographers and not audited. The settings format may still change.
 
-This document describes the first AI-native wave as implemented, following the concept in docs/planning/ai-native.md (German; principles §3, data classes §4, architecture §6). Agent access (`pbx mcp`, K1) and the agent audit (K12) are a separate building block: see [ai-agents.md](ai-agents.md). `pbx scan` (K10) uses no AI and is documented in [cli.md](https://github.com/passboxnet/cli/blob/main/docs/cli.md#finding-leaked-secrets-pbx-scan).
+This document describes the AI gateway that Passbox's own AI features use: providers, settings, redaction and what each feature sends. Agent access (`pbx mcp`) and the agent audit are a separate building block: see [ai-agents.md](ai-agents.md). `pbx scan` uses no AI and is documented in [cli.md](https://github.com/passboxnet/cli/blob/main/docs/cli.md#finding-leaked-secrets-pbx-scan).
 
-The binding rules are in [ADR 0006: AI principles](../adr/0006-ai-principles.md): secrets never reach a model (local or remote), the only exception being the explicit per-grant `passbox_reveal` for agents; AI off by default and opt-in per feature; bring your own model, no Passbox-hosted inference; members' names and emails pseudonymised by default for a future admin assistant (K9).
+The binding rules are in [ADR 0006: AI principles](../adr/0006-ai-principles.md): secrets never reach a model (local or remote), the only exception being the explicit per-grant `passbox_reveal` for agents; AI off by default and opt-in per feature; bring your own model, no Passbox-hosted inference; members' names and emails pseudonymised by default for a future admin assistant.
 
 ## Principles in code
 
@@ -38,10 +38,10 @@ JSON answer ──▶ feature validates it (schema, allowed values, local counts
 | Provider presets | `presets.rs` (`PROVIDER_PRESETS`; a test checks it matches the TypeScript list) | `presets.ts` (`PROVIDER_PRESETS`, `presetById`, `presetForEndpoint`) |
 | Redaction | `redact.rs` (`Redacted`, `DataClass`, `SecretGuard`) | `redacted.ts` |
 | Gateway, settings, policy, log | `gateway.rs` | `gateway.ts`, `settings.ts` |
-| K6 import mapping | `import_mapping.rs` | `importMapping.ts` |
-| K4 security copilot | `security_copilot.rs` | `securityCopilot.ts` |
+| Import mapping | `import_mapping.rs` | `importMapping.ts` |
+| Security copilot | `security_copilot.rs` | `securityCopilot.ts` |
 
-The web app wires it up in `apps/web/src/ai` (settings panel, gateway hook, security plan) and `apps/web/src/import/MappingSuggestion.tsx`. Native clients can use `passbox-ai` later through the FFI; nothing calls it yet outside its tests.
+The web app ([passboxnet/web](https://github.com/passboxnet/web)) wires it up in `app/src/ai` (settings panel, gateway hook, security plan) and `app/src/import/MappingSuggestion.tsx`. Native clients can use `passbox-ai` later through the FFI; nothing calls it yet outside its tests.
 
 ## Settings
 
@@ -71,7 +71,7 @@ Stored per account **in this browser** (`localStorage`, key `passbox.ai.<account
 
 ### Provider presets (cloud, your own key)
 
-Settings → AI → "Provider" fills in endpoint, API, region and a suggested model. Base URLs were checked in each provider's official documentation on 25.10.2026; model names change more often, so the suggestion is only a start (the UI says when a suggested model was not confirmed in the docs). The data classes the features send (D1 structure, D2 metadata; never D4 secrets) are the same for every provider, and the cloud confirmation names provider and region.
+Settings → AI → "Provider" fills in endpoint, API, region and a suggested model. Base URLs come from each provider's official API documentation; model names change more often, so the suggestion is only a start (the UI says when a suggested model was not confirmed in the docs). The data classes the features send (D1 structure, D2 metadata; never D4 secrets) are the same for every provider, and the cloud confirmation names provider and region.
 
 | Preset | API | Base URL | Region | Suggested model | Notes |
 | --- | --- | --- | --- | --- | --- |
@@ -85,7 +85,7 @@ Settings → AI → "Provider" fills in endpoint, API, region and a suggested mo
 
 Each preset has an optional `domain` (for example `ionos.de`) for a favicon. Sources: the providers' API documentation linked in `presets.ts`.
 - **Opt-in disclosure:** each feature switch says what it sends; the panel shows where it goes ("Goes to your server gpu.lan:11434"); switching a feature on with a cloud provider asks for confirmation and names the host and the country or region.
-- **Organization policy** (`AiPolicy`: allowed locations, forbidden data classes, required endpoint prefix) is enforced by the gateway. It is not yet delivered by the server or the extension's managed storage; that comes with the organization policies (D-wave).
+- **Organization policy** (`AiPolicy`: allowed locations, forbidden data classes, required endpoint prefix) is enforced by the gateway. It is not yet delivered by the server or the extension's managed storage; that will come through the signed organization policies ([administration.md](administration.md#policies)).
 
 ## The AI log
 
@@ -93,9 +93,9 @@ Every request a gateway sends is recorded locally: time, feature, provider ID, l
 
 ## Data flows
 
-Data classes (concept §4): **D0** the user's own input, **D1** structure (headers, value patterns, counts), **D2** metadata (titles, domains, usernames), **D3** content (notes, custom fields). D4 (secrets) does not exist in the code. The gateway allows D0 and D1 everywhere, D2 to cloud providers only pseudonymized, D3 never to the cloud.
+Data classes: **D0** the user's own input, **D1** structure (headers, value patterns, counts), **D2** metadata (titles, domains, usernames), **D3** content (notes, custom fields). D4 (secrets) does not exist in the code. The gateway allows D0 and D1 everywhere, D2 to cloud providers only pseudonymized, D3 never to the cloud.
 
-### K6 Smart import mapping (`import-mapping`, D1)
+### Smart import mapping (`import-mapping`, D1)
 
 When a CSV file is imported as "Excel / CSV", the header rules (`detectColumns`, English and German synonyms) map what they recognize. Columns they do not recognize become extra fields; for those the mapping step offers **Suggest fields** (patterns, on this device) or, with the feature on, **Suggest with AI**. Suggestions are marked in the table ("AI suggestion" / "Suggested"), can be undone, and nothing is imported until the user continues.
 
@@ -125,13 +125,13 @@ When a CSV file is imported as "Excel / CSV", the header rules (`detectColumns`,
 - `header` is the column title, or `null` when it is empty, longer than 64 characters, looks like a value (URL, email, domain, number, date, UUID, Base32 or random string, as in a file without a header row) or equals or contains any cell value of the file.
 - `profile` per column, computed over at most 2,000 rows (the web app reads at most the first 2 MB): `filled` (share of non-empty cells, in tenths), `kinds` (share per value kind, in tenths, ≥ 0.1: `otpauth`, `url`, `email`, `uuid`, `date`, `boolean`, `digits`, `phone`, `domain`, `base32`, `random-string`, `text`, `other`), `digitLength` (most common number of digits in digit columns, "6-digit number"), `length` (min, median, max characters, capped at 1,000), `entropy` (`low` < 28 bits, `medium` < 60 bits, `high`, median of the per-value Shannon estimate) and `distinct` (`constant`, `repeated`, `unique`).
 - Plus the fixed system prompt and the answer schema.
-- **Never:** any cell value or part of one. Unit tests in both languages send a table with distinctive values through a recording fake provider and assert that no cell (and no 8+ character part of one) appears in anything the provider received (`crates/ai/tests/gateway.rs`, `packages/ai/src/importMapping.test.ts`, `apps/web/src/ai/ai.test.ts`); the e2e test checks the real HTTP body.
+- **Never:** any cell value or part of one. Unit tests in both languages send a table with distinctive values through a recording fake provider and assert that no cell (and no 8+ character part of one) appears in anything the provider received (`crates/ai/tests/gateway.rs`, `packages/ai/src/importMapping.test.ts`, and `app/src/ai/ai.test.ts` in passboxnet/web); the end-to-end test in passboxnet/web checks the real HTTP body.
 
 **Answer:** `{ "columns": [{ "index", "target", "confidence" }] }`. An index outside the table or an unknown target makes the whole answer invalid (fallback). Only unknown columns change; single targets (title, username, email, password, url, totp, notes, folder, tags, favorite) stay unique, higher confidence wins.
 
 **Without AI:** value patterns on this device: ≥ 80 % URLs → website, email addresses → username (or email if a username exists), `otpauth://` or Base32 → one-time password, random strings → hidden field.
 
-### K4 Security copilot (`security-copilot`, D1 + D2)
+### Security copilot (`security-copilot`, D1 + D2)
 
 The security check shows **Your plan** above the findings: up to five steps, most important first (breached passwords; reused passwords, critical when an email or finance account is among them; weak passwords; plain-http websites; missing two-factor sign-in for email, finance, developer and government accounts), each with a count, a priority and up to three sites to start with. Without AI the plan comes from rules and translated texts (German and English). With the feature on, **Explain with AI** asks the model for plain-language titles and explanations.
 
@@ -156,7 +156,7 @@ The security check shows **Your plan** above the findings: up to five steps, mos
 
 **Answer:** `{ "summary", "steps": [{ "kind", "title", "detail", "sites" }] }`, at most five steps. Counts and priorities always come from the local analysis, never from the model; steps for kinds without findings are dropped; sites the model invents are dropped; text is shown as plain text (control and bidirectional override characters removed, length capped). Findings the model leaves out keep their rule step.
 
-### K10 `pbx scan`
+### `pbx scan`
 
 No model, no network. See [cli.md](https://github.com/passboxnet/cli/blob/main/docs/cli.md#finding-leaked-secrets-pbx-scan).
 
@@ -174,4 +174,4 @@ No model, no network. See [cli.md](https://github.com/passboxnet/cli/blob/main/d
 
 ## Not built yet
 
-Organization policy from the server and the extension's managed schema; pseudonymization of D2 for features beyond the security plan; desktop and mobile settings screens; native on-device runtimes (Apple Foundation Models, Android on-device); natural-language search (K3), categorization (K8), phishing detection (K7) and the admin copilot (K9).
+Organization policy from the server and the extension's managed schema; pseudonymization of D2 for features beyond the security plan; desktop and mobile settings screens; native on-device runtimes (Apple Foundation Models, Android on-device); natural-language search, categorization, phishing detection and the admin copilot.

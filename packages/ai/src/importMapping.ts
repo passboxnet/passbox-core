@@ -1,5 +1,5 @@
 /**
- * K6 smart import mapping. For CSV columns the header rules did not
+ * Smart import mapping. For CSV columns the header rules did not
  * recognize, suggests a Passbox field from D1 data only: headers (dropped
  * when they look like a value) and a pattern profile per column. **No cell
  * value leaves the device.** Same algorithm as

@@ -1,5 +1,5 @@
 /**
- * Account recovery, emergency access and adding devices by code (wave C).
+ * Account recovery, emergency access and adding devices by code.
  * Request bodies with keys are built by `@passbox/core-wasm`; see
  * docs/architecture/recovery.md and docs/api/openapi.yaml.
  */

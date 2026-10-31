@@ -1,5 +1,5 @@
 /**
- * The decisions of 25.10.2026 against a real server: recovery on by
+ * Product defaults against a real server: recovery on by
  * default, view-only guests that are not billable, and the agent fair-use
  * limit endpoint. Start a server and set PASSBOX_TEST_SERVER_URL (see
  * client.integration.test.ts).

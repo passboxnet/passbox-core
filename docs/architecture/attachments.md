@@ -2,7 +2,7 @@
 
 > **Draft.** Not reviewed by cryptographers and not audited. The blob format may still change before the first release that ships it.
 
-This document describes wave G2 as implemented: files attached to any item, and the `document` item category (a file with notes). The planning sketch is in docs/planning/feature-gap.md §5.9 (German); where this document differs, this document is what the code does.
+This document describes file attachments on any item, and the `document` item category (a file with notes).
 
 ## What the server learns
 
@@ -11,7 +11,7 @@ This document describes wave G2 as implemented: files attached to any item, and 
 | read a file, its name or its type | the file is encrypted on the device with its own key; name, type, size and key are stored in the encrypted item |
 | hand out one file in place of another | every chunk is bound to the attachment's ID (and the key is per file) |
 | reorder, drop, duplicate or cut off chunks | the chunk index and a "last chunk" flag are authenticated |
-| keep a file readable for someone who lost access to the vault | — it **can**: see below |
+| keep a file readable for someone who lost access to the vault | it **can**: see below |
 
 What it **can** see or do: the number and the encrypted size of an item's attachments (padding is not added), when they were uploaded and by whom, and which items have attachments. It can withhold or delete blobs. A removed member who downloaded a file (or its key, which is in the item) may keep it; vault key rotation re-encrypts items but **does not** re-encrypt attachment blobs, so a former member who kept an old copy of the item still has the file key. Change or remove sensitive files after removing someone.
 
@@ -29,7 +29,7 @@ chunk  = XChaCha20-Poly1305(file_key, nonce, plaintext_i, aad)        (plaintext
 
 Every chunk but the last holds exactly `chunk_size` bytes; the last holds at most `chunk_size` (an empty file is one empty last chunk). Decryption fails on a wrong key or file ID, a modified header or chunk, reordered or swapped chunks, a blob cut off at a chunk boundary and trailing bytes (`file_crypto::tests`). Readers accept chunk sizes from 1 KiB to 16 MiB, so the size can change in later versions.
 
-The item ID is deliberately not bound: moving an item between vaults (B5) keeps its attachments without re-encrypting them. The file key is protected by the item, and the item by the vault key.
+The item ID is deliberately not bound: moving an item between vaults keeps its attachments without re-encrypting them. The file key is protected by the item, and the item by the vault key.
 
 Clients encrypt and decrypt in chunks (`FileEncryptor`/`FileDecryptor` in Rust and WebAssembly). The web app and the Rust client currently hold the whole file in memory while uploading or downloading (up to the server's size limit, 100 MiB by default); the format allows true streaming later without a change.
 
@@ -46,7 +46,7 @@ Clients encrypt and decrypt in chunks (`FileEncryptor`/`FileDecryptor` in Rust a
 
 ## Server
 
-Blobs are stored outside the database by a `BlobStore` (`crates/server/src/blobs.rs`). This version ships the disk store: `{PASSBOX_BLOB_DIR}/{first two characters of the ID}/{ID}`, written to `tmp/` first and renamed when complete. The database keeps `attachments(id, item_id, vault_id, uploaded_by, owner_type, owner_id, size, created_at)` (migration [`0001_baseline.sql`](https://github.com/passboxnet/server/blob/main/migrations/0001_baseline.sql), with row level security like every tenant table).
+Blobs are stored outside the database by a `BlobStore` (`src/blobs.rs` in passboxnet/server). This version ships the disk store: `{PASSBOX_BLOB_DIR}/{first two characters of the ID}/{ID}`, written to `tmp/` first and renamed when complete. The database keeps `attachments(id, item_id, vault_id, uploaded_by, owner_type, owner_id, size, created_at)` (migration [`0001_baseline.sql`](https://github.com/passboxnet/server/blob/main/migrations/0001_baseline.sql), with row level security like every tenant table).
 
 **S3:** no S3-compatible backend is included yet. The available Rust S3 clients are large (the AWS SDK) or not audited, which does not fit the dependency policy; `BlobStore` is the seam for adding one. Today, put `PASSBOX_BLOB_DIR` on a volume (or an S3 FUSE mount if you need object storage) and back it up together with the database.
 
@@ -68,7 +68,7 @@ Deleting an item permanently deletes its attachments. Blobs whose row is gone (v
 | `PASSBOX_ATTACHMENT_QUOTA_MB` | 0 | Storage per account for its personal vaults |
 | `PASSBOX_ORG_ATTACHMENT_QUOTA_MB` | 0 | Storage per organization for its shared vaults |
 
-Self-hosted servers are unlimited by default. The hosted service sets the quotas per plan through these settings until plans exist in the server (H5).
+Self-hosted servers are unlimited by default. The hosted service sets the quotas per plan through these settings until plans exist in the server.
 
 ## Clients
 

@@ -1,6 +1,6 @@
 # Database security
 
-How Passbox keeps tenants apart in PostgreSQL, what row level security adds to the application's own checks, and what it does not protect. Background: [ADR 0007](../adr/0007-postgresql-only.md). The schema is in [`crates/server/migrations`](https://github.com/passboxnet/server/tree/main/migrations), the roles in [`crates/server/sql/roles.sql`](https://github.com/passboxnet/server/blob/main/sql/roles.sql) and the Rust side in [`crates/server/src/db.rs`](https://github.com/passboxnet/server/blob/main/src/db.rs).
+How Passbox keeps tenants apart in PostgreSQL, what row level security adds to the application's own checks, and what it does not protect. Background: [ADR 0007](../adr/0007-postgresql-only.md). The server lives in [passboxnet/server](https://github.com/passboxnet/server): the schema is in [`migrations`](https://github.com/passboxnet/server/tree/main/migrations), the roles in [`sql/roles.sql`](https://github.com/passboxnet/server/blob/main/sql/roles.sql) and the Rust side in [`src/db.rs`](https://github.com/passboxnet/server/blob/main/src/db.rs).
 
 ## Layers
 
@@ -70,7 +70,7 @@ Policies use the same kind of functions for membership (`passbox.my_orgs()`, `pa
 
 ## Coverage
 
-All 68 tenant tables and the two global breach catalogue tables (`site_breaches`, `site_breach_catalog`, below) have `ENABLE` and `FORCE ROW LEVEL SECURITY`. `counters` (the global change sequences) has no tenant data and no policy; `_sqlx_migrations` belongs to sqlx. `site_icons` (migration 0003, the website icons shared by all users) has no tenant data either: no account, session or address column, and none may be added. It has forced row level security anyway, so every table follows the same rules: every named context reads it, only the `icons` context (request handlers, which look icons up there instead of as the account) and the `worker:icons` refresh job write it, and only the job deletes. The policies, grouped:
+All 68 tenant tables and the two global breach catalogue tables (`site_breaches`, `site_breach_catalog`, below) have `ENABLE` and `FORCE ROW LEVEL SECURITY`. `counters` (the global change sequences) has no tenant data and no policy; `_sqlx_migrations` belongs to sqlx. `site_icons` (the website icons shared by all users) has no tenant data either: no account, session or address column, and none may be added. It has forced row level security anyway, so every table follows the same rules: every named context reads it, only the `icons` context (request handlers, which look icons up there instead of as the account) and the `worker:icons` refresh job write it, and only the job deletes. The policies, grouped:
 
 | Tables | Who sees and changes rows |
 | --- | --- |
@@ -91,7 +91,7 @@ All 68 tenant tables and the two global breach catalogue tables (`site_breaches`
 | `server_secrets` | the `secrets` system context at start only |
 | `site_icons` | every named context reads; the `icons` and `worker:icons` contexts write (no tenant data) |
 
-The exact policies are in `0002_rls.sql`; `crates/server/tests/api/rls.rs` checks that every table is forced and tries reads, writes and inserts across tenants, the escalation to instance admin, and each signed-out and machine context.
+The exact policies are in `0002_rls.sql`; `tests/api/rls.rs` in passboxnet/server checks that every table is forced and tries reads, writes and inserts across tenants, the escalation to instance admin, and each signed-out and machine context.
 
 ## For the hosted service
 
@@ -103,5 +103,5 @@ The hosted service runs the same code: one database, one schema, row level secur
 2. In the same migration: `ALTER TABLE … ENABLE ROW LEVEL SECURITY; ALTER TABLE … FORCE ROW LEVEL SECURITY;` and at least one policy per context that needs the table, with `USING` and `WITH CHECK`. Use the membership functions (`passbox.my_vaults()`, `passbox.is_org_member(org)`), not subqueries on other tenant tables.
 3. Grants: `GRANT SELECT, INSERT, UPDATE, DELETE ON … TO passbox_app` (inside `IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'passbox_app')`, as in `0002_rls.sql`), narrower if possible; `passbox_worker` only if a background job needs it, and only the privileges it uses.
 4. If a signed-out flow or another tenant needs a value from it, add a narrow `SECURITY DEFINER` function in the `passbox` schema with a fixed `search_path` and a context check, and revoke `EXECUTE` from `PUBLIC`.
-5. Query it only through a `Db` context, with `query!` macros; refresh `.sqlx/` (CONTRIBUTING.md).
+5. Query it only through a `Db` context, with `query!` macros; refresh `.sqlx/` (see CONTRIBUTING.md in passboxnet/server).
 6. Extend `tests/api/rls.rs` with a cross-tenant read and write attempt for the table. The forced-RLS check already fails for a table without `FORCE`.

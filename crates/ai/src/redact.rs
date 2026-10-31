@@ -9,7 +9,7 @@ use std::collections::HashSet;
 
 use serde::{Deserialize, Serialize};
 
-/// What kind of data a model input contains (concept §4). D4, secrets
+/// What kind of data a model input contains. D4, secrets
 /// (passwords, TOTP seeds, card numbers, private keys, hidden fields), is
 /// deliberately not representable: it never reaches a model.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize, Deserialize)]
@@ -81,7 +81,7 @@ impl<T: Serialize> Redacted<T> {
 }
 
 /// Values that must never leave the device, checked against every string
-/// a redaction function lets through (concept §6.3). It lives in memory
+/// a redaction function lets through. It lives in memory
 /// for one request only. Values shorter than [`SecretGuard::MIN_LEN`]
 /// characters are ignored, since short strings ("yes", "1") occur
 /// everywhere.

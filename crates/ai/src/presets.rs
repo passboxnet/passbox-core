@@ -5,8 +5,8 @@
 //! A preset only fills in settings (endpoint, API, region, a suggested
 //! model). The API key is always a vault item, and the D2/D3 data-class
 //! rules apply as for any cloud provider. Base URLs were checked against
-//! each provider's official documentation on 25.10.2026; suggested models
-//! with `model_checked: false` were not confirmed there.
+//! each provider's official documentation (the date is in `checked`);
+//! suggested models with `model_checked: false` were not confirmed there.
 
 use serde::Serialize;
 

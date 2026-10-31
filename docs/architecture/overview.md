@@ -1,10 +1,10 @@
 # Architecture overview
 
 ```
-               ┌────────────────────┐   ┌────────────────────┐   ┌──────────────┐
-               │ Web client (React) │   │ Chrome extension   │   │ pbx CLI      │
-               │ apps/web           │   │ apps/extension     │   │ crates/cli   │
-               └─────────┬──────────┘   └─────────┬──────────┘   └──────┬───────┘
+               ┌────────────────────┐   ┌────────────────────┐   ┌────────────────┐
+               │ Web client (React) │   │ Chrome extension   │   │ pbx CLI        │
+               │ passboxnet/web     │   │ browser-extension  │   │ passboxnet/cli │
+               └─────────┬──────────┘   └─────────┬──────────┘   └──────┬─────────┘
                          │ WebAssembly            │ WebAssembly         │ native
                          ▼                        ▼                     ▼
                ┌──────────────────────────────────────────────────────────────┐
@@ -13,8 +13,9 @@
                          │ HTTPS + JSON, encrypted payloads only
                          ▼
                ┌──────────────────────────────────────────────────────────────┐
-               │ passbox-server (crates/server): accounts, sync, sharing,     │
-               │ SSO/SCIM, audit log. Never sees plaintext or usable keys.    │
+               │ passbox-server (passboxnet/server): accounts, sync,          │
+               │ sharing, SSO/SCIM, audit log. Never sees plaintext or        │
+               │ usable keys.                                                 │
                └──────────────────────────────────────────────────────────────┘
                          │
                          ▼
@@ -23,7 +24,7 @@
 
 ## Principles
 
-1. **Headless first.** The server is a pure HTTP API described in [`docs/api/openapi.yaml`](https://github.com/passboxnet/server/blob/main/docs/api/openapi.yaml). The web client, the extension, the CLI and later the desktop and mobile apps are equal clients of that API.
+1. **Headless first.** The server is a pure HTTP API described in [`docs/api/openapi.yaml`](https://github.com/passboxnet/server/blob/main/docs/api/openapi.yaml). The web client, the extension, the CLI, the desktop app and the mobile apps are equal clients of that API.
 2. **One cryptographic core.** `crates/core` is the only place with cryptographic code. Browsers use it through `crates/core-wasm`; desktop and mobile will use it through UniFFI bindings.
 3. **Zero knowledge against a malicious server.** The server stores ciphertext and public keys. Clients authenticate everything they receive and never trust server-supplied security parameters (see [cryptography.md](cryptography.md)).
 4. **Offline first.** Clients keep an encrypted local copy of the vault and sync changes by revision.
@@ -47,16 +48,18 @@
 
 ## Server
 
-- **Database:** PostgreSQL only ([ADR 0007](../adr/0007-postgresql-only.md)), migrations in [`crates/server/migrations`](https://github.com/passboxnet/server/tree/main/migrations) with native types (`BYTEA` ciphertext, `JSONB`, `BOOLEAN`, `BIGINT` Unix milliseconds) and compile-time checked queries (`sqlx::query!`, cache in `.sqlx/`). Handlers never get a pool: `crate::db::Db` opens a transaction that names its context (`as_account`, `public`, `as_org`, `system`), and row level security on every tenant table limits each statement to that context. See [database-security.md](database-security.md).
-- **Operations:** `passbox-server migrate` (or `PASSBOX_AUTO_MIGRATE`), `/health` and `/ready`, Prometheus metrics on `PASSBOX_METRICS_BIND` (`crates/server/src/metrics.rs`).
+The server lives in [passboxnet/server](https://github.com/passboxnet/server); paths in this section are relative to that repository.
+
+- **Database:** PostgreSQL only ([ADR 0007](../adr/0007-postgresql-only.md)), migrations in [`migrations`](https://github.com/passboxnet/server/tree/main/migrations) of passboxnet/server with native types (`BYTEA` ciphertext, `JSONB`, `BOOLEAN`, `BIGINT` Unix milliseconds) and compile-time checked queries (`sqlx::query!`, cache in `.sqlx/`). Handlers never get a pool: `crate::db::Db` opens a transaction that names its context (`as_account`, `public`, `as_org`, `system`), and row level security on every tenant table limits each statement to that context. See [database-security.md](database-security.md).
+- **Operations:** `passbox-server migrate` (or `PASSBOX_AUTO_MIGRATE`), `/health` and `/ready`, Prometheus metrics on `PASSBOX_METRICS_BIND` (`src/metrics.rs`).
 - **Sync:** a global change counter. Every write takes the next value inside its transaction; `GET /api/v1/sync?since=<cursor>` returns everything with a higher value. Deleted items remain as tombstones without data.
-- **Instance administration:** `crates/server/src/instance.rs` holds the instance settings (registration mode, name, help address, default mail language, master password policy) as a JSON document in `instance_state`, decides who may register, and knows who is an instance admin (first account, `PASSBOX_ADMIN_EMAILS`). `api/admin.rs` serves `/api/v1/admin/*` behind the `AdminSession` extractor and writes the hash-chained `admin_events` log; record new admin actions with `admin::record` or, inside a write transaction, `admin::record_in`.
+- **Instance administration:** `src/instance.rs` holds the instance settings (registration mode, name, help address, default mail language, master password policy) as a JSON document in `instance_state`, decides who may register, and knows who is an instance admin (first account, `PASSBOX_ADMIN_EMAILS`). `api/admin.rs` serves `/api/v1/admin/*` behind the `AdminSession` extractor and writes the hash-chained `admin_events` log; record new admin actions with `admin::record` or, inside a write transaction, `admin::record_in`.
 - **Mail:** see [Sending mail](#sending-mail-from-server-modules).
 - **Concurrency:** optimistic. A write names the revision it creates, which must be exactly one higher than the stored revision, otherwise the server answers `409 Conflict` with the current revision.
 
 ## Sending mail from server modules
 
-Modules never talk to SMTP. They queue a mail with the `Mailer` in `AppState` (`crates/server/src/mail`), and a background task sends it with retries:
+Modules never talk to SMTP. They queue a mail with the `Mailer` in `AppState` (`src/mail`), and a background task sends it with retries:
 
 ```rust
 use crate::mail::{Locale, Mailer, Template};
@@ -75,7 +78,7 @@ tx.commit().await?;
 state.mailer.wake();
 ```
 
-- **Templates** (`mail/templates.rs`, English and German with "Sie", text and HTML): `Invitation` (`inviter`, `link`, `expiresAt`, optional `organization`), `NewDevice`, `MasterPasswordChanged` (`device`, `ip`, `time`), `TwoFactorChanged` (plus `change`: `enabled`, `disabled` or `changed`), `EmergencyAccess` (`requester`, `event`, `link`) and `Recovery` (`event`, `link`) as placeholders for C1/C3, and `Test`. Missing parameters render as empty text. Add a template by extending the enum and `render`, with both languages. Never put secrets other than single-use links into parameters; they are stored until the mail is sent.
+- **Templates** (`mail/templates.rs`, English and German with "Sie", text and HTML): `Invitation` (`inviter`, `link`, `expiresAt`, optional `organization`), `NewDevice`, `MasterPasswordChanged` (`device`, `ip`, `time`), `TwoFactorChanged` (plus `change`: `enabled`, `disabled` or `changed`), `EmergencyAccess` (`requester`, `event`, `link`), `Recovery` (`event`, `link`) and `Test`. Missing parameters render as empty text. Add a template by extending the enum and `render`, with both languages. Never put secrets other than single-use links into parameters; they are stored until the mail is sent.
 - **Links:** build them from `state.mailer.public_url()` (`PASSBOX_PUBLIC_URL`, no trailing slash) and the web app's hash routes, for example `{public_url}/#/?invite=…`. It is `None` when not configured; then offer the link to the acting user instead (as instance invitations do).
 - **Language:** `Locale::parse`, `mail::request_locale` (explicit value or `Accept-Language`); accounts store theirs in `accounts.locale` (`/api/v1/account/preferences`).
 - Queuing never fails a request because the mail server is down. Security notifications should log a failure to queue rather than fail the request (see `api/notify.rs`).

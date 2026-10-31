@@ -39,7 +39,7 @@ pub struct TrustStore {
     pub org_roots: BTreeMap<String, String>,
     /// Latest verified manifest version and hash per vault.
     pub manifests: BTreeMap<String, ManifestPin>,
-    /// Newest verified policy per organization (D2).
+    /// Newest verified policy per organization.
     pub policies: BTreeMap<String, crate::policy::PolicyPin>,
 }
 
@@ -160,7 +160,7 @@ pub struct SharingView {
     pub orgs: Vec<OrgView>,
     pub vaults: Vec<SharedVaultView>,
     pub warnings: Vec<Warning>,
-    /// Policies in force per organization (D2).
+    /// Policies in force per organization.
     #[serde(default)]
     pub policies: Vec<crate::policy::OrgPolicyView>,
     /// The combination of the policies this account is bound by.
@@ -821,7 +821,7 @@ impl Keyring {
                     role = role.max(Some(entry.role));
                 }
             }
-            // Guests are view-only whatever the manifest grants (B8).
+            // Guests are view-only whatever the manifest grants.
             if let Some(own) = roster.active(&my_id) {
                 role = role.map(|r| r.min(own.role.max_vault_role()));
             }

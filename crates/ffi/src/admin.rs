@@ -1,4 +1,4 @@
-//! Organization policies and the audit log (additive API, wave D). See
+//! Organization policies and the audit log (additive API). See
 //! `docs/architecture/administration.md`.
 //!
 //! Policies are signed by an owner or admin and verified by the Rust core

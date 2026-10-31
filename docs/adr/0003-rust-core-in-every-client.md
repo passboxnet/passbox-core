@@ -1,7 +1,6 @@
 # ADR 0003: One Rust cryptographic core for every client
 
-- Status: accepted
-- Date: 2026-10-24
+- Status: Accepted
 
 ## Context
 

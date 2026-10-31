@@ -27,7 +27,7 @@ export interface AiLogEntry {
 }
 
 /**
- * Whether a data class may go to a location (concept §4): D0/D1 anywhere,
+ * Whether a data class may go to a location: D0/D1 anywhere,
  * D2 to the cloud only pseudonymized, D3 never to the cloud.
  */
 export function classAllowed(cls: DataClass, location: ModelLocation, pseudonymized: boolean): boolean {

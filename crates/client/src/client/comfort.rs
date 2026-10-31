@@ -1,5 +1,5 @@
-//! Moving items between vaults (B5), the archive (G14) and file
-//! attachments (G2).
+//! Moving items between vaults, the archive and file
+//! attachments.
 
 use passbox_core::{file_crypto, id};
 use serde_json::json;

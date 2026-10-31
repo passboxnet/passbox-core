@@ -1,5 +1,5 @@
 //! Account recovery, emergency access and adding a device by code
-//! (additive API, wave C). See `docs/architecture/recovery.md`.
+//! (additive API). See `docs/architecture/recovery.md`.
 //!
 //! Typical flows for the apps:
 //!

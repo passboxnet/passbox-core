@@ -1,7 +1,6 @@
 //! The Passbox AI gateway for native clients (desktop, CLI, mobile through
 //! the FFI later). The TypeScript twin is `packages/ai`; both have the same
-//! shape. Concept: `docs/planning/ai-native.md` (German), data flows:
-//! `docs/architecture/ai-gateway.md`.
+//! shape. Data flows: `docs/architecture/ai-gateway.md`.
 //!
 //! The gateway calls a model for Passbox's own features. It has **no vault
 //! access and no keys**: this crate cannot depend on `passbox-core` or
@@ -18,7 +17,7 @@
 //!   the [`Redacted`] wrapper and the secret guard.
 //! - [`gateway`]: settings (off by default, opt-in per feature), feature
 //!   manifests, policy checks, response validation and the local AI log.
-//! - [`import_mapping`] (K6) and [`security_copilot`] (K4): the features.
+//! - [`import_mapping`] and [`security_copilot`]: the features.
 
 pub mod gateway;
 pub mod import_mapping;

@@ -108,7 +108,7 @@ export interface SharingView {
   orgs: Org[];
   vaults: SharedVault[];
   warnings: SharingWarning[];
-  /** Policies in force per organization (wave D2). */
+  /** Policies in force per organization. */
   policies?: OrgPolicy[];
   effectivePolicy?: EffectivePolicy;
 }

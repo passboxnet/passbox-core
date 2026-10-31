@@ -77,7 +77,7 @@ export interface ItemField {
 }
 
 /**
- * A file attached to an item (G2). The key and metadata live in the
+ * A file attached to an item. The key and metadata live in the
  * encrypted item; the server only stores the encrypted blob under `id`.
  */
 export interface Attachment {

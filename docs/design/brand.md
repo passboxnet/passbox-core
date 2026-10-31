@@ -11,8 +11,8 @@ node scripts/generate-design-tokens.mjs   # colors, type, gradients (docs/design
 node scripts/generate-brand-assets.mjs    # logo, app icons, icon family, board assets
 ```
 
-`generate-brand-assets.mjs` renders with Playwright's Chromium (installed for
-the e2e tests). Commit everything it writes. See [board.html](board.html) for
+`generate-brand-assets.mjs` renders with Playwright's Chromium (the one
+installed for the end-to-end tests). Commit everything it writes. See [board.html](board.html) for
 the brand sheet.
 
 ## 1. Logo and app icons
@@ -28,7 +28,7 @@ the right of the mark with a gap of 30–40 % of the mark size, in Marina ink
   `mark-small.svg` (no inner edge, for 16–32 px), `glyph.svg` (keyhole only,
   `currentColor`), `app-icon.svg` (full-bleed 1024 px square; platforms round
   it), `app-icon-dark.svg`, `app-icon-tinted.svg`, and the desktop icon in
-  `apps/desktop/assets/icon.svg`. The geometry lives in one place
+  `assets/icon.svg` of passboxnet/desktop. The geometry lives in one place
   (`GLYPH` in `scripts/generate-brand-assets.mjs`); the React `Logo` in
   `packages/ui/src/Logo.tsx` uses the same paths.
 - Clear space: half the mark's size on every side. Minimum size 16 px.
@@ -38,12 +38,12 @@ the right of the mark with a gap of 30–40 % of the mark size, in Marina ink
 
 | Platform | Asset | Wired in |
 | --- | --- | --- |
-| iOS / iPadOS | `AppIcon.appiconset`: light (Marina gradient, Solar glyph, opaque), dark (Solar glyph on transparent; the system draws the dark background), tinted (grayscale on black), 1024 px each | `apps/ios/Passbox/Assets.xcassets`, `ASSETCATALOG_COMPILER_APPICON_NAME` |
-| Android | Adaptive icon: Marina gradient background vector with the Sky glow, Solar glyph foreground (inside the 66 dp safe zone), monochrome layer for themed icons; Play Store PNG 512 px | `res/mipmap-anydpi-v26/ic_launcher.xml`, `res/drawable/ic_launcher_*.xml`, `src/main/ic_launcher-playstore.png` |
-| Desktop (Tauri) | macOS-grid icon (824 px tile on 1024 px with shadow) as PNGs, `icon.icns`, `icon.ico`, Windows Store tiles | `apps/desktop/src-tauri/icons`, `tauri.conf.json` |
-| Browser extension | 16, 32, 48, 128 px (128 with 16 px padding) | `apps/extension/public/icons`, `manifest.json` |
-| Web app, website | `favicon.svg`, `favicon.ico` (16 + 32), `apple-touch-icon.png` (180, opaque), `icon-512.png` | `apps/web/index.html`, `apps/website/components/SiteDocument.tsx` |
-| Emails | `packages/ui/brand/png/email-logo@2x.png` (mark + wordmark, 164 × 48 at 2×, for light backgrounds) and `email-logo-dark@2x.png` | Attached to every mail as inline images (`cid:logo-light@passbox`, `cid:logo-dark@passbox`; `crates/server/src/mail/layout.rs`), so no remote image is loaded; also served at `/assets/mail/logo-light.png` and `/assets/mail/logo-dark.png`. The alt text “Passbox” is styled as the wordmark, so the header still reads with images off. |
+| iOS / iPadOS | `AppIcon.appiconset`: light (Marina gradient, Solar glyph, opaque), dark (Solar glyph on transparent; the system draws the dark background), tinted (grayscale on black), 1024 px each | `Passbox/Assets.xcassets` in passboxnet/ios, `ASSETCATALOG_COMPILER_APPICON_NAME` |
+| Android | Adaptive icon: Marina gradient background vector with the Sky glow, Solar glyph foreground (inside the 66 dp safe zone), monochrome layer for themed icons; Play Store PNG 512 px | `app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml`, `res/drawable/ic_launcher_*.xml`, `src/main/ic_launcher-playstore.png` in passboxnet/android |
+| Desktop (Tauri) | macOS-grid icon (824 px tile on 1024 px with shadow) as PNGs, `icon.icns`, `icon.ico`, Windows Store tiles | `src-tauri/icons`, `tauri.conf.json` in passboxnet/desktop |
+| Browser extension | 16, 32, 48, 128 px (128 with 16 px padding) | `public/icons`, `manifest.json` in passboxnet/browser-extension |
+| Web app, website | `favicon.svg`, `favicon.ico` (16 + 32), `apple-touch-icon.png` (180, opaque), `icon-512.png` | `app/index.html` in passboxnet/web, the website passbox.net |
+| Emails | `packages/ui/brand/png/email-logo@2x.png` (mark + wordmark, 164 × 48 at 2×, for light backgrounds) and `email-logo-dark@2x.png` | Attached to every mail as inline images (`cid:logo-light@passbox`, `cid:logo-dark@passbox`; `src/mail/layout.rs` in passboxnet/server), so no remote image is loaded; also served at `/assets/mail/logo-light.png` and `/assets/mail/logo-dark.png`. The alt text “Passbox” is styled as the wordmark, so the header still reads with images off. |
 
 ## 2. Colours and the signature gradient
 
@@ -69,11 +69,11 @@ Rules that keep it legible:
   focus rings, switches and checkboxes are Solar.
 - **Selection** (selected list row, active navigation item, selected tab) is
   a Sky tint (`selection`) with a marker in `selection-marker` (Marina in
-  light, Solar in dark) — never a full Solar fill, which is reserved for the
+  light, Solar in dark), never a full Solar fill, which is reserved for the
   primary action and the “+”.
 - **Status colours stay apart from Solar:** warning is a clear orange
   (hue 50, not yellow), danger red, success green, info Sky. The orange
-  update banner and the Mehrfach/Schwach stat tiles must never look like
+  update banner and the Reused/Weak stat tiles must never look like
   the brand yellow.
 
 **The signature gradient** is Marina: lighter Marina → Nocturnal Marina →
@@ -97,8 +97,8 @@ behind website panels and onboarding.
 and Bitwarden blue, LastPass and Passbolt red, Proton Pass violet, Dashlane
 green/teal, NordPass teal. Keeper also uses a yellow, but a saturated
 `#FFC700` on black; Passbox pairs a soft Solar yellow with teal-navy Marina
-and muted Sky, so neither the yellow nor the navy alone carries the brand —
-the combination does. The previous electric blue (`#276CF3`) is retired
+and muted Sky, so neither the yellow nor the navy alone carries the brand.
+The combination does. The previous electric blue (`#276CF3`) is retired
 everywhere.
 
 ### The lip
@@ -126,7 +126,7 @@ in the app, never animated.
 
 The motif also frames the app's **empty states** (`EmptyState`: the Solar icon on
 the Marina signature gradient tile with its lip inside dotted rings with corner dots) and the
-**Emergency Kit** PDF (`apps/web/src/lib/kit.ts`: a band in the Marina signature
+**Emergency Kit** PDF (`app/src/lib/kit.ts` in passboxnet/web: a band in the Marina signature
 gradient with its lip, the Solar keyhole and the wordmark, dotted guides along the
 content with corner dots, rounded tinted boxes for the Secret Key and the
 recovery code).
@@ -138,7 +138,7 @@ joins (ISC license; icons derived from Feather are MIT, see
 THIRD_PARTY_NOTICES.md).
 
 - Web, extension, desktop, website: `lucide-react`.
-- iOS: `apps/ios/Shared/Icons.xcassets` (template SVGs that keep their vector
+- iOS: `Shared/Icons.xcassets` in passboxnet/ios (template SVGs that keep their vector
   data) and `PassboxIcon` (`PassboxIcon.keyRound.image`), in both the app and
   the AutoFill extension. Prefer these over SF Symbols for Passbox concepts so
   the apps match the web; system controls (share sheet, navigation back) may
@@ -166,18 +166,18 @@ These shapes say “Passbox” before the logo does; use them consistently:
 - **Raised round “+”** in Solar with a Marina “+”, the lip and a soft glow in
   the middle of the mobile bottom bar; a round “+” floating action in
   desktop lists.
-- **Solar pill calls to action** (“Kostenlos starten”) with Marina ink and
+- **Solar pill calls to action** (“Get started for free”) with Marina ink and
   the lip, and a secondary outline pill.
 - **Big-number stat tiles** for security status, stacked with a lip, with
   the tone in a small icon chip, and the **alert card** above them.
-- **Orange inline banner** for “Zeit, Ihr Passwort zu ändern · Jetzt ändern”.
+- **Orange inline banner** for “Time to change your password · Change now”.
 - **Large titles** on mobile, two-line headlines on the website.
 
 ## 7. The server's own surfaces
 
-The server renders a few things itself; they carry the same brand line:
+The server ([passboxnet/server](https://github.com/passboxnet/server)) renders a few things itself; they carry the same brand line:
 
-- **Emails** (`crates/server/src/mail/layout.rs`): one table-based layout
+- **Emails** (`src/mail/layout.rs`): one table-based layout
   with inline styles. Light theme inline (readable in every client), dark
   theme through `prefers-color-scheme` (and Outlook.com's `[data-ogsc]`).
   Logo header, a 6 px band in the signature gradient (solid
@@ -186,14 +186,14 @@ The server renders a few things itself; they carry the same brand line:
   button with Marina text and the link repeated as text below it, and a footer with the template's reason, the
   instance name and its address. Plain-text alternatives are unchanged.
   Previews of every template in both languages:
-  `cargo run -p passbox-server --example mail-previews -- <dir>`.
-- **Pages** (`crates/server/src/brand`): without a web vault
+  `cargo run --example mail-previews -- <dir>`.
+- **Pages** (`src/brand`): without a web vault
   (`PASSBOX_WEB_DIR` unset) browsers get a start page with the server
   address, a branded 404, and single sign-on errors (when no
   `PASSBOX_PUBLIC_URL` is set to redirect to). They use the backdrop
   gradient with grain, a bezelled panel with the dotted grid frame, the mark,
   Plus Jakarta Sans served by the instance (`/assets/brand/*.woff2`) and pill
   buttons, in light and dark.
-- Colors come from `crates/server/src/brand/tokens.rs`, generated from
+- Colors come from `src/brand/tokens.rs`, generated from
   `tokens.json` like every other platform (sRGB, because email clients do not
   understand OKLCH).

@@ -1,4 +1,4 @@
-//! SSH keys for the "SSH key" item type (G3): Ed25519 key generation in
+//! SSH keys for the "SSH key" item type: Ed25519 key generation in
 //! the OpenSSH formats, public keys and fingerprints.
 //!
 //! Private keys are written in the unencrypted `openssh-key-v1` format

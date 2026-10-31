@@ -1,5 +1,5 @@
 //! Moving items between vaults, the archive, file attachments, item
-//! templates and SSH keys (additive API, waves B5, G2, G3, G14). See
+//! templates and SSH keys (additive API). See
 //! `docs/architecture/sharing.md` and `docs/architecture/attachments.md`.
 //!
 //! All calls are blocking: run them on a background task.

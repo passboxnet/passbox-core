@@ -1,4 +1,4 @@
-//! Streaming encryption of file attachments (G2).
+//! Streaming encryption of file attachments.
 //!
 //! Every attachment has its own random 256-bit `file_key`. The key, the file
 //! name, its media type and size are stored inside the encrypted item, so

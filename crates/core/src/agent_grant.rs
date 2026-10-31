@@ -1,5 +1,4 @@
-//! Signed grants for AI agents (wave F7, concept K1/K12 in
-//! `docs/planning/ai-native.md`, §6.4).
+//! Signed grants for AI agents (see `docs/architecture/ai-agents.md`).
 //!
 //! This module only holds the cryptographic part: the canonical encoding of
 //! a grant request and of the human's decision, and the signature over the

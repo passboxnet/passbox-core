@@ -1,4 +1,4 @@
-//! Key directory (wave A4, first version): an append-only, hash-chained log
+//! Key directory (first version): an append-only, hash-chained log
 //! of published public key bundles with a signed head.
 //!
 //! ```text

@@ -1,4 +1,4 @@
-//! Service accounts (wave F2): machine identities for CI, scripts and AI
+//! Service accounts: machine identities for CI, scripts and AI
 //! agents, without a master password.
 //!
 //! A service account belongs to an account (its *owner*). It has its own

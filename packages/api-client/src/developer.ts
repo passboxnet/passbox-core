@@ -1,5 +1,5 @@
 /**
- * Service accounts (wave F2) and AI agent grants (wave F7). Bodies with
+ * Service accounts and AI agent grants. Bodies with
  * keys and signatures are built by `@passbox/core-wasm`; see
  * docs/architecture/service-accounts.md and docs/architecture/ai-agents.md.
  */

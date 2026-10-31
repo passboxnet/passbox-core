@@ -1,4 +1,4 @@
-//! K6 smart import mapping: suggests Passbox fields for CSV columns the
+//! Smart import mapping: suggests Passbox fields for CSV columns the
 //! header rules did not recognize.
 //!
 //! The model gets data class D1 only: column headers (dropped when they

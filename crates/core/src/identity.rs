@@ -1,4 +1,4 @@
-//! Account key pairs (wave A1): public key bundles, sealing to a public key
+//! Account key pairs: public key bundles, sealing to a public key
 //! and signatures.
 //!
 //! Every account has

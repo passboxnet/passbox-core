@@ -1,6 +1,6 @@
 /**
  * Types and errors of account recovery, emergency access and adding a
- * device by code (wave C). The operations are methods of `PassboxClient`;
+ * device by code. The operations are methods of `PassboxClient`;
  * the cryptography is in the Rust core. See docs/architecture/recovery.md.
  */
 import type { EmergencyGrantInfo, OrgRecoveryRequest } from "@passbox/api-client";

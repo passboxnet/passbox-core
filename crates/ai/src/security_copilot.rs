@@ -1,4 +1,4 @@
-//! K4 security copilot: turns the findings of the security check into a
+//! Security copilot: turns the findings of the security check into a
 //! short, prioritised plan.
 //!
 //! Input is metadata only: finding kinds, counts and website domains (D1

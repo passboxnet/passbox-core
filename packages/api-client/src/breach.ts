@@ -1,5 +1,5 @@
 /**
- * Have I Been Pwned through the user's own server (G6, G11): the Pwned
+ * Have I Been Pwned through the user's own server: the Pwned
  * Passwords range proxy and email breach monitoring. See
  * docs/architecture/security-analysis.md.
  */

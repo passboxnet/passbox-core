@@ -1,5 +1,4 @@
-//! The agent broker (F7, concept K1/K12 in `docs/planning/ai-native.md`):
-//! controlled access for AI agents such as Claude Code, Codex or Cursor
+//! The agent broker: controlled access for AI agents such as Claude Code, Codex or Cursor
 //! through `pbx mcp`.
 //!
 //! Principles (see `docs/architecture/ai-agents.md`):

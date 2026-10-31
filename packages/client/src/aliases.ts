@@ -1,5 +1,5 @@
 /**
- * Email aliases in the generator (G10): SimpleLogin, addy.io, Fastmail
+ * Email aliases in the generator: SimpleLogin, addy.io, Fastmail
  * Masked Email, DuckDuckGo Email Protection and Firefox Relay. The API key
  * is stored as a vault item (category "other", tag `alias-service`); the
  * request goes directly from this device to the provider, never through

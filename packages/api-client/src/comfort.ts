@@ -1,6 +1,6 @@
 /**
- * Moving items between vaults (B5), attachments (G2), share links (B7)
- * and access requests (B9). Ciphertexts are built by `@passbox/core-wasm`;
+ * Moving items between vaults, attachments, share links
+ * and access requests. Ciphertexts are built by `@passbox/core-wasm`;
  * see docs/architecture/attachments.md and docs/architecture/sharing.md.
  */
 

@@ -62,7 +62,7 @@ impl OrgRole {
         matches!(self, Self::Owner | Self::Admin)
     }
 
-    /// Guests are view-only (B8): they open, copy and fill items of the
+    /// Guests are view-only: they open, copy and fill items of the
     /// vaults shared with them and change nothing.
     pub fn is_guest(self) -> bool {
         self == Self::Guest

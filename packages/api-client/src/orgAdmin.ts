@@ -1,5 +1,5 @@
 /**
- * Organization administration (wave D): signed policies, the audit log,
+ * Organization administration: signed policies, the audit log,
  * reports, settings, offboarding and the events API. Policy bodies are
  * signed by `@passbox/core-wasm`; see docs/architecture/administration.md.
  */

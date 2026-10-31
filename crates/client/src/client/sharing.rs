@@ -264,7 +264,7 @@ impl Client {
         Ok(id)
     }
 
-    /// Organization recovery is on by default (C1, since 25.10.2026): a new
+    /// Organization recovery is on by default: a new
     /// organization gets its recovery key and a first policy that requires
     /// enrollment ([`PolicyRules::new_org_defaults`]), and the creator
     /// enrolls. Admins can turn both off later.
@@ -404,7 +404,7 @@ impl Client {
         )?;
         self.sync()?;
         let org = self.org(org_id)?;
-        // Guests only see what is shared with them (B8): no family vault.
+        // Guests only see what is shared with them: no family vault.
         let guest = org
             .members
             .iter()
@@ -760,7 +760,7 @@ impl Client {
     }
 }
 
-// --- Policies (wave D2) -------------------------------------------------------------
+// --- Policies -----------------------------------------------------------------------
 
 impl Client {
     /// The policies in force per organization (verified in sync, or pinned

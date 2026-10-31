@@ -103,7 +103,7 @@ pub struct CatalogStatus {
     pub bundled: bool,
 }
 
-/// An email alias service ("Alias erstellen" in the generator, G10).
+/// An email alias service ("Create alias" in the generator).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum AliasProvider {
@@ -718,7 +718,7 @@ impl Client {
         Ok(())
     }
 
-    // --- Email aliases (G10) -------------------------------------------------------------
+    // --- Email aliases -------------------------------------------------------------------
 
     /// The alias services set up in the vault (items tagged `alias-service`).
     pub fn alias_services(&self) -> Result<Vec<AliasService>> {

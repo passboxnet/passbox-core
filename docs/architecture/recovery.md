@@ -2,9 +2,9 @@
 
 > **Draft.** Not reviewed by cryptographers and not audited. Formats may still change before the first release that ships them.
 
-This document describes waves C1 (recovery through an organization or family), C2 (personal recovery code), C3 (emergency access) and C4 (adding a device with a code) as implemented. The planning sketch is in docs/planning/feature-gap.md §5.3 (German); where this document differs, this document is what the code does. It builds on the key hierarchy in [cryptography.md](cryptography.md) and the key pairs, key directory and organizations in [sharing.md](sharing.md).
+This document describes recovery through an organization or family, the personal recovery code, emergency access and adding a device with a code. It builds on the key hierarchy in [cryptography.md](cryptography.md) and the key pairs, key directory and organizations in [sharing.md](sharing.md).
 
-All cryptography is in [`crates/core`](../../crates/core): `recovery::code`, `recovery::org`, `emergency` and `device_link`. The web app and the extension use it through `@passbox/core-wasm` and [`packages/client`](../../packages/client) (`PassboxClient`), the native apps through [`crates/client`](../../crates/client) and the FFI ([`crates/ffi/src/recovery.rs`](../../crates/ffi/src/recovery.rs)). The server ([`crates/server/src/api/recovery.rs`](https://github.com/passboxnet/server/blob/main/src/api/recovery.rs), `org_recovery.rs`, `emergency.rs`, `device_links.rs`, migration [`0001_baseline.sql`](https://github.com/passboxnet/server/blob/main/migrations/0001_baseline.sql)) stores sealed data and enforces who gets it when.
+All cryptography is in [`crates/core`](../../crates/core): `recovery::code`, `recovery::org`, `emergency` and `device_link`. The web app and the extension use it through `@passbox/core-wasm` and [`packages/client`](../../packages/client) (`PassboxClient`), the native apps through [`crates/client`](../../crates/client) and the FFI ([`crates/ffi/src/recovery.rs`](../../crates/ffi/src/recovery.rs)). The server (passboxnet/server: [`src/api/recovery.rs`](https://github.com/passboxnet/server/blob/main/src/api/recovery.rs), `org_recovery.rs`, `emergency.rs`, `device_links.rs`, [`migrations/0001_baseline.sql`](https://github.com/passboxnet/server/blob/main/migrations/0001_baseline.sql)) stores sealed data and enforces who gets it when.
 
 ## What recovery means here
 
@@ -12,13 +12,13 @@ Passbox cannot reset a master password: nobody but the user knows it, and the ac
 
 | Path | Who holds the second way | What the user needs | What happens afterwards |
 | --- | --- | --- | --- |
-| Recovery code (C2) | The user (Emergency Kit) | email, recovery code, second factor if 2FA is on | new master password, **new Secret Key**, new recovery code, all sessions revoked |
-| Organization recovery (C1) | Admins who hold the organization's recovery key | email, a device, an out-of-band identity check by an admin | same as above |
-| Emergency access (C3) | A trusted person | (the trusted person's own account) | read access to chosen vaults; no account takeover |
+| Recovery code | The user (Emergency Kit) | email, recovery code, second factor if 2FA is on | new master password, **new Secret Key**, new recovery code, all sessions revoked |
+| Organization recovery | Admins who hold the organization's recovery key | email, a device, an out-of-band identity check by an admin | same as above |
+| Emergency access | A trusted person | (the trusted person's own account) | read access to chosen vaults; no account takeover |
 
 The account key itself never changes during a recovery, so vaults, items, shared vault copies, key pairs and organization memberships stay as they are. What changes is how the account key is wrapped (new AUK from the new master password and the new Secret Key), the OPAQUE record, and the recovery code record.
 
-## Personal recovery code (C2)
+## Personal recovery code
 
 ```text
 R           = 32 random bytes, shown as R1- + 11 groups of 5 Crockford Base32 characters
@@ -36,7 +36,7 @@ wrapped     = XChaCha20-Poly1305(wrap_key, account_key, aad = "passbox/v1/recove
 
 **What the code protects against and what not.** `R` has 256 bits of entropy, so the stored OPAQUE record and `wrapped` cannot be attacked offline, even with a full database copy. Whoever has `R` and the email (and the second factor, if 2FA is on) can take over the account: the Emergency Kit with a recovery code must be kept like cash, and the UI says so. The 2FA requirement means a stolen Emergency Kit alone is not enough for accounts with two-factor sign-in.
 
-## Organization recovery (C1)
+## Organization recovery
 
 ```text
 recovery bundle = { org_id, key_version, enc_pk (X-Wing), creator_id, created_at }  signed by an owner/admin
@@ -57,9 +57,9 @@ request code    = 4 groups of 5 digits from SHA-256("passbox/v1/recovery-request
 
 All objects use the canonical encoding and signatures of [sharing.md](sharing.md#canonical-encoding-and-domain-separation) (own type tags, so a signature over one type never verifies as another); sealing is the X-Wing sealing described there.
 
-**On by default (since 25.10.2026).** Every organization created from now on, family or team, gets recovery set up right away: the creating client creates the recovery key (below), signs the organization's first policy with `require_recovery_enrollment = true` (`PolicyRules::new_org_defaults`, otherwise restricting nothing) and enrolls the creator. Members are enrolled automatically: the client seals the escrow as part of joining, as soon as an admin confirmed the membership (the server accepts escrows only from confirmed members), at the latest on the next unlock (`enrollRequiredOrgRecovery` / `enroll_required_org_recovery`, called after accepting, from the policy banner and after unlock). **Consent is explicit and honest:** the invitation preview carries `recovery: true` when the organization has recovery set up and its policy requires it, and the web app shows before "Accept invitation" that the organization's admins can restore the member's access, that the approving admin's device briefly holds the account key and could technically read the member's data, and that every recovery is logged and mailed. The create dialog tells the creator the same. **Guests are never enrolled** and policies that require recovery do not apply to them (an organization must not be able to take over an external person's account); the preview says `recovery: false` for them.
+**On by default.** Every new organization, family or team, gets recovery set up right away: the creating client creates the recovery key (below), signs the organization's first policy with `require_recovery_enrollment = true` (`PolicyRules::new_org_defaults`, otherwise restricting nothing) and enrolls the creator. Members are enrolled automatically: the client seals the escrow as part of joining, as soon as an admin confirmed the membership (the server accepts escrows only from confirmed members), at the latest on the next unlock (`enrollRequiredOrgRecovery` / `enroll_required_org_recovery`, called after accepting, from the policy banner and after unlock). **Consent is explicit and honest:** the invitation preview carries `recovery: true` when the organization has recovery set up and its policy requires it, and the web app shows before "Accept invitation" that the organization's admins can restore the member's access, that the approving admin's device briefly holds the account key and could technically read the member's data, and that every recovery is logged and mailed. The create dialog tells the creator the same. **Guests are never enrolled** and policies that require recovery do not apply to them (an organization must not be able to take over an external person's account); the preview says `recovery: false` for them.
 
-**Setup.** An owner or admin turns recovery on for an organization that does not have it yet (Settings → Recovery → "Set up recovery"; organizations created before 25.10.2026 keep the opt-in flow). Their client creates the recovery key pair, signs the public bundle and seals the private seed to itself. Admins who hold the key can seal it for other verified admins (`grant_org_recovery`); the server checks that the target is a confirmed owner or admin. Demoting or removing an admin deletes their copy on the server.
+**Setup.** An owner or admin turns recovery on for an organization that does not have it yet (Settings → Recovery → "Set up recovery"; organizations created before recovery was on by default keep this opt-in flow). Their client creates the recovery key pair, signs the public bundle and seals the private seed to itself. Admins who hold the key can seal it for other verified admins (`grant_org_recovery`); the server checks that the target is a confirmed owner or admin. Demoting or removing an admin deletes their copy on the server.
 
 **Per member.** A member turns on "Allow recovery through {organization}" (or is enrolled automatically, above). Their client verifies the recovery bundle against the organization's verified roster (signed by a verified owner or admin, right organization and version), seals the account key to it and signs the escrow. The confirmation dialog says honestly that an approving admin could technically read the member's data. Where the policy requires recovery, the switch cannot be turned off; otherwise turning it off deletes the escrow (and cancels open requests). Removing a member from the organization deletes their escrow.
 
@@ -77,7 +77,7 @@ All objects use the canonical encoding and signatures of [sharing.md](sharing.md
 
 **Families** use the same mechanism: the organizer is the owner; recovery is on from the start and family members are enrolled when they join (guests excepted).
 
-## Emergency access (C3)
+## Emergency access
 
 ```text
 grant  = { grant_id, grantor_id, grantor_bundle_hash, grantee_id, grantee_bundle_hash,
@@ -89,7 +89,7 @@ sealed = Seal(grantee bundle, canonical("passbox/v1/emergency-keys", [(vault_id,
 
 1. **Invite.** The grantor adds a trusted person by email with a waiting period of 1 to 30 days (default 7). The server mails them (`emergency_access_invited`); they need a Passbox account.
 2. **Accept.** The trusted person, signed in with that email, accepts.
-3. **Confirm.** The grantor's client looks the trusted person up in the [key directory](sharing.md#key-directory-a4-first-version) (pinning the key, warning on changes) and shows the fingerprint to compare. The grantor chooses **personal** vaults; the client seals their keys (all key epochs it holds) to the trusted person's verified key and signs the grant. The server checks the IDs, the signature, the grantee's current key, that the signed waiting period equals the stored one and that the vaults are the grantor's personal vaults.
+3. **Confirm.** The grantor's client looks the trusted person up in the [key directory](sharing.md#key-directory-first-version) (pinning the key, warning on changes) and shows the fingerprint to compare. The grantor chooses **personal** vaults; the client seals their keys (all key epochs it holds) to the trusted person's verified key and signs the grant. The server checks the IDs, the signature, the grantee's current key, that the signed waiting period equals the stored one and that the vaults are the grantor's personal vaults.
 4. **Request.** The trusted person requests access. The grantor gets a mail (`emergency_access`, with the release date) and sees the countdown in Settings → Emergency access, where they can **decline** (also after the release, which ends access) or **allow now**.
 5. **Release.** After the waiting period without a decline (or after "allow now"), `GET /emergency/grants/{id}/access` returns the sealed keys, the signed grant and the vaults' current ciphertexts. The trusted person's client looks the grantor up in the key directory, checks the grantor's signature and that the grant names its own current key, opens the keys and decrypts the vaults read-only (nothing is stored). The first access mails the grantor (`emergency_access_used`).
 
@@ -99,7 +99,7 @@ sealed = Seal(grantee bundle, canonical("passbox/v1/emergency-keys", [(vault_id,
 
 **What the server enforces.** Confidentiality does not depend on the server: the keys are sealed to the trusted person's verified key. The **waiting period is enforced by the server**: a malicious server could release the sealed keys early, but only to the person the grantor chose and verified (as with Bitwarden). Declining or removing the contact stops future access; what the trusted person already opened they may have kept.
 
-## Adding a device with a code (C4)
+## Adding a device with a code
 
 ```text
 code       = short_id (4 chars, chosen by the server) || secret (12 chars, chosen by the device; never sent)
@@ -151,7 +151,7 @@ Rate limits (in memory, per server process): recovery-code logins share the per-
 
 Events (`account_events`): `account_recovery_code_created`/`_removed`, `account_recovery_failed`, `account_recovered_code`, `account_recovered_org`, `login_recovered`, `org_recovery_enabled`, `org_recovery_admin_added`, `org_recovery_enrolled`/`_withdrawn`, `org_recovery_requested`/`_approved`/`_denied`, `org_member_recovered`, `emergency_contact_added`/`_removed`, `emergency_invitation_accepted`, `emergency_access_confirmed`/`_requested`/`_approved`/`_denied`/`_used`, `device_link_created`/`_approved`.
 
-Mails (English and German, `crates/server/src/mail/templates.rs`): `recovery_code_created`, `recovery_used`, `recovery`, `recovery_requested`, `recovery_approved`, `recovery_denied`, `emergency_access_invited`, `emergency_access`, `emergency_access_approved`, `emergency_access_denied`, `emergency_access_used`.
+Mails (English and German, `src/mail/templates.rs` in passboxnet/server): `recovery_code_created`, `recovery_used`, `recovery`, `recovery_requested`, `recovery_approved`, `recovery_denied`, `emergency_access_invited`, `emergency_access`, `emergency_access_approved`, `emergency_access_denied`, `emergency_access_used`.
 
 ## Client APIs
 
@@ -169,8 +169,8 @@ Endpoints are listed in [docs/api/openapi.yaml](https://github.com/passboxnet/se
 ## Tests
 
 - Core: known-answer test of the recovery code encoding and derivation (computed independently with Python's `hashlib`/`hmac`), checksum and typo handling, wrong code, wrong account, tampering (`recovery::code`); organization recovery end to end, a swapped ephemeral key, forged approvals, bundles and escrows (`recovery::org::tests`); emergency access, tampering, wrong recipients and waiting-period bounds (`emergency`); device links with a swapped key and wrong codes (`device_link`).
-- Server: `crates/server/tests/api/recovery.rs` (PostgreSQL with row level security): recovery code with and without a second factor, fake answers for unknown emails, single-use tokens, revoked sessions, rate limits; organization recovery with forged approvals, wrong request tokens, denial and opt-out; emergency access with signed waiting period checks, versions, decline, release after the waiting period and removal; device links.
-- Rust client: `crates/client/tests/recovery.rs`. TypeScript: `packages/client/src/recovery.integration.test.ts`. Swift and Kotlin bindings: `RecoveryIntegrationTests.swift`, `FfiRecoveryTest.kt`. Web: unit tests and `e2e/tests/recovery.spec.ts` (recovery code, emergency access).
+- Server (passboxnet/server): `tests/api/recovery.rs` (PostgreSQL with row level security): recovery code with and without a second factor, fake answers for unknown emails, single-use tokens, revoked sessions, rate limits; organization recovery with forged approvals, wrong request tokens, denial and opt-out; emergency access with signed waiting period checks, versions, decline, release after the waiting period and removal; device links.
+- Rust client: `tests/client_recovery.rs` in passboxnet/server. TypeScript: `packages/client/src/recovery.integration.test.ts`. Swift and Kotlin bindings: `RecoveryIntegrationTests.swift` (passboxnet/ios), `FfiRecoveryTest.kt` (passboxnet/android). Web: unit tests and `e2e/tests/recovery.spec.ts` in passboxnet/web (recovery code, emergency access).
 
 ## Open issues
 

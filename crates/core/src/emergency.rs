@@ -1,4 +1,4 @@
-//! Emergency access (wave C3): read access to chosen vaults for a trusted
+//! Emergency access: read access to chosen vaults for a trusted
 //! person after a waiting period.
 //!
 //! ```text

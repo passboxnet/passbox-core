@@ -974,7 +974,7 @@ impl Keyring {
     }
 }
 
-// --- Account recovery, emergency access, device links (wave C) -----------------------
+// --- Account recovery, emergency access, device links --------------------------------
 //
 // See `docs/architecture/recovery.md`. Secret material (recovery keys,
 // ephemeral keys, released vault keys) stays inside these objects.
@@ -1436,7 +1436,7 @@ impl DeviceLinkRequest {
     }
 }
 
-// --- Trusted devices (SSO unlock, wave E2) ---------------------------------------
+// --- Trusted devices (SSO unlock) ------------------------------------------------
 
 /// The approval code (4 groups of five digits) of a device public key
 /// (Base64url), to compare with the new device before approving it.
@@ -1523,9 +1523,9 @@ impl TrustedDeviceKey {
     }
 }
 
-// --- Organization policies and audit log (wave D) ---------------------------------
+// --- Organization policies and audit log ------------------------------------------
 
-/// Policies (D2) and signed client events (D3). The verified policies come
+/// Policies and signed client events. The verified policies come
 /// with every `applySharing` result (`view.policies`,
 /// `view.effectivePolicy`); these functions sign new versions and verify
 /// single records.
@@ -1649,7 +1649,7 @@ pub fn share_link_problem(
         .map(|e| e.to_string()))
 }
 
-// --- Service accounts and agent grants (wave F) --------------------------------------
+// --- Service accounts and agent grants -----------------------------------------------
 //
 // See `docs/architecture/service-accounts.md` and `docs/architecture/ai-agents.md`.
 
@@ -1778,7 +1778,7 @@ pub fn parse_agent_request(request: &str) -> Result<String, JsValue> {
     .to_string())
 }
 
-// --- Attachments, share links, SSH keys (G2, B7, G3) ------------------------------
+// --- Attachments, share links, SSH keys -------------------------------------------
 
 /// A new random file key (Base64url), stored in the item with the
 /// attachment's metadata.

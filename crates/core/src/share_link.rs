@@ -1,4 +1,4 @@
-//! Share links for people without a Passbox account (B7).
+//! Share links for people without a Passbox account.
 //!
 //! A share link carries a snapshot (a copy of an item, or free text) that
 //! is encrypted on the sender's device. The key travels only in the URL

@@ -1,4 +1,4 @@
-# Security analysis ("Sicherheits-Check")
+# Security analysis (security check)
 
 The security check grades the whole vault and tells users what to fix
 first. It goes beyond the classic weak/reused/breached trio: similar
@@ -43,7 +43,7 @@ the options and the results of the optional online checks.
 | `similar` | medium | Distinct passwords with the same base, or the password is a small change of an earlier one of the same item | change password |
 | `insecure_url` | medium | `http://` (not for IPs and `localhost`) | use https |
 | `missing_two_factor` | medium | The site offers TOTP or security keys (2fa.directory) and the login has neither a one-time code nor a passkey | enable 2FA (with the site's instructions) |
-| `expired` | medium | A card or document (any field labeled expiry / "Ablauf" / "Gültig bis") is past its date | renew |
+| `expired` | medium | A card or document (any field labeled expiry, or in German "Ablauf" or "Gültig bis") is past its date | renew |
 | `expiring` | low | … within `expiringWithinDays` (default 60) | renew |
 | `old` | low | Password set more than `oldAfterDays` ago (default 365; from the password history, else the creation date) | change password |
 | `passkey_available` | low | The site supports passkey sign-in (Passkeys Directory) and the login has none | add passkey |
@@ -63,18 +63,18 @@ open findings, `1 − Π(1 − w)` with critical 1.0, high 0.7, medium 0.35,
 low 0.1, info 0; the score is `100 × (1 − Σ loss / items)`, rated excellent
 (≥ 90), good (≥ 75), fair (≥ 50) or poor. Each category reports the points
 it costs (`categories[].points`), which is the explanation the UIs show
-("−18 Mehrfach verwendet"). `fixFirst` lists up to ten items by severity,
+("−18 Used more than once"). `fixFirst` lists up to ten items by severity,
 then by the points fixing them would gain.
 
 ### Dismissals
 
 Dismissing a finding stores its code in the item (`securityIgnore: ["weak"]`),
 so it is encrypted and synced like the item and older clients keep it.
-Dismissed findings stay listed ("Ausgeblendet") but no longer count. Kinds
+Dismissed findings stay listed ("Dismissed") but no longer count. Kinds
 can also be turned off entirely per device (web settings; iOS keeps the
 password-age limit in `AppSettings`).
 
-## Lookalike detection (G17)
+## Lookalike detection
 
 - **Homographs:** IDN labels are decoded from punycode and folded with a
   table of look-alike characters (Cyrillic, Greek, accented Latin, `0`/`o`,
@@ -89,7 +89,7 @@ password-age limit in `AppSettings`).
 
 The browser extension calls `checkLookalike(host)` when the inline menu
 opens on a page **without** a matching login and when the save banner
-appears; it then warns "Vorsicht: Das ist nicht paypal.com" and fills
+appears; it then warns "Careful: this is not paypal.com" and fills
 nothing. The analysis flags saved logins whose own domain is a lookalike.
 The registrable-domain heuristic in the core knows common two-level
 suffixes and hosting platforms; the extension still matches logins with the
@@ -101,15 +101,15 @@ full Public Suffix List.
 | --- | --- | --- | --- |
 | Analysis, similar passwords, lookalikes, expiry, duplicates | nothing | – | always local |
 | 2FA / passkey hints | nothing (bundled snapshots, MIT and CC BY 4.0, see [THIRD_PARTY_NOTICES.md](../../THIRD_PARTY_NOTICES.md); `scripts/update-site-directories.py` refreshes them) | – | always local |
-| Leaked passwords (G6) | first 5 hex characters of each password's SHA-1 | the user's Passbox server, which asks `api.pwnedpasswords.com` with `Add-Padding: true` (default) – or Have I Been Pwned directly | only after the user starts the check |
-| Email monitoring (G11) | the email addresses the user confirmed | the Passbox server, which sends them to `haveibeenpwned.com` with the operator's API key | after opt-in and confirmation by code, then every `PASSBOX_HIBP_CHECK_HOURS` |
-| Email aliases (G10) | the website's domain as a note; the API key | the alias provider chosen by the user, directly from the device | when the user presses "Alias erstellen" |
-| Breached websites | **nothing new**: the app downloads the same public catalogue as everyone else (`GET /api/v1/breaches/catalog`, no session) and matches it on the device | – (the server fetches the public list from Have I Been Pwned on its own schedule) | at unlock and every few hours |
+| Leaked passwords | first 5 hex characters of each password's SHA-1 | the user's Passbox server, which asks `api.pwnedpasswords.com` with `Add-Padding: true` (default), or Have I Been Pwned directly | only after the user starts the check |
+| Email monitoring | the email addresses the user confirmed | the Passbox server, which sends them to `haveibeenpwned.com` with the operator's API key | after opt-in and confirmation by code, then every `PASSBOX_HIBP_CHECK_HOURS` |
+| Email aliases | the website's domain as a note; the API key | the alias provider chosen by the user, directly from the device | when the user presses "Create alias" |
+| Breached websites | **nothing new**: the app downloads the same public catalogue as everyone else (`GET /api/v1/breaches/catalog`, no session) and matches it on the device | nobody (the server fetches the public list from Have I Been Pwned on its own schedule) | at unlock and every few hours |
 | Organization report of breached websites | per breach title: logins in the organization's vaults still open and fixed (counts, no item IDs; sensitive breaches never) | the user's Passbox server, inside the existing security aggregate | at most daily, members of team organizations |
 
 Nothing in this feature sends a password, a TOTP secret or a vault item to
-a model or service (data class D4 in `docs/planning/ai-native.md` stays on
-the device).
+a model or service (data class D4, see
+[ADR 0006](../adr/0006-ai-principles.md), stays on the device).
 
 ### Breach routing
 
@@ -136,7 +136,7 @@ per minute, 10 per hour) to the address itself; only confirmed addresses
 are ever sent to Have I Been Pwned. The first check runs at confirmation and
 is shown, not mailed; later checks mail new breaches to the account owner
 (`breach_monitor_alert`). Tables `breach_monitor_emails` and
-`breach_monitor_results` (migration 0012) hold only addresses, breach
+`breach_monitor_results` hold only addresses, breach
 metadata and timestamps. The analysis turns results into `exposed_email`
 findings for logins of the breached site that use the address.
 
@@ -150,7 +150,7 @@ without the server learning which sites anyone uses.
   (`https://haveibeenpwned.com/api/v3/breaches`, no API key, CC BY 4.0) every
   `PASSBOX_BREACH_CATALOG_HOURS` (6) in the `worker:breach_catalog` job,
   with `If-None-Match` when Have I Been Pwned sent an `ETag`, and stores
-  every entry with its flags in `site_breaches` (migration 0004; global,
+  every entry with its flags in `site_breaches` (global,
   readable in every context, written only by the job). `GET
   /api/v1/breaches/catalog` serves the entries clients match against (a
   domain; not fabricated, not a spam list, not retired; sensitive ones
@@ -197,18 +197,18 @@ without the server learning which sites anyone uses.
   the decrypted vault, so background runs with a locked vault only
   download the catalogue; the alert follows at the next unlock. Sensitive
   breaches are never named in notifications. Email alerts stay with the
-  opt-in email monitoring (G11): only confirmed addresses Have I Been
+  opt-in email monitoring: only confirmed addresses Have I Been
   Pwned reports for a breach are mailed.
 - **Organizations.** Members' apps add per-breach counts of the logins in
   that organization's vaults (open, fixed; sensitive breaches left out) to
   the daily security aggregate (`siteBreaches` in `PUT
   /orgs/{id}/security-report`, stored in `org_security_reports`); admins
-  see "12 Mitglieder betroffen, 8 behoben" per breach title in Reports.
+  see "12 members affected, 8 fixed" per breach title in Reports.
   Personal vaults are never included.
 - **Attribution.** Every UI that shows breach data names Have I Been Pwned
   with a link and the license (THIRD_PARTY_NOTICES.md).
 
-### Email aliases (G10)
+### Email aliases
 
 Providers: SimpleLogin, addy.io (both also self-hosted), Fastmail Masked
 Email (JMAP), DuckDuckGo Email Protection, Firefox Relay. The API key is a
@@ -240,30 +240,30 @@ organization security aggregate.
   (route, password age, expiry warning, optional kinds). The generator has
   "Email alias".
 - **Extension:** lookalike warning in the inline menu and the save banner.
-- **iOS / Android:** the Sicherheits-Check shows the score with its reasons,
-  "Zuerst beheben" and "Weitere Prüfungen" with a list per kind (swipe or
+- **iOS / Android:** the security check shows the score with its reasons,
+  "Fix these first" and further checks with a list per kind (swipe or
   button to dismiss and show again).
 
 ## Tests
 
-- `cargo test -p passbox-core analysis` – engine, punycode, lookalikes,
+- `cargo test -p passbox-core analysis`: engine, punycode, lookalikes,
   similar passwords, expiry dates, directories.
-- `cargo test -p passbox-server --test api` – proxy (cache, validation, off
+- `cargo test --test api` in passboxnet/server: proxy (cache, validation, off
   switch) and monitoring (codes, isolation, periodic check, alert mail) with
   a fake Have I Been Pwned, on PostgreSQL.
-- `cargo test -p passbox-client --test analysis` – report, dismissals, proxy
+- `cargo test --test client_analysis` in passboxnet/server: report, dismissals, proxy
   routing and monitoring end to end; alias providers with a recording
   transport.
 - `packages/client/src/analysis.test.ts`, extension `autofill.test.ts`,
-  `e2e/tests/security.spec.ts`, PassboxKit `SecurityAnalysisTests`, Android
+  `e2e/tests/security.spec.ts` (passboxnet/web), PassboxKit `SecurityAnalysisTests`, Android
   `SecurityAnalysisTest` and the FFI integration test.
 - Breached websites: core `breaches.rs` and `tests.rs` (dates, subdomains,
   password changed after the breach, unknown dates, severity, bundled
-  snapshot); server `breach_catalog` in `tests/api/breach.rs` (fake Have I
+  snapshot); server `breach_catalog` in `tests/api/breach.rs` of passboxnet/server (fake Have I
   Been Pwned, filter, `ETag`/304, gzip, versions across instances,
   failures, off switch, row level security) and the organization counts in
   `tests/api/org_admin.rs`; client `breached_websites_from_the_server_catalogue`;
   TS `analysis.test.ts` and `breaches.integration.test.ts`; extension
-  `breaches.test.ts`; `e2e/tests/breaches.spec.ts` (fake catalogue → banner
+  `breaches.test.ts`; `e2e/tests/breaches.spec.ts` in passboxnet/web (fake catalogue → banner
   and finding → new password → resolved); PassboxKit `BreachedSitesTests`;
   Android `breachedSitesExplainTheFinding` and the FFI integration test.

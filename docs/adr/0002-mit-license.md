@@ -1,7 +1,6 @@
 # ADR 0002: MIT License and no feature gating for self-hosters
 
-- Status: accepted
-- Date: 2026-10-24
+- Status: Accepted
 
 ## Context
 

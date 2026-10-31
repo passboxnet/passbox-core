@@ -1,4 +1,4 @@
-//! Recovery through an organization or family (wave C1).
+//! Recovery through an organization or family.
 //!
 //! ```text
 //! recovery bundle = { org_id, key_version, enc_pk, creator_id, created_at }   signed by an admin

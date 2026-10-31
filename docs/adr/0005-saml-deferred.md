@@ -1,13 +1,12 @@
 # ADR 0005: SAML 2.0 is deferred; single sign-on uses OpenID Connect
 
-- Status: accepted
-- Date: 2026-10-24
+- Status: Accepted
 
 ## Context
 
-Wave E4 asks for SAML 2.0 for identity providers without OpenID Connect (older ADFS installations, some public-sector IdPs). Every provider Passbox targets first (Microsoft Entra ID, Google Workspace, Okta, Keycloak, authentik, ZITADEL, and ADFS since Windows Server 2016) also speaks OpenID Connect, which Passbox implements (wave E1, [sso.md](../architecture/sso.md)).
+Some organizations ask for SAML 2.0 for identity providers without OpenID Connect (older ADFS installations, some public-sector IdPs). Every provider Passbox targets first (Microsoft Entra ID, Google Workspace, Okta, Keycloak, authentik, ZITADEL, and ADFS since Windows Server 2016) also speaks OpenID Connect, which Passbox implements ([sso.md](../architecture/sso.md)).
 
-SAML is verified through XML Signature, which needs XML canonicalization (Exclusive C14N) and careful handling of signature wrapping, comments, namespaces and entity expansion. The Rust options in October 2026:
+SAML is verified through XML Signature, which needs XML canonicalization (Exclusive C14N) and careful handling of signature wrapping, comments, namespaces and entity expansion. The Rust options at the time of this decision:
 
 - **`samael`** (MIT) is the only maintained, reasonably complete SAML service provider crate. Signature verification needs its `xmlsec` feature, which links **libxml2, libxmlsec1 and OpenSSL** through C bindings. That breaks the static, OpenSSL-free builds Passbox relies on (musl container, cross-compiled ARM images, `cargo audit` without C advisories to track) and adds two large C libraries with a long history of parser vulnerabilities to the server's attack surface. It has not had an independent security audit.
 - Pure-Rust XML parsers (`quick-xml`, `roxmltree`) exist, but there is no audited pure-Rust XML-DSig with canonicalization. Writing one in Passbox would mean owning exactly the code where SAML implementations have failed most often (signature wrapping, CVE-2017-11427 class comment truncation, `xmlsec` key confusion).

@@ -1,4 +1,4 @@
-//! The organization audit log (wave D3): the hash chain over its entries
+//! The organization audit log: the hash chain over its entries
 //! and the signed events clients report.
 //!
 //! ```text
@@ -17,7 +17,7 @@
 //! [`verify_chain`], in Rust, through WebAssembly or the FFI. The chain makes
 //! later changes and deletions visible; it does not stop whoever controls
 //! the database from rewriting everything after a point. Copy the head
-//! (`seq`, `hash`) somewhere else regularly (SIEM, D5) to anchor it.
+//! (`seq`, `hash`) somewhere else regularly (export, SIEM) to anchor it.
 //!
 //! Viewing, copying and filling happen on the device, so clients report
 //! them signed with the account key. The server checks the signature, but

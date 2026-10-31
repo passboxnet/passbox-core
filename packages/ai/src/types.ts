@@ -1,6 +1,6 @@
 /**
- * Shapes shared by the gateway, providers and features (concept §6.2,
- * same as `crates/ai`).
+ * Shapes shared by the gateway, providers and features (same as
+ * `crates/ai`).
  */
 import type { Redacted } from "./redacted";
 
@@ -10,7 +10,7 @@ export type ModelLocation = "on-device" | "self-hosted" | "cloud";
 export const MODEL_LOCATIONS: readonly ModelLocation[] = ["on-device", "self-hosted", "cloud"];
 
 /**
- * Data classes (concept §4): D0 the user's own input, D1 structure (headers,
+ * Data classes: D0 the user's own input, D1 structure (headers,
  * patterns, counts), D2 metadata (titles, domains, usernames), D3 content
  * (notes, custom fields). D4, secrets, is not representable: it never
  * reaches a model.

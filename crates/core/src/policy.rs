@@ -1,4 +1,4 @@
-//! Organization policies (wave D2).
+//! Organization policies.
 //!
 //! ```text
 //! policy = { org_id, version, prev_hash, rules: [(name, value)] sorted, signer_id, created_at }
@@ -53,7 +53,7 @@ fn invalid(message: impl Into<String>) -> Error {
 
 // --- Rules ---------------------------------------------------------------------------
 
-/// What share links (B7) may do with this organization's items.
+/// What share links may do with this organization's items.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum ShareLinkRule {
@@ -88,7 +88,7 @@ impl ShareLinkRule {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", default)]
 pub struct PolicyRules {
-    /// Members must turn on two-factor sign-in (A3).
+    /// Members must turn on two-factor sign-in.
     pub require_two_factor: bool,
     /// Minimum strength score (0–4, 0 = no requirement) of the master
     /// password, checked on the device when it is entered.
@@ -106,7 +106,7 @@ pub struct PolicyRules {
     pub share_link_max_days: u32,
     /// With `share_links = restricted`: most views per link (0 = no limit).
     pub share_link_max_views: u32,
-    /// Members must enroll in recovery through the organization (C1).
+    /// Members must enroll in recovery through the organization.
     pub require_recovery_enrollment: bool,
     /// Members may keep personal vaults. When off, clients do not create
     /// personal vaults or new items in them (existing items can be moved).
@@ -142,9 +142,9 @@ impl Default for PolicyRules {
 }
 
 impl PolicyRules {
-    /// The first policy of an organization created from now on: recovery
-    /// through the organization is required (C1, on by default since
-    /// 25.10.2026), everything else as [`PolicyRules::default`]. Admins can
+    /// The first policy of a new organization: recovery through the
+    /// organization is required (on by default), everything else as
+    /// [`PolicyRules::default`]. Admins can
     /// turn it off like any rule.
     pub fn new_org_defaults() -> Self {
         Self {
@@ -768,7 +768,7 @@ pub(crate) fn evaluate(
         })
         .collect();
     let mut effective = EffectivePolicy::combine(&binding);
-    // Guests are external people with their own account (B8): an
+    // Guests are external people with their own account: an
     // organization never gets to recover a guest's account, so a policy
     // that requires recovery does not apply to them.
     effective.recovery_enrollment_orgs.retain(|org_id| {

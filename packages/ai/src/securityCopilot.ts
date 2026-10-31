@@ -1,5 +1,5 @@
 /**
- * K4 security copilot: a short, prioritised plan from the security check.
+ * Security copilot: a short, prioritised plan from the security check.
  * Input is metadata only (finding kinds, counts, website domains); the
  * caller never passes passwords, and hosts are checked against the vault's
  * secrets. Cloud models get placeholders ("Site A") instead of domains.

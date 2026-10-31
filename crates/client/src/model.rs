@@ -381,7 +381,7 @@ pub struct PasswordHistoryEntry {
     pub replaced_at: i64,
 }
 
-/// A file attached to an item (G2). The metadata and the file key live in
+/// A file attached to an item. The metadata and the file key live in
 /// the encrypted item; the server stores only the encrypted blob under
 /// `id` (see `passbox_core::file_crypto`).
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

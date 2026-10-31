@@ -18,6 +18,6 @@ We will acknowledge your report within three working days and keep you informed 
 
 ## Scope
 
-In scope: everything in this repository, including the cryptographic core, the server, the web client, the browser extension and the build pipeline.
+In scope: everything in this repository, including the cryptographic core, its WebAssembly build, the Rust client and its bindings, the shared TypeScript packages and the build and release pipeline. The server and the apps live in their own repositories (see the [README](README.md#repositories)); report issues in them through the security advisories of the affected repository.
 
 Especially welcome are findings where a malicious or compromised server can read, modify, swap or roll back vault data. Passbox is designed to resist that.

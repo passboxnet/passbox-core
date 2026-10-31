@@ -1,5 +1,5 @@
 /**
- * Types for service accounts (wave F2) and AI agent grants (wave F7). The
+ * Types for service accounts and AI agent grants. The
  * operations are methods of `PassboxClient`; see
  * docs/architecture/service-accounts.md and docs/architecture/ai-agents.md.
  */

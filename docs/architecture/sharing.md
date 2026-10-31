@@ -2,7 +2,7 @@
 
 > **Draft.** Not reviewed by cryptographers and not audited. Formats may still change before the first release that ships them.
 
-This document describes waves A1 (account key pairs), A4 (key directory, first version), B1 (organizations, invitations, roles), B2 (shared vaults), B3 (groups), B4 (families), B5 (moving items between vaults), B7 (share links), B8 (guests) and B9 (access requests) as implemented. The planning sketch is in docs/planning/feature-gap.md §5.1–5.2 (German); where this document differs, this document is what the code does.
+This document describes account key pairs, the key directory, organizations (with invitations, roles and families), shared vaults, groups, moving items between vaults, share links, guests and access requests.
 
 All cryptography is in [`crates/core`](../../crates/core): `identity` (key pairs, sealing, signatures), `canon` (canonical encoding), `directory` (key log), `sharing/*` (signed objects, verification, request builders). The TypeScript client uses it through `@passbox/core-wasm`, the native clients through `crates/client` and `crates/ffi`. The server stores and serves; it verifies uploads only to keep garbage out, never as a security boundary for clients.
 
@@ -22,7 +22,7 @@ The server is untrusted for confidentiality and integrity of vault contents (see
 
 What it **can** still do (known limits, honest list):
 
-- **Withhold and delay.** It can hide new items, a new manifest version, a removal or a re-attestation (rollback within what the client has not seen yet). The planned signed revision chain (A5) and head gossip address this.
+- **Withhold and delay.** It can hide new items, a new manifest version, a removal or a re-attestation (rollback within what the client has not seen yet). The planned signed revision chain and head gossip address this.
 - **Split view in the key directory.** Two clients that never compare heads can be shown different logs. There are no external witnesses or head gossip yet; the log is a hash chain, not a Merkle tree, so proofs are linear in the number of entries since the client's last head (bounded by 10,000 per lookup).
 - **First contact (TOFU).** The first time a client sees an organization without an invitation link fragment, or an account's key, it trusts what it is shown. Comparing fingerprints out of band (`confirmMember` returns it, `ownFingerprint` shows one's own) removes this.
 - **Metadata.** It sees who is in which organization, group and vault, roles, emails of members (to members), sizes, times and access patterns.
@@ -31,7 +31,7 @@ What it **can** still do (known limits, honest list):
 - **What a removed member saw**, they may have kept. Rotation protects new and changed data only; the web app says so when removing someone and suggests changing those passwords.
 - **A compromised admin** (or owner) can attest a key of their choice and share vaults they manage. The design narrows trust to the owner and admins instead of the server; it does not remove it.
 
-## Account key pairs (A1)
+## Account key pairs
 
 Each account has two key pairs, generated in the core on sign-up or on the first unlock after the update (migration of existing accounts; both clients do it in `sync` when `GET /api/v1/account/keys` answers 404):
 
@@ -66,7 +66,7 @@ sealed   = 0x01 (version) | 0x01 (X-Wing) | ct (1120 B) | XChaCha20-Poly1305 env
 
 Purposes are `vault-key`, `group-key` and `org-key`; contexts are canonical encodings of (vault, epoch, principal), (group, key version, account) and (organization, epoch, account). Sealing is anonymous; the sender is authenticated by a signed grant covering the sealed hash. Known-answer, round-trip and tamper tests are in `identity::tests`.
 
-## Key directory (A4, first version)
+## Key directory (first version)
 
 The server keeps an append-only log (`key_log`) of published bundles:
 
@@ -83,7 +83,7 @@ Clients use the directory when an admin confirms a member (mandatory: `confirm_m
 
 Tests: `directory::tests` (forks, rollback, forged heads, tampered entries, outdated keys, key change).
 
-## Organizations, members, invitations (B1, B4)
+## Organizations, members, invitations
 
 ```
 genesis     = { org_id, kind (family|team), owner_id, owner_bundle_hash, created_at }   signed by the owner
@@ -105,9 +105,9 @@ metadata    = XChaCha20-Poly1305(org key, {"name": ...}, aad = "passbox/v1/org-m
 
 **Family** (`kind = family`): created with its family vault (name from the client, encrypted); the creator is the organizer (owner).
 
-## Shared vaults (B2)
+## Shared vaults
 
-Shared vaults belong to an organization (`vaults.org_id`); personal vaults keep working exactly as before (epoch 0, version-1 associated data, `vaults.encrypted_key` wrapped with the account key). Personal vaults cannot be shared; share by creating a shared vault and moving items into it (B5, below).
+Shared vaults belong to an organization (`vaults.org_id`); personal vaults keep working exactly as before (epoch 0, version-1 associated data, `vaults.encrypted_key` wrapped with the account key). Personal vaults cannot be shared; share by creating a shared vault and moving items into it ([below](#moving-items-between-vaults)).
 
 ```
 vault key (epoch e ≥ 1) sealed per principal:
@@ -130,11 +130,11 @@ item      = aad "passbox/v2/item|{vault_id}|{item_id}|{revision}|{epoch}"   (per
 
 **Sync.** `GET /api/v1/sync?sharing=1` adds shared vault rows (`orgId`, `keyEpoch`, no `encryptedKey`) and items (`keyEpoch`) through the same cursor, plus `sharing`: full lists of organizations, groups and vault access; changed rosters (whole member list), sealed organization/group/vault keys for the account and its groups, whole manifest chains of vaults whose members changed, and signer bundles. A vault the account gained access to after the cursor is sent from scratch. Without `sharing=1` the response is exactly the old one (older apps never see shared vaults). Clients drop shared vaults and items they lost access to; if a verified vault's current key cannot be opened (for example after invalid data), they fetch everything once more.
 
-## Groups (B3)
+## Groups
 
 A group is a principal with its own X-Wing key pair. Its public bundle `{group_id, org_id, key_version, enc_pk, creator_id, created_at}` is signed by an admin; its private seed is sealed for each member with a signed group-key grant. Vault keys are sealed to the group. Adding a member is one sealing, regardless of the number of vaults. Only admins who are members of the group can add members (they need the group key), so the creator is always a member. Removing a member rotates the group key (new version, sealed for the remaining members) and marks the group's vaults for rotation; the client rotates them (the manifest then names the group's new key hash). Members see the verified member list from the signed grants; others see the server's list. Group names are encrypted with the organization key.
 
-## Moving items between vaults (B5)
+## Moving items between vaults
 
 Moving is a re-encryption on the device, not a copy: the item keeps its ID, creation date, attachments and history.
 
@@ -147,7 +147,7 @@ Policies apply: `forbid_external_sharing` keeps an organization's items in its v
 
 **Permission preview.** Before moving, clients show who gains and who loses access: `movePreview(ids, vaultId)` (TypeScript) compares the verified member lists of the source and target vaults, groups expanded to their members; a personal vault counts as "only you". People who lose access may have seen the item before (the app says so and suggests changing its password). The web app offers "Move to another vault" in the item menu and for a selection of items; the "Share" action of a personal item moves it into a shared vault and offers to move it back. Rust and FFI: `move_items(ids, vault_id)` / `moveItems(ids, vaultId)`; the iOS and Android apps use it instead of copy and trash.
 
-## Share links for people without an account (B7)
+## Share links for people without an account
 
 A share link carries a snapshot (selected fields of an item, or free text), encrypted on the sender's device (`passbox_core::share_link`):
 
@@ -162,11 +162,11 @@ server  ← { blob, SHA-256("passbox/v1/link-auth-hash\0" || auth), salt, expire
 
 The viewer page (`/s/{id}`, part of the web app, no account needed) shows whether a passphrase is needed (`GET /api/v1/public/share-links/{id}`), asks before opening because opening counts a view, derives `auth` and fetches the blob (`POST …/open { auth }`), and decrypts in the browser. The server only answers with the blob for the right `auth`: knowing the link ID alone (for example from a log) reveals nothing and uses up no views. A wrong passphrase is refused without a view; after 10 wrong attempts the link is deleted. The server cannot try passphrases offline because it never sees `k_link`. The last allowed view deletes the link, and so does its creator (`DELETE /api/v1/share-links/{id}`, Settings → Share links in the web app). Expired links are deleted. Public endpoints are rate-limited per IP.
 
-Snapshots never contain passkeys, password history, attachments or one-time password secrets. **Policies (D2):** `share_links = forbidden` or `restricted` (longest lifetime, most views) apply to links for items of the organization's vaults; the client applies them in the dialog and the server checks the vault the client names. A modified client could create a link without naming the vault: like export, this rule guards honest clients, it is not a cryptographic boundary. Not implemented yet: limiting a link to an email address (with a confirmation code), files in links, links from the mobile apps and the extension.
+Snapshots never contain passkeys, password history, attachments or one-time password secrets. **Policies** ([administration.md](administration.md#policies)): `share_links = forbidden` or `restricted` (longest lifetime, most views) apply to links for items of the organization's vaults; the client applies them in the dialog and the server checks the vault the client names. A modified client could create a link without naming the vault: like export, this rule guards honest clients, it is not a cryptographic boundary. Not implemented yet: limiting a link to an email address (with a confirmation code), files in links, links from the mobile apps and the extension.
 
-## Guests (B8)
+## Guests
 
-Guests are organization members with the role `guest`, for external people (clients of an agency, a babysitter in a family). Decided on 25.10.2026: **guests are unlimited, always free and view-only.**
+Guests are organization members with the role `guest`, for external people (clients of an agency, a babysitter in a family). **Guests are unlimited, always free and view-only.**
 
 - **What they see:** only the vaults shared with them (directly; they do not see groups), and the roster shows them only themselves and the owners and admins. In a family they do not get the family vault.
 - **What they can do:** open, copy and fill items of those vaults, nothing else. They cannot create or change items, vaults, attachments, share links or invitations, ask for more than `view`, or give service accounts access to those vaults.
@@ -177,7 +177,7 @@ Guests are organization members with the role `guest`, for external people (clie
 
 As with other roles, this is enforced by honest servers and clients; a guest holds the vault key and could produce valid ciphertexts, which other clients would accept (see "Server-side authorization" above).
 
-## Access requests (B9)
+## Access requests
 
 A confirmed member of an organization who opens a link to one of its shared vaults without access (`#/vault/{id}`; managers copy it in the vault's sharing dialog) can ask for access with a role (`POST /api/v1/vaults/{id}/access-requests`, one pending request per vault, 20 per day). Everyone else gets 404, so outsiders cannot tell whether the vault exists. Managers of the vault (and organization admins who are members of it) see pending requests (`GET /api/v1/access-requests` → `incoming`) in the vault's sharing dialog. **Approving** is a normal share, signed by the manager's client after it checked the requester's key (`shareVault`); afterwards the client marks the request approved (`POST …/approve`, which the server refuses until the requester actually has access). **Declining** (`POST …/deny`) and withdrawing (`DELETE …`) only change the status. Requests and decisions are in the organization's audit log (`vault_access_requested`, `vault_access_request_approved`, `vault_access_request_denied`).
 
@@ -205,7 +205,7 @@ Key pairs are created for existing accounts on the next unlock. The trust store 
 
 ## Open issues
 
-- Signed revision chain per vault (A5) to detect withheld or rolled-back items; head gossip/witnesses and a Merkle tree for the key directory.
+- Signed revision chain per vault to detect withheld or rolled-back items; head gossip/witnesses and a Merkle tree for the key directory.
 - Account key rotation (key version 2) and owner transfer are not implemented; the server refuses a second bundle.
 - Re-anchoring: if every admin who signed a vault's manifests leaves before any later admin signs a version, older grants can become unverifiable; members with own copies are unaffected, others need a re-grant.
 - Group-delivered vault keys are opened through the group key on every unlock (no own copy).

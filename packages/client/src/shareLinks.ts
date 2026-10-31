@@ -1,5 +1,5 @@
 /**
- * Share links for people without an account (B7): the snapshot format and
+ * Share links for people without an account: the snapshot format and
  * opening a link on the public viewer page (no session, no keyring).
  * Cryptography is in `passbox_core::share_link` (WebAssembly).
  */

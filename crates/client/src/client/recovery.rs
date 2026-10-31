@@ -1,5 +1,5 @@
 //! Account recovery (recovery code, organization recovery), emergency
-//! access and adding a device by code (wave C).
+//! access and adding a device by code.
 //!
 //! All cryptography is in `passbox_core::{recovery, emergency,
 //! device_link}`; these methods add the HTTP calls and the multi-step flows.

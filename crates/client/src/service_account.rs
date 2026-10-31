@@ -1,4 +1,4 @@
-//! Client for service accounts (F2): reads and writes the vaults a service
+//! Client for service accounts: reads and writes the vaults a service
 //! account was granted, with a token instead of a master password.
 //!
 //! The token's secret stays on this machine: the server receives a derived

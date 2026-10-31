@@ -1,4 +1,4 @@
-//! Build rule (concept §3.10, §6.6): AI code gets no keys. `passbox-ai`
+//! Build rule: AI code gets no keys. `passbox-ai`
 //! must not depend on `passbox-core` or `passbox-client`, directly or
 //! through any other crate. Checked against the manifest and the full
 //! dependency closure in `Cargo.lock`.

@@ -1,4 +1,4 @@
-//! Service accounts (F2) and agent grant decisions (F7) for the signed-in
+//! Service accounts and agent grant decisions for the signed-in
 //! account. The web app has the same operations in `packages/client`.
 //!
 //! Deciding on agent grants is deliberately not offered by the CLI: an

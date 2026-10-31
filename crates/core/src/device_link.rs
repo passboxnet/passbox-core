@@ -1,4 +1,4 @@
-//! Adding a device with a code from a signed-in device (wave C4).
+//! Adding a device with a code from a signed-in device.
 //!
 //! The signed-in device asks the server for a link (the server picks a
 //! 4-character `short_id`), adds a 12-character secret and shows

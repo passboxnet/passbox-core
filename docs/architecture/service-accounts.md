@@ -2,8 +2,6 @@
 
 > **Draft.** Not reviewed by cryptographers and not audited. Formats may still change before the first release that ships them.
 
-Wave F2 as implemented. The planning sketch is in docs/planning/feature-gap.md §5.8 (German); where this document differs, this document is what the code does.
-
 A service account is a machine identity for CI pipelines, servers, scripts and AI agents. It has no master password. It belongs to the account that created it (its **owner**), has its own key pair, and can read (or read and write) the vaults the owner selected, until it expires or is revoked.
 
 ## Keys and token
@@ -53,13 +51,13 @@ Service account endpoints: `GET /api/v1/service-account` (everything it can read
 
 Checks: uploads must parse; the public key and each grant must be signed by the owner's published key and name the service account, vault, epoch and sealed bytes of the request; grants need the vault's current epoch and, for `write`, the owner's write access. Limits: the fair-use limit below, 200 grants per service account, 600 requests per service account and minute. Guests cannot give service accounts access to the vaults shared with them (403 `guest_view_only`).
 
-**Fair use (25.10.2026).** Service accounts and AI agents are free and never count as members. `PASSBOX_AGENT_LIMIT_PER_MEMBER` (hosted: 10; self-hosting default 0 = unlimited; instance admins can override it in the admin console) limits active service accounts (neither revoked nor expired): an account on its own may own that many; a confirmed member (not a guest) of an organization draws from the organization's pool of limit × members (the organization with the most room counts). Creating more answers 403 `agent_limit_reached`. `GET /api/v1/agent-limit` returns the account's pool; the organization report has `serviceAccountCount` and `agentLimitPerMember`. Every read and write is logged in `service_account_events`; creation, access changes, revocation and deletion appear in the owner's activity.
+**Fair use.** Service accounts and AI agents are free and never count as members. `PASSBOX_AGENT_LIMIT_PER_MEMBER` (hosted: 10; self-hosting default 0 = unlimited; instance admins can override it in the admin console) limits active service accounts (neither revoked nor expired): an account on its own may own that many; a confirmed member (not a guest) of an organization draws from the organization's pool of limit × members (the organization with the most room counts). Creating more answers 403 `agent_limit_reached`. `GET /api/v1/agent-limit` returns the account's pool; the organization report has `serviceAccountCount` and `agentLimitPerMember`. Every read and write is logged in `service_account_events`; creation, access changes, revocation and deletion appear in the owner's activity.
 
 ## Clients
 
 - Rust: `passbox_client::ServiceAccountClient` (connect with a token, list vaults and items, create/update/trash/delete items), and `Client::create_service_account`, `grant_service_account`, `service_accounts`, `revoke_service_account` for owners.
 - CLI: `PASSBOX_SERVICE_ACCOUNT_TOKEN` (with `PASSBOX_SERVER`) switches every vault command to the service account; see [cli.md](https://github.com/passboxnet/cli/blob/main/docs/cli.md).
-- Web: **Developer → Service accounts** (`apps/web/src/developer`): create (name, vaults with read or read/write, expiry), copy the token once, add or renew vault access, see activity, revoke, delete. TypeScript API in `packages/client` (`createServiceAccount`, `grantServiceAccount`, …).
+- Web: **Developer → Service accounts** (`app/src/developer` in passboxnet/web): create (name, vaults with read or read/write, expiry), copy the token once, add or renew vault access, see activity, revoke, delete. TypeScript API in `packages/client` (`createServiceAccount`, `grantServiceAccount`, …).
 
 ## Not yet built
 

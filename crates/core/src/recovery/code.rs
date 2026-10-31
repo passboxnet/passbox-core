@@ -1,4 +1,4 @@
-//! The personal recovery code (wave C2).
+//! The personal recovery code.
 //!
 //! A recovery code is 256 random bits, generated on the device and shown
 //! once (in the Emergency Kit). It decrypts a second copy of the account key

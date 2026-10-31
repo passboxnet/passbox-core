@@ -1,4 +1,4 @@
-//! Organizations, groups and shared vaults (waves B1–B4).
+//! Organizations, groups and shared vaults.
 //!
 //! - [`objects`]: the signed objects and their canonical encodings.
 //! - [`data`]: what the server delivers, and merging of sync deltas.

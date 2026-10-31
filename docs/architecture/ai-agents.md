@@ -2,7 +2,7 @@
 
 > **Draft.** Not reviewed by cryptographers and not audited. Formats may still change before the first release that ships them.
 
-This document describes wave F7 as implemented, following the concept in docs/planning/ai-native.md (German; K1 agent access, K12 agent audit). Setup instructions for the agents are at the end.
+This document describes how AI agents use Passbox secrets through `pbx mcp`, and how their access is granted, approved and audited. Setup instructions for the agents are at the end.
 
 ## What it does
 
@@ -17,7 +17,7 @@ This document describes wave F7 as implemented, following the concept in docs/pl
 ## Components
 
 ```
-agent ──MCP (stdio)──▶ pbx mcp (crates/cli/src/mcp.rs: protocol only)
+agent ──MCP (stdio)──▶ pbx mcp (passboxnet/cli, src/mcp.rs: protocol only)
                           │
                           ▼
                  agent broker (crates/client/src/agent: grants, tools, redaction, audit)
@@ -32,8 +32,8 @@ agent ──MCP (stdio)──▶ pbx mcp (crates/cli/src/mcp.rs: protocol only)
 - **`crates/core/src/agent_grant.rs`** holds only cryptography: the canonical grant request, the decision, and its signature and verification. No AI code is in the core.
 - **The broker** (`passbox_client::agent`) decides: it resolves references, checks grants (items, action, allowlist, time limit, uses), asks the server for revocations before every use, runs commands, redacts output and reports every action. It works with the account on the machine or with a service account (`Backend` trait).
 - **`pbx mcp`** translates MCP (JSON-RPC 2.0, newline-delimited, protocol versions 2025-06-18, 2025-03-26 and 2024-11-05) to broker calls. It is implemented directly (about 400 lines) to keep a dependency out of the path to secrets. Tool descriptions are fixed in the binary.
-- **The server** relays requests and decisions and stores the audit trail (`agent_grants`, `agent_events`, migration `0011`). It never sees secret values.
-- **The approving app** (web, `apps/web/src/developer`) shows pending requests, parses the exact request bytes with the WebAssembly core, and signs the decision.
+- **The server** relays requests and decisions and stores the audit trail (`agent_grants`, `agent_events`). It never sees secret values.
+- **The approving app** (web vault, `app/src/developer` in passboxnet/web) shows pending requests, parses the exact request bytes with the WebAssembly core, and signs the decision.
 
 ## Grants
 
@@ -74,7 +74,7 @@ Layers, all of which must agree:
 
 The value is returned once, with a note that it must not be repeated in answers, logs, commits or files. A revealed value cannot be taken back: the agent, its model provider and anything it sends the value to may keep it. Change the secret afterwards if it matters.
 
-## Audit (K12)
+## Audit
 
 Every action is recorded twice, never with values:
 
@@ -95,7 +95,7 @@ Assets: secret values in the vault; the integrity of what runs with them; the pe
 | **The agent reads the secret through the file system** after `passbox_inject` | `inject` needs approval per output path; files are written 0600. | The agent usually runs as the same user and can read the file. Use `run` when you can; inject only into paths the agent will not read. |
 | **The agent answers its own approval** | No terminal prompt and no CLI approve command: decisions come only from the web or desktop app, signed with the account key; the server also refuses decisions from CLI sessions. With a service account token, `pbx mcp` holds no key that can sign an approval at all. | A compromised device that is signed in to your account can approve. Without a service account, `pbx mcp` unlocks your account with `PASSBOX_PASSWORD`, so a process that reads that password has your whole account, including the key that signs approvals: use a service account. |
 | **A malicious or compromised server** approves, changes or replays requests | Decisions are signed by the account key and bound to the hash of the exact request bytes; the approving app displays what it parsed from those bytes; the broker verifies. | The server can withhold requests or decisions (denial of service) and sees metadata (who asked, when, which item IDs, client names). |
-| **Agent reads credentials from disk** (MCP config with a token or `PASSBOX_PASSWORD`, `pbx` data directory) | `pbx mcp` scrubs `PASSBOX_PASSWORD`, `PASSBOX_SERVICE_ACCOUNT_TOKEN`, `PASSBOX_TWO_FACTOR_CODE` and `PASSBOX_SECRET_KEY` from every command it runs. Recommended setup: a dedicated service account with read access to one small vault, with an expiry. | An agent that can run arbitrary shell commands as your user can read its own MCP configuration and use the token directly with `pbx`, bypassing the broker. The token then gives exactly what the service account has: keep it small, set an expiry, and restrict the agent's file access (Claude Code permissions, sandboxing). Server-enforced approvals for agent principals are planned (K11). |
+| **Agent reads credentials from disk** (MCP config with a token or `PASSBOX_PASSWORD`, `pbx` data directory) | `pbx mcp` scrubs `PASSBOX_PASSWORD`, `PASSBOX_SERVICE_ACCOUNT_TOKEN`, `PASSBOX_TWO_FACTOR_CODE` and `PASSBOX_SECRET_KEY` from every command it runs. Recommended setup: a dedicated service account with read access to one small vault, with an expiry. | An agent that can run arbitrary shell commands as your user can read its own MCP configuration and use the token directly with `pbx`, bypassing the broker. The token then gives exactly what the service account has: keep it small, set an expiry, and restrict the agent's file access (Claude Code permissions, sandboxing). Server-enforced approvals for agent principals are planned. |
 | **Approval fatigue** | Grants with an allowlist cover a task (default 1 hour); single-use grants for everything else; pending requests expire after 10 minutes; at most 10 pending per account and 30 requests per 10 minutes per principal. | People approve what they see often. |
 | **Rug pull** (tool descriptions change to invite misuse) | Tool names, descriptions and schemas are compiled into `pbx`. | A malicious `pbx` build is out of scope; use signed releases. |
 | **Malicious vault content** shared by others (titles, labels, tags) | Search results say that vault text is data, not instructions; notes are never returned. | Agents may still follow instructions in titles. |
@@ -210,6 +210,6 @@ To let an agent see a value at all, add `--allow-reveal` to the arguments (`"arg
 ## Not yet built
 
 - Approval on the phone and a native desktop dialog with biometrics (the desktop app shows the web dialog and asks for attention).
-- Server-enforced approvals for agent principals (K11): today the broker enforces grants; the server enforces only the service account's vault access.
-- Network allowlists or sandboxes per grant; browser autofill for agents (K2).
+- Server-enforced approvals for agent principals: today the broker enforces grants; the server enforces only the service account's vault access.
+- Network allowlists or sandboxes per grant; browser autofill for agents.
 - Marking items as "used by an agent" in Watchtower.

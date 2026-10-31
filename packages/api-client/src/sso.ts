@@ -1,5 +1,5 @@
 /**
- * Single sign-on (OIDC), trusted devices and SCIM provisioning (wave E).
+ * Single sign-on (OIDC), trusted devices and SCIM provisioning.
  * See docs/architecture/sso.md and docs/api/openapi.yaml (tag `sso`).
  */
 

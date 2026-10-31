@@ -2,7 +2,7 @@
 
 > **Draft.** Not reviewed by cryptographers and not audited. Formats may still change before the first release that ships them.
 
-This document describes wave D of docs/planning/feature-gap.md as implemented: D1 (admin console), D2 (signed policies), D3 (organization audit log), D4 (offboarding), D5 (events API and webhooks) and D6 (reports). It builds on organizations, groups and shared vaults ([sharing.md](sharing.md)) and on recovery through the organization ([recovery.md](recovery.md)).
+This document describes how organizations are administered: the admin console, signed policies, the organization audit log, offboarding, the events API and webhooks, and reports. It builds on organizations, groups and shared vaults ([sharing.md](sharing.md)) and on recovery through the organization ([recovery.md](recovery.md)).
 
 The cryptography is in [`crates/core`](../../crates/core): `policy` (signed policies, verification, pinning, combination) and `audit` (the hash chain, signed client events). The web app and the extension use it through `@passbox/core-wasm`, the native clients through `crates/client` and `crates/ffi`. Everything described here is part of the self-hosted server; there is no separate edition.
 
@@ -21,31 +21,31 @@ The server stays untrusted for confidentiality and integrity of vault contents. 
 What it **can** still do (honest list):
 
 - **Withhold.** It can keep a newer policy from a device that has not seen it yet, and the first policy a new device sees is trusted on first use, like the roster it is checked against. It can stop writing audit entries or drop client events before storing them.
-- **Rewrite the audit log from a point on.** Whoever controls the database can recompute every hash after a change. The chain only makes tampering visible to someone with an earlier head: export regularly or connect a SIEM (D5).
+- **Rewrite the audit log from a point on.** Whoever controls the database can recompute every hash after a change. The chain only makes tampering visible to someone with an earlier head: export regularly or connect a SIEM ([events API and webhooks](#events-api-and-webhooks)).
 - **Enforcement happens in the apps.** A modified app can ignore a policy (fill without logging, export anyway). The server additionally enforces what it sees itself: it refuses turning two-factor sign-in off for members of an organization that requires it, and it refuses new personal vaults and new items in personal vaults when an organization turned them off.
 - **Client events are only as complete as the apps.** A modified or old app can stay silent. This holds for every zero-knowledge password manager.
 - **Metadata.** The server sees who belongs to which organization, group and vault, roles, sign-in times, when items change and, with item usage on, which item IDs are used when.
 
-## D1: Admin console
+## Admin console
 
 Owners and admins of an organization open it from the organization page ("Admin console") or the sidebar ("Admin: {name}"); route `#/org/{id}/admin/{section}`. Families get the same console without groups and integrations. Sections:
 
 | Section | What it shows and does |
 | --- | --- |
 | Overview | members, two-factor coverage, recovery enrollment, average security score, vaults and pending key rotations, policy version and verification, audit chain status, and a "needs your attention" list (people waiting for confirmation, recovery requests, vaults waiting for a new key, a broken chain, a policy that needs re-signing, members without required two-factor sign-in, no policy, no recovery, unused vaults) |
-| Members | table with role, status, two-factor, recovery enrollment, last sign-in and security score; filters (waiting, without two-factor, paused) and search; invite, confirm (security code comparison), change role, pause and lift the pause, offboard (D4); pending invitations with revoke |
+| Members | table with role, status, two-factor, recovery enrollment, last sign-in and security score; filters (waiting, without two-factor, paused) and search; invite, confirm (security code comparison), change role, pause and lift the pause, offboard ([below](#offboarding)); pending invitations with revoke |
 | Groups | the existing group management (create, rename, members, delete) |
 | Vaults | every shared vault with people, managers, items, last activity and badges (no access for you, waiting for a new key, unused); who can open it and through which group; manage access and replace the key where this account manages the vault; create shared vaults |
-| Policies | D2, see below |
-| Activity log | D3, see below |
-| Reports | D6, see below |
+| Policies | see [Policies](#policies) |
+| Activity log | see [Audit log](#audit-log) |
+| Reports | see [Reports](#reports) |
 | Recovery | setting up the recovery key, adding approvers, enrollment coverage, pending requests with approval |
-| Integrations | D5: events API tokens and webhooks |
+| Integrations | events API tokens and webhooks, see [Events API and webhooks](#events-api-and-webhooks) |
 | Settings | audit log retention, renaming, leaving or deleting the organization |
 
 Vault names are encrypted with vault keys. The console shows the names of vaults the admin is a member of and "Vault …abc123 (no access)" otherwise; this is the zero-knowledge boundary, not a gap.
 
-## D2: Policies
+## Policies
 
 ### Object
 
@@ -65,10 +65,10 @@ Rules are string pairs, so new rules do not need a new object format: a client t
 | `min_password_score` | `0`–`4` | apps compare the zxcvbn score of the master password entered at unlock (the password never leaves the device); banner asks for a stronger one; reports show "meets the policy" per member |
 | `max_auto_lock_minutes` | `0` (no limit) to `1440` | web and desktop app clamp the auto-lock setting; the extension keeps the limit also while locked and after restarts |
 | `forbid_export` | bool | export leaves the organization's vaults out (export runs on the device) |
-| `forbid_external_sharing` | bool | no app function takes items out of an organization's vaults today ("Share" only copies personal items into shared vaults); `canMoveBetween` in the TS client is the check for moving and copying (B5) and share links (B7) when they arrive |
-| `share_links` | `allowed`/`restricted`/`forbidden` | `PolicyRules::check_share_link` (core, wasm `shareLinkProblem`) for share links (B7); the share link implementation calls it before creating a link |
+| `forbid_external_sharing` | bool | no app function takes items out of an organization's vaults today ("Share" only copies personal items into shared vaults); `canMoveBetween` in the TS client is the check for moving and copying items and for share links |
+| `share_links` | `allowed`/`restricted`/`forbidden` | `PolicyRules::check_share_link` (core, wasm `shareLinkProblem`) for share links; the share link implementation calls it before creating a link |
 | `share_link_max_days`, `share_link_max_views` | `1`–`365`, `0` = unlimited (only with `restricted`) | as above |
-| `require_recovery_enrollment` | bool (`true` in the first policy of every organization created since 25.10.2026, see [recovery.md](recovery.md)) | banner with one-click enrollment; reports and the recovery section list who is missing |
+| `require_recovery_enrollment` | bool (`true` in the first policy of every new organization, see [recovery.md](recovery.md)) | banner with one-click enrollment; reports and the recovery section list who is missing |
 | `allow_personal_vault` | bool, default `true` | apps do not create personal vaults or new items in them; **server** refuses both (`403 policy_violation`); existing items stay readable so they can be moved |
 | `report_item_usage` | bool, default `false` | members' apps sign and upload "viewed", "revealed", "copied" and "filled" events for this organization's vaults; members see that it is on ("Policy" on the organization page) |
 | `allow_agent_reveal` | bool, default `false` | members may let AI agents see values of this organization's items (`passbox_reveal`), each time with an explicit tick in the approval; checked by the approving app's core, the agent broker and the server (403 `policy_violation` / `agent_reveal_not_allowed`). Policies signed before the rule existed, and organizations without a policy, forbid it ([ADR 0006](../adr/0006-ai-principles.md)) |
@@ -87,11 +87,11 @@ Signing (`Keyring::sign_org_policy`) uses the pinned version as predecessor; the
 
 Tests: `policy::tests` (rules, canonical encoding, combination, rollback, forgery, missing policy, signer roles), server `org_admin` integration test (upload, conflicts, forged signatures, sync delivery, enforcement), TS `admin.integration.test.ts` (sign, verify, enforce, re-sign after offboarding).
 
-## D3: Audit log
+## Audit log
 
 ### Entries and the chain
 
-Per organization, `org_audit_events` (migration 0009) with a head row (`org_audit_heads`) that serializes appends:
+Per organization, `org_audit_events` with a head row (`org_audit_heads`) that serializes appends:
 
 ```
 hash(n) = hex(SHA-256("passbox/v1/audit-hash\0" || canonical("passbox/v1/audit-entry",
@@ -138,7 +138,7 @@ The web app reports opening an item, revealing a hidden field, copying (username
 - Retention (`PUT /orgs/{id}/settings { auditRetentionDays }`, 0 = forever or 30–3650): a background task deletes older entries hourly and records `pruned_seq`/`pruned_hash`, so the remaining chain still verifies.
 - Deleting the organization deletes its log. The owner's account activity keeps `org_deleted`.
 
-## D4: Offboarding
+## Offboarding
 
 "Offboard…" in the members section, or `PassboxClient.offboardMember(orgId, accountId, { handovers, endSessions })`:
 
@@ -151,7 +151,7 @@ The web app reports opening an item, revealing a hidden field, copying (username
 
 **Escrow-based handover is not implemented.** With recovery through the organization, an admin who holds the recovery key could in principle open a member's escrowed account key, unwrap the member's own copies of vault keys and grant them to a successor, even for vaults the admin is not a member of. This needs (a) an admin endpoint that delivers a vault's manifest chain and the member's wrapped keys to a non-member admin, (b) a core function that opens the escrow and adds the vault keys to the admin's keyring for one signed manifest change, and (c) a policy decision, because it lets admins reach vaults they were never given. It is documented as an open issue.
 
-## D6: Reports
+## Reports
 
 `GET /orgs/{id}/reports` (admins) returns, from server metadata:
 
@@ -162,7 +162,7 @@ The web app reports opening an item, revealing a hidden field, copying (username
 
 **Security aggregates.** Once a day after unlocking, each member's app sends every team organization it is a confirmed member of `PUT /orgs/{id}/security-report { score, total, weak, reused, unsecured, passwordMeetsPolicy }`, computed by the Watchtower analysis over the logins the member can see in personal vaults and the organization's vaults. Only numbers leave the device; the server checks ranges. The web console shows a security table with "only problems", an access matrix (view/edit/manage, through groups), unused vaults and a CSV export of the security table.
 
-## D5: Events API and webhooks
+## Events API and webhooks
 
 **Pull.** An admin creates a token (Integrations → New token, `POST /orgs/{id}/event-tokens`); it is shown once and stored as SHA-256. A collector calls
 
@@ -194,9 +194,9 @@ Verify the signature with the secret and reject timestamps older than a few minu
 - **Elastic.** Filebeat/Elastic Agent `httpjson` input with `request.url: https://passbox.example.com/api/v1/org-events`, `request.transforms` setting `after` from `[[.last_response.body.nextAfter]]`, `response.split.target: body.events`, into an index or data stream `logs-passbox.audit-*`; or point a webhook at a Logstash `http` input that verifies the signature.
 - **Graylog, Wazuh** and others: any HTTP poller or webhook receiver works the same way.
 
-## Storage (migration 0009)
+## Storage
 
-Tables (migration [`0001_baseline.sql`](https://github.com/passboxnet/server/blob/main/migrations/0001_baseline.sql), policies in `0002_rls.sql`): `org_policies` (every version, signed, with the parsed rules), `org_audit_heads`, `org_audit_events` (indexes per organization and time, actor and action; unique client nonce), `org_settings` (retention), `org_security_reports`, `org_event_tokens` (token hashes), `org_webhooks` (URL, secret, cursor, backoff, last status).
+Tables ([`0001_baseline.sql`](https://github.com/passboxnet/server/blob/main/migrations/0001_baseline.sql), policies in `0002_rls.sql`): `org_policies` (every version, signed, with the parsed rules), `org_audit_heads`, `org_audit_events` (indexes per organization and time, actor and action; unique client nonce), `org_settings` (retention), `org_security_reports`, `org_event_tokens` (token hashes), `org_webhooks` (URL, secret, cursor, backoff, last status).
 
 ## API summary
 
@@ -222,8 +222,8 @@ Tables (migration [`0001_baseline.sql`](https://github.com/passboxnet/server/blo
 
 ## Open issues
 
-- Escrow-based vault handover (see D4) and a policy rule that allows or forbids it.
-- Signed policies for extension autofill rules and passkey unlock (listed in the planning document, not yet rules).
+- Escrow-based vault handover (see [Offboarding](#offboarding)) and a policy rule that allows or forbids it.
+- Signed policies for extension autofill rules and passkey unlock (planned, not yet rules).
 - Mobile and desktop apps read `effective_policy` through the FFI but do not show the admin console or report item usage yet.
 - Webhook delivery checks the address before connecting but does not pin the resolved address; organizations whose admins are not trusted by the instance should keep private addresses disallowed and use an egress proxy.
 - Audit entries are written by the server; there are no external witnesses for the chain head yet beyond exports and SIEM copies.

@@ -14,9 +14,9 @@ use crate::{AiError, Result};
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum FeatureId {
-    /// K6: column mapping for unknown CSV files.
+    /// Column mapping for unknown CSV files.
     ImportMapping,
-    /// K4: a prioritised plan from the security check.
+    /// A prioritised plan from the security check.
     SecurityCopilot,
 }
 
@@ -124,7 +124,7 @@ pub struct AiPolicy {
     pub required_endpoint: Option<String>,
 }
 
-/// Whether a data class may go to a location (concept §4): D0 and D1
+/// Whether a data class may go to a location: D0 and D1
 /// anywhere; D2 to cloud providers only pseudonymized; D3 never to the
 /// cloud.
 pub fn class_allowed(class: DataClass, location: ModelLocation, pseudonymized: bool) -> bool {

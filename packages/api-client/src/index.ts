@@ -689,20 +689,20 @@ export interface PassboxApi extends AdminApi {
     req: { vaultId: string; revision: number; encryptedData: string; keyEpoch?: number },
   ): Promise<WriteResponse>;
   sharing: SharingApi;
-  /** Recovery code, organization recovery (wave C1/C2). */
+  /** Recovery code, organization recovery. */
   recovery: RecoveryApi;
-  /** Emergency access (wave C3). */
+  /** Emergency access. */
   emergency: EmergencyApi;
-  /** Adding a device by code (wave C4). */
+  /** Adding a device by code. */
   deviceLinks: DeviceLinkApi;
-  /** Single sign-on, trusted devices and SCIM (wave E). */
+  /** Single sign-on, trusted devices and SCIM. */
   sso: SsoApi;
-  /** Organization administration: policies, audit log, reports (wave D). */
+  /** Organization administration: policies, audit log, reports. */
   orgAdmin: OrgAdminApi;
   breach: BreachApi;
-  /** Service accounts and AI agent grants (wave F). */
+  /** Service accounts and AI agent grants. */
   developer: DeveloperApi;
-  /** Moving items, attachments, share links and access requests (B5, G2, B7, B9). */
+  /** Moving items, attachments, share links and access requests. */
   comfort: ComfortApi;
   deleteItem(id: string, revision: number): Promise<WriteResponse>;
   /** Earlier versions of an item, newest first (up to 20). */

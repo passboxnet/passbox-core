@@ -4,7 +4,7 @@ The visual language of every Passbox surface: website, web app, desktop app,
 browser extension, iOS, Android and the server's own pages and emails. The
 brand elements (logo, app icons, gradient, motif, icon family) are in
 [brand.md](brand.md); the visual board is [board.html](board.html) (open it in
-a browser; screenshots in both themes are attached to the redesign PRs).
+a browser).
 
 **Direction:** dark-first, premium and calm. Deep Marina surfaces, one Solar
 Silk accent used sparingly, Sky Horizon for selection and information,
@@ -23,9 +23,9 @@ One source, generated everywhere:
 | Token source (colors, type, radii, spacing, motion, layers, gradients) | `packages/ui/tokens/tokens.json` |
 | Generator and checks (sRGB gamut, WCAG contrast, stale outputs) | `scripts/generate-design-tokens.mjs` (`pnpm --filter @passbox/ui tokens`; `pnpm test` runs `--check`) |
 | Web, extension, desktop, website | `packages/ui/src/tokens.css` (Tailwind CSS v4 `@theme` + CSS variables `--pb-*`) |
-| iOS | `apps/ios/Shared/DesignTokens.swift` (dynamic light/dark colors without asset catalog entries, type scale, radii, spacing, motion, gradients) |
-| Android | `apps/android/app/src/main/java/dev/passbox/android/ui/theme/Tokens.kt` (Material `ColorScheme` light/dark with `primary` = `control`, so Material text buttons and switches never show Solar on white; `PassboxColors`, `PassboxTokenTypography`, `PassboxShapeScale`, spacing, motion, gradients) |
-| Server pages and emails | `crates/server/src/brand/tokens.rs` (sRGB colors per theme, gradients, font stacks, radii) |
+| iOS | `Shared/DesignTokens.swift` in passboxnet/ios (dynamic light/dark colors without asset catalog entries, type scale, radii, spacing, motion, gradients) |
+| Android | `app/src/main/java/dev/passbox/android/ui/theme/Tokens.kt` in passboxnet/android (Material `ColorScheme` light/dark with `primary` = `control`, so Material text buttons and switches never show Solar on white; `PassboxColors`, `PassboxTokenTypography`, `PassboxShapeScale`, spacing, motion, gradients) |
+| Server pages and emails | `src/brand/tokens.rs` in passboxnet/server (sRGB colors per theme, gradients, font stacks, radii) |
 | Logo, app icons, icon family | `scripts/generate-brand-assets.mjs`, see [brand.md](brand.md) |
 
 Change a value in `tokens.json`, run `node scripts/generate-design-tokens.mjs`
@@ -37,7 +37,7 @@ and commit every changed file. Never edit generated regions by hand.
   tabular figures, `case` forms and full Latin Extended (German, Polish,
   Vietnamese …). Web: `@fontsource-variable/plus-jakarta-sans` (variable
   200–800) via `@passbox/ui/fonts.css`, bundled by Vite and Next.js, no font
-  CDN. iOS: static TTFs in `apps/ios/Shared/Fonts` (registered with
+  CDN. iOS: static TTFs in `Shared/Fonts` (registered with
   `UIAppFonts` in `project.yml`). Android: `res/font/plus_jakarta_sans_*.ttf`.
   The static weights (400, 500, 600, 700, 800) are instances of the variable
   font made with fontTools:
@@ -89,7 +89,7 @@ color utility (`bg-surface`, `text-text-muted`, `border-hairline`,
 and on any element (a light website panel on a dark page). This works because
 the semantic colors and shadows are declared `@theme inline`: `bg-surface`
 compiles to `var(--pb-surface)` and resolves on the element itself
-(`apps/web/src/themeTokens.test.ts` guards it).
+(`app/src/themeTokens.test.ts` in passboxnet/web guards it).
 
 ## Shape, space and elevation
 
@@ -292,8 +292,8 @@ focus ring (`focus` token, 2 px, offset 2 px), a 44 px (iOS, touch web) or
 | --- | --- | --- |
 | `Button` | label, optional leading icon or spinner; `variant` primary / secondary / soft / ghost / subtle / danger / onAccent (icon buttons on a solid accent fill); `size` xs–lg, icon sizes; `shape="pill"` | Primary: Solar fill, Marina ink, the lip (`shadow-lip`); hover `accent-hover` + `shadow-lip-glow`; pressed `accent-pressed` without lip. `loading` disables and shows a spinner. Pill shape for calls to action and marketing; rounded (12 px) in app chrome. One primary button per view. |
 | `IconButton` | icon only, required `label` (accessible name) | Ghost by default. |
-| `Fab` | the raised round “+”: 56 px Solar circle with a Marina “+”, the lip and the Solar glow, a 4 px canvas-colored ring | One per screen, bottom right of the desktop/web item list (opens “Neuer Eintrag”); the mobile bottom bar uses the same anatomy. Required `label`. |
-| `Avatar` | round tile with up to two initials; `tone` tint (a hue per person) or signature (the signed-in account: Solar initials on the Marina gradient); sizes xs 24 / sm 32 / md 36 / lg 44 / xl 64 | People only (account card, unlock, “Geteilt mit”, members); items use favicon tiles. Decorative: the name is always next to it. |
+| `Fab` | the raised round “+”: 56 px Solar circle with a Marina “+”, the lip and the Solar glow, a 4 px canvas-colored ring | One per screen, bottom right of the desktop/web item list (opens “New item”); the mobile bottom bar uses the same anatomy. Required `label`. |
+| `Avatar` | round tile with up to two initials; `tone` tint (a hue per person) or signature (the signed-in account: Solar initials on the Marina gradient); sizes xs 24 / sm 32 / md 36 / lg 44 / xl 64 | People only (account card, unlock, “Shared with”, members); items use favicon tiles. Decorative: the name is always next to it. |
 | `Input`, `PasswordInput`, `Textarea` | label, field (12 px radius, `field` background), hint or error below, leading/trailing slots | Focus: accent border + 4 px focus halo; error: danger border and `danger-text` message that says what happened and what to do. Password fields: mono, reveal toggle, Caps Lock hint. |
 | `Field` | read-only item field: caption label, value, actions (reveal, copy, open) | Hairline divider; secrets in mono; actions are `IconButton`s with labels. |
 | `SegmentedControl` | pill track (`surface-sunken`), selected pill on `surface-overlay` | Native radio inputs; arrow keys work. |
@@ -307,8 +307,8 @@ focus ring (`focus` token, 2 px, offset 2 px), a 44 px (iOS, touch web) or
 | `Toaster` / `toast()` | overlay surface, icon, text, optional action pill | Says what happened and, for errors, what to do. |
 | `Tabs` + `TabPanel` | underline (sections) or pill (filters), optional count | WAI-ARIA tabs: arrow keys, Home, End. |
 | `Monogram`, `SiteIcon` (`ItemIcon`) | tile with favicon on a light tile, or a tinted initial | Sizes sm 24 / md 32 / lg 40 / xl 56 / 2xl 72; radius 28 % of the size. Always a real favicon or brand icon when available. |
-| `StatTile` | tone chip (icon) or dot, big tabular number, label, optional detail | Security report: Gefährdet (danger), Mehrfach (warning), Schwach (warning), Sicher (success). Tone only in the chip, the number stays `text`. `interactive` makes it a filter button. |
-| `AlertCard` | `card`: icon tile, title, description, action; `banner`: solid strip with action (the orange “Zeit, Ihr Passwort zu ändern · Jetzt ändern”) | Danger and warning use `role="alert"`, others `role="status"`; optional dismiss. |
+| `StatTile` | tone chip (icon) or dot, big tabular number, label, optional detail | Security report: Compromised (danger), Reused (warning), Weak (warning), Safe (success). Tone only in the chip, the number stays `text`. `interactive` makes it a filter button. |
+| `AlertCard` | `card`: icon tile, title, description, action; `banner`: solid strip with action (the orange “Time to change your password · Change now”) | Danger and warning use `role="alert"`, others `role="status"`; optional dismiss. |
 | `EmptyState` | `brand` (default): the Solar icon on the Marina signature gradient inside two dotted rings with corner dots (the panel motif in miniature) and a soft glow; `quiet`: an accent-soft tile; title, description, action | Every list has one; it says what to do next. `quiet` for searches without results and small inline lists. |
 | `Skeleton` | shimmering placeholder shape | Hidden from screen readers; the region sets `aria-busy`. Shimmer stops with reduced motion. |
 | `SidebarItem` | icon or colored category dot (`tag-*`), label, count | Active: `selection` fill with a `selection-marker` icon, `aria-current="page"`. `sidebarItemClassName` for router links. |
@@ -319,11 +319,11 @@ focus ring (`focus` token, 2 px, offset 2 px), a 44 px (iOS, touch web) or
 
 - Large title (`title-lg`, 34) at the top of each tab; search as a pill.
 - Home: 2 × 2 category cards (`sheet` radius on mobile, outline icon, title,
-  count, chevron), then “Zuletzt verwendet” with round favicon tiles.
+  count, chevron), then “Recently used” with round favicon tiles.
 - Bottom bar: floating glass bar with four outline icons and a raised round
   “+” in the middle in Solar with a Marina “+” (56–60 pt, the lip, a soft
   Solar glow, a canvas-colored ring separates it from the bar). It opens
-  “Neuer Eintrag”. The selected tab icon uses `selection-marker`.
+  “New item”. The selected tab icon uses `selection-marker`.
 - Category cards and stat tiles are stacked cards with the 3 pt/dp lip.
 - Security: score ring, alert card, 2 × 2 `StatTile`s.
 
@@ -332,28 +332,28 @@ focus ring (`focus` token, 2 px, offset 2 px), a 44 px (iOS, touch web) or
 Three columns on the app canvas (`bg-app`: the canvas with a soft Sky glow
 top left and a faint Solar glow bottom right). The sidebar (`surface` at 70 % with backdrop blur) has
 the account card (Marina avatar with Solar initials, email, family or team), the sections
-Alle Einträge / Favoriten / Sicherheits-Check / Familie & Team / Papierkorb
+All items / Favorites / Security check / Family & team / Trash
 with counts, categories, vaults with colored dots (`vaultColor`: the personal
 vault `tag-blue`, others a stable color per vault), tools, the sync state and the
-full-width Solar “Neuer Eintrag +” pill at the bottom. The item list (glass) has a
+full-width Solar “New item +” pill at the bottom. The item list (glass) has a
 44 px search field, rows with 40 px favicon tiles, the selected row in the Sky
 selection tint with its marker (on phones only once the user opened an item), a shield
 badge on rows with findings, and the raised round “+” (`Fab`). The detail
 (`surface` at 85 %) shows the 56 px icon tile, the title with a category
 pill and a vault chip, the actions favourite / edit / share / more, the
-orange banner “Zeit, Ihr Passwort zu ändern · Jetzt ändern” with the
+orange banner “Time to change your password · Change now” with the
 reasons below it, field cards with always visible reveal and copy buttons,
-the one-time password with its countdown ring, “Geteilt mit” with avatars
+the one-time password with its countdown ring, “Shared with” with avatars
 and the metadata. Pages without a list (settings, security check,
 generator, sharing, developer tools, import) use `Page` and `Panel` in
-`apps/web/src/views/PageHeader.tsx`: an eyebrow, the `title` step, cards
+`app/src/views/PageHeader.tsx` (passboxnet/web): an eyebrow, the `title` step, cards
 with icon tiles; the same anatomy as the admin consoles. Sign-up, sign-in,
 unlock and the Emergency Kit sit on the backdrop gradient with grain in a
 bezelled `Panel` (dark brand half with `GridFrame` next to the form).
 
 In the desktop app on Windows 11 the window uses the Mica material and the
 canvas becomes translucent (`html[data-window-material="mica"]`); elsewhere
-the canvas stays solid (see docs/desktop.md).
+the canvas stays solid (see [desktop.md](https://github.com/passboxnet/desktop/blob/main/docs/desktop.md)).
 
 ## Iconography
 
@@ -372,8 +372,7 @@ of a bottom bar item, if at all. Status icons: `shield-alert` (compromised),
 - Product screenshots and mocks show realistic but invented data (no real
   people's names with real accounts, no customer logos).
 - Website social proof (testimonials, logos, certifications) only from real
-  sources; placeholders are marked as such and never shipped (see
-  docs/website.md once the website is rebuilt).
+  sources; placeholders are marked as such and never shipped.
 - Illustrations must work in both themes: draw them with token colors or
   provide a light and a dark version.
 

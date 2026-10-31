@@ -1,4 +1,4 @@
-//! Unlocking with SSO on trusted devices (wave E2).
+//! Unlocking with SSO on trusted devices.
 //!
 //! A trusted device holds an X-Wing key pair. The account key is sealed to
 //! the device's public key and the server stores the sealed copy. After an

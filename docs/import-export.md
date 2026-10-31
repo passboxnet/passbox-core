@@ -3,7 +3,7 @@
 Passbox imports the export files of browsers and other password managers and exports your data as an encrypted Passbox file or as CSV. Everything happens on your device: the file is parsed in the browser (in a Web Worker), and each item is encrypted with its vault key before it is uploaded, like any other item.
 
 - Web app: **Settings → Import and export**, or open `#/import` directly.
-- Code: parsers in [`packages/client/src/import`](../packages/client/src/import), export in [`packages/client/src/export`](../packages/client/src/export), the export encryption in [`crates/core/src/export.rs`](../crates/core/src/export.rs), the UI in [`apps/web/src/import`](https://github.com/passboxnet/web/tree/main/src/import) and [`apps/web/src/export`](https://github.com/passboxnet/web/tree/main/src/export).
+- Code: parsers in [`packages/client/src/import`](../packages/client/src/import), export in [`packages/client/src/export`](../packages/client/src/export), the export encryption in [`crates/core/src/export.rs`](../crates/core/src/export.rs), the UI in [`app/src/import`](https://github.com/passboxnet/web/tree/main/app/src/import) and [`app/src/export`](https://github.com/passboxnet/web/tree/main/app/src/export) in passboxnet/web.
 - The command-line client has no import or export yet (`pbx import` / `pbx export` are planned).
 
 ## Supported formats
@@ -12,7 +12,7 @@ The format is detected from the file content (ZIP entries, JSON keys, XML root e
 
 | Source | File | What is imported | Not imported |
 | --- | --- | --- | --- |
-| Chrome, Edge, Brave, Opera, Vivaldi | CSV: `name,url,username,password[,note]` | logins, notes | — (browsers export nothing else) |
+| Chrome, Edge, Brave, Opera, Vivaldi | CSV: `name,url,username,password[,note]` | logins, notes | nothing (browsers export nothing else) |
 | Firefox | CSV: `url,username,password,httpRealm,formActionOrigin,guid,timeCreated,timeLastUsed,timePasswordChanged` | logins; HTTP realm and a differing form address as fields | sync metadata (`guid`, timestamps), `chrome://` entries |
 | Safari, Apple Passwords | CSV: `Title,URL,Username,Password,Notes,OTPAuth` | logins with one-time passwords | passkeys (Apple does not export them) |
 | Bitwarden | JSON (unencrypted) | logins (all URIs, TOTP, custom fields, password history, **passkeys**), secure notes, cards, identities, SSH keys (as "Other"), folders and collections as tags, favourites | items in the trash, attachments, encrypted (`"encrypted": true`) exports are refused with a hint |
@@ -49,7 +49,7 @@ Only Bitwarden JSON and KeePassXC XML export passkeys with their private key. Pa
 
 `detectColumns(headers)` suggests a target for each column from English and German header names (for example *Bezeichnung*, *Benutzername*, *Kennwort*, *Webseite*, *Bemerkung*, *Ordner*). Exact names win over partial matches, each target is used once, a lone email column becomes the username, and columns that look secret (*PIN*, *Code*, *Geheim*) become hidden fields. Everything else becomes a visible extra field. The user can change every column in the mapping step; `mappingProblem` blocks mappings without any useful column or with a target used twice.
 
-Columns the header rules do not recognize can get a suggestion in the mapping step (K6): **Suggest fields** uses value patterns on the device (URLs → website, email addresses → username, `otpauth://`/Base32 → one-time password, random strings → hidden field); with the AI feature switched on, **Suggest with AI** asks the configured model and sends only the headers and a pattern profile per column, never cell values. Suggestions are marked and can be undone. See [architecture/ai-gateway.md](architecture/ai-gateway.md#k6-smart-import-mapping-import-mapping-d1).
+Columns the header rules do not recognize can get a suggestion in the mapping step: **Suggest fields** uses value patterns on the device (URLs → website, email addresses → username, `otpauth://`/Base32 → one-time password, random strings → hidden field); with the AI feature switched on, **Suggest with AI** asks the configured model and sends only the headers and a pattern profile per column, never cell values. Suggestions are marked and can be undone. See [architecture/ai-gateway.md](architecture/ai-gateway.md#smart-import-mapping-import-mapping-d1).
 
 ### Duplicates
 
@@ -105,4 +105,4 @@ The dialog shows a strong warning and requires an explicit confirmation before i
 - `pnpm --filter @passbox/client test`: parsers against the fixtures in [`packages/client/src/import/fixtures`](../packages/client/src/import/fixtures) (synthetic data only), format detection, duplicate detection, the encrypted export round trip through the WebAssembly core and the importer, and CSV export round trips.
 - `cargo test -p passbox-core export`: the export envelope (round trip, wrong password, header authentication, KDF bounds, versions).
 - `PASSBOX_TEST_SERVER_URL=… pnpm --filter @passbox/client test`: bulk import, duplicate update and master password check against a server; add `PASSBOX_IMPORT_BENCH=10000` for the benchmark.
-- `pnpm e2e` (`e2e/tests/import.spec.ts`): imports the Chrome fixture in the web app, finds the items, re-imports to see the duplicates, and exports encrypted and CSV files from Settings.
+- `pnpm e2e` in passboxnet/web (`e2e/tests/import.spec.ts`): imports the Chrome fixture in the web app, finds the items, re-imports to see the duplicates, and exports encrypted and CSV files from Settings.
