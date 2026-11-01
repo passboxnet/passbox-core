@@ -307,6 +307,13 @@ export interface Account {
   instanceAdmin?: boolean;
 }
 
+/** A change of the account's address that waits for the code mailed to the new one. */
+export interface PendingEmailChange {
+  newEmail: string;
+  /** When the code expires (Unix ms). */
+  expiresAt: number;
+}
+
 /** Preferences the server needs: mail language and notifications. */
 export interface AccountPreferences {
   /** `null`: the server's default language. */
@@ -654,6 +661,13 @@ export interface PassboxApi extends AdminApi {
   /** Changes the given preferences; `locale: ""` resets to the server default. */
   updatePreferences(changes: { locale?: MailLocale | ""; notifyNewDevice?: boolean }): Promise<AccountPreferences>;
   accountEvents(limit?: number): Promise<AccountEvent[]>;
+  /** The pending change of the account's address, or `null`. */
+  emailChangePending(): Promise<PendingEmailChange | null>;
+  /** Mails a code to the new address. Needs a login in the last 10 minutes. */
+  emailChangeStart(req: { email: string; locale?: string }): Promise<PendingEmailChange>;
+  /** Replaces the address with the pending one. Fails with `invalid_two_factor_code`, `code_expired` or `email_taken`. */
+  emailChangeConfirm(code: string): Promise<{ email: string }>;
+  emailChangeCancel(): Promise<void>;
   passwordChangeStart(req: { registrationRequest: string }): Promise<{ registrationResponse: string }>;
   passwordChangeFinish(req: {
     registrationUpload: string;
@@ -776,6 +790,10 @@ export function createClient(options: ClientOptions = {}): PassboxApi {
     preferences: () => call("GET", "/api/v1/account/preferences"),
     updatePreferences: (changes) => call("PUT", "/api/v1/account/preferences", changes),
     accountEvents: (limit = 50) => call("GET", `/api/v1/account/events?limit=${encodeURIComponent(limit)}`),
+    emailChangePending: () => call("GET", "/api/v1/account/email"),
+    emailChangeStart: (req) => call("POST", "/api/v1/account/email", req),
+    emailChangeConfirm: (code) => call("POST", "/api/v1/account/email/confirm", { code }),
+    emailChangeCancel: () => call("DELETE", "/api/v1/account/email"),
     passwordChangeStart: (req) => call("POST", "/api/v1/account/password/start", req),
     passwordChangeFinish: (req) => call("POST", "/api/v1/account/password/finish", req),
     twoFactorStatus: () => call("GET", "/api/v1/account/two-factor"),

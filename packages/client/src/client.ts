@@ -24,6 +24,7 @@ import {
   type OrgAdminApi,
   type OrgInvitationInfo,
   type PassboxApi,
+  type PendingEmailChange,
   type RecoveryGrant,
   type RecoveryStatus,
   type SecondFactor,
@@ -1009,6 +1010,52 @@ export class PassboxClient {
     } finally {
       newKeys.free();
     }
+  }
+
+  /** The change of the account's address that waits for its code, if any. */
+  async pendingEmailChange(): Promise<PendingEmailChange | null> {
+    this.requireKeyring();
+    return this.api.emailChangePending();
+  }
+
+  /**
+   * Starts changing the account's address: the server mails a code to
+   * `newEmail`, and `confirmEmailChange` finishes the change. Unless the
+   * session comes from a recent login, a fresh login with `password`
+   * follows first, which may throw `TwoFactorRequiredError`: complete it and
+   * call this again.
+   */
+  async startEmailChange(password: string, newEmail: string, locale?: string): Promise<PendingEmailChange> {
+    const account = this.deviceAccount;
+    if (!account) throw new Error("no account on this device");
+    this.requireKeyring();
+    if (!this.hasRecentLogin) {
+      const keys = await this.checkedKeys(account, password);
+      try {
+        await this.login(account, keys, "reauth");
+      } finally {
+        this.releaseKeys(keys);
+      }
+    }
+    return this.api.emailChangeStart({ email: newEmail.trim().toLowerCase(), locale });
+  }
+
+  /**
+   * Finishes the change with the mailed code. This device signs in with the
+   * new address from now on; other devices need it at their next sign-in.
+   */
+  async confirmEmailChange(code: string): Promise<string> {
+    this.requireKeyring();
+    const { email } = await this.api.emailChangeConfirm(code);
+    const account = this.deviceAccount;
+    if (account) this.storage.setItem(ACCOUNT_KEY, JSON.stringify({ ...account, email }));
+    this.emit();
+    return email;
+  }
+
+  async cancelEmailChange(): Promise<void> {
+    this.requireKeyring();
+    await this.api.emailChangeCancel();
   }
 
   /**
