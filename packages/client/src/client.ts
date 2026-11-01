@@ -10,9 +10,11 @@ import {
   type AttachmentUsageResponse,
   type AuditExport,
   type AuditQuery,
+  type BillingInterval,
   type BreachCatalog,
   type ChainCheck,
   type ClientKind,
+  type CloudBilling,
   type EmailMonitoring,
   type InvitationPreview,
   isTwoFactorChallenge,
@@ -23,6 +25,7 @@ import {
   type MoveItemUpload,
   type OrgAdminApi,
   type OrgInvitationInfo,
+  type OrgLock,
   type PassboxApi,
   type PendingEmailChange,
   type RecoveryGrant,
@@ -139,6 +142,7 @@ import {
   type Org,
   type OrgGroup,
   type OrgRole,
+  orgLocks,
   type PrincipalType,
   parseInvitationLink,
   type SharedVault,
@@ -147,6 +151,7 @@ import {
   type SharingWarning,
   type VaultAccess,
   type VaultRole,
+  withOrgLocks,
 } from "./sharing";
 import type { PendingDeviceApproval, TrustedDeviceSecret } from "./sso";
 import type { KeyValueStorage } from "./storage";
@@ -535,6 +540,8 @@ export class PassboxClient {
   private items = new Map<string, Item>();
   private errors = new Map<string, string>();
   private sharingView: SharingView = EMPTY_SHARING;
+  /** Organizations the server holds read-only, from the last sync. */
+  private orgLocks = new Map<string, OrgLock>();
   /** Website icons as data URLs (`null` = none), by domain. */
   private icons = new Map<string, Promise<string | null>>();
   /** Breach counts by password from `checkBreachedItems`; cleared on lock. */
@@ -1154,6 +1161,7 @@ export class PassboxClient {
     this.breachChecked = false;
     this.exposedEmails = [];
     this.sharingView = EMPTY_SHARING;
+    this.orgLocks = new Map();
     this.passwordScore = undefined;
     if (this.usageTimer) clearTimeout(this.usageTimer);
     this.usageTimer = undefined;
@@ -1329,7 +1337,8 @@ export class PassboxClient {
     let uploads: SharingReport["wrappedKeys"] = [];
     if (delta.sharing) {
       const report = JSON.parse(keyring.applySharing(JSON.stringify(delta.sharing))) as SharingReport;
-      this.sharingView = report.view;
+      this.orgLocks = orgLocks(delta.sharing);
+      this.sharingView = withOrgLocks(report.view, this.orgLocks);
       uploads = report.wrappedKeys;
       this.saveTrust(keyring);
       const accessible = new Set(report.view.vaults.map((v) => v.vaultId));
@@ -2249,7 +2258,7 @@ export class PassboxClient {
     const keyring = this.requireKeyring();
     const fingerprint = keyring.acceptKeyChange(accountId);
     this.saveTrust(keyring);
-    this.sharingView = JSON.parse(keyring.sharingView()) as SharingView;
+    this.sharingView = withOrgLocks(JSON.parse(keyring.sharingView()) as SharingView, this.orgLocks);
     this.emit();
     return fingerprint;
   }
@@ -3549,6 +3558,28 @@ export class PassboxClient {
    */
   get unlockPasswordScore(): number | undefined {
     return this.passwordScore;
+  }
+
+  // --- Hosted service: Business billing ------------------------------------------
+  //
+  // Only on the hosted service (`meta.extensions.cloud`), for the owner and admins.
+
+  /** The organization's subscription: status, members counted and billed, period. */
+  async cloudBilling(orgId: string): Promise<CloudBilling> {
+    this.requireKeyring();
+    return this.api.cloudBilling(orgId);
+  }
+
+  /** Starts a checkout for Business; the app opens the returned URL with a top-level redirect. */
+  async cloudCheckout(orgId: string, interval: BillingInterval): Promise<{ url: string }> {
+    this.requireKeyring();
+    return this.api.cloudCheckout(orgId, interval);
+  }
+
+  /** The billing portal (payment method, invoices, plan); the app opens the URL with a top-level redirect. */
+  async cloudPortal(orgId: string): Promise<{ url: string }> {
+    this.requireKeyring();
+    return this.api.cloudPortal(orgId);
   }
 
   /** Raw API for organization administration (reports, settings, tokens, webhooks). */

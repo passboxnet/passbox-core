@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { ApiError, createClient, isTwoFactorChallenge } from "./index";
+import { ApiError, type CloudPlan, cloudPlan, createClient, isTwoFactorChallenge } from "./index";
 
 function fakeFetch(status: number, body: unknown) {
   return vi.fn(
@@ -122,5 +122,51 @@ describe("createClient", () => {
       .registerStart({ accountId: "a", email: "x@example.com", registrationRequest: "r", inviteToken: "t" })
       .catch((e: unknown) => e);
     expect(error).toMatchObject({ status: 403, code: "registration_closed" });
+  });
+
+  it("calls the hosted billing endpoints of an organization", async () => {
+    const fetch = fakeFetch(200, { url: "https://billing.example.com/c/1" });
+    const client = createClient({ fetch, getToken: () => "tok" });
+
+    await client.cloudBilling("org/1");
+    await client.cloudCheckout("org1", "year");
+    await client.cloudPortal("org1");
+
+    const calls = fetch.mock.calls.map(([url, init]) => [url, init?.method, init?.body]);
+    expect(calls).toEqual([
+      ["/api/v1/cloud/orgs/org%2F1/billing", "GET", undefined],
+      ["/api/v1/cloud/orgs/org1/checkout", "POST", JSON.stringify({ interval: "year" })],
+      ["/api/v1/cloud/orgs/org1/portal", "POST", "{}"],
+    ]);
+  });
+
+  it("exposes the family limit of family_limit_reached", async () => {
+    const client = createClient({
+      fetch: fakeFetch(403, { error: "family_limit_reached", message: "family is full", details: { limit: 6 } }),
+    });
+    const error = (await client.sharing
+      .invite("o", { email: "x@example.com", role: "member" })
+      .catch((e) => e)) as ApiError;
+    expect(error.code).toBe("family_limit_reached");
+    expect(error.body?.details?.limit).toBe(6);
+  });
+});
+
+describe("cloudPlan", () => {
+  const monthly: CloudPlan = {
+    code: "business-monthly",
+    interval: "month",
+    amountCents: 300,
+    currency: "EUR",
+    perUnit: true,
+    unitLabel: "member",
+  };
+
+  it("finds the plan for an interval on the hosted service only", () => {
+    const meta = { extensions: { cloud: { billing: true as const, plans: [monthly] } } };
+    expect(cloudPlan(meta, "month")).toBe(monthly);
+    expect(cloudPlan(meta, "year")).toBeUndefined();
+    expect(cloudPlan({}, "month")).toBeUndefined();
+    expect(cloudPlan(undefined, "month")).toBeUndefined();
   });
 });

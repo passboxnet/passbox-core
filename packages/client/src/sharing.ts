@@ -5,6 +5,7 @@
  * what the server claims (the server's view is in `serverRole`).
  */
 
+import type { OrgLock } from "@passbox/api-client";
 import type { EffectivePolicy, OrgPolicy } from "./admin";
 
 export type OrgKind = "family" | "team";
@@ -55,6 +56,12 @@ export interface Org {
   verified: boolean;
   members: OrgMember[];
   groups: OrgGroup[];
+  /**
+   * Set when the server holds the organization read-only, for example on
+   * the hosted service when a payment is overdue. Not signed: it comes from
+   * the server and only explains what the server refuses (403 `org_read_only`).
+   */
+  lock?: OrgLock | null | undefined;
 }
 
 export interface SharedVaultMember {
@@ -157,4 +164,33 @@ export function parseInvitationLink(link: string): { token: string; orgRoot: str
     .find((part) => part.startsWith("org="))
     ?.slice(4);
   return { token, orgRoot: orgRoot || undefined };
+}
+
+/** Whether the server holds the organization read-only. */
+export function isOrgLocked(org: Pick<Org, "lock"> | undefined): boolean {
+  return !!org?.lock;
+}
+
+/**
+ * The locks of the organizations in a sync's `sharing` part. The server
+ * sends every organization of the account each time; one without `lock`
+ * is not locked.
+ */
+export function orgLocks(sharing: Record<string, unknown> | undefined): Map<string, OrgLock> {
+  const locks = new Map<string, OrgLock>();
+  const orgs = sharing?.orgs;
+  if (!Array.isArray(orgs)) return locks;
+  for (const org of orgs as { id?: unknown; lock?: unknown }[]) {
+    const lock = org?.lock as Partial<OrgLock> | null | undefined;
+    if (typeof org?.id === "string" && lock && typeof lock.reason === "string") {
+      locks.set(org.id, { reason: lock.reason, source: typeof lock.source === "string" ? lock.source : "" });
+    }
+  }
+  return locks;
+}
+
+/** The verified view with each organization's lock added (the core does not carry it). */
+export function withOrgLocks(view: SharingView, locks: Map<string, OrgLock>): SharingView {
+  if (locks.size === 0 && !view.orgs.some((org) => org.lock)) return view;
+  return { ...view, orgs: view.orgs.map((org) => ({ ...org, lock: locks.get(org.id) ?? null })) };
 }

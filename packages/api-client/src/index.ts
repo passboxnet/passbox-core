@@ -1,4 +1,5 @@
 import { type BreachApi, breachApi } from "./breach";
+import { type CloudApi, cloudApi, type ServerExtensions } from "./cloud";
 import { type ComfortApi, comfortApi } from "./comfort";
 import { type DeveloperApi, developerApi } from "./developer";
 import { type OrgAdminApi, orgAdminApi } from "./orgAdmin";
@@ -13,6 +14,7 @@ import {
 import { type SsoApi, ssoApi } from "./sso";
 
 export * from "./breach";
+export * from "./cloud";
 export * from "./comfort";
 export * from "./developer";
 export * from "./orgAdmin";
@@ -68,6 +70,10 @@ export interface ServerMeta {
   emailMonitoring?: boolean;
   /** Whether `/api/v1/breaches/catalog` serves the breach catalogue. Missing on older servers. */
   breachCatalog?: boolean;
+  /** Most members a family may have, if the server limits it (403 `family_limit_reached`). */
+  familyMemberLimit?: number;
+  /** Additions of the server; `cloud` only on the hosted service. */
+  extensions?: ServerExtensions;
 }
 
 export interface PreloginResponse {
@@ -600,7 +606,8 @@ export interface WriteResponse {
 export interface ErrorBody {
   error: string;
   message: string;
-  details?: { currentRevision?: number } & Record<string, unknown>;
+  /** `limit` comes with `family_limit_reached`. */
+  details?: { currentRevision?: number; limit?: number } & Record<string, unknown>;
 }
 
 /** Thrown when the server answers with a non-2xx status. */
@@ -628,7 +635,7 @@ export interface ClientOptions {
   getToken?: () => string | undefined;
 }
 
-export interface PassboxApi extends AdminApi {
+export interface PassboxApi extends AdminApi, CloudApi {
   health(): Promise<Health>;
   meta(): Promise<ServerMeta>;
   prelogin(email: string): Promise<PreloginResponse>;
@@ -848,6 +855,7 @@ export function createClient(options: ClientOptions = {}): PassboxApi {
     adminInvites: () => call("GET", "/api/v1/admin/invites"),
     createInvite: (req) => call("POST", "/api/v1/admin/invites", req),
     revokeInvite: (id) => call("DELETE", `/api/v1/admin/invites/${encodeURIComponent(id)}`),
+    ...cloudApi(call),
     sharing: sharingApi(call),
     recovery: recoveryApi(call),
     emergency: emergencyApi(call),

@@ -182,12 +182,14 @@ export {
 } from "./shareLinks";
 export {
   type Invitation,
+  isOrgLocked,
   type KeyLookup,
   type Org,
   type OrgGroup,
   type OrgKind,
   type OrgMember,
   type OrgRole,
+  orgLocks,
   type PrincipalType,
   parseInvitationLink,
   type SharedVault,
@@ -197,6 +199,7 @@ export {
   type SharingWarningKind,
   type VaultAccess,
   type VaultRole,
+  withOrgLocks,
 } from "./sharing";
 export {
   type PendingDeviceApproval,
