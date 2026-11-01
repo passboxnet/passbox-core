@@ -325,21 +325,30 @@ fn warnings(report: &super::state::SharingReport, kind: &str) -> usize {
 /// Alice creates a family with its vault, invites and confirms Bob, and
 /// shares the vault with him.
 pub(crate) fn family() -> (Server, Keyring, Keyring, String, String) {
+    organization(OrgKind::Family)
+}
+
+/// Alice creates a team (without vaults) and invites and confirms Bob.
+pub(crate) fn team() -> (Server, Keyring, Keyring, String, String) {
+    organization(OrgKind::Team)
+}
+
+fn organization(kind: OrgKind) -> (Server, Keyring, Keyring, String, String) {
     let mut server = Server::default();
     let mut alice = account();
     let mut bob = account();
     server.publish(&mut alice);
     server.publish(&mut bob);
+    let family = kind == OrgKind::Family;
     let org = alice
         .create_org(
-            OrgKind::Family,
+            kind,
             r#"{"name":"Doe family"}"#,
-            Some(r#"{"name":"Family"}"#),
+            family.then_some(r#"{"name":"Family"}"#),
             10,
         )
         .unwrap();
     server.create_org(alice.account_id(), &org);
-    let vault_id = org.vault.as_ref().unwrap().id.clone();
     let report = alice.apply_sharing(server.delta(alice.account_id()));
     assert!(
         report.view.warnings.is_empty(),
@@ -349,8 +358,10 @@ pub(crate) fn family() -> (Server, Keyring, Keyring, String, String) {
     let org_view = &report.view.orgs[0];
     assert!(org_view.verified);
     assert_eq!(org_view.name.as_deref(), Some("Doe family"));
-    assert_eq!(report.view.vaults[0].role.as_deref(), Some("manage"));
-    assert!(report.view.vaults[0].has_key);
+    if family {
+        assert_eq!(report.view.vaults[0].role.as_deref(), Some("manage"));
+        assert!(report.view.vaults[0].has_key);
+    }
 
     // Bob accepts the invitation (the link carries the org fingerprint).
     let (root, _) = alice.org_fingerprint(&org.id).unwrap();
@@ -370,6 +381,10 @@ pub(crate) fn family() -> (Server, Keyring, Keyring, String, String) {
     server.confirm(&org.id, bob.account_id(), &confirm);
     alice.apply_sharing(server.delta(alice.account_id()));
 
+    let Some(vault) = &org.vault else {
+        return (server, alice, bob, org.id, String::new());
+    };
+    let vault_id = vault.id.clone();
     let change = alice
         .share_vault(
             &vault_id,

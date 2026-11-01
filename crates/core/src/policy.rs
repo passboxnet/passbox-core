@@ -14,6 +14,14 @@
 //! cannot make a client forget what it pinned: the pinned rules stay in
 //! force and a warning is shown.
 //!
+//! Policies are a feature of team organizations (Business). A family's
+//! policy only carries whether members must enroll in recovery through the
+//! organization (set up with every new family, see
+//! [`PolicyRules::new_org_defaults`]); its other rules are not in force
+//! ([`PolicyRules::for_family`]), also for versions a family signed
+//! before. The kind comes from the organization's signed genesis, so a
+//! server cannot turn a team's policy off by calling it a family.
+//!
 //! Rules travel as sorted `(name, value)` string pairs. A client that does
 //! not know a rule still verifies the signature and reports the rule as
 //! unknown (the web app asks to update), so new rules can be added without
@@ -33,7 +41,7 @@ use crate::canon::{Reader, Writer};
 use crate::identity::HASH_LEN;
 use crate::keyring::Keyring;
 use crate::sharing::data::SharingData;
-use crate::sharing::objects::{Canonical, OrgRole, Signed};
+use crate::sharing::objects::{Canonical, OrgKind, OrgRole, Signed};
 use crate::sharing::state::{TrustStore, Warning};
 use crate::sharing::verify::Roster;
 use crate::{Error, Result, encoding};
@@ -149,6 +157,16 @@ impl PolicyRules {
     pub fn new_org_defaults() -> Self {
         Self {
             require_recovery_enrollment: true,
+            ..Self::default()
+        }
+    }
+
+    /// The rules in force for a family: recovery enrollment as signed,
+    /// everything else as [`PolicyRules::default`] (policies are for
+    /// teams).
+    pub fn for_family(&self) -> Self {
+        Self {
+            require_recovery_enrollment: self.require_recovery_enrollment,
             ..Self::default()
         }
     }
@@ -755,7 +773,16 @@ pub(crate) fn evaluate(
             }
             (None, None) => None,
         };
-        if let Some(view) = view {
+        if let Some(mut view) = view {
+            // Families keep the recovery rule only; the pin keeps what was
+            // signed.
+            if rosters
+                .get(org_id)
+                .is_some_and(|roster| roster.kind == OrgKind::Family)
+            {
+                view.rules = view.rules.for_family();
+                view.unknown_rules.clear();
+            }
             views.push(view);
         }
     }
@@ -874,7 +901,7 @@ pub fn verify_policy_chain(org_id: &str, records: &[PolicyRecord]) -> Result<()>
 mod tests {
     use super::*;
     use crate::sharing::objects::OrgRole;
-    use crate::sharing::tests::{account, family};
+    use crate::sharing::tests::{account, family, team};
 
     fn strict() -> PolicyRules {
         PolicyRules {
@@ -1054,7 +1081,7 @@ mod tests {
 
     #[test]
     fn members_verify_and_pin_admin_signed_policies() {
-        let (mut server, mut alice, mut bob, org, _) = family();
+        let (mut server, mut alice, mut bob, org, _) = team();
         let upload = alice.sign_org_policy(&org, &strict(), 10).unwrap();
         assert_eq!(upload.version, 1);
         server.policies.insert(org.clone(), record(&org, &upload));
@@ -1091,7 +1118,7 @@ mod tests {
 
     #[test]
     fn a_server_cannot_roll_back_forge_or_drop_a_policy() {
-        let (mut server, mut alice, mut bob, org, _) = family();
+        let (mut server, mut alice, mut bob, org, _) = team();
         let v1 = alice
             .sign_org_policy(&org, &PolicyRules::default(), 10)
             .unwrap();
@@ -1166,8 +1193,64 @@ mod tests {
     }
 
     #[test]
+    fn a_family_keeps_only_the_recovery_rule() {
+        let (mut server, mut alice, mut bob, org, _) = family();
+        // A strict policy a family signed before policies became a team
+        // feature.
+        let rules = PolicyRules {
+            require_recovery_enrollment: true,
+            ..strict()
+        };
+        let upload = alice.sign_org_policy(&org, &rules, 10).unwrap();
+        server.policies.insert(org.clone(), record(&org, &upload));
+        let report = bob.apply_sharing(server.delta(bob.account_id()));
+        let policy = report
+            .view
+            .policies
+            .iter()
+            .find(|p| p.org_id == org)
+            .unwrap();
+        assert_eq!(policy.source, "verified");
+        assert_eq!(policy.rules, PolicyRules::new_org_defaults());
+        assert!(policy.unknown_rules.is_empty());
+        let effective = &report.view.effective_policy;
+        assert!(!effective.require_two_factor);
+        assert!(effective.allow_personal_vault);
+        assert_eq!(effective.max_auto_lock_minutes, None);
+        assert!(effective.export_blocked_orgs.is_empty());
+        assert_eq!(effective.recovery_enrollment_orgs, vec![org.clone()]);
+        // The pin keeps what was signed, so a server cannot roll it back.
+        assert_eq!(bob.trust_store().policies[&org].version, 1);
+        server.policies.remove(&org);
+        let report = bob.apply_sharing(server.delta(bob.account_id()));
+        assert_eq!(
+            report.view.effective_policy.recovery_enrollment_orgs,
+            vec![org.clone()]
+        );
+        assert!(!report.view.effective_policy.require_two_factor);
+
+        // The organizer can still turn the recovery rule off.
+        alice.apply_sharing(server.delta(alice.account_id()));
+        server.policies.insert(org.clone(), record(&org, &upload));
+        alice.apply_sharing(server.delta(alice.account_id()));
+        let off = alice
+            .sign_org_policy(&org, &PolicyRules::default(), 20)
+            .unwrap();
+        assert_eq!(off.version, 2);
+        server.policies.insert(org.clone(), record(&org, &off));
+        let report = bob.apply_sharing(server.delta(bob.account_id()));
+        assert!(
+            report
+                .view
+                .effective_policy
+                .recovery_enrollment_orgs
+                .is_empty()
+        );
+    }
+
+    #[test]
     fn verify_org_policy_checks_the_signer_role() {
-        let (mut server, alice, mut bob, org, _) = family();
+        let (mut server, alice, mut bob, org, _) = team();
         let upload = alice.sign_org_policy(&org, &strict(), 10).unwrap();
         server.policies.insert(org.clone(), record(&org, &upload));
         bob.apply_sharing(server.delta(bob.account_id()));

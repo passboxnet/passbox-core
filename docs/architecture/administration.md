@@ -28,7 +28,7 @@ What it **can** still do (honest list):
 
 ## Admin console
 
-Owners and admins of an organization open it from the organization page ("Admin console") or the sidebar ("Admin: {name}"); route `#/org/{id}/admin/{section}`. Families get the same console without groups and integrations. Sections:
+Owners and admins of an organization open it from the organization page ("Admin console") or the sidebar ("Admin: {name}"); route `#/org/{id}/admin/{section}`. Families get the same console without groups, policies, activity log and integrations (see [Families](#families)). Sections:
 
 | Section | What it shows and does |
 | --- | --- |
@@ -44,6 +44,13 @@ Owners and admins of an organization open it from the organization page ("Admin 
 | Settings | audit log retention, renaming, leaving or deleting the organization |
 
 Vault names are encrypted with vault keys. The console shows the names of vaults the admin is a member of and "Vault …abc123 (no access)" otherwise; this is the zero-knowledge boundary, not a gap.
+
+## Families
+
+Policies, the audit log (activity log), the events API, single sign-on and SCIM provisioning are features of team organizations (Business). The open-source server enforces this by organization kind on every instance, like single sign-on and SCIM; self-hosters create a team to get them, for free.
+
+- **Policies.** A family's policy carries one rule: `require_recovery_enrollment`. Every app sets it up when it creates a family (`PolicyRules::new_org_defaults`), and family recovery depends on it. The server accepts a family's new version only if it restricts nothing else, or if it signs the version in force again (offboarding re-signs automatically). `GET /orgs/{id}/policy` answers `403 policies_team_only` for families. The other rules of a family's policy, including versions a family signed before, stay stored and signed but are not in force: `PolicyRules::for_family` drops them in `Keyring::evaluate_sharing` (the kind comes from the signed genesis, so a server cannot switch a team's policy off), and the server ignores them for its own enforcement. Nothing is deleted and nothing locks a family out. To turn recovery off, the organizer signs a version without the rule first; the web app does this in the recovery settings.
+- **Activity log.** Nothing else reads the log (security notifications and recovery have their own records), so the server writes no entries for families and answers `403 audit_team_only` for reading, verifying and exporting it and for new event tokens, webhooks and pulls. Client events are refused because no family policy asks for them. Entries a family has from before stay stored but are not shown; a retention set earlier still applies, and deleting the organization deletes them.
 
 ## Policies
 
