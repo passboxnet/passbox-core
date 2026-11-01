@@ -1,8 +1,8 @@
 # Security Policy
 
-## Status
+## Cryptographic design
 
-Passbox is in early development. The cryptographic design in [docs/architecture/cryptography.md](docs/architecture/cryptography.md) is a draft and has not been independently reviewed or audited. Do not use Passbox for real secrets yet.
+The cryptographic design is documented in [docs/architecture/cryptography.md](docs/architecture/cryptography.md).
 
 ## Reporting a vulnerability
 

@@ -1,7 +1,5 @@
 # Cryptography
 
-> **Draft.** This design has not been reviewed by cryptographers or audited. It will change.
-
 ## Goals
 
 1. The server can never read vault contents, item metadata or keys.

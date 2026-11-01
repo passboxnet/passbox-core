@@ -2,8 +2,6 @@
 
 The shared foundation of [Passbox](https://passbox.net), an open-source password manager with passkeys, a built-in authenticator and single sign-on: the cryptographic core and every library the apps and the server build on.
 
-> **Status: early development.** The cryptographic design is a draft and has not been audited. Do not store real secrets in Passbox yet.
-
 | Path | Description |
 | --- | --- |
 | [`crates/core`](crates/core) | Cryptographic core in Rust: key derivation, encryption, Secret Key, TOTP, password generator. All cryptography lives here |
