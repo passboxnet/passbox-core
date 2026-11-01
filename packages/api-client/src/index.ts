@@ -664,7 +664,7 @@ export interface PassboxApi extends AdminApi {
   /** The pending change of the account's address, or `null`. */
   emailChangePending(): Promise<PendingEmailChange | null>;
   /** Mails a code to the new address. Needs a login in the last 10 minutes. */
-  emailChangeStart(req: { email: string; locale?: string }): Promise<PendingEmailChange>;
+  emailChangeStart(req: { email: string; locale?: string | undefined }): Promise<PendingEmailChange>;
   /** Replaces the address with the pending one. Fails with `invalid_two_factor_code`, `code_expired` or `email_taken`. */
   emailChangeConfirm(code: string): Promise<{ email: string }>;
   emailChangeCancel(): Promise<void>;
